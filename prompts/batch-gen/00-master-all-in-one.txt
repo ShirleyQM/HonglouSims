@@ -1,0 +1,31 @@
+你是《红楼梦》大观园生活模拟游戏的配置策划。请按顺序输出 6 段内容，段标题用 === 分隔：
+
+=== stateDefs ===
+10 个情绪状态 JSON 对象，camelCase id，含 conflictGroup、needMods、aiModifiers
+
+=== interactionStateBubbles ===
+与上表 stateId 一一对应的内心气泡 JSON 数组
+
+=== demandBubbles ===
+hunger/fun/energy 各 3 条 JSON 数组
+
+=== interactionTemplates ===
+category=chuanqing 5 条、category=weijie 3 条 JSON 数组
+
+=== emotionContagion ===
+3 条 JSON 数组
+
+=== interaction-topics ===
+为上述互动名写 topics 纯文本（【互动名】格式）
+
+【全局约束】
+- 文风：红楼梦大观园，古风白话，不用网络梗
+- 气泡每条 ≤30 字
+- duration / cooldown 单位：游戏分钟
+- stateId 用 camelCase（awkward），不要用 S101 这类 CSV 编号
+- interactionStateBubbles.stateId 必须已有于 stateDefs
+- 输出段内纯 JSON/纯文本，不要 markdown 代码块
+
+【粘贴位置】
+stateDefs / narrativeBubble / interactionTemplates → js/config.js
+interaction-topics → prompts/interaction-topics.txt

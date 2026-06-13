@@ -1,0 +1,28 @@
+生成大观园游戏「互动状态气泡」JSON 数组。
+
+【任务】
+为以下 stateId 各生成 1 条配置，每条 texts 4–5 句：
+{stateId 列表，如：awkward,angry,ganshang,baonu,chikuang,secretCrush}
+
+【规则】
+- 第一人称内心独白，≤30 字
+- style 以 thought 为主；angry/baonu 可用 exclaim
+- icon 单 emoji，情绪相符
+- 不要解释状态名，写出感受即可
+- stateId 必须是 stateDefs 中已有的 camelCase id（如 awkward，不是 S101）
+
+【空白模板】
+{
+  "stateId": "",
+  "style": "thought",
+  "icon": "😳",
+  "texts": ["", "", ""]
+}
+
+【已有 stateId 参考】
+awkward, angry, offended, heartFlutter, joyful, teaHeart, tipsySocial,
+secretCrush, punished, melancholy, brokenBond, selfDemeaning, unfilial, doted,
+chikuang, ganshang, baonu, elated, warmCozy
+
+【输出】
+纯 JSON 数组

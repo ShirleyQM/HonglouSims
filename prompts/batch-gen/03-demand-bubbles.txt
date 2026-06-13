@@ -1,0 +1,33 @@
+生成大观园游戏「需求气泡」配置 JSON 数组。
+
+【任务】
+为 needKey={needKey} 生成 {count} 条 demandBubbles。
+覆盖 trait 组合：无 trait（priority 99 兜底）、lazy、qinggao、qingjie、haoke。
+
+【规则】
+- threshold：一般 0.25–0.35，危急 0.15
+- texts 每条 3–5 句，≤30 字，第一人称内心独白
+- style：hunger/energy 偏 thought；fun+haoke 可 speech
+- icon 用单个 emoji
+- id 从 {startId} 递增
+
+【空白模板】
+{
+  "id": 0,
+  "needKey": "hunger",
+  "threshold": 0.3,
+  "priority": 1,
+  "condition": { "trait": "" },
+  "style": "thought",
+  "icon": "😴",
+  "texts": ["", "", ""]
+}
+
+【占位符】
+{name} {need_name} {need_value} {scene} {trait}
+
+【needKey】hunger|energy|fun|hygiene
+【style】thought|speech|exclaim
+
+【输出】
+纯 JSON 数组，不要 markdown

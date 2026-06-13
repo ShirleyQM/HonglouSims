@@ -1,0 +1,40 @@
+将情绪/社交状态转为大观园游戏 stateDefs JSON 对象（非数组）。
+
+【输入状态列表】
+{名称与简述列表，如：羞赧、醋意、怅惘、得意、惶恐}
+
+【任务】
+每个状态一个 key（camelCase 英文 id，如 ganshang、awkward），写全：
+name, duration（游戏分钟 10–120）, desc, conflictGroup（情绪必填）,
+needMods（至少改 fun 或 energy 一项 decay/grow 倍率 0.3–2.0）,
+blockedSkills（可选）, aiModifiers.boost/cut（可选，键用六类互动 id）,
+trigger（可选，仅适合自动触发的）
+
+【空白模板】
+{
+  "stateId": {
+    "name": "",
+    "duration": 30,
+    "desc": "",
+    "category": "情绪类",
+    "stackable": true,
+    "conflictGroup": "mood_negative",
+    "needMods": { "fun": { "decay": 1.0, "grow": 1.0 } },
+    "blockedSkills": [],
+    "aiModifiers": {
+      "boost": { "chuanqing": 1.0 },
+      "cut": { "tiaoxiao": 1.0 }
+    },
+    "trigger": { "need": "fun", "op": "lt", "value": 18 }
+  }
+}
+
+【参考】
+愤怒：fun decay×1.3；心动：fun grow×1.3；尴尬：cut chuanqing/tiaoxiao
+
+【conflictGroup】mood_positive|mood_negative|social_atmo|drunk_state|love_reaction
+【aiModifiers 键】xujiu|lundao|tiaoxiao|weijie|chuanqing|zhengchi
+【blockedSkills】move|talk|poetry|serve
+
+【输出】
+单个 JSON 对象 { "id1": {...}, "id2": {...} }，不要 markdown

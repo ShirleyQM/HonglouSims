@@ -1,0 +1,29 @@
+生成大观园游戏「关系阈值事件」JSON 数组。
+
+【任务】
+为四轴 trust / friendship / affection / submission 各生成 2 条（up/down），共 8 条。
+
+【规则】
+- id 格式：{axis}_{threshold}_{direction}，如 trust_50_up
+- threshold：±20、±50、±80 等等级
+- bubble.a / bubble.b 各一句，≤30 字；down 可只写 a
+- effects 可选：state（heartFlutter/brokenBond/awkward）、relation axis delta
+- log 第三人称旁白一句，含 {A} {B}
+
+【空白模板】
+{
+  "id": "",
+  "axis": "trust",
+  "threshold": 30,
+  "direction": "up",
+  "requireInitType": [],
+  "bubble": { "a": "", "b": "" },
+  "effects": [],
+  "log": ""
+}
+
+【axis】affection|trust|friendship|submission
+【direction】up|down
+
+【输出】
+纯 JSON 数组

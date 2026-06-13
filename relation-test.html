@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>互动测试台·关系×身份</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; background: #0d0a08; color: #f5e6c8;
+      font-family: "SimSun", "STSong", serif; overflow: hidden; }
+    #root { display: flex; flex-direction: column; height: 100vh; padding: 10px; gap: 8px; }
+
+    /* header */
+    #header { display: flex; align-items: center; gap: 12px; padding: 6px 12px;
+      background: #1a1210; border: 1px solid #5c4033; border-radius: 4px; flex-shrink: 0; }
+    #header h1 { font-size: 14px; color: #d4a574; letter-spacing: 3px; }
+    .badge { font-size: 10px; padding: 2px 7px; border-radius: 10px;
+      background: #2a1f18; border: 1px solid #5c4033; color: #a89070; }
+    #header .sep { color: #5c4033; }
+    .sys-btn { background: #2a1f18; border: 1px solid #5c4033; color: #d4a574;
+      padding: 3px 10px; font-family: inherit; font-size: 11px; cursor: pointer; border-radius: 2px; }
+    .sys-btn:hover { background: #3a2f28; }
+    .sys-btn.danger { border-color: #7a2020; color: #e57373; }
+    .sys-btn.danger:hover { background: #2a1010; }
+
+    /* main grid */
+    #main { flex: 1; display: grid; grid-template-columns: 200px 1fr 270px; gap: 8px; min-height: 0; }
+    .panel { background: #1a1210; border: 1px solid #5c4033; border-radius: 4px; padding: 10px; }
+    .panel-title { font-size: 10px; color: #6a5a48; letter-spacing: 2px;
+      border-bottom: 1px solid #3a2f28; padding-bottom: 5px; margin-bottom: 8px; }
+
+    /* left */
+    #panel-left { display: flex; flex-direction: column; gap: 8px; }
+    #pair-picker { display: flex; flex-direction: column; gap: 7px; }
+    #pair-picker label { font-size: 11px; color: #8a7355; display: flex; align-items: center; gap: 6px; }
+    #pair-picker select { flex: 1; background: #2a1f18; border: 1px solid #5c4033; color: #f5e6c8;
+      padding: 3px 6px; font-size: 12px; font-family: inherit; border-radius: 2px; }
+    #matrix-panel { flex: 1; overflow-y: auto; }
+    .mx-row { display: flex; gap: 4px; align-items: center; cursor: pointer; padding: 3px 4px;
+      border-radius: 2px; transition: background .12s; }
+    .mx-row:hover, .mx-row.active { background: #2a1f18; }
+    .mx-names { font-size: 11px; color: #c8b8a0; flex: 1; min-width: 0; }
+    .mx-names .mxt { font-size: 9px; color: #5a4a38; margin-left: 3px; }
+    .mx-mini { width: 36px; height: 4px; background: #2a1f18; border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+    .mx-mini-fill { height: 100%; border-radius: 2px; transition: width .3s; }
+    .mx-score { font-size: 10px; width: 26px; text-align: right; flex-shrink: 0; }
+
+    /* middle */
+    #panel-mid { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+    #detail-panel { flex: 1; overflow-y: auto; }
+
+    /* hierarchy badge */
+    #hierarchy-badge { display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 10px; border-radius: 3px; font-size: 11px; margin-bottom: 10px; }
+
+    /* pair header */
+    #rel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    #rel-names { font-size: 17px; letter-spacing: 2px; }
+    #rel-meta { display: flex; gap: 7px; align-items: center; }
+    #rel-score { font-size: 20px; font-weight: bold; }
+    #rel-type { font-size: 11px; padding: 2px 7px; border-radius: 10px;
+      background: #2a1f18; border: 1px solid #5c4033; }
+    #rel-note { font-size: 10px; color: #5a4a38; font-style: italic;
+      padding: 3px 6px; border-left: 2px solid #3a2f28; margin-bottom: 10px; }
+
+    /* axis */
+    .axis-row { margin-bottom: 11px; }
+    .axis-label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+    .axis-name { font-size: 12px; color: #a89070; }
+    .axis-val { font-size: 13px; font-weight: bold; }
+    .axis-delta { font-size: 10px; opacity: 0; transition: opacity .4s; margin-left: 4px; }
+    .axis-delta.show { opacity: 1; }
+    .axis-track { height: 12px; background: #2a1f18; border-radius: 6px; overflow: hidden; position: relative; }
+    .axis-center { position: absolute; left: 50%; top: 0; height: 100%; width: 1px; background: #3a2f28; z-index: 1; }
+    .axis-fill { height: 100%; border-radius: 6px; transition: width .4s, background .4s; position: absolute; }
+
+    /* threshold */
+    #threshold-log { min-height: 30px; }
+    .th-event { padding: 4px 7px; border-left: 2px solid #c9a227; margin-bottom: 3px;
+      background: rgba(201,162,39,.07); border-radius: 0 2px 2px 0; font-size: 10px; color: #e8d0a0; }
+
+    /* right - interaction panel */
+    #panel-right { display: flex; flex-direction: column; padding: 0; overflow-y: auto; }
+    .cat-group { }
+    .cat-title { font-size: 10px; color: #5a4a38; letter-spacing: 2px; padding: 5px 10px 3px;
+      background: #111009; border-top: 1px solid #2a1f18; position: sticky; top: 0; z-index: 2; }
+    .interaction-btn { display: flex; flex-direction: column; width: 100%; text-align: left;
+      padding: 5px 10px; background: transparent; border: none;
+      border-bottom: 1px solid #16130f; color: #c8b8a0; cursor: pointer;
+      font-family: inherit; font-size: 12px; transition: background .12s; }
+    .interaction-btn:hover:not(:disabled) { background: #221a14; }
+    .interaction-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-top { display: flex; justify-content: space-between; align-items: center; gap: 4px; }
+    .btn-name { flex: 1; }
+    .btn-relmin { font-size: 9px; color: #4a6a7a; }
+    .btn-effects { font-size: 9px; color: #5a7a5a; margin-top: 1px; }
+    .btn-status { font-size: 9px; margin-top: 2px; padding: 1px 5px; border-radius: 3px; display: inline-block; }
+    .btn-status.allowed { display: none; }
+    .btn-status.risky { background: rgba(180,120,0,.2); color: #c9a227; border: 1px solid #7a5a00; }
+    .btn-status.forbidden { background: rgba(120,20,20,.2); color: #e74c3c; border: 1px solid #7a2020; }
+    .btn-status.conditional { background: rgba(0,80,160,.2); color: #5a9ad4; border: 1px solid #2a5070; }
+    .btn-status.locked-rel { background: rgba(80,50,20,.2); color: #8a6a40; border: 1px solid #4a3a20; }
+    .btn-status.low-score { background: rgba(160,100,0,.2); color: #c47a20; border: 1px solid #7a4a10; }
+    /* 软锁按钮：可点击但加警示边框 */
+    .interaction-btn.low-score { border-color: #7a4a10; opacity: 0.85; }
+    .interaction-btn.low-score:hover { border-color: #c47a20; opacity: 1; }
+
+    /* risk result toast */
+    #risk-toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(.9);
+      background: #1a1210; border: 2px solid #5c4033; border-radius: 6px; padding: 20px 24px;
+      min-width: 280px; max-width: 400px; opacity: 0; pointer-events: none; z-index: 1000;
+      transition: opacity .25s, transform .25s; text-align: center; }
+    #risk-toast.show { opacity: 1; pointer-events: auto; transform: translate(-50%,-50%) scale(1); }
+    #risk-toast.success { border-color: #27ae60; }
+    #risk-toast.fail { border-color: #c0392b; }
+    #toast-result { font-size: 20px; margin-bottom: 8px; }
+    #toast-desc { font-size: 12px; color: #a89070; margin-bottom: 12px; line-height: 1.6; }
+    #toast-bubbles { font-size: 12px; color: #c8b8a0; text-align: left; margin-bottom: 12px; line-height: 1.8; }
+    #toast-effects { font-size: 11px; color: #8a7355; margin-bottom: 14px; }
+    #toast-close { background: #2a1f18; border: 1px solid #5c4033; color: #d4a574;
+      padding: 5px 20px; font-family: inherit; font-size: 12px; cursor: pointer; border-radius: 2px; }
+
+    /* group chat panel */
+    .grp-row { display: flex; gap: 8px; align-items: center; margin: 6px 0; flex-wrap: wrap; }
+    .grp-row label { font-size: 11px; color: #a89070; min-width: 70px; }
+    .grp-row select { background: #1a1512; border: 1px solid #3a2a20; color: #c8b8a0;
+      font-family: inherit; font-size: 11px; padding: 3px 6px; border-radius: 2px; }
+    .grp-observer-list { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+    .grp-observer-item { display: flex; align-items: center; gap: 3px;
+      background: #1a1512; border: 1px solid #3a2a20; border-radius: 3px;
+      padding: 3px 6px; font-size: 11px; color: #c8b8a0; cursor: pointer; }
+    .grp-observer-item:hover { border-color: #5a4a3a; }
+    .grp-observer-item.selected { border-color: #c9a227; background: #2a1f18; }
+    .grp-observer-item .prob { font-size: 9px; color: #5a8a5a; margin-left: 4px; }
+    .grp-observer-item .prob-low { color: #8a4a4a; }
+    #grp-obs-result { background: #1a1512; border: 1px solid #3a2a20; border-radius: 3px; padding: 6px; }
+    #grp-history-list { font-size: 11px; line-height: 1.7; }
+    .grp-line { display: flex; gap: 6px; padding: 2px 0; border-bottom: 1px dashed #2a1f18; }
+    .grp-line .speaker { color: #c9a227; min-width: 50px; }
+    .grp-line .text { color: #c8b8a0; flex: 1; }
+    .grp-line .round { font-size: 9px; color: #5a4a3a; }
+
+    /* bottom log */
+    #log-bar { height: 120px; background: #1a1210; border: 1px solid #5c4033;
+      border-radius: 4px; display: flex; flex-direction: column; flex-shrink: 0; }
+    #log-entries { flex: 1; overflow-y: auto; padding: 4px 10px; }
+    .log-entry { font-size: 11px; color: #a89070; line-height: 1.6; padding: 1px 0;
+      border-bottom: 1px solid #13100e; }
+    .log-entry .log-ts { font-size: 9px; color: #4a3a28; margin-right: 5px; }
+    #tick-controls { display: flex; gap: 6px; align-items: center; padding: 4px 10px;
+      border-top: 1px solid #2a1f18; flex-shrink: 0; }
+    #tick-controls span { font-size: 10px; color: #5a4a38; }
+    #tick-day { color: #a89070 !important; font-size: 11px !important; }
+
+    /* 人物状态 */
+    .char-state-row { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 7px;
+      padding: 5px 6px; background: rgba(255,255,255,.02); border-radius: 3px; flex-wrap: wrap; }
+    .csr-name { font-size: 11px; font-weight: bold; white-space: nowrap; flex-shrink: 0;
+      padding-top: 1px; min-width: 26px; }
+    .csr-pills { display: flex; flex-wrap: wrap; gap: 4px; }
+    .state-pill { font-size: 10px; padding: 2px 7px; border-radius: 10px;
+      border: 1px solid; cursor: pointer; user-select: none;
+      transition: opacity .15s; white-space: nowrap; }
+    .state-pill:hover { opacity: .7; }
+    .state-add-row { display: flex; gap: 5px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+    .state-add-row select { background: #2a1f18; border: 1px solid #5c4033; color: #f5e6c8;
+      padding: 3px 5px; font-size: 11px; font-family: inherit; border-radius: 2px; }
+
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: #0d0a08; }
+    ::-webkit-scrollbar-thumb { background: #5c4033; border-radius: 2px; }
+  </style>
+</head>
+<body>
+<div id="root">
+  <div id="header">
+    <h1>互动测试台</h1>
+    <span class="sep">·</span>
+    <span class="badge">四轴关系</span>
+    <span class="badge" style="border-color:#7a5a00;color:#c9a227">身份礼法</span>
+    <span class="badge" style="border-color:#27ae60;color:#27ae60">状态系统</span>
+    <span class="sep">·</span>
+    <span style="font-size:11px;color:#5a4a38">宝玉·黛玉·宝钗·紫鹃·晴雯</span>
+    <span style="flex:1"></span>
+    <button class="sys-btn danger" onclick="resetAll()">重置关系</button>
+  </div>
+
+  <div id="main">
+    <!-- 左栏 -->
+    <div id="panel-left">
+      <div class="panel">
+        <div class="panel-title">选择对象</div>
+        <div id="pair-picker">
+          <label>发起 <select id="sel-a" onchange="onPairChange()"></select></label>
+          <label>对象 <select id="sel-b" onchange="onPairChange()"></select></label>
+        </div>
+      </div>
+      <div class="panel" id="matrix-panel" style="flex:1;overflow-y:auto">
+        <div class="panel-title">全部10对关系</div>
+        <div id="matrix"></div>
+      </div>
+    </div>
+
+    <!-- 中栏 -->
+    <div id="panel-mid">
+      <div class="panel" id="detail-panel">
+        <!-- 身份关系 -->
+        <div id="hierarchy-badge">…</div>
+        <!-- 综合分 -->
+        <div id="rel-header">
+          <div id="rel-names">——</div>
+          <div id="rel-meta">
+            <span id="rel-inittype" style="font-size:10px;color:#5a4a38"></span>
+            <span id="rel-type">—</span>
+            <span id="rel-score" style="color:#c9a227">0</span>
+          </div>
+        </div>
+        <div id="rel-note"></div>
+        <!-- 三轴 -->
+        <div style="margin-top:10px">
+          <div class="axis-row">
+            <div class="axis-label-row">
+              <span class="axis-name">❤ 好感</span>
+              <span><span class="axis-val" id="val-affection">0</span><span class="axis-delta" id="delta-affection"></span></span>
+            </div>
+            <div class="axis-track"><div class="axis-center"></div><div class="axis-fill" id="bar-affection"></div></div>
+          </div>
+          <div class="axis-row">
+            <div class="axis-label-row">
+              <span class="axis-name">🛡 信任</span>
+              <span><span class="axis-val" id="val-trust">0</span><span class="axis-delta" id="delta-trust"></span></span>
+            </div>
+            <div class="axis-track"><div class="axis-center"></div><div class="axis-fill" id="bar-trust"></div></div>
+          </div>
+          <div class="axis-row">
+            <div class="axis-label-row">
+              <span class="axis-name">🌿 友谊</span>
+              <span><span class="axis-val" id="val-friendship">0</span><span class="axis-delta" id="delta-friendship"></span></span>
+            </div>
+            <div class="axis-track"><div class="axis-fill" id="bar-friendship"></div></div>
+          </div>
+          <div class="axis-row">
+            <div class="axis-label-row">
+              <span class="axis-name" id="sub-a-label">🙇 服从→?</span>
+              <span><span class="axis-val" id="val-sub-a">0</span><span class="axis-delta" id="delta-sub-a"></span></span>
+            </div>
+            <div class="axis-track"><div class="axis-fill" id="bar-sub-a" style="background:#9b59b6"></div></div>
+          </div>
+          <div class="axis-row">
+            <div class="axis-label-row">
+              <span class="axis-name" id="sub-b-label">🙇 ?→服从</span>
+              <span><span class="axis-val" id="val-sub-b">0</span><span class="axis-delta" id="delta-sub-b"></span></span>
+            </div>
+            <div class="axis-track"><div class="axis-fill" id="bar-sub-b" style="background:#8e44ad"></div></div>
+          </div>
+        </div>
+        <!-- 阈值事件 -->
+        <div class="panel-title" style="margin-top:12px">已触发阈值事件</div>
+        <div id="threshold-log"><span style="font-size:10px;color:#3a2f28">暂无</span></div>
+
+        <!-- 人物状态 -->
+        <div class="panel-title" style="margin-top:14px">人物当前状态</div>
+        <div id="char-states-panel"></div>
+        <div class="state-add-row">
+          <select id="state-char-sel"></select>
+          <select id="state-id-sel"></select>
+          <button class="sys-btn" onclick="applyStateManual()">施加状态</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右栏 -->
+    <div id="panel-right" class="panel" style="padding:0">
+      <div id="interaction-panel"></div>
+      
+      <!-- 群聊测试面板 -->
+      <div id="groupchat-panel" style="border-top:1px solid #3a2a20;padding:10px">
+        <div class="cat-title">── 群聊测试 ──</div>
+        
+        <!-- 场景模拟 -->
+        <div style="margin:8px 0;font-size:12px;color:#a89070">
+          模拟场景：同场景中有多个角色，测试观察意愿与群聊形成
+        </div>
+        
+        <!-- 参与者选择 -->
+        <div class="grp-row">
+          <label>主互动：</label>
+          <select id="grp-initiator"></select>
+          <span style="color:#8a7a6a">对</span>
+          <select id="grp-target"></select>
+        </div>
+        
+        <!-- 旁观者列表 -->
+        <div class="grp-row">
+          <label>场景旁观者（可多选）：</label>
+          <div id="grp-observers" class="grp-observer-list"></div>
+        </div>
+        
+        <!-- 场景设定 -->
+        <div class="grp-row">
+          <label>场景私密性：</label>
+          <select id="grp-privacy">
+            <option value="low">公开（花园、厅堂）</option>
+            <option value="medium" selected>半私密（走廊、庭院）</option>
+            <option value="high">私密（内室、书房）</option>
+          </select>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="grp-row" style="margin-top:10px">
+          <button class="sys-btn" onclick="checkObservers()">计算观察意愿</button>
+          <button class="sys-btn" onclick="startGroupChat()" style="background:#5a4a3a">启动群聊</button>
+          <button class="sys-btn" onclick="advanceDialogue()" id="btn-advance" disabled>推进1轮</button>
+          <button class="sys-btn" onclick="endDialogue()" id="btn-end-dlg" disabled>结束对话</button>
+        </div>
+        
+        <!-- 观察意愿结果 -->
+        <div id="grp-obs-result" style="margin-top:10px;font-size:11px;display:none"></div>
+        
+        <!-- 当前对话状态 -->
+        <div id="grp-status" style="margin-top:10px;padding:8px;background:#1a1512;border:1px solid #3a2a20;border-radius:3px;display:none">
+          <div style="color:#c9a227;font-size:12px;margin-bottom:4px">🗣️ 当前对话</div>
+          <div id="grp-status-text" style="font-size:11px;color:#a89070"></div>
+        </div>
+        
+        <!-- 对话历史 -->
+        <div id="grp-history" style="margin-top:10px;max-height:200px;overflow-y:auto;display:none">
+          <div style="color:#8a7a6a;font-size:11px;margin-bottom:4px">对话记录：</div>
+          <div id="grp-history-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部日志 -->
+  <div id="log-bar">
+    <div class="panel-title" style="padding:5px 10px;border-bottom:1px solid #2a1f18">事件日志</div>
+    <div id="log-entries"></div>
+    <div id="tick-controls">
+      <span>推进时间（衰减测试）：</span>
+      <button class="sys-btn" onclick="tickTime(1/24)">+1时</button>
+      <button class="sys-btn" onclick="tickTime(1)">+1天</button>
+      <button class="sys-btn" onclick="tickTime(7)">+7天</button>
+      <button class="sys-btn" onclick="tickTime(30)">+30天</button>
+      <span style="flex:1"></span>
+      <span id="tick-day">第1日</span>
+    </div>
+  </div>
+</div>
+
+<!-- 逾矩结果弹窗 -->
+<div id="risk-toast">
+  <div id="toast-result"></div>
+  <div id="toast-desc"></div>
+  <div id="toast-bubbles"></div>
+  <div id="toast-effects"></div>
+  <button id="toast-close" onclick="closeToast()">知道了</button>
+</div>
+
+<!-- ── 配置层 + 独立系统层 ── -->
+<script src="js/config.js"></script>
+<script src="js/systems/relation.js"></script>
+<script src="js/systems/state.js"></script>
+<script src="js/systems/state-defs.js"></script>
+<script src="js/systems/dialogue.js"></script>
+
+<!-- ── 运行时桩 ── -->
+<script>
+  let CONFIG = null, relations = {};
+  let gameHour = 8, gameDay = 1;
+
+  const EventBus = (() => {
+    const ls = {};
+    return {
+      on(t, fn) { (ls[t] ||= []).push(fn); },
+      emit(t, d) { (ls[t] || []).forEach(fn => fn(d)); },
+      off(t, fn) { if (ls[t]) ls[t] = ls[t].filter(f => f !== fn); },
+    };
+  })();
+
+  function getGameTimestamp() { return gameDay * 1440 + gameHour * 60; }
+  function getGameMinuteDelta(dt) { return dt * (1440 / (20 * 60)); }
+
+  // 5名测试角色（socialRank 从 CONFIG.characters 读取，无需硬编码）
+  // rank: 0至尊 1长辈 2平辈主子 3晚辈主子 4体面仆从 5普通仆从 6外人
+  const CHAR_IDS = ['baoyu', 'daiyu', 'baochai', 'zijuan', 'qingwen'];
+  function getCharRankFromConfig(id) {
+    return CONFIG?.characters?.find(c => c.id === id)?.socialRank ?? 2;
+  }
+  let TEST_CHARS = [];
+
+  function getChar(id) { return TEST_CHARS.find(c => c.id === id); }
+
+  const FamilySystem = { getRelationMultiplier: () => 1 };
+  const NarrativeBubbleSystem = {
+    showBubble(b) {
+      const c = getChar(b.charId);
+      addLog(`💭 ${c?.short || b.charId}：「${b.text}」`, 'event');
+    }
+  };
+  // applyState 由 js/systems/state.js 提供，此处无需桩
+  // state.js 通过 EventBus 发布事件，测试页监听后做 verbose 日志
+  function log(text) { addLog(text, 'system'); }
+</script>
+
+<!-- ── 身份礼法系统 + 测试台逻辑 ── -->
+<script>
+// ════════════════════════════════════════════════════
+//  一、身份礼法常量
+// ════════════════════════════════════════════════════
+
+const SOCIAL_RANK_LABELS = {
+  0: '至尊', 1: '长辈', 2: '平辈主子', 3: '晚辈主子',
+  4: '体面仆从', 5: '普通仆从', 6: '外人'
+};
+
+const HIERARCHY_LABELS = {
+  peer:                     { text: '平等',       color: '#a89070' },
+  master_to_servant:        { text: '主 → 仆',    color: '#c9a227' },
+  servant_to_master:        { text: '仆 → 主',    color: '#e67e22' },
+  senior_servant_to_junior: { text: '大丫鬟 → 仆', color: '#8a7355' },
+  junior_to_senior_servant: { text: '仆 → 大丫鬟', color: '#7a8a55' },
+  parent_to_child:          { text: '长辈 → 晚辈', color: '#5a7a9a' },
+  child_to_parent:          { text: '晚辈 → 长辈', color: '#9a5a7a' },
+  grandparent_to_child:     { text: '贾母 → 众',  color: '#9a8040' },
+  outsider:                 { text: '外人',        color: '#5a6a5a' },
+};
+
+// 互动模板 → PRD互动大类
+const INTERACTION_CAT_MAP = {
+  101:'叙旧', 102:'叙旧', 103:'叙旧',
+  104:'叙旧', 105:'叙旧',
+  201:'叙旧', 202:'叙旧', 203:'叙旧', 204:'叙旧', 205:'叙旧',
+  301:'调笑', 302:'调笑', 303:'调笑', 304:'调笑',
+  401:'慰藉', 402:'慰藉', 403:'慰藉', 404:'慰藉',
+  501:'传情', 502:'传情', 503:'传情', 504:'传情', 505:'传情',
+  601:'争执', 602:'争执', 603:'争执', 604:'争执',
+};
+
+// ── 礼法规则表 ──
+// behavior: 'allowed' | 'risky' | 'conditional' | 'forbidden'
+// modifiers: 各轴 delta 的倍率（逾矩成功时放大效果）
+const HIERARCHY_RULES = [
+  // ── 主子 → 仆从 ──
+  { rel: 'master_to_servant', cat: '叙旧',  behavior: 'allowed' },
+  { rel: 'master_to_servant', cat: '调笑',  behavior: 'allowed' },
+  { rel: 'master_to_servant', cat: '慰藉',  behavior: 'allowed' },
+  { rel: 'master_to_servant', cat: '传情',  behavior: 'risky',
+    risk: {
+      rate: 0.70,
+      // role:'a'=发起者(主子)  role:'b'=对象(仆从)
+      successBubble: [{ role:'b', text:'（没有推开…竟有些恍惚）' },
+                      { role:'a', text:'（心意已明，却故作轻描淡写）' }],
+      failBubble:    [{ role:'b', text:'这……这成何体统！' },
+                      { role:'a', text:'（讪讪一笑，不再追问）' }],
+      failEffects:   [{ target: 'b', axis: 'affection', delta: -6 },
+                      { target: 'b', axis: 'trust', delta: -4 }],
+    },
+    modifiers: { affection: 1.3, trust: 1.0, friendship: 2.0 } },
+  { rel: 'master_to_servant', cat: '争执',  behavior: 'allowed',
+    modifiers: { affection: 1.0, trust: 0.8, friendship: 0.8 } },
+
+  // ── 仆从 → 主子 ──
+  { rel: 'servant_to_master', cat: '叙旧',  behavior: 'allowed' },
+  { rel: 'servant_to_master', cat: '调笑',  behavior: 'risky',
+    risk: {
+      rate: 0.60,
+      successBubble: [{ role:'b', text:'（这丫头竟如此大胆…）' },
+                      { role:'a', text:'（偷偷抬头看，竟也笑了）' }],
+      failBubble:    [{ role:'b', text:'放肆！哪来的规矩！' },
+                      { role:'a', text:'……（讪讪退开）' }],
+      failEffects:   [{ target: 'a', axis: 'affection', delta: -5 }],
+    },
+    modifiers: { affection: 1.5, trust: 0.8, friendship: 1.5 } },
+  { rel: 'servant_to_master', cat: '慰藉',  behavior: 'conditional',
+    condition: { relMin: 50, desc: '需综合分≥50，否则多管闲事' },
+    modifiers: { affection: 1.0, trust: 1.2, friendship: 1.0 } },
+  { rel: 'servant_to_master', cat: '传情',  behavior: 'risky',
+    risk: {
+      rate: 0.50,
+      successBubble: [{ role:'a', text:'（心跳加速，竟没被斥退…）' },
+                      { role:'b', text:'（心中一动，却未发作）' }],
+      failBubble:    [{ role:'b', text:'放肆！成何体统！' },
+                      { role:'a', text:'……（低头受责，眼圈泛红）' }],
+      failEffects:   [{ target: 'a', axis: 'affection', delta: -8 },
+                      { target: 'a', axis: 'trust', delta: -5 }],
+      witnessEffect: { penalty: -0.30, bubble: '这成何体统，也不知自重。' },
+    },
+    modifiers: { affection: 1.5, trust: 1.2, friendship: 2.0 } },
+  { rel: 'servant_to_master', cat: '争执',  behavior: 'risky',
+    risk: {
+      rate: 0.40,
+      successBubble: [{ role:'b', text:'（这奴才…竟说得有几分道理）' },
+                      { role:'a', text:'（心中惴惴，却不甘示弱）' }],
+      failBubble:    [{ role:'b', text:'你这是什么话！' },
+                      { role:'a', text:'……（噤若寒蝉）' }],
+      failEffects:   [{ target: 'a', axis: 'affection', delta: -8 },
+                      { target: 'a', axis: 'trust', delta: -6 }],
+    },
+    modifiers: { affection: 1.5, trust: 0.5, friendship: 0.8 } },
+
+  // ── 体面仆从 → 普通仆从 ──
+  { rel: 'senior_servant_to_junior', cat: '叙旧',  behavior: 'allowed' },
+  { rel: 'senior_servant_to_junior', cat: '慰藉',  behavior: 'allowed' },
+  { rel: 'senior_servant_to_junior', cat: '调笑',  behavior: 'allowed' },
+  { rel: 'senior_servant_to_junior', cat: '传情',  behavior: 'risky',
+    risk: {
+      rate: 0.65,
+      successBubble: [{ role:'b', text:'（被这位大姐姐拉着，有点窘…）' },
+                      { role:'a', text:'（顺势靠近一步）' }],
+      failBubble:    [{ role:'a', text:'你这举止成何体统。' },
+                      { role:'b', text:'……（缩手退开）' }],
+      failEffects:   [{ target: 'b', axis: 'affection', delta: -5 }],
+    },
+    modifiers: { affection: 1.2, trust: 0.9, friendship: 1.5 } },
+  { rel: 'senior_servant_to_junior', cat: '争执',  behavior: 'allowed',
+    modifiers: { affection: 1.0, trust: 0.8, friendship: 0.8 } },
+
+  // ── 普通仆从 → 体面仆从 ──
+  { rel: 'junior_to_senior_servant', cat: '叙旧',  behavior: 'allowed' },
+  { rel: 'junior_to_senior_servant', cat: '传情',  behavior: 'risky',
+    risk: {
+      rate: 0.55,
+      successBubble: [{ role:'b', text:'（没想到她没生气…）' },
+                      { role:'a', text:'（轻轻一笑带过）' }],
+      failBubble:    [{ role:'b', text:'你这丫头，规矩呢！' },
+                      { role:'a', text:'……（满脸通红）' }],
+      failEffects:   [{ target: 'a', axis: 'affection', delta: -5 }],
+    },
+    modifiers: { affection: 1.2, trust: 0.9, friendship: 1.5 } },
+  { rel: 'junior_to_senior_servant', cat: '争执',  behavior: 'risky',
+    risk: {
+      rate: 0.50,
+      successBubble: [{ role:'b', text:'（倒有几分胆气…）' },
+                      { role:'a', text:'（头也不敢抬）' }],
+      failBubble:    [{ role:'b', text:'你这毛丫头！' },
+                      { role:'a', text:'……（缩着脖子退开）' }],
+      failEffects:   [{ target: 'a', axis: 'affection', delta: -6 }],
+    },
+    modifiers: { affection: 1.3, trust: 0.6, friendship: 0.8 } },
+
+  // ── peer 全部 allowed（默认兜底）──
+];
+
+// ════════════════════════════════════════════════════
+//  二、身份关系判定
+// ════════════════════════════════════════════════════
+
+function getHierarchyRelation(idA, idB) {
+  const rankA = getCharRankFromConfig(idA);
+  const rankB = getCharRankFromConfig(idB);
+  if (rankA === 6 || rankB === 6) return 'outsider';
+  if (rankA === 0) return 'grandparent_to_child';
+  if (rankA <= 3 && rankB >= 4) return 'master_to_servant';
+  if (rankB <= 3 && rankA >= 4) return 'servant_to_master';
+  if (rankA === 4 && rankB === 5) return 'senior_servant_to_junior';
+  if (rankA === 5 && rankB === 4) return 'junior_to_senior_servant';
+  if (rankA === 1 && rankB >= 2) return 'parent_to_child';
+  if (rankB === 1 && rankA >= 2) return 'child_to_parent';
+  return 'peer';
+}
+
+function getHierarchyRule(hierarchyRel, cat) {
+  return HIERARCHY_RULES.find(r => r.rel === hierarchyRel && r.cat === cat) || null;
+}
+
+// ════════════════════════════════════════════════════
+//  三、初始化
+// ════════════════════════════════════════════════════
+
+CONFIG = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+
+TEST_CHARS = CHAR_IDS
+  .map(id => CONFIG.characters.find(c => c.id === id))
+  .filter(Boolean)
+  .map(c => ({ id: c.id, name: c.name, short: c.short, color: c.color,
+               socialRank: c.socialRank ?? 2,
+               activeStates: [] }));
+
+initRelations();
+
+let currentA = TEST_CHARS[0].id;
+let currentB = TEST_CHARS[1].id;
+let logEntries = [];
+const GAME_DAY_REAL_MIN = 20;
+
+// ────── 状态系统 ──────────────────────────────────────────────────────────────
+
+// 状态图标和颜色映射
+const STATE_STYLES = {
+  elated:       { icon: '✨', color: '#c9a227' }, teaHeart:    { icon: '🍵', color: '#27ae60' },
+  tipsySocial:  { icon: '🍷', color: '#8e44ad' }, joyful:      { icon: '😄', color: '#27ae60' },
+  heartFlutter: { icon: '💕', color: '#e84393' }, angry:       { icon: '💢', color: '#e74c3c' },
+  brokenBond:   { icon: '💔', color: '#7f8c8d' }, melancholy:  { icon: '😔', color: '#7f8c8d' },
+  drunk:        { icon: '🥴', color: '#8e44ad' }, exhausted:   { icon: '💤', color: '#7f8c8d' },
+  ganshang:     { icon: '🌧', color: '#5d9cec' }, punished:    { icon: '😰', color: '#e74c3c' },
+  chikuang:     { icon: '🌀', color: '#e67e22' }, rezhen:      { icon: '🤒', color: '#e67e22' },
+  renao:        { icon: '🎉', color: '#27ae60' }, zizai:       { icon: '🧘', color: '#27ae60' },
+  baonu:        { icon: '😡', color: '#e74c3c' }, sickServe:    { icon: '🤧', color: '#e67e22' },
+  homeworkDone: { icon: '📝', color: '#27ae60' },
+  // 关系反馈类状态
+  awkward:      { icon: '😅', color: '#c47a20' }, selfDemeaning: { icon: '😓', color: '#8a6a40' },
+  offended:     { icon: '😤', color: '#c0392b' }, secretCrush:   { icon: '💗', color: '#e84393' },
+  unfilial:     { icon: '🚷', color: '#7f2020' }, doted:         { icon: '🥰', color: '#c9a227' },
+};
+
+// ── applyState / updateStates 已由 js/systems/state.js 提供 ──
+// 测试页只保留：UI 辅助函数 + EventBus 日志 + 测试专用操作
+
+// 手动移除状态（测试专用：点击 badge 移除）
+function removeStateManual(charId, stateId) {
+  const c = getChar(charId);
+  if (!c) return;
+  const hadState = c.activeStates.some(s => s.id === stateId);
+  c.activeStates = c.activeStates.filter(s => s.id !== stateId);
+  if (hadState) EventBus.emit('state:remove', { charId, stateId });
+}
+
+// 手动施加状态（测试专用：下拉选单）
+function applyStateManual() {
+  const charId = document.getElementById('state-char-sel')?.value;
+  const stateId = document.getElementById('state-id-sel')?.value;
+  const c = getChar(charId);
+  if (c && stateId) applyState(c, stateId);
+}
+
+// 时间推进时消耗所有角色状态（测试专用：主游戏在 main.js 逐帧调用）
+function tickStates(realSecs) {
+  TEST_CHARS.forEach(c => updateStates(c, realSecs));
+  refreshCharStates();
+}
+
+function refreshCharStates() {
+  const panel = document.getElementById('char-states-panel');
+  if (!panel) return;
+  panel.innerHTML = TEST_CHARS.map(c => {
+    const pills = (c.activeStates || []).map(st => {
+      const sd = CONFIG.stateDefs?.[st.id];
+      const sty = STATE_STYLES[st.id] || { icon: '●', color: '#a89070' };
+      const mins = Math.round(st.remaining);
+      const needModStr = sd?.needMods
+        ? Object.entries(sd.needMods).map(([k,v]) =>
+            `${k}: 衰减×${v.decay??1} 增长×${v.grow??1}`).join(', ')
+        : '';
+      const blockedStr = sd?.blockedSkills?.length
+        ? `  封锁: ${sd.blockedSkills.join('/')}` : '';
+      const tooltip = `${sd?.desc || ''}\n${needModStr}${blockedStr}\n剩余: ${mins}游分`;
+      return `<span class="state-pill" style="color:${sty.color};border-color:${sty.color}55;background:${sty.color}18"
+        title="${tooltip}" onclick="removeStateManual('${c.id}','${st.id}')"
+      >${sty.icon} ${sd?.name || st.id} <span style="font-size:9px;opacity:.6">${mins}m</span></span>`;
+    }).join('') || '<span style="font-size:10px;color:#3a2f28;padding:1px 0">—</span>';
+    return `<div class="char-state-row">
+      <span class="csr-name" style="color:${c.color||'#c8b8a0'}">${c.short}</span>
+      <span class="csr-pills">${pills}</span>
+    </div>`;
+  }).join('');
+}
+
+function initStateSelectors() {
+  const charSel = document.getElementById('state-char-sel');
+  const stateSel = document.getElementById('state-id-sel');
+  if (!charSel || !stateSel) return;
+  charSel.innerHTML = TEST_CHARS.map(c => `<option value="${c.id}">${c.short}</option>`).join('');
+
+  // 按 category 分组显示
+  const byCategory = {};
+  for (const [id, sd] of Object.entries(CONFIG.stateDefs || {})) {
+    const cat = sd.category || '其他';
+    (byCategory[cat] = byCategory[cat] || []).push({ id, sd });
+  }
+  const catOrder = ['情绪类','社交状态','逾矩与身份礼法状态','关系特殊状态','需求与生理状态','任务与指令状态','观察与记忆触发状态','特殊状态'];
+  let html = '';
+  const cats = [...catOrder.filter(c => byCategory[c]), ...Object.keys(byCategory).filter(c => !catOrder.includes(c))];
+  for (const cat of cats) {
+    const entries = byCategory[cat];
+    if (!entries) continue;
+    html += `<optgroup label="${cat}">`;
+    html += entries.map(({ id, sd }) => `<option value="${id}">${sd.name}[${id}]</option>`).join('');
+    html += '</optgroup>';
+  }
+  stateSel.innerHTML = html;
+}
+
+// ── 事件监听 ──
+EventBus.on('relation:axis_change', ({ idA, idB, axis, old: ov, new: nv, delta }) => {
+  const axN = { affection: '好感', trust: '信任', friendship: '友谊', submission: '服从' };
+  const sign = delta >= 0 ? '+' : '';
+  addLog(`${getChar(idA)?.short}↔${getChar(idB)?.short}  ${axN[axis]} ${Math.round(ov)}→${Math.round(nv)}（${sign}${Math.round(delta)}）`,
+    delta >= 0 ? 'pos' : 'neg');
+  refreshAll();
+  showAxisDelta(axis, delta);
+});
+EventBus.on('relation:threshold', ({ id, idA, idB }) => {
+  addLog(`⚡ 阈值事件 [${id}]  ${getChar(idA)?.short}↔${getChar(idB)?.short}`, 'event');
+  refreshThresholdLog();
+});
+// 状态 EventBus 监听：verbose 日志 + 刷新 UI
+EventBus.on('state:add', ({ charId, stateName, stateDef }) => {
+  const c = getChar(charId);
+  const blockedStr = stateDef?.blockedSkills?.length ? `  🚫${stateDef.blockedSkills.join('/')}` : '';
+  addLog(`✦ ${c?.short || charId} ▶ 「${stateName}」— ${stateDef?.desc || ''}（${stateDef?.duration || '?'}游分）${blockedStr}`, 'event');
+  refreshCharStates();
+});
+EventBus.on('state:refresh', ({ charId, stateName, stateDef }) => {
+  const c = getChar(charId);
+  addLog(`↺ ${c?.short || charId}「${stateName}」刷新（${stateDef?.duration || '?'}游分）`, 'action');
+  refreshCharStates();
+});
+EventBus.on('state:remove', ({ charId, stateId }) => {
+  const c = getChar(charId);
+  const sd = CONFIG.stateDefs?.[stateId];
+  addLog(`⏳ ${c?.short || charId}「${sd?.name || stateId}」消散`, 'system');
+  refreshCharStates();
+});
+
+// ════════════════════════════════════════════════════
+//  四、互动执行（含身份礼法判定）
+// ════════════════════════════════════════════════════
+
+function checkInteractionAvailable(tpl) {
+  const score = getRelationValue(currentA, currentB);
+  if (score > (tpl.relMax ?? 100)) return { ok: false, kind: 'locked-rel', reason: `综合分需≤${tpl.relMax}` };
+  if (score < (tpl.relMin ?? -100)) {
+    // 软锁：允许互动，但会触发 onLowScore 反馈
+    return { ok: 'low', kind: 'low-score',
+             reason: `关系不足（${score}<${tpl.relMin}）`, score, tpl };
+  }
+  if (tpl.axisReq) {
+    const chk = checkAxisReq(currentA, currentB, tpl.axisReq);
+    if (!chk.ok) {
+      const AN = { affection: '好感', trust: '信任', friendship: '友谊', submission: '服从' };
+      const hint = chk.missing.map(m => `${AN[m.axis]}需${m.need}（现${m.have}）`).join('，');
+      return { ok: false, kind: 'locked-rel', reason: hint };
+    }
+  }
+  const cat = INTERACTION_CAT_MAP[tpl.id] || '叙旧';
+  const hrel = getHierarchyRelation(currentA, currentB);
+  const rule = getHierarchyRule(hrel, cat);
+  if (rule?.behavior === 'forbidden') return { ok: false, kind: 'forbidden', reason: '礼法所禁' };
+  if (rule?.behavior === 'conditional') {
+    const cond = rule.condition;
+    if (cond?.relMin !== undefined && score < cond.relMin)
+      return { ok: false, kind: 'conditional', reason: cond.desc || `需综合分≥${cond.relMin}` };
+  }
+  return { ok: true, kind: rule?.behavior || 'allowed', rule };
+}
+
+function doInteraction(id) {
+  const tpl = CONFIG.interactionTemplates[id];
+  if (!tpl) return;
+  const avail = checkInteractionAvailable(tpl);
+  if (!avail.ok && avail.ok !== 'low') return;  // 硬锁：forbidden/axis 不满足
+
+  const cat = INTERACTION_CAT_MAP[id] || '叙旧';
+  const rule = avail.rule;
+  const cA = getChar(currentA), cB = getChar(currentB);
+
+  // ── 软锁路径：关系分不足，触发 onLowScore ────────────────────────────
+  if (avail.ok === 'low') {
+    const onLow = tpl.onLowScore;
+    addLog(`⚠ ${cA.short} 对 ${cB.short}「${tpl.name}」— 关系不足（${avail.score}<${tpl.relMin}）${onLow ? '，尴尬收场' : '，互动失败'}`, 'neg');
+    if (onLow) {
+      applyTplStateEffects(onLow.effects, cA, cB);
+      for (const ae of onLow.axisEffects || []) {
+        if (ae.axis === 'submission') {
+          const who = ae.who === 'target' ? cB : cA;
+          const other = ae.who === 'target' ? cA : cB;
+          changeAxis(who.id, other.id, 'submission', ae.delta || 0);
+        } else {
+          changeAxis(currentA, currentB, ae.axis, ae.delta || 0);
+        }
+      }
+    }
+    return;
+  }
+
+  addLog(`▶ ${cA.short} 对 ${cB.short}「${tpl.name}」`, 'action');
+
+  if (rule?.behavior === 'risky') {
+    const rp = rule.risk;
+    let rate = rp.rate;
+    // TODO: 旁观者暂不检测（test环境无场景），用 rate 直接 roll
+    const success = Math.random() < rate;
+
+    // 倍率
+    const mods = rule.modifiers || { affection: 1, trust: 1, friendship: 1 };
+
+    if (success) {
+      // 成功：正常轴效果 × modifier + 状态效果
+      for (const ae of tpl.axisEffects || []) {
+        const scaled = ae.delta * (mods[ae.axis] ?? 1);
+        if (ae.axis === 'submission') {
+          const who = ae.who === 'target' ? cB : cA;
+          const other = ae.who === 'target' ? cA : cB;
+          changeAxis(who.id, other.id, 'submission', scaled);
+        } else {
+          changeAxis(currentA, currentB, ae.axis, scaled);
+        }
+      }
+      applyTplStateEffects(tpl.effects, cA, cB);
+      showRiskToast(true, tpl.name, rp.rate, rp.successBubble, cA, cB, tpl.axisEffects, mods);
+    } else {
+      for (const ef of rp.failEffects || []) {
+        changeAxis(currentA, currentB, ef.axis, ef.delta);
+      }
+      showRiskToast(false, tpl.name, rp.rate, rp.failBubble, cA, cB, rp.failEffects, null);
+    }
+    return;
+  }
+
+  // allowed / conditional → 正常执行（modifier 如有则应用）
+  const mods = rule?.modifiers || { affection: 1, trust: 1, friendship: 1 };
+  for (const ae of tpl.axisEffects || []) {
+    const scaled = ae.delta * (mods[ae.axis] ?? 1);
+    if (ae.axis === 'submission') {
+      const who = ae.who === 'target' ? cB : cA;
+      const other = ae.who === 'target' ? cA : cB;
+      changeAxis(who.id, other.id, 'submission', scaled);
+    } else {
+      changeAxis(currentA, currentB, ae.axis, scaled);
+    }
+  }
+  applyTplStateEffects(tpl.effects, cA, cB);
+}
+
+// 应用互动模板中 effects 列表的状态效果
+function applyTplStateEffects(effects, cA, cB) {
+  for (const ef of effects || []) {
+    if (ef.system !== 'state' || !ef.stateId) continue;
+    if (ef.prob !== undefined && Math.random() > ef.prob) continue;
+    const targets = ef.target === 'both' ? [cA, cB]
+                  : ef.target === 'target' ? [cB]
+                  : [cA];
+    for (const tgt of targets) applyState(tgt, ef.stateId);
+  }
+}
+
+// ════════════════════════════════════════════════════
+//  五、风险结果弹窗
+// ════════════════════════════════════════════════════
+
+let toastTimer = null;
+
+// bubbles 格式：[{ role:'a'|'b', text:'...' }, ...]
+// role:'a' → 发起者(cA)说  role:'b' → 对象(cB)说
+function showRiskToast(success, name, rate, bubbles, cA, cB, effects, mods) {
+  const toast = document.getElementById('risk-toast');
+  toast.className = 'show ' + (success ? 'success' : 'fail');
+
+  document.getElementById('toast-result').textContent = success ? '✅ 逾矩成功' : '❌ 逾矩失败';
+  document.getElementById('toast-result').style.color = success ? '#27ae60' : '#c0392b';
+
+  document.getElementById('toast-desc').textContent =
+    `「${name}」  成功率 ${Math.round(rate * 100)}%  —  ${success ? '这次侥幸过关。' : '被识破了。'}`;
+
+  // 按 role 决定是谁在说话
+  const bubbleHtml = (bubbles || []).map(b => {
+    const who = b.role === 'b' ? cB : cA;
+    const col  = b.role === 'b' ? '#a8b8d8' : '#c8d8a0';
+    return `<div style="color:${col}">${who.short}：「${b.text}」</div>`;
+  }).join('');
+  document.getElementById('toast-bubbles').innerHTML = bubbleHtml || '';
+
+  const AN = { affection: '好感', trust: '信任', friendship: '友谊', submission: '服从' };
+  let effHtml = '';
+  if (effects?.length) {
+    effHtml = effects.map(e => {
+      // 显示受影响方
+      const whoName = e.target === 'b' ? cB.short : cA.short;
+      const delta = mods ? (e.delta * (mods[e.axis] ?? 1)).toFixed(0) : e.delta;
+      const sign = delta >= 0 ? '+' : '';
+      const col = delta >= 0 ? '#5a9a5a' : '#a05050';
+      return `<span style="color:${col};margin-right:8px">${whoName} ${AN[e.axis]||e.axis} ${sign}${delta}</span>`;
+    }).join('');
+  }
+  document.getElementById('toast-effects').innerHTML = effHtml;
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(closeToast, 4000);
+}
+
+function closeToast() {
+  document.getElementById('risk-toast').className = '';
+  clearTimeout(toastTimer);
+}
+
+// ════════════════════════════════════════════════════
+//  六、渲染函数
+// ════════════════════════════════════════════════════
+
+function buildSelects() {
+  const selA = document.getElementById('sel-a');
+  const selB = document.getElementById('sel-b');
+  TEST_CHARS.forEach(c => {
+    const rank = SOCIAL_RANK_LABELS[c.socialRank] || '';
+    selA.innerHTML += `<option value="${c.id}">${c.short}（${rank}）</option>`;
+    selB.innerHTML += `<option value="${c.id}">${c.short}（${rank}）</option>`;
+  });
+  selA.value = currentA;
+  selB.value = currentB;
+}
+
+function onPairChange() {
+  currentA = document.getElementById('sel-a').value;
+  currentB = document.getElementById('sel-b').value;
+  if (currentA === currentB) {
+    const other = TEST_CHARS.find(c => c.id !== currentA);
+    if (other) { currentB = other.id; document.getElementById('sel-b').value = currentB; }
+  }
+  refreshAll();
+}
+
+function relKey2(a, b) { return [a, b].sort().join('|'); }
+
+function getAllPairs() {
+  const p = [];
+  for (let i = 0; i < TEST_CHARS.length; i++)
+    for (let j = i + 1; j < TEST_CHARS.length; j++)
+      p.push([TEST_CHARS[i], TEST_CHARS[j]]);
+  return p;
+}
+
+function buildMatrix() {
+  const container = document.getElementById('matrix');
+  container.innerHTML = '';
+  for (const [a, b] of getAllPairs()) {
+    const ri = getRelationInfo(a.id, b.id);
+    const s = ri.score;
+    const pct = (s + 100) / 2;
+    const col = s >= 60 ? '#c9a227' : s >= 20 ? '#27ae60' : s >= 0 ? '#a89070' : s >= -30 ? '#e67e22' : '#c0392b';
+    const isActive = (currentA===a.id&&currentB===b.id)||(currentA===b.id&&currentB===a.id);
+    const row = document.createElement('div');
+    row.className = 'mx-row' + (isActive ? ' active' : '');
+    row.innerHTML = `<div class="mx-names">${a.short}↔${b.short}<span class="mxt">${ri.initType||''}</span></div>
+      <div class="mx-mini"><div class="mx-mini-fill" style="width:${pct}%;background:${col}"></div></div>
+      <div class="mx-score" style="color:${col}">${s>=0?'+':''}${s}</div>`;
+    row.onclick = () => {
+      currentA = a.id; currentB = b.id;
+      document.getElementById('sel-a').value = a.id;
+      document.getElementById('sel-b').value = b.id;
+      refreshAll();
+    };
+    container.appendChild(row);
+  }
+}
+
+function refreshPairDetail() {
+  const ri = getRelationInfo(currentA, currentB);
+  const cA = getChar(currentA), cB = getChar(currentB);
+
+  // 身份关系 badge
+  const hrel = getHierarchyRelation(currentA, currentB);
+  const hl = HIERARCHY_LABELS[hrel] || { text: hrel, color: '#a89070' };
+  const rankA = SOCIAL_RANK_LABELS[cA.socialRank] || '?';
+  const rankB = SOCIAL_RANK_LABELS[cB.socialRank] || '?';
+  document.getElementById('hierarchy-badge').innerHTML =
+    `<span style="color:${hl.color};font-size:12px;font-weight:bold">${hl.text}</span>
+     <span style="font-size:9px;color:#5a4a38">${cA.short}[${rankA}] → ${cB.short}[${rankB}]</span>`;
+  document.getElementById('hierarchy-badge').style.background = 'rgba(0,0,0,.3)';
+  document.getElementById('hierarchy-badge').style.border = `1px solid ${hl.color}44`;
+
+  document.getElementById('rel-names').textContent = `${cA.short} ↔ ${cB.short}`;
+  const s = ri.score;
+  const scoreEl = document.getElementById('rel-score');
+  scoreEl.textContent = (s >= 0 ? '+' : '') + s;
+  scoreEl.style.color = s >= 60 ? '#c9a227' : s >= 0 ? '#27ae60' : '#c0392b';
+  document.getElementById('rel-type').textContent = ri.typeLabel;
+  document.getElementById('rel-inittype').textContent = ri.initType ? `【${ri.initType}】` : '';
+
+  const r = relations[relKey2(currentA, currentB)];
+  document.getElementById('rel-note').textContent = r?.note || '';
+
+  updateAxisBar('affection',  ri.affection,  -100, 100, '#c0392b');
+  updateAxisBar('trust',      ri.trust,      -100, 100, '#2980b9');
+  updateAxisBar('friendship', ri.friendship,    0, 100, '#27ae60');
+
+  // 服从：A→B 和 B→A 双向显示
+  const subAtoB = ri.submissionAtoB ?? 0;
+  const subBtoA = ri.submissionBtoA ?? 0;
+
+  // 更新服从条标签
+  const labelA = document.getElementById('sub-a-label');
+  const labelB = document.getElementById('sub-b-label');
+  if (labelA) labelA.textContent = `🙇 ${cA?.short}服从`;
+  if (labelB) labelB.textContent = `🙇 ${cB?.short}服从`;
+
+  updateAxisBarCustom('sub-a', subAtoB, 0, 100, '#9b59b6');
+  updateAxisBarCustom('sub-b', subBtoA, 0, 100, '#8e44ad');
+}
+
+function updateAxisBarCustom(id, val, min, max, posColor) {
+  const rounded = Math.round(val);
+  const el = document.getElementById('val-' + id);
+  if (el) { el.textContent = (rounded >= 0 ? '+' : '') + rounded; el.style.color = posColor; }
+  const bar = document.getElementById('bar-' + id);
+  if (bar) { bar.style.width = (val / max * 100) + '%'; bar.style.left = '0'; bar.style.background = posColor; }
+}
+
+function updateAxisBar(axis, val, min, max, posColor) {
+  const rounded = Math.round(val);
+  const el = document.getElementById('val-' + axis);
+  el.textContent = (rounded >= 0 ? '+' : '') + rounded;
+  el.style.color = val >= 0 ? posColor : '#c0392b';
+  const bar = document.getElementById('bar-' + axis);
+  if (min < 0) {
+    const pct = Math.abs(val) / max * 50;
+    bar.style.width = pct + '%';
+    bar.style.left = val >= 0 ? '50%' : (50 - pct) + '%';
+    bar.style.background = val >= 0 ? posColor : '#c0392b';
+  } else {
+    bar.style.width = (val / max * 100) + '%';
+    bar.style.left = '0';
+    bar.style.background = posColor;
+  }
+}
+
+function showAxisDelta(axis, delta) {
+  const el = document.getElementById('delta-' + axis);
+  if (!el) return;
+  el.textContent = (delta >= 0 ? '+' : '') + Math.round(delta);
+  el.style.color = delta >= 0 ? '#27ae60' : '#c0392b';
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+function refreshThresholdLog() {
+  const r = relations[relKey2(currentA, currentB)];
+  const events = CONFIG.relationThresholdEvents || [];
+  const fired = r?.thresholdEvents || [];
+  const el = document.getElementById('threshold-log');
+  if (!fired.length) { el.innerHTML = '<span style="font-size:10px;color:#3a2f28">暂无</span>'; return; }
+  el.innerHTML = fired.map(id => {
+    const ev = events.find(e => e.id === id);
+    return `<div class="th-event">${ev ? `${ev.axis}${ev.direction==='up'?'↑':'↓'}${ev.threshold} · ${ev.log||id}` : id}</div>`;
+  }).join('');
+}
+
+// ── 互动面板 ──
+const CATEGORIES = [
+  { label: '寒暄', ids: [101,102,103] },
+  { label: '品茗·对酌', ids: [104,105] },
+  { label: '文艺谈论', ids: [201,202,203,204,205] },
+  { label: '嬉闹', ids: [301,302,303,304] },
+  { label: '温情', ids: [401,402,403,404] },
+  { label: '传情', ids: [501,502,503,504,505] },
+  { label: '负面冲突', ids: [601,602,603,604] },
+];
+
+const AXIS_NAMES = { affection: '好感', trust: '信任', friendship: '友谊', submission: '服从' };
+
+const BEHAVIOR_LABELS = {
+  risky:       { text: '🎲 逾矩', cls: 'risky' },
+  forbidden:   { text: '🚫 礼法所禁', cls: 'forbidden' },
+  conditional: { text: '❓ 有条件', cls: 'conditional' },
+  allowed:     { text: '', cls: 'allowed' },
+  'low-score': { text: '⚠ 关系不足', cls: 'low-score' },
+};
+
+function fmtEffects(ae, mods) {
+  if (!ae?.length) return '';
+  return ae.map(e => {
+    const d = mods ? (e.delta * (mods[e.axis] ?? 1)) : e.delta;
+    const sign = d >= 0 ? '+' : '';
+    const col = d >= 0 ? '#5a8a5a' : '#8a4a4a';
+    const axLabel = AXIS_NAMES[e.axis] || e.axis;
+    // 服从轴标注方向
+    const whoTag = e.axis === 'submission'
+      ? `<span style="font-size:9px;color:#9b59b6">(${e.who === 'target' ? '对象' : '发起'})</span>` : '';
+    return `<span style="color:${col}">${axLabel}${sign}${Math.round(d)}${whoTag}</span>`;
+  }).join(' ');
+}
+
+function buildInteractionPanel() {
+  const tpls = CONFIG.interactionTemplates || {};
+  const hrel = getHierarchyRelation(currentA, currentB);
+  let html = '';
+  for (const cat of CATEGORIES) {
+    html += `<div class="cat-group"><div class="cat-title">── ${cat.label} ──</div>`;
+    for (const id of cat.ids) {
+      const tpl = tpls[id];
+      if (!tpl) continue;
+      const avail = checkInteractionAvailable(tpl);
+      const isLow = avail.ok === 'low';
+      const blocked = !avail.ok;  // 仅 forbidden / hard-axis 才 disabled
+      const catName = INTERACTION_CAT_MAP[id] || '叙旧';
+      const rule = getHierarchyRule(hrel, catName);
+      const behaviorInfo = avail.ok === true
+        ? BEHAVIOR_LABELS[rule?.behavior || 'allowed']
+        : avail.ok === 'low'
+          ? BEHAVIOR_LABELS['low-score']
+          : { text: avail.reason, cls: avail.kind || 'locked-rel' };
+      const mods = rule?.modifiers;
+      // 低分时展示惩罚效果而非正常效果
+      const effHtml = isLow
+        ? fmtEffects(tpl.onLowScore?.axisEffects, null)
+        : fmtEffects(tpl.axisEffects, mods);
+      const effectSrc = isLow ? (tpl.onLowScore?.effects || []) : (tpl.effects || []);
+      const stateEffHtml = effectSrc
+        .filter(e => e.system === 'state')
+        .map(e => {
+          const sd = CONFIG.stateDefs?.[e.stateId];
+          const sty = STATE_STYLES[e.stateId] || { icon: '●', color: '#a89070' };
+          const tgtLabel = e.target === 'both' ? '双方' : e.target === 'target' ? '对象' : '发起';
+          const probStr = e.prob ? `${Math.round(e.prob*100)}%` : '';
+          return `<span style="color:${sty.color}">${sty.icon}${sd?.name||e.stateId}(${tgtLabel}${probStr})</span>`;
+        }).join(' ');
+      const rateHtml = rule?.behavior === 'risky' ? `<span style="color:#c9a227;font-size:9px"> ${Math.round(rule.risk.rate*100)}%成功率</span>` : '';
+
+      html += `<button class="interaction-btn ${isLow ? 'low-score' : ''}" ${blocked ? 'disabled' : ''} onclick="doInteraction(${id})">
+        <div class="btn-top">
+          <span class="btn-name">${tpl.name}</span>
+          ${rateHtml}
+          <span class="btn-relmin">≥${tpl.relMin ?? '—'}</span>
+        </div>
+        ${effHtml || stateEffHtml ? `<div class="btn-effects">${effHtml}${stateEffHtml ? ' '+stateEffHtml : ''}${mods&&rule?.behavior==='risky'?'<span style="color:#7a5a20;font-size:9px"> (逾矩倍率)</span>':''}</div>` : ''}
+        ${behaviorInfo.text ? `<div class="btn-status ${behaviorInfo.cls}">${behaviorInfo.text}</div>` : ''}
+      </button>`;
+    }
+    html += '</div>';
+  }
+  document.getElementById('interaction-panel').innerHTML = html;
+}
+
+// ── 日志 ──
+function addLog(text, cls) {
+  const ts = `第${gameDay}日`;
+  logEntries.unshift({ text, cls, ts });
+  if (logEntries.length > 80) logEntries.pop();
+  renderLog();
+}
+function renderLog() {
+  const colors = { pos:'#4a9a4a', neg:'#c0392b', event:'#c9a227', action:'#d4a574', system:'#6a5a48' };
+  document.getElementById('log-entries').innerHTML = logEntries.slice(0, 30).map(e =>
+    `<div class="log-entry" style="color:${colors[e.cls]||'#a89070'}">
+      <span class="log-ts">[${e.ts}]</span>${e.text}</div>`
+  ).join('');
+}
+
+// ── 时间推进 ──
+function tickTime(days) {
+  const realSecs = days * GAME_DAY_REAL_MIN * 60;
+  const snapBefore = {};
+  for (const k of Object.keys(relations)) {
+    const r = relations[k];
+    snapBefore[k] = { aff: Math.round(r.affection), trt: Math.round(r.trust), frn: Math.round(r.friendship ?? 0) };
+  }
+  tickRelationDecay(realSecs);
+  tickStates(realSecs);  // 状态消耗
+  gameDay += days;
+  document.getElementById('tick-day').textContent = `第${Math.round(gameDay)}日`;
+  for (const k of Object.keys(relations)) {
+    const r = relations[k];
+    const b = snapBefore[k];
+    if (!b) continue;
+    const diffs = [];
+    if (Math.abs(Math.round(r.affection)-b.aff)>=1)   diffs.push(`好感${Math.round(r.affection)-b.aff}`);
+    if (Math.abs(Math.round(r.trust)-b.trt)>=1)       diffs.push(`信任${Math.round(r.trust)-b.trt}`);
+    if (Math.abs(Math.round(r.friendship ?? 0)-b.frn)>=1) diffs.push(`友谊${Math.round(r.friendship??0)-b.frn}`);
+    if (diffs.length) addLog(`⏳ [${k}] 衰减：${diffs.join('，')}`, 'system');
+  }
+  refreshAll();
+}
+
+function resetAll() {
+  relations = {};
+  initRelations();
+  logEntries = [];
+  gameDay = 1;
+  TEST_CHARS.forEach(c => c.activeStates = []);
+  document.getElementById('tick-day').textContent = '第1日';
+  addLog('↺ 所有关系及状态已重置', 'event');
+  refreshAll();
+}
+
+function refreshAll() {
+  buildMatrix();
+  refreshPairDetail();
+  refreshThresholdLog();
+  buildInteractionPanel();
+  refreshCharStates();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── 群聊测试功能 ──
+// ═══════════════════════════════════════════════════════════════════════════
+
+let currentDialogueId = null;
+let currentDialogueType = null; // 'pair' or 'group'
+
+// 初始化群聊选择器
+function initGroupChatSelectors() {
+  const initSel = document.getElementById('grp-initiator');
+  const tgtSel = document.getElementById('grp-target');
+  if (!initSel || !tgtSel) return;
+  
+  const opts = TEST_CHARS.map(c => `<option value="${c.id}">${c.short}</option>`).join('');
+  initSel.innerHTML = opts;
+  tgtSel.innerHTML = opts;
+  
+  // 默认选择 currentA 和 currentB
+  initSel.value = currentA;
+  tgtSel.value = currentB;
+  
+  refreshObserversList();
+}
+
+// 刷新旁观者列表
+function refreshObserversList() {
+  const container = document.getElementById('grp-observers');
+  if (!container) return;
+  
+  const initiatorId = document.getElementById('grp-initiator')?.value || currentA;
+  const targetId = document.getElementById('grp-target')?.value || currentB;
+  
+  const others = TEST_CHARS.filter(c => c.id !== initiatorId && c.id !== targetId);
+  
+  container.innerHTML = others.map(c => `
+    <div class="grp-observer-item" data-id="${c.id}" onclick="toggleObserver('${c.id}')">
+      <span style="color:${c.color||'#c8b8a0'}">${c.short}</span>
+      <span class="prob" id="prob-${c.id}">?</span>
+    </div>
+  `).join('');
+  
+  selectedObservers.clear();
+}
+
+// 选中的旁观者（手动勾选，传给群聊系统做意愿判定）
+const selectedObservers = new Set();
+
+function toggleObserver(id) {
+  const el = document.querySelector(`.grp-observer-item[data-id="${id}"]`);
+  if (!el) return;
+  if (selectedObservers.has(id)) {
+    selectedObservers.delete(id);
+    el.classList.remove('selected');
+  } else {
+    selectedObservers.add(id);
+    el.classList.add('selected');
+  }
+}
+
+// 计算观察意愿（用固定距离3，与 GroupChatInstance 的测试环境 fallback 一致）
+function checkObservers() {
+  if (!window.DialogueSystem) { addLog('❌ DialogueSystem 未加载', 'error'); return; }
+
+  const initiatorId = document.getElementById('grp-initiator')?.value;
+  const targetId    = document.getElementById('grp-target')?.value;
+  const initiator   = getChar(initiatorId);
+  const target      = getChar(targetId);
+  if (!initiator || !target) { addLog('请选择有效的互动双方', 'error'); return; }
+
+  const TEST_DISTANCE = 3;  // 测试环境没有格坐标，固定用 3 格
+  const threshold = DialogueSystem.config.observation.threshold;
+  const others = TEST_CHARS.filter(c => c.id !== initiatorId && c.id !== targetId);
+
+  let html = '<div style="color:#c9a227;margin-bottom:4px">观察意愿（距离固定3格）：</div>';
+  let willJoin = [];
+
+  for (const observer of others) {
+    const prob = DialogueSystem.calculateObservationProb(observer, initiator, target, TEST_DISTANCE);
+    const will = prob > threshold;
+    if (will) willJoin.push(observer);
+
+    html += `<div style="margin:3px 0;display:flex;gap:8px;align-items:center">
+      <span style="color:${observer.color||'#c8b8a0'};min-width:44px">${observer.short}</span>
+      <span style="color:${will?'#5a8a5a':'#8a4a4a'};min-width:60px">${will?'✓ 加入':'✗ 旁观'}</span>
+      <span style="color:${will?'#5aaa5a':'#8a5a5a'}">P=${(prob*100).toFixed(1)}%</span>
+    </div>`;
+
+    // 更新旁观者标签概率显示
+    const probEl = document.getElementById(`prob-${observer.id}`);
+    if (probEl) {
+      probEl.textContent = `${(prob*100).toFixed(0)}%`;
+      probEl.className = will ? 'prob' : 'prob prob-low';
+    }
+
+    // 自动勾选会加入的角色
+    if (will && !selectedObservers.has(observer.id)) {
+      selectedObservers.add(observer.id);
+      const el = document.querySelector(`.grp-observer-item[data-id="${observer.id}"]`);
+      if (el) el.classList.add('selected');
+    } else if (!will && selectedObservers.has(observer.id)) {
+      // 不强制取消已手动勾选的
+    }
+  }
+
+  html += `<div style="margin-top:6px;color:#a89070">阈值 >${(threshold*100).toFixed(0)}%，已自动勾选会加入的角色</div>`;
+
+  const resultDiv = document.getElementById('grp-obs-result');
+  resultDiv.innerHTML = html;
+  resultDiv.style.display = 'block';
+
+  addLog(`观察意愿：${willJoin.length}/${others.length} 人会加入（${willJoin.map(c=>c.short).join('、') || '无'}）`, 'event');
+}
+
+// 启动群聊 / 双人对话
+function startGroupChat() {
+  if (!window.DialogueSystem) { addLog('❌ DialogueSystem 未加载', 'error'); return; }
+
+  const initiatorId = document.getElementById('grp-initiator')?.value;
+  const targetId    = document.getElementById('grp-target')?.value;
+  const privacy     = document.getElementById('grp-privacy')?.value || 'medium';
+  const initiator   = getChar(initiatorId);
+  const target      = getChar(targetId);
+  if (!initiator || !target || initiatorId === targetId) {
+    addLog('请选择不同的互动双方', 'error'); return;
+  }
+
+  // 结束已有对话
+  if (currentDialogueId) {
+    DialogueSystem.end(currentDialogueId);
+    currentDialogueId = null;
+  }
+
+  const sceneName = { low:'花园', medium:'庭院', high:'内室' }[privacy] || '庭院';
+  const scene = { privacy, name: sceneName };
+
+  // nearby = 当前选中的旁观者（系统内部会再做意愿判定）
+  const nearby = [...selectedObservers].map(id => getChar(id)).filter(Boolean);
+
+  clearDialogueHistory();
+
+  if (nearby.length > 0) {
+    currentDialogueId   = DialogueSystem.startGroupChat(initiator, target, scene, nearby);
+    currentDialogueType = 'group';
+    addLog(`🗣️ 群聊启动：${initiator.short}+${target.short}，${nearby.length} 人在场`, 'event');
+  } else {
+    currentDialogueId   = DialogueSystem.startPairDialogue(initiator, target, '叙旧', scene);
+    currentDialogueType = 'pair';
+    addLog(`💬 双人对话启动：${initiator.short} ↔ ${target.short}`, 'event');
+  }
+
+  const dlg = getActiveDlg();
+  if (!dlg) { addLog('❌ 对话创建失败', 'error'); return; }
+
+  // 实际 maxRounds 取自内层 primaryDialogue（群聊）或对话本身（双人）
+  const maxR = dlg.primaryDialogue?.maxRounds ?? dlg.maxRounds;
+  addLog(`预估轮次上限：${maxR} 轮 · 话题：${dlg.topic?.name || '—'}`, 'system');
+
+  updateDialogueUI(true);
+  updateDialogueStatus(dlg);
+  document.getElementById('grp-history').style.display = 'block';
+}
+
+// 获取当前活动对话实例（自动处理群聊/双人）
+function getActiveDlg() {
+  if (!currentDialogueId) return null;
+  return DialogueSystem.get(currentDialogueId);
+}
+
+// 推进对话一轮
+function advanceDialogue() {
+  if (!currentDialogueId) return;
+
+  const result = DialogueSystem.advance(currentDialogueId);
+
+  // 不管是否有 result，都检查对话是否还活着
+  const dlg = DialogueSystem.get(currentDialogueId);
+  const ended = !dlg;  // 从 activeDialogues 删除了 = 已结束
+
+  if (result) {
+    addDialogueLine(result);
+  }
+
+  if (ended) {
+    updateDialogueUI(false);
+    updateDialogueStatus(null);
+    addLog('✅ 对话结束，记忆已记录', 'event');
+    currentDialogueId = null;
+  } else {
+    updateDialogueStatus(dlg);
+  }
+}
+
+// 结束对话
+function endDialogue() {
+  if (!currentDialogueId) return;
+  DialogueSystem.end(currentDialogueId);
+  updateDialogueUI(false);
+  updateDialogueStatus(null);
+  addLog('手动结束对话', 'system');
+  currentDialogueId = null;
+}
+
+// 更新对话 UI 按钮状态
+function updateDialogueUI(active) {
+  document.getElementById('btn-advance').disabled = !active;
+  document.getElementById('btn-end-dlg').disabled  = !active;
+}
+
+// 更新状态面板
+function updateDialogueStatus(dlg) {
+  const statusDiv  = document.getElementById('grp-status');
+  const statusText = document.getElementById('grp-status-text');
+  if (!statusDiv || !statusText) return;
+
+  if (!dlg) {
+    statusText.innerHTML = '对话已结束';
+    return;
+  }
+
+  statusDiv.style.display = 'block';
+
+  // 群聊：核心信息在 primaryDialogue；双人：直接取 dlg
+  const inner = dlg.primaryDialogue ?? dlg;
+  const typeLabel = dlg.type === 'group' ? '群聊' : '双人对话';
+  const participants = (dlg.participants ?? inner.participants ?? []).map(p => {
+    const c = getChar(p.id ?? p);
+    return `<span style="color:${c?.color||'#c8b8a0'}">${c?.short||p}</span>`;
+  }).join(' · ');
+
+  statusText.innerHTML = `
+    <b>${typeLabel}</b> · 第 ${inner.round}/${inner.maxRounds} 轮
+    ${inner.phase ? `· 阶段：${inner.phase}` : ''}
+    ${inner.privateMode ? ' · <span style="color:#8e44ad">私语中</span>' : ''}<br>
+    话题：<b>${inner.topic?.name || '—'}</b>
+    ${inner.topic?.tone ? `（${inner.topic.tone}）` : ''}<br>
+    参与者：${participants}
+  `;
+}
+
+// 添加对话行到历史记录
+function addDialogueLine(line) {
+  const list = document.getElementById('grp-history-list');
+  if (!list) return;
+
+  const speaker = getChar(line.speaker);
+  const color   = speaker?.color || '#c8b8a0';
+
+  const div = document.createElement('div');
+  div.className = 'grp-line';
+  div.innerHTML = `
+    <span class="round">#${line.round}</span>
+    <span class="speaker" style="color:${color}">${speaker?.short || line.speaker}</span>
+    <span class="text">${line.text}</span>
+  `;
+  list.appendChild(div);
+  list.scrollTop = list.scrollHeight;
+}
+
+// 清空对话历史
+function clearDialogueHistory() {
+  const list = document.getElementById('grp-history-list');
+  if (list) list.innerHTML = '';
+}
+
+// 监听对话相关事件 → 日志
+EventBus.on('groupchat:join',    e => addLog(`➕ ${getChar(e.charId)?.short||e.charId} 加入群聊（共${e.totalParticipants}人）`, 'event'));
+EventBus.on('groupchat:private', e => addLog(`🤫 ${e.pair.map(id=>getChar(id)?.short||id).join('+')} 开始私语`, 'event'));
+EventBus.on('groupchat:end',     e => addLog(`💬 群聊结束（${e.totalRounds}轮）`, 'system'));
+EventBus.on('dialogue:end',      e => addLog(`💬 对话结束（${e.totalRounds}轮 · ${e.finalTopic||'—'}）`, 'system'));
+
+// 当改变主互动人选时刷新旁观者列表
+document.getElementById('grp-initiator')?.addEventListener('change', refreshObserversList);
+document.getElementById('grp-target')?.addEventListener('change', refreshObserversList);
+
+// ── 启动 ──
+buildSelects();
+initStateSelectors();
+initGroupChatSelectors();
+addLog('✅ 测试台就绪  ·  四轴关系 + 身份礼法 + 状态系统 + 对话群聊', 'event');
+addLog(`已初始化 ${Object.keys(relations).length} 对关系  ·  ${Object.keys(CONFIG.stateDefs || {}).length} 种状态  ·  ${Object.keys(DialogueSystem?.topics || {}).length} 类话题`, 'system');
+refreshAll();
+</script>
+</body>
+</html>

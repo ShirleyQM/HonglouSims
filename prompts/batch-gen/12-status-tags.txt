@@ -1,0 +1,21 @@
+生成大观园游戏 statusTags JSON 对象。
+
+【任务】
+为以下状态各提供 1–2 个中文标签（游戏中旁白/显示用）：
+{stateId 与 name 列表，如 awkward=尴尬, heartFlutter=怦然心动, ganshang=感伤}
+
+【规则】
+- 值必须是已有 stateDefs 的 camelCase id
+- 键 2–4 字，不重复
+- 输出单个 JSON 对象
+
+【空白模板】
+{
+  "中文标签": "camelCaseStateId"
+}
+
+【示例】
+{ "羞赧": "awkward", "心动": "heartFlutter", "感伤": "ganshang" }
+
+【输出】
+单个 JSON 对象，不要 markdown

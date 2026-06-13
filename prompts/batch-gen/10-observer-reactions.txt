@@ -1,0 +1,44 @@
+生成大观园游戏「旁观反应」JSON 数组。
+
+【任务】
+生成 {count} 条 observerReactions，角色从红楼众中选择，场景多样。
+
+【每条须含】
+observerCharId、triggerSignal、reactionType、bubbleTexts（2–3 条）；
+send_bubble 用 reactionParams.bubbleStyle；
+force_interaction 填 interactionTemplateId（402 安慰、603 斥责等）；
+status_gained 填 triggerStatus（camelCase）。
+
+【创意方向】
+- 黛玉见宝玉与他人传情 → thought 气泡
+- 平儿见凤姐争执 → mediate 式 speech
+- 贾母见孙辈嬉闹 → 慈祥 speech
+- 小厮见逾矩 → scene_enter_unauthorized
+
+【规则】
+- bubbleTexts ≤30 字；可用 {observed.name} {target.name}
+- priority 1–10，cooldownGameMin 30–2880
+- id 从 {startId} 递增，勿与现有 1–32 重复
+
+【角色 id】
+baoyu, daiyu, baochai, xiren, qingwen, xifeng, jiamu, wangfuren, jiazheng, xueyan, zijuan, sheyue
+
+【空白模板】
+{
+  "id": 0,
+  "name": "",
+  "priority": 5,
+  "cooldownGameMin": 60,
+  "observerCharId": "",
+  "triggerSignal": "interaction",
+  "triggerInteractionCategory": "",
+  "reactionType": "send_bubble",
+  "reactionParams": { "bubbleStyle": "thought" },
+  "bubbleTexts": ["", ""]
+}
+
+【triggerSignal】interaction|status_gained|action_tag|scene_enter|scene_enter_unauthorized|absent_near_baoyu
+【reactionType】send_bubble|force_interaction|issue_quest|add_status|boost_action|take_over_task
+
+【输出】
+纯 JSON 数组

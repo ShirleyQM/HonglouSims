@@ -1,0 +1,28 @@
+生成大观园游戏「记忆浮现」JSON 数组。
+
+【任务】
+为 memoryTag：{tags 列表} 各写 1–2 条 memorySurfaces。
+
+【规则】
+- template 必须包含 {memory_title}，建议含 {other_name} 或 {scene}
+- walkEffect：温情/传情用 slow，创伤用 pause，平淡用 none
+- probability 0.35–0.7
+- 语气怅惘含蓄，≤45 字
+
+【空白模板】
+{
+  "id": 0,
+  "memoryTag": "",
+  "probability": 0.5,
+  "style": "thought",
+  "icon": "💭",
+  "template": "",
+  "walkEffect": "slow"
+}
+
+【memoryTag 常用】温情|创伤|传情|争执|（空字符串=任意记忆）
+
+【占位符】{name} {other_name} {scene} {memory_title} {time_ago}
+
+【输出】
+纯 JSON 数组

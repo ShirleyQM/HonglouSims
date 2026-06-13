@@ -1,0 +1,34 @@
+生成大观园游戏「情绪传染」JSON 数组。
+
+【任务】
+生成 {count} 条 emotionContagion，覆盖组合：
+欢笑 joyful→elated、感伤 ganshang→ganshang、暴怒 baonu→angry、
+心动 heartFlutter→melancholy、欢畅 joyful→elated。
+
+【规则】
+- bubbleTexts 2–3 条，≤30 字
+- traitModifiers 用 letian/haoke/qinggao/duoqing/kebo/zhongcheng，值 -0.25~0.25
+- baseProbability 0.15–0.4；负向传染 relationMin 可更高
+- sourceStatusId / resultStatusId 用 camelCase（joyful、ganshang），不是 S024
+- 每条 id 递增
+
+【空白模板】
+{
+  "id": 0,
+  "name": "",
+  "sourceStatusId": "",
+  "resultStatusId": "",
+  "baseProbability": 0.3,
+  "durationPercent": 50,
+  "maxDistance": 20,
+  "distanceDecay": 0.05,
+  "relationMin": -50,
+  "relationFactor": 0.003,
+  "maxContagionChain": 3,
+  "traitModifiers": {},
+  "showBubble": true,
+  "bubbleTexts": ["", ""]
+}
+
+【输出】
+纯 JSON 数组
