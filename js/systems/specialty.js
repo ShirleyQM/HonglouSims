@@ -3,6 +3,9 @@ const CharSpecialtySystem = (() => {
 
   function cfg() { return CONFIG.charSpecialtyConfig || DEFAULT_CONFIG.charSpecialtyConfig || {}; }
   function profile(charId) { return cfg().profiles?.[charId]; }
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+  }
 
   function charsInScene(sceneId) {
     return CHARS.filter(c => c.sceneId === sceneId);
@@ -16,6 +19,18 @@ const CharSpecialtySystem = (() => {
 
   function traitModTable() {
     return { ...TRAIT_MODS, ...(cfg().traitModifiers || {}) };
+  }
+
+  function specialtyMetaKey(charId, specId) {
+    const meta = cfg().specialtyMetadata || {};
+    const ownerKey = `${charId}.${specId}`;
+    if (meta[ownerKey]) return ownerKey;
+    return specId;
+  }
+
+  function specialtyMeta(charId, spec) {
+    const meta = cfg().specialtyMetadata || {};
+    return meta[specialtyMetaKey(charId, spec?.id)] || spec || {};
   }
 
   function getDisplayTraits(c) {
@@ -33,7 +48,8 @@ const CharSpecialtySystem = (() => {
   }
 
   function evalCheck(c, checkId) {
-    if (!checkId || checkId === 'always') return false;
+    if (!checkId) return false;
+    if (checkId === 'always') return true;
     if (checkId.startsWith('state:')) return c.activeStates.some(s => s.id === checkId.slice(6));
     const p = profile(c.id);
     const scene = c.sceneId;
@@ -59,6 +75,12 @@ const CharSpecialtySystem = (() => {
     if (checkId === 'xirenAway') {
       return c.id === 'sheyue' && !others.some(x => x.id === 'xiren') && charsInScene(scene).some(x => x.id === 'baoyu');
     }
+    if (checkId === 'avoid_wife') {
+      return c.id === 'jialian' && others.some(x => x.id === 'xifeng');
+    }
+    if (checkId === 'cling_feng') {
+      return others.some(x => x.id === 'xifeng');
+    }
     if (checkId === 'daiyuDistress') {
       const d = getChar('daiyu');
       if (!d || d.sceneId !== scene) return false;
@@ -72,8 +94,14 @@ const CharSpecialtySystem = (() => {
     if (!p?.specialties?.length) return '';
     const traitTags = getDisplayTraits(c).map(t => `<span class="tag specialty">${t}</span>`).join('');
     const specTags = p.specialties.map(s => {
+      const meta = specialtyMeta(c.id, s);
       const on = evalCheck(c, p.checks?.[s.id]);
-      return `<span class="tag specialty${on ? ' on' : ''}" title="${s.desc}（${(s.systems || []).join('·')}）">${s.name}</span>`;
+      const label = meta.label || s.name || s.id;
+      const desc = meta.description || s.desc || '';
+      const examples = (meta.effectExamples || []).join('；');
+      const systems = (meta.systems || s.systems || []).join('·');
+      const title = [desc, examples, systems ? `系统：${systems}` : ''].filter(Boolean).join('｜');
+      return `<span class="tag specialty${on ? ' on' : ''}" title="${esc(title)}">${esc(label)}</span>`;
     }).join('');
     return traitTags + specTags;
   }
@@ -84,7 +112,9 @@ const CharSpecialtySystem = (() => {
     let f = MultiInteractSystem.getActionBoost(c, cand, tags);
     if (p.femaleSocialBoost && cand.kind === 'interaction') {
       const tgt = getChar(cand.targetCharId);
-      if (isFemale(tgt) && ['chuanqing', 'xujiu'].includes(cand.category)) f *= p.femaleSocialBoost;
+      if (isFemale(tgt) && cand.category !== 'zhengchi') {
+        f *= Math.min(1.15, Math.max(1, p.femaleSocialBoost));
+      }
     }
     if (p.aloneDeskBoost && tags.includes('desk') && charsInScene(c.sceneId).filter(x => x.id !== c.id).length === 0)
       f *= p.aloneDeskBoost;
@@ -98,7 +128,15 @@ const CharSpecialtySystem = (() => {
       if (tags.includes('solitude') || tags.includes('bath')) f *= 1.5;
     }
     if (evalCheck(c, 'afternoon') && ['tiaoxiao', 'xujiu', 'outdoor'].some(t => tags.includes(t))) f *= 1.4;
-    if (evalCheck(c, 'morning') && (tags.includes('solitude') || tags.includes('lundao'))) f *= 1.3;
+    if (evalCheck(c, 'morning') && (tags.includes('solitude') || tags.includes('lundao') || tags.includes('desk'))) f *= 1.3;
+    if (evalCheck(c, 'sceneConflict') && cand.category === 'zhengchi' && p.specialties?.some(s => s.id === 'sharp_tongue')) f *= 1.8;
+    if (evalCheck(c, 'sceneCrowd3') && ['tiaoxiao', 'xujiu', 'outdoor'].some(t => tags.includes(t))) f *= 1.5;
+    if (evalCheck(c, 'cling_feng') && cand.kind === 'interaction' && cand.targetCharId === 'xifeng') f *= 2.2;
+    if (evalCheck(c, 'avoid_wife') && cand.kind === 'interaction') f *= 0.25;
+    if (evalCheck(c, 'avoid_wife') && (tags.includes('outdoor') || tags.includes('行'))) f *= 1.6;
+    if (p.specialties?.some(s => s.id === 'banquet') && (tags.includes('wine') || tags.includes('xujiu') || tags.includes('tiaoxiao'))) f *= 1.5;
+    if (p.specialties?.some(s => s.id === 'wander') && (tags.includes('wine') || tags.includes('outdoor') || tags.includes('fun'))) f *= 1.4;
+    if (p.specialties?.some(s => s.id === 'errand') && cand.kind === 'wander') f *= 1.3;
     return f;
   }
 
@@ -107,13 +145,19 @@ const CharSpecialtySystem = (() => {
       const p = profile(c.id);
       for (const amb of p?.ambient || []) {
         if (amb.type === 'crowdBuff' && charsInScene(c.sceneId).length >= (amb.minChars || 4)) {
-          if (!c.activeStates.some(s => s.id === amb.stateId)) applyState(c, amb.stateId);
+          if (!c.activeStates.some(s => s.id === amb.stateId)) CharacterEffectSystem.apply({
+            type: 'state', charId: c.id, stateId: amb.stateId,
+          }, { source: `specialty:${c.id}:ambient`, reason: '人物专长环境效果' });
         }
         if (amb.type === 'sceneState' && c.sceneId === amb.sceneId && !c.activeStates.some(s => s.id === amb.stateId))
-          applyState(c, amb.stateId);
+          CharacterEffectSystem.apply({
+            type: 'state', charId: c.id, stateId: amb.stateId,
+          }, { source: `specialty:${c.id}:scene`, reason: '人物专长场景效果' });
       }
       if (c.id === 'daiyu' && evalCheck(c, 'eveningOutdoor') && !c.activeStates.some(s => s.id === 'ganshang') && Math.random() < 0.08)
-        applyState(c, 'ganshang');
+        CharacterEffectSystem.apply({
+          type: 'state', charId: c.id, stateId: 'ganshang',
+        }, { source: 'specialty:daiyu:wind-tear', reason: '临风洒泪' });
     }
   }
 
@@ -136,6 +180,7 @@ const CharSpecialtySystem = (() => {
   return {
     init, profile, renderHudSpecialties, calcFactor, tickAmbient,
     applyNeedMods, traitModTable, getDisplayTraits, evalCheck,
+    specialtyMeta, specialtyMetaKey,
   };
 })();
 window.CharSpecialtySystem = CharSpecialtySystem;
