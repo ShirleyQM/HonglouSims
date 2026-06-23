@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大观园 · 3D 沙盘预览</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #15140f; color: #eadfca; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+    #stage { position: fixed; inset: 0; }
+    #hud {
+      position: fixed; left: 16px; top: 16px; width: 280px; max-width: calc(100vw - 32px);
+      background: rgba(28, 23, 18, .82); border: 1px solid rgba(214, 178, 116, .35);
+      box-shadow: 0 18px 48px rgba(0,0,0,.35); padding: 14px; backdrop-filter: blur(10px);
+    }
+    #hud h1 { margin: 0 0 8px; font-size: 18px; line-height: 1.25; font-weight: 700; color: #f3d18f; }
+    #hud p { margin: 0 0 12px; font-size: 12px; line-height: 1.6; color: #d8c9ad; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .metric { border: 1px solid rgba(214,178,116,.24); background: rgba(255,255,255,.05); padding: 8px; }
+    .metric b { display: block; font-size: 18px; color: #fff4d6; }
+    .metric span { font-size: 11px; color: #bcae91; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+    button {
+      appearance: none; border: 1px solid rgba(214,178,116,.38); background: rgba(112, 72, 42, .7);
+      color: #fff0d0; padding: 7px 10px; cursor: pointer; font: inherit; font-size: 12px;
+    }
+    button:hover { background: rgba(146, 92, 48, .9); }
+    #hint { position: fixed; right: 16px; bottom: 14px; font-size: 12px; color: rgba(239,226,198,.78); }
+    #error {
+      display: none; position: fixed; inset: 0; padding: 24px; background: #19130f; color: #ffd4bf;
+      white-space: pre-wrap; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.165.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.165.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="stage"></div>
+  <aside id="hud">
+    <h1>大观园 · 3D 沙盘预览</h1>
+    <p>读取现有配置生成 3D 表现层：房间、游廊、家具和人物都来自当前游戏数据。</p>
+    <div class="metrics">
+      <div class="metric"><b id="m-scenes">-</b><span>场景</span></div>
+      <div class="metric"><b id="m-furn">-</b><span>家具</span></div>
+      <div class="metric"><b id="m-chars">-</b><span>人物</span></div>
+    </div>
+    <div class="toolbar">
+      <button id="btn-top">俯视</button>
+      <button id="btn-tilt">斜俯视</button>
+      <button id="btn-focus">聚焦潇湘馆</button>
+    </div>
+  </aside>
+  <div id="hint">拖拽旋转 · 滚轮缩放 · 右键平移</div>
+  <pre id="error"></pre>
+
+  <script src="js/config.js?v=20260621-2"></script>
+  <script type="module" src="js/three-preview.js?v=20260621-1"></script>
+</body>
+</html>

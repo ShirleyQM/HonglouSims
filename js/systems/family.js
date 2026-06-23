@@ -132,8 +132,14 @@ const FamilySystem = (() => {
     const sc = getScene(f.residenceSceneId);
     if (!sc) return;
     const px = gridToPixel(sc.originCol + sc.cols / 2, sc.originRow + sc.rows / 2);
-    camX = Math.max(0, Math.min(px.x - VIEW_W / 2, WORLD_COLS * CELL - VIEW_W));
-    camY = Math.max(0, Math.min(px.y - VIEW_H / 2, WORLD_ROWS * CELL - VIEW_H));
+    const target = typeof clampCameraTarget === 'function'
+      ? clampCameraTarget(px.x - VIEW_W / 2, px.y - VIEW_H / 2)
+      : {
+        x: Math.max(0, Math.min(px.x - VIEW_W / 2, WORLD_COLS * CELL - VIEW_W)),
+        y: Math.max(0, Math.min(px.y - VIEW_H / 2, WORLD_ROWS * CELL - VIEW_H)),
+      };
+    camX = target.x;
+    camY = target.y;
   }
 
   function switchFamily(newFamilyId) {
@@ -156,21 +162,39 @@ const FamilySystem = (() => {
   function getFund(familyId) { return funds[familyId] ?? getFamily(familyId)?.fund ?? 0; }
 
   function depositFund(familyId, amount, reason) {
-    if (!amount) return;
+    amount = Math.max(0, Math.round(amount || 0));
+    if (!amount) return 0;
     funds[familyId] = getFund(familyId) + amount;
     const row = { amount, reason: reason || '存入', day: gameDay, type: 'in' };
     (fundLog[familyId] = fundLog[familyId] || []).unshift(row);
     if (fundLog[familyId].length > 20) fundLog[familyId].pop();
     EventBus.emit('family:fund_changed', { familyId, amount, reason, balance: funds[familyId] });
+    uiDirty = true;
+    return amount;
   }
 
   function withdrawFund(familyId, amount, reason) {
-    if (!amount) return;
-    funds[familyId] = Math.max(0, getFund(familyId) - amount);
-    const row = { amount: -amount, reason: reason || '支出', day: gameDay, type: 'out' };
+    amount = Math.max(0, Math.round(amount || 0));
+    const actual = Math.min(getFund(familyId), amount);
+    if (!actual) return 0;
+    funds[familyId] = getFund(familyId) - actual;
+    const row = { amount: -actual, reason: reason || '支出', day: gameDay, type: 'out' };
     (fundLog[familyId] = fundLog[familyId] || []).unshift(row);
     if (fundLog[familyId].length > 20) fundLog[familyId].pop();
-    EventBus.emit('family:fund_changed', { familyId, amount: -amount, reason, balance: funds[familyId] });
+    EventBus.emit('family:fund_changed', { familyId, amount: -actual, reason, balance: funds[familyId] });
+    uiDirty = true;
+    return actual;
+  }
+
+  function transferFund(fromFamilyId, toFamilyId, amount, reason) {
+    amount = Math.max(0, Math.round(amount || 0));
+    if (!amount || fromFamilyId === toFamilyId || getFund(fromFamilyId) < amount) return false;
+    withdrawFund(fromFamilyId, amount, reason || '转出');
+    depositFund(toFamilyId, amount, reason || '转入');
+    EventBus.emit('family:fund_transferred', {
+      fromFamilyId, toFamilyId, amount, reason: reason || '家庭转账',
+    });
+    return true;
   }
 
   function getRecentTransactions(familyId, count) {
@@ -199,26 +223,50 @@ const FamilySystem = (() => {
     for (const ef of ev.effects || []) {
       if (ef.type === 'needAll') {
         ids.forEach(id => {
-          const c = getChar(id);
-          if (!c) return;
-          const cf = calcNeedCoeffs(c);
-          c.needs[ef.key] = Math.max(cf[ef.key].min, Math.min(cf[ef.key].max, c.needs[ef.key] + (ef.delta || 0)));
+          CharacterEffectSystem.apply({
+            type: 'need', charId: id, key: ef.key, delta: ef.delta || 0,
+          }, {
+            source: `family:${ev.id}`,
+            reason: ev.name,
+            familyId: family.id,
+          });
         });
       }
       if (ef.type === 'relationAll') {
         for (let i = 0; i < ids.length; i++)
           for (let j = i + 1; j < ids.length; j++)
             if (hasConfiguredRelation(ids[i], ids[j]) || getRelationValue(ids[i], ids[j]) !== 0)
-              changeRelation(ids[i], ids[j], ef.delta || 0);
+              CharacterEffectSystem.apply({
+                type: 'relation', idA: ids[i], idB: ids[j], delta: ef.delta || 0,
+              }, {
+                source: `family:${ev.id}`,
+                reason: ev.name,
+                familyId: family.id,
+              });
       }
       if (ef.type === 'relationConflict') {
         for (let i = 0; i < ids.length; i++)
           for (let j = i + 1; j < ids.length; j++)
-            if (hasTraitConflict(ids[i], ids[j])) { changeRelation(ids[i], ids[j], ef.delta || 0); break; }
+            if (hasTraitConflict(ids[i], ids[j])) {
+              CharacterEffectSystem.apply({
+                type: 'relation', idA: ids[i], idB: ids[j], delta: ef.delta || 0,
+              }, {
+                source: `family:${ev.id}`,
+                reason: ev.name,
+                familyId: family.id,
+              });
+              break;
+            }
       }
       if (ef.type === 'fund') {
         const amt = ef.min + Math.floor(Math.random() * ((ef.max || ef.min) - ef.min + 1));
-        depositFund(family.id, amt, ev.name);
+        CharacterEffectSystem.apply({
+          type: 'familyFund', familyId: family.id, delta: amt,
+        }, {
+          source: `family:${ev.id}`,
+          reason: ev.name,
+          familyId: family.id,
+        });
       }
     }
     const bubble = (ev.bubbleTexts || [])[0];
@@ -331,7 +379,7 @@ const FamilySystem = (() => {
     getCurrentMemberIds: () => getMemberIds(currentFamilyId),
     getFirstMemberCharId,
     getCharRole, getHeadCharId,
-    findFamilyOfChar, getRelationMultiplier, getFund, depositFund, withdrawFund,
+    findFamilyOfChar, sameFamily, getRelationMultiplier, getFund, depositFund, withdrawFund, transferFund,
     getRecentTransactions, getReputation, getSocialBonusForFamily, serialize, apply, reloadConfig: initFunds,
   };
 })();

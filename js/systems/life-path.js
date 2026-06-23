@@ -30,6 +30,7 @@ const LifePathSystem = (() => {
     if (!c.storyNodes) c.storyNodes = {};
     if (!c.storyStreaks) c.storyStreaks = {};
     MoneySystem?.initChar?.(c);
+    ReputationDomainSystem?.initChar?.(c);
   }
 
   function initAllChars() {
@@ -40,8 +41,9 @@ const LifePathSystem = (() => {
     return Math.max(0, Math.min(st().maxReputation ?? 1000, Math.round(v)));
   }
 
-  function getReputation(c) {
+  function getReputation(c, domain) {
     initChar(c);
+    if (domain && ReputationDomainSystem?.get) return ReputationDomainSystem.get(c, domain);
     return c.reputation ?? 0;
   }
 
@@ -57,30 +59,43 @@ const LifePathSystem = (() => {
     return getReputationTier(getReputation(c));
   }
 
-  function changeReputation(c, delta, reason) {
+  function changeReputation(c, delta, reason, opts = {}) {
     if (!c || !delta) return 0;
     initChar(c);
     const old = c.reputation;
-    c.reputation = clampRep(old + delta);
+    const domains = ReputationDomainSystem?.changeMany
+      ? ReputationDomainSystem.changeMany(c, opts.domains || opts.domain || null, delta, reason, {
+        source: opts.source || 'lifePath',
+        rewardKey: opts.rewardKey || '',
+        pathId: opts.pathId || c.lifePath || '',
+        stageId: opts.stageId || c.currentStage || '',
+      })
+      : null;
+    if (!domains) c.reputation = clampRep(old + delta);
+    else c.reputation = clampRep(c.reputation ?? old);
     const actual = c.reputation - old;
-    if (actual !== 0) {
+    const domainActual = domains
+      ? Object.values(domains).reduce((sum, v) => sum + Math.abs(v || 0), 0)
+      : Math.abs(actual);
+    if (actual !== 0 || domainActual !== 0) {
       const tier = getReputationTier(c.reputation);
-      log(`声望：${c.short} ${old}→${c.reputation}（${tier.title}）${reason ? ' · ' + reason : ''}`, 'social');
+      if (actual !== 0) log(`声望：${c.short} ${old}→${c.reputation}（${tier.title}）${reason ? ' · ' + reason : ''}`, 'social');
       EventBus.emit('reputation:change', {
         charId: c.id, old, new: c.reputation, delta: actual, reason, tier: tier.title,
+        domains: domains || { general: actual },
       });
       tryPromote(c);
       uiDirty = true;
     }
-    return actual;
+    return actual || domainActual;
   }
 
-  function applyReputationDelta(c, key) {
+  function applyReputationDelta(c, key, opts = {}) {
     const spec = st().reputationDeltas?.[key];
     if (spec == null) return 0;
-    if (typeof spec === 'number') return changeReputation(c, spec, key);
+    if (typeof spec === 'number') return changeReputation(c, spec, key, { ...opts, rewardKey: key });
     const delta = spec.min + Math.floor(Math.random() * (spec.max - spec.min + 1));
-    return changeReputation(c, delta, key);
+    return changeReputation(c, delta, key, { ...opts, rewardKey: key });
   }
 
   /** 路径阶段覆盖的 SocialRank；无路径时返回配置原值 */
@@ -165,6 +180,7 @@ const LifePathSystem = (() => {
     c._baseSocialRank = c._baseSocialRank ?? getCharDefRank(c.id);
     c.lifePath = pathId;
     c.currentStage = firstStage;
+    ReputationDomainSystem?.ensurePathDomains?.(c);
     pushHistory(c, firstStage);
 
     for (const sk of path.defaultSkills || []) {
@@ -196,7 +212,7 @@ const LifePathSystem = (() => {
     c.currentStage = null;
 
     if (!opts.silent && penalty) {
-      changeReputation(c, penalty, '半途而废');
+      changeReputation(c, penalty, '半途而废', { rewardKey: 'quitPath', source: 'quitPath' });
     }
 
     if (!opts.silent) {
@@ -216,9 +232,10 @@ const LifePathSystem = (() => {
     if (!stage) return { ok: false, reason: '阶段无效', missing: [] };
 
     const missing = [];
-    const rep = getReputation(c);
+    const repDomain = stage.requiredReputationDomain || stage.reputationDomain || null;
+    const rep = getReputation(c, repDomain);
     if (stage.requiredReputation != null && rep < stage.requiredReputation) {
-      missing.push({ type: 'reputation', need: stage.requiredReputation, have: rep });
+      missing.push({ type: 'reputation', need: stage.requiredReputation, have: rep, domain: repDomain });
     }
 
     for (const [sk, lv] of Object.entries(stage.requiredSkills || {})) {
@@ -246,7 +263,10 @@ const LifePathSystem = (() => {
 
       if (missing.length) {
       const hint = missing.map(m => {
-        if (m.type === 'reputation') return `声望≥${m.need}`;
+        if (m.type === 'reputation') {
+          const label = m.domain && ReputationDomainSystem?.domainLabel ? ReputationDomainSystem.domainLabel(m.domain) : '声望';
+          return `${label}≥${m.need}`;
+        }
         if (m.type === 'skill') return `${m.name}≥${m.need}`;
         if (m.type === 'relation') return `与${m.name}情分≥${m.need}`;
         if (m.type === 'storyNode') return `须完成「${m.name}」`;
@@ -265,6 +285,7 @@ const LifePathSystem = (() => {
 
     const oldStage = c.currentStage;
     c.currentStage = stageId;
+    ReputationDomainSystem?.ensurePathDomains?.(c);
     pushHistory(c, stageId);
 
     log(`${c.short}晋升「${stage.title}」！`, 'social');
@@ -335,7 +356,12 @@ const LifePathSystem = (() => {
           const target = rew.charId ? getChar(rew.charId) : c;
           if (target && typeof applyState === 'function') applyState(target, rew.stateId);
         } else if (rew.type === 'reputation') {
-          changeReputation(c, rew.delta, nodeId);
+          changeReputation(c, rew.delta, nodeId, {
+            domain: rew.domain,
+            domains: rew.domains,
+            rewardKey: 'storyNode',
+            source: nodeId,
+          });
         } else if (rew.type === 'axis') {
           if (typeof changeRelationAxis === 'function') changeRelationAxis(c.id, rew.targetId, rew.axis, rew.delta);
         } else if (rew.type === 'skill_xp') {
@@ -468,6 +494,7 @@ const LifePathSystem = (() => {
       lifePath: c.lifePath ?? null,
       currentStage: c.currentStage ?? null,
       reputation: c.reputation ?? 0,
+      ...(ReputationDomainSystem?.serializeChar?.(c) || {}),
       professionHistory: (c.professionHistory || []).slice(),
       _baseSocialRank: c._baseSocialRank,
       storyNodes: Object.assign({}, c.storyNodes || {}),
@@ -484,6 +511,7 @@ const LifePathSystem = (() => {
       c.lifePath = row.lifePath ?? null;
       c.currentStage = row.currentStage ?? null;
       c.reputation = row.reputation ?? 0;
+      ReputationDomainSystem?.applyChar?.(c, row);
       c.professionHistory = row.professionHistory || [];
       c._baseSocialRank = row._baseSocialRank ?? getCharDefRank(c.id);
       c.storyNodes = Object.assign({}, row.storyNodes || {});

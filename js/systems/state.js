@@ -15,6 +15,15 @@
 
 const MAX_ACTIVE_STATES = 6;
 
+function _isNeedIndicator(stateId) {
+  const category = CONFIG?.stateDefs?.[stateId]?.category;
+  return category === 'needBand' || category === 'needCombo';
+}
+
+function _ordinaryStateCount(c) {
+  return c.activeStates.filter(st => !_isNeedIndicator(st.id)).length;
+}
+
 // 游戏分钟/真实秒 比例（fallback 1.2 = 1440 game-min/day ÷ 1200 real-sec/day）
 function _gameMinPerSec() {
   return (typeof GAME_MINUTES_PER_REAL_SEC !== 'undefined') ? GAME_MINUTES_PER_REAL_SEC : 1.2;
@@ -44,9 +53,9 @@ function _removeConflicts(c, stateId) {
 
 // 容量超限时移除「剩余时间最短的非永久状态」
 function _evictIfFull(c) {
-  if (c.activeStates.length < MAX_ACTIVE_STATES) return null;
+  if (_ordinaryStateCount(c) < MAX_ACTIVE_STATES) return null;
   // 找出可驱逐的（非永久，即 remaining > 0 且有限）
-  const evictable = c.activeStates.filter(s => s.remaining > 0 && s.remaining < 999990);
+  const evictable = c.activeStates.filter(s => s.remaining > 0 && !_isNeedIndicator(s.id));
   if (!evictable.length) return null;
   evictable.sort((a, b) => a.remaining - b.remaining);
   const victim = evictable[0];
@@ -59,11 +68,20 @@ function applyState(c, stateId) {
   const sd = CONFIG?.stateDefs?.[stateId];
   if (!sd) return;
   if (!c.activeStates) c.activeStates = [];
+  const traitProbability = TraitEffectSystem?.stateApplyProbability?.(c, stateId) ?? 1;
+  const moodMultiplier = CoreNeedSystem?.negativeStateMultiplier?.(c, stateId) ?? 1;
+  const applyProbability = Math.min(1, traitProbability * moodMultiplier);
+  if (applyProbability < 1 && Math.random() > applyProbability) {
+    EventBus.emit('state:resisted', { charId: c.id, stateId, reason: 'trait' });
+    return;
+  }
 
   // 1. 已存在 → 刷新剩余时间
   const existing = c.activeStates.find(s => s.id === stateId);
   if (existing) {
-    if (sd.duration !== -1) existing.remaining = sd.duration;
+    if (sd.duration !== -1) {
+      existing.remaining = TraitEffectSystem?.modifyStateDuration?.(c, stateId, sd.duration) ?? sd.duration;
+    }
     EventBus.emit('state:refresh', { charId: c.id, stateId, stateName: sd.name, stateDef: sd });
     return;
   }
@@ -72,22 +90,26 @@ function applyState(c, stateId) {
   _removeConflicts(c, stateId);
 
   // 3. 容量检查：超 6 个则驱逐最短的非永久状态
-  while (c.activeStates.length >= MAX_ACTIVE_STATES) {
+  while (!_isNeedIndicator(stateId) && _ordinaryStateCount(c) >= MAX_ACTIVE_STATES) {
     const evicted = _evictIfFull(c);
     if (!evicted) break; // 全是永久状态，无法再加
   }
 
   // 仍超限 → 放弃（全是永久状态）
-  if (c.activeStates.length >= MAX_ACTIVE_STATES) {
+  if (!_isNeedIndicator(stateId) && _ordinaryStateCount(c) >= MAX_ACTIVE_STATES) {
     if (typeof log === 'function') log(`${c.short}状态已满(${MAX_ACTIVE_STATES})，无法获得「${sd.name}」`);
     return;
   }
 
   // 4. 添加
-  const remaining = sd.duration === -1 ? 999999 : sd.duration;
+  const remaining = sd.duration === -1
+    ? -1
+    : (TraitEffectSystem?.modifyStateDuration?.(c, stateId, sd.duration) ?? sd.duration);
   c.activeStates.push({ id: stateId, remaining });
-  if (typeof c.statusText !== 'undefined') c.statusText = sd.name;
-  if (typeof log === 'function') log(`${c.short}进入状态「${sd.name}」：${sd.desc}`);
+  if (!_isNeedIndicator(stateId)) {
+    if (typeof c.statusText !== 'undefined') c.statusText = sd.name;
+    if (typeof log === 'function') log(`${c.short}进入状态「${sd.name}」：${sd.desc}`);
+  }
   EventBus.emit('state:add', { charId: c.id, stateId, stateName: sd.name, stateDef: sd });
   if (typeof uiDirty !== 'undefined') uiDirty = true;
 }
@@ -97,8 +119,9 @@ function updateStates(c, realSecDt) {
   const gameDt = realSecDt * _gameMinPerSec();  // 真实秒 → 游戏分钟
   const before = c.activeStates.map(s => s.id);
   c.activeStates = c.activeStates.filter(st => {
-    if (st.remaining >= 999990) return true;  // 永久
-    st.remaining -= gameDt;
+    if (st.remaining === -1) return true;
+    const recovery = TraitEffectSystem?.stateRecoveryMultiplier?.(c, st.id) || 1;
+    st.remaining -= gameDt * recovery;
     return st.remaining > 0;
   });
   const after = c.activeStates.map(s => s.id);

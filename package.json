@@ -1,0 +1,21 @@
+{
+  "name": "dayuan-game",
+  "version": "1.0.0",
+  "private": true,
+  "description": "大观园 · 像素人生 — 本地/局域网/远程可访问的静态游戏服务",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node serve.mjs",
+    "start:local": "BIND_LOCAL=1 node serve.mjs",
+    "test:economy": "node scripts/test-economy.mjs",
+    "test:needs": "node scripts/test-need-adaptation.mjs",
+    "test:need-states": "node scripts/test-need-states.mjs",
+    "portraits": "python3 scripts/process_portraits.py",
+    "tunnel": "cloudflared tunnel --url http://127.0.0.1:${PORT:-8765}",
+    "docker:build": "docker build -t dayuan-game .",
+    "docker:run": "docker run --rm -p 8765:8765 dayuan-game"
+  }
+}

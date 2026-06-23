@@ -1,0 +1,11 @@
+services:
+  game:
+    build: .
+    ports:
+      - "8765:8765"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8765
+      # 若宿主机已运行 ollama serve，取消下行注释（Mac/Win 用 host.docker.internal）
+      # - OLLAMA_URL=http://host.docker.internal:11434
+    restart: unless-stopped

@@ -31,18 +31,19 @@ const MoneySystem = (() => {
   }
 
   function getFamilyFund(familyId) {
-    const fam = FamilySystem?.getFamily?.(familyId) || CONFIG.familyConfig?.families?.find(f => f.id === familyId);
-    return fam?.fund ?? 0;
+    return FamilySystem?.getFund?.(familyId) ?? 0;
   }
 
   function changeFamilyFund(familyId, delta, reason) {
-    const fam = CONFIG.familyConfig?.families?.find(f => f.id === familyId);
-    if (!fam || !delta) return 0;
-    const old = fam.fund ?? 0;
-    fam.fund = Math.max(0, Math.round(old + delta));
-    EventBus.emit('money:family', { familyId, delta, fund: fam.fund, reason });
-    uiDirty = true;
-    return fam.fund - old;
+    delta = Math.round(delta || 0);
+    if (!delta) return 0;
+    const changed = delta > 0
+      ? FamilySystem?.depositFund?.(familyId, delta, reason)
+      : -(FamilySystem?.withdrawFund?.(familyId, -delta, reason) || 0);
+    EventBus.emit('money:family', {
+      familyId, delta: changed || 0, fund: getFamilyFund(familyId), reason,
+    });
+    return changed || 0;
   }
 
   function setPathFlag(c, key, delta) {
@@ -77,7 +78,7 @@ const MoneySystem = (() => {
 
   function applyChar(c, row) {
     if (!c || !row) return;
-    c.money = row.money ?? 0;
+    c.money = row.money ?? cfg().defaultPersonal ?? 0;
     c.pathFlags = Object.assign({}, row.pathFlags || {});
     c.agents = Object.assign({}, row.agents || {});
   }

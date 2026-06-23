@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大观园 · AI 3D 表现层</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #15140f; color: #eadfca; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+    #stage3d { position: fixed; inset: 0; }
+    #game { display: none; }
+    #hud3d {
+      position: fixed; left: 16px; top: 16px; width: 316px; max-width: calc(100vw - 32px);
+      background: rgba(28, 23, 18, .84); border: 1px solid rgba(214, 178, 116, .35);
+      box-shadow: 0 18px 48px rgba(0,0,0,.38); padding: 14px; backdrop-filter: blur(10px);
+    }
+    #hud3d h1 { margin: 0 0 8px; font-size: 18px; line-height: 1.25; color: #f3d18f; }
+    #hud3d .meta { margin: 0 0 10px; font-size: 12px; line-height: 1.55; color: #d8c9ad; }
+    .row { display: grid; grid-template-columns: 74px 1fr; gap: 8px; font-size: 12px; margin: 5px 0; }
+    .row b { color: #f4d692; font-weight: 600; }
+    .row span { color: #fff0d0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .needs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 10px 0 12px; }
+    .need { border: 1px solid rgba(214,178,116,.24); background: rgba(255,255,255,.05); padding: 6px; }
+    .need b { display: block; font-size: 13px; color: #fff4d6; }
+    .need span { font-size: 10px; color: #bcae91; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    button {
+      appearance: none; border: 1px solid rgba(214,178,116,.38); background: rgba(112, 72, 42, .72);
+      color: #fff0d0; padding: 7px 10px; cursor: pointer; font: inherit; font-size: 12px;
+    }
+    button:hover { background: rgba(146, 92, 48, .9); }
+    #feed3d {
+      position: fixed; right: 16px; top: 16px; width: 330px; max-width: calc(100vw - 32px);
+      display: flex; flex-direction: column; gap: 6px; pointer-events: none;
+    }
+    .feed-item {
+      background: rgba(20, 17, 14, .72); border: 1px solid rgba(214,178,116,.22);
+      padding: 7px 9px; font-size: 12px; color: #eadfca;
+    }
+    #hint3d { position: fixed; right: 16px; bottom: 14px; font-size: 12px; color: rgba(239,226,198,.78); }
+    #err-overlay {
+      display: none; position: fixed; inset: 0; z-index: 20; padding: 24px; overflow: auto;
+      background: #19130f; color: #ffd4bf; white-space: pre-wrap;
+      font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.165.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.165.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="stage3d"></div>
+  <canvas id="game"></canvas>
+  <aside id="hud3d">
+    <h1>大观园 · AI 3D 表现层</h1>
+    <p class="meta">独立 3D 入口，复用现有 AI、任务、需求、关系、家具和寻路系统。</p>
+    <div class="row"><b>时辰</b><span id="hud-time">-</span></div>
+    <div class="row"><b>选中</b><span id="hud-char">-</span></div>
+    <div class="row"><b>状态</b><span id="hud-status">-</span></div>
+    <div class="row"><b>队列</b><span id="hud-queue">-</span></div>
+    <div class="needs" id="hud-needs"></div>
+    <div class="toolbar">
+      <button id="btn-3d-follow">跟随选中</button>
+      <button id="btn-3d-free">自由镜头</button>
+      <button id="btn-3d-xiaoxiang">潇湘馆</button>
+      <button id="btn-3d-pause">暂停</button>
+    </div>
+  </aside>
+  <div id="feed3d"></div>
+  <div id="hint3d">点击人物选择 · 点击地面让选中人物移动 · 拖拽旋转 · 滚轮缩放</div>
+  <pre id="err-overlay"></pre>
+
+  <script src="js/config.js?v=20260621-2"></script>
+  <script src="js/runtime.js"></script>
+  <script src="js/systems/trait-effects.js"></script>
+  <script src="js/systems/need-adaptation.js?v=20260615-2"></script>
+  <script src="js/systems/trait-behavior.js"></script>
+  <script src="js/systems/narrative.js?v=20260615-1"></script>
+  <script src="js/systems/interaction-llm.js?v=20260619-1"></script>
+  <script src="js/systems/family.js"></script>
+  <script src="js/systems/scene-access.js?v=20260617-2"></script>
+  <script src="js/systems/multi-interact.js"></script>
+  <script src="js/systems/specialty.js"></script>
+  <script src="js/systems/quest.js?v=20260621-2"></script>
+  <script src="js/systems/relation.js?v=20260619-5"></script>
+  <script src="js/systems/money.js"></script>
+  <script src="js/systems/economy.js"></script>
+  <script src="js/systems/reputation-domain.js"></script>
+  <script src="js/systems/life-path.js"></script>
+  <script src="js/systems/fortune.js"></script>
+  <script src="js/systems/identity-protocol.js"></script>
+  <script src="js/systems/servant-relations.js?v=20260616-1"></script>
+  <script src="js/systems/interaction-score.js?v=20260619-1"></script>
+  <script src="js/systems/interaction-social.js?v=20260619-2"></script>
+  <script src="js/systems/quest-issue.js"></script>
+  <script src="js/systems/state.js"></script>
+  <script src="js/systems/state-defs.js?v=20260621-1"></script>
+  <script src="js/systems/core-needs.js"></script>
+  <script src="js/systems/need-state.js?v=20260616-1"></script>
+  <script src="js/systems/health.js"></script>
+  <script src="js/systems/behavior-daily-stats.js"></script>
+  <script src="js/systems/dream-progress.js"></script>
+  <script src="js/systems/dream-condition.js"></script>
+  <script src="js/systems/ai-candidate-provider.js"></script>
+  <script src="js/ai.js?v=20260621-1"></script>
+  <script src="js/systems/ai-homeward.js"></script>
+  <script src="js/systems/ai-drama.js"></script>
+  <script src="js/systems/behavior-telemetry.js?v=20260617-2"></script>
+  <script src="js/systems/furniture-reaction.js?v=20260617-2"></script>
+  <script src="js/world.js?v=20260617-1"></script>
+  <script src="js/action-queue.js?v=20260620-1"></script>
+  <script src="js/assets.js?v=20260618-2"></script>
+  <script src="js/systems/character-effects.js"></script>
+  <script src="js/systems/character-logic.js"></script>
+  <script src="js/main-3d.js?v=20260621-1"></script>
+</body>
+</html>

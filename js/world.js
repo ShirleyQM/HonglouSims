@@ -177,21 +177,28 @@ function startPathToFurnitureStand(c, inst, forWait, onArrive) {
     if (!slot) return false;
 
     const arrived = () => {
-      if (charAtCell(slot.col, slot.row, [c.id])) {
+      if (!CHAR_PASS_THROUGH && isCellOccupiedByAny(slot.col, slot.row, [c.id])) {
         releaseFurnitureStandSlot(c, inst.instanceId);
-        if (attempt < 4 && tryGo(attempt + 1)) return;
-        log(`${c.short}无法找到空闲站位。`);
-        return;
+        if (attempt < 4) return tryGo(attempt + 1);
+        failQueueItem(c, '无法找到空闲站位');
+        return false;
+      }
+      const occ = getFurnitureSlotOccupancy(inst, c.id);
+      if (occ.has(`${slot.col},${slot.row}`)) {
+        releaseFurnitureStandSlot(c, inst.instanceId);
+        if (attempt < 4) return tryGo(attempt + 1);
+        failQueueItem(c, '无法占位');
+        return false;
       }
       syncCharPixel(c);
       onArrive();
+      return true;
     };
 
     if (Math.round(c.gridCol) === slot.col && Math.round(c.gridRow) === slot.row) {
-      arrived();
-      return true;
+      return arrived() !== false;
     }
-    const ok = startPathTo(c, slot.col, slot.row, arrived, { excludeCharIds: [c.id] });
+    const ok = startPathTo(c, slot.col, slot.row, () => { arrived(); }, { excludeCharIds: [c.id] });
     if (!ok) releaseFurnitureStandSlot(c, inst.instanceId);
     return ok;
   };
@@ -202,6 +209,9 @@ function getGroundSpeed(col, row) {
   const g = WORLD[col]?.[row]?.ground || 'stone';
   return CONFIG.groundTypes[g]?.speed ?? 1;
 }
+
+/** 人物移动是否互相挡路；false = 可穿过彼此 */
+const CHAR_PASS_THROUGH = true;
 
 /** 静止角色才挡路；行走/赶路中的角色可被穿行 */
 function isCharStationary(c) {
@@ -228,6 +238,7 @@ function charAtCell(col, row, excludeIds = [], opts = {}) {
 }
 
 function isCellOccupiedByOther(col, row, selfId, alsoExclude = []) {
+  if (CHAR_PASS_THROUGH) return null;
   return charAtCell(col, row, [selfId, ...alsoExclude]);
 }
 
@@ -236,6 +247,7 @@ function isCellOccupiedByAny(col, row, selfId, alsoExclude = []) {
 }
 
 function getCharOccupancy(excludeIds = [], opts = {}) {
+  if (CHAR_PASS_THROUGH && opts.blockMoving !== false) return new Set();
   const blockMoving = opts.blockMoving !== false;
   const occ = new Set();
   const ex = new Set(excludeIds);
@@ -251,7 +263,7 @@ function astar(sCol, sRow, eCol, eRow, opts = {}) {
   if (!WORLD[eCol]?.[eRow]?.walkable) return null;
   const key = (c, r) => c + ',' + r;
   const h = (c, r) => Math.abs(c - eCol) + Math.abs(r - eRow);
-  const blockChars = opts.blockChars !== false;
+  const blockChars = CHAR_PASS_THROUGH ? false : (opts.blockChars !== false);
   const occupancy = blockChars && CHARS?.length
     ? getCharOccupancy(opts.excludeCharIds || [], { blockMoving: opts.blockMoving !== false })
     : null;
@@ -348,22 +360,39 @@ function getEntryCell(inst) {
 
 function canUseFurniture(c, inst, urgentNeedKey) {
   const tpl = getTemplate(inst.templateId);
+  const action = urgentNeedKey && typeof urgentNeedKey === 'object' ? urgentNeedKey : null;
+  const effective = action ? getFurnitureActionRuntime(tpl, action) : tpl;
+  const urgentKey = action ? null : urgentNeedKey;
+  if (c.sceneId !== inst.sceneId) {
+    const access = SceneAccessSystem?.canEnterScene?.(c, inst.sceneId, { noFollow: true });
+    if (!(access === true || access?.ok === true)) {
+      return `${c.short}无法进入${getScene(inst.sceneId)?.name || '该处'}`;
+    }
+  }
   const rt = FURN_RT[inst.instanceId];
-  if (rt.users.length >= tpl.maxUsers && !rt.users.includes(c.id)) return '已满';
+  const maxUsers = effective.maxUsers ?? tpl.maxUsers;
+  if (rt.users.length >= maxUsers && !rt.users.includes(c.id)) return '已满';
   const essential = isEssentialFurniture(tpl);
-  if (!essential && tpl.skill && !canUseSkill(c, tpl.skill)) return `需技能${CONFIG.skillDefs[tpl.skill]?.name}`;
-  const uk = urgentNeedKey || c.ai?.urgentNeed;
+  const skill = effective.skill || effective.skillReq?.skill;
+  const skillLevel = effective.skillLevel || effective.skillReq?.level;
+  if (skill && !canUseSkill(c, skill)) {
+    return getSkillBlockReason(c, skill) || `需技能${CONFIG.skillDefs[skill]?.name}`;
+  }
+  if (skill && skillLevel) {
+    const level = getSkillLevel(c, skill);
+    if (level < skillLevel) {
+      const name = CONFIG.skillDefs?.[skill]?.name || skill;
+      return `${name}等级不足，需 Lv.${skillLevel}`;
+    }
+  }
+  const economyCheck = EconomySystem?.canUseFurniture?.(c, tpl);
+  if (economyCheck !== true) return economyCheck;
+  const uk = urgentKey || c.ai?.urgentNeed;
   const urgentCats = uk ? (URGENT_FURN_CATEGORIES[uk] || []) : [];
   const helpsUrgent = uk && (
-    tpl.needRestores?.some(nr => nr.need === uk) ||
+    effective.needRestores?.some(nr => nr.need === uk) ||
     urgentCats.includes(tpl.category)
   );
-  const uc = tpl.useCondition;
-  if (uc && !helpsUrgent && !essential) {
-    const v = c.needs[uc.need];
-    if (uc.op === 'lt' && v >= uc.value) return `${getNeedDefs().find(n=>n.key===uc.need)?.label}未够低`;
-    if (uc.op === 'gt' && v <= uc.value) return '条件不满足';
-  }
   return true;
 }
 
@@ -390,14 +419,45 @@ function wakeFurnitureWaiters(instanceId) {
 function failQueueItem(c, reason) {
   const item = c.actionQueue[0];
   const failInst = item?.instanceId;
+  reason = c._lastActionBlockReason || reason || '行动受阻';
+  c._lastActionBlockReason = '';
   if (item?.type === 'furniture') releaseFurnitureStandSlot(c, item.instanceId);
   log(`${c.short}行动失败${item ? '「' + item.name + '」' : ''}：${reason}`);
+  showActionBlocked(c, reason, item?.type || 'action');
+  EventBus.emit('queue:failed', {
+    charId: c.id, itemType: item?.type, itemName: item?.name,
+    instanceId: item?.instanceId, actionId: item?.actionId,
+    sceneId: item?.sceneId || (item?.instanceId ? getInstance(item.instanceId)?.sceneId : 0),
+    candidateKey: item?.aiCandidateKey, reason,
+  });
   finishCurrentQueueItem(c, true);
   if (c.ai?.urgentNeed) scheduleUrgentRetry(c, failInst);
 }
 
+function getFurnitureActionRuntime(tpl, action) {
+  const act = action || null;
+  return {
+    ...tpl,
+    ...(act || {}),
+    name: act?.name || tpl.name,
+    category: act?.category || tpl.category,
+    needRestores: act?.needRestores || tpl.needRestores || [],
+    extraEffects: act?.effects || act?.extraEffects || tpl.extraEffects || [],
+    duration: act?.duration ?? tpl.duration,
+    maxUsers: act?.maxUsers ?? tpl.maxUsers,
+    skill: act?.skill ?? tpl.skill,
+    skillLevel: act?.skillLevel ?? tpl.skillLevel,
+    skillReq: act?.skillReq ?? tpl.skillReq,
+    stopWhenFull: act?.stopWhenFull ?? tpl.stopWhenFull,
+    targetNeedValue: act?.targetNeedValue ?? tpl.targetNeedValue,
+    minDurationAtTarget: act?.minDurationAtTarget ?? tpl.minDurationAtTarget,
+  };
+}
+
 function beginFurnitureUse(c, inst, item, onComplete) {
   const tpl = getTemplate(inst.templateId);
+  const action = item?.furnitureAction || null;
+  const effective = getFurnitureActionRuntime(tpl, action);
   const rt = FURN_RT[inst.instanceId];
   if (!rt.slots) rt.slots = {};
   if (!rt.slots[c.id]) pickFurnitureStandCell(inst, c, false);
@@ -410,12 +470,21 @@ function beginFurnitureUse(c, inst, item, onComplete) {
   c._waitingFurnId = 0;
   rt.users.push(c.id);
   c.usingInstanceId = inst.instanceId;
-  rt.remaining = tpl.duration;
-  c.action = { type: 'furniture', inst, tpl, phase: 'use', timer: tpl.duration, onComplete };
-  c.statusText = `使用${tpl.name}…`;
-  if (item) { item.phase = 'executing'; item.remaining = tpl.duration; }
+  const duration = NeedAdaptationSystem?.durationFor?.(c, effective, item) ?? effective.duration;
+  rt.remaining = duration;
+  c.action = {
+    type: 'furniture', inst, tpl: effective, baseTpl: tpl, furnitureAction: action, phase: 'use', timer: duration, onComplete,
+    needPlan: item?._needPlan || NeedAdaptationSystem?.prepareUse?.(c, effective, item)?.plan,
+    playerInitiated: !item?.aiGenerated,
+  };
+  c.statusText = action?.name ? `${action.name}…` : `使用${tpl.name}…`;
+  if (item) { item.phase = 'executing'; item.remaining = duration; }
   const sc = getScene(inst.sceneId);
-  log(`${c.short}在${sc?.name || ''}使用${tpl.name}（${tpl.duration}s）`);
+  log(`${c.short}在${sc?.name || ''}${action?.text ? action.text : '使用' + effective.name}（${duration.toFixed(1)}s）`);
+  EventBus.emit('furniture:use_started', {
+    charId: c.id, instanceId: inst.instanceId,
+    templateId: inst.templateId, category: effective.category, actionId: action?.id || 'default_use',
+  });
   uiDirty = true;
 }
 
@@ -425,6 +494,8 @@ function tryExecuteFurnitureQueue(c, item) {
   const tpl = getTemplate(inst.templateId);
   const pre = canUseFurniture(c, inst);
   if (pre !== true && pre !== '已满') { failQueueItem(c, pre); return; }
+  const prepared = NeedAdaptationSystem?.prepareUse?.(c, tpl, item);
+  if (prepared && !prepared.ok) { failQueueItem(c, prepared.reason); return; }
 
   const rt = FURN_RT[inst.instanceId];
   const full = rt.users.length >= tpl.maxUsers && !rt.users.includes(c.id);
@@ -459,53 +530,78 @@ function tryExecuteFurnitureQueue(c, item) {
   }
 }
 
-function updateQueueWait(c) {
+function updateQueueWait(c, dt = 0) {
   if (c.action) return;
   const item = c.actionQueue[0];
-  if (!item || item.type !== 'furniture' || item.phase !== 'waiting') return;
-  const inst = getInstance(item.instanceId);
-  if (!inst) return;
-  const tpl = getTemplate(inst.templateId);
+  if (!item || item.type !== 'furniture') return;
+  if (item.phase === 'waiting') {
+    c._queueStallAcc = 0;
+    const inst = getInstance(item.instanceId);
+    if (!inst) return;
+    const tpl = getTemplate(inst.templateId);
 
-  if (canUseFurniture(c, inst) !== true) {
-    if (!c._waitingFurnId) c._waitingFurnId = inst.instanceId;
-    const slot = pickFurnitureStandCell(inst, c, true);
-    if (slot) {
-      const atWait = Math.round(c.gridCol) === slot.col && Math.round(c.gridRow) === slot.row;
-      if (!atWait) startPathToFurnitureStand(c, inst, true, () => {});
+    if (canUseFurniture(c, inst) !== true) {
+      if (!c._waitingFurnId) c._waitingFurnId = inst.instanceId;
+      const slot = pickFurnitureStandCell(inst, c, true);
+      if (slot) {
+        const atWait = Math.round(c.gridCol) === slot.col && Math.round(c.gridRow) === slot.row;
+        if (!atWait) startPathToFurnitureStand(c, inst, true, () => {});
+      }
+      return;
     }
-    return;
-  }
 
-  const slot = pickFurnitureStandCell(inst, c, false);
-  if (!slot) return;
-  const atUse = Math.round(c.gridCol) === slot.col && Math.round(c.gridRow) === slot.row;
-  if (!atUse) {
-    startPathToFurnitureStand(c, inst, false, () => updateQueueWait(c));
+    const slot = pickFurnitureStandCell(inst, c, false);
+    if (!slot) return;
+    const atUse = Math.round(c.gridCol) === slot.col && Math.round(c.gridRow) === slot.row;
+    if (!atUse) {
+      startPathToFurnitureStand(c, inst, false, () => updateQueueWait(c));
+      return;
+    }
+    c._waitingFurnId = 0;
+    beginFurnitureUse(c, inst, item, () => finishCurrentQueueItem(c));
     return;
   }
-  c._waitingFurnId = 0;
-  beginFurnitureUse(c, inst, item, () => finishCurrentQueueItem(c));
+  // 队列已标记 moving 但未出发：隔一段时间重试（例如穿过人物后占位检测误拦）
+  if (item.phase === 'moving' && !c.path?.length) {
+    c._queueStallAcc = (c._queueStallAcc || 0) + dt;
+    if (c._queueStallAcc >= 0.5) {
+      c._queueStallAcc = 0;
+      tryExecuteFurnitureQueue(c, item);
+    }
+  } else {
+    c._queueStallAcc = 0;
+  }
 }
 
 function applyFurnEffects(c, tpl, timing) {
   for (const ef of tpl.extraEffects || []) {
-    if (ef.timing !== timing) continue;
-    if (ef.type === 'addState') applyState(c, ef.param);
-    if (ef.type === 'skillXp') log(`${c.short}「${CONFIG.skillDefs[ef.param]?.name}」经验+1`);
+    if ((ef.timing || 'end') !== timing) continue;
+    if (ef.type === 'need') CharacterEffectSystem.apply({
+      type: 'need', charId: c.id, key: ef.need || ef.key, delta: ef.delta || 0,
+    }, { source: `furniture:${tpl.category}`, reason: tpl.name });
+    if (ef.type === 'addState' || ef.type === 'state') CharacterEffectSystem.apply({
+      type: 'state', charId: c.id, stateId: ef.param || ef.stateId,
+    }, { source: `furniture:${tpl.category}`, reason: tpl.name });
+    if (ef.type === 'skillXp') {
+      CharacterEffectSystem.apply({
+        type: 'skillXp', charId: c.id, skill: ef.param || ef.skill, delta: ef.delta || 1,
+      }, { source: `furniture:${tpl.category}`, reason: tpl.name });
+      log(`${c.short}「${CONFIG.skillDefs[ef.param || ef.skill]?.name}」经验+${ef.delta || 1}`);
+    }
+    if (ef.type === 'log' && ef.text) log(ef.text.replace('{A}', c.short), ef.category || 'system');
   }
-}
-
-function needsFullFromFurn(c, tpl) {
-  const cf = calcNeedCoeffs(c);
-  return (tpl.needRestores || []).every(nr => c.needs[nr.need] >= cf[nr.need].max - 0.5);
 }
 
 function initRuntime() {
   buildWorldGrid();
   initFurnRuntime();
-  CHARS = CONFIG.characters.map(c => ({
-    ...JSON.parse(JSON.stringify(c)),
+  CHARS = CONFIG.characters.map(c => {
+    const cloned = JSON.parse(JSON.stringify(c));
+    const needs = {};
+    for (const nd of getNeedDefs()) needs[nd.key] = cloned.needs?.[nd.key] ?? nd.defaultValue ?? 70;
+    return {
+    ...cloned,
+    needs,
     statusText: '闲庭漫步',
     action: null,
     activeStates: [],
@@ -513,13 +609,15 @@ function initRuntime() {
     actionQueue: [],
     skillLevels: Object.fromEntries((c.skills || []).map(s => [s, s === 'poetry' ? 3 : 1])),
     memories: [],
-    _prevNeeds: { ...c.needs },
+    _prevNeeds: { ...needs },
+    needMeta: {},
     path: [],
     usingInstanceId: 0,
     _waitingFurnId: 0,
     moveSpeed: 4,
-    _lastSceneId: c.sceneId,
-  }));
+    _lastSceneId: cloned.sceneId,
+  };
+  });
   CHARS.forEach(syncCharPixel);
   LifePathSystem?.initAllChars?.();
   const separated = separateOverlappingChars();
@@ -531,4 +629,3 @@ function initRuntime() {
   updateCamera(true);
   resizeCanvas();
 }
-

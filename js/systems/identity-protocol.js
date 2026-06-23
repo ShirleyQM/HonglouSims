@@ -25,6 +25,10 @@ const IdentityProtocolSystem = (() => {
     return 'peer';
   }
 
+  function getRankRelation(idA, idB) {
+    return getHierarchyRelation(idA, idB);
+  }
+
   function getInteractionCat(tpl) {
     const map = cfg().interactionCatMap || {};
     if (tpl?.id != null && map[tpl.id]) return map[tpl.id];
@@ -42,6 +46,52 @@ const IdentityProtocolSystem = (() => {
 
   function rankLabel(rank) {
     return cfg().rankLabels?.[rank] ?? `等级${rank}`;
+  }
+
+  function getReputationContext(charId) {
+    const c = typeof charId === 'object' ? charId : getChar(charId);
+    if (!c) return { value: 0, domains: [] };
+    return ReputationDomainSystem?.getIdentityReputation?.(c.id) || {
+      value: c.reputation || 0,
+      domains: [{ domain: 'general', label: '总体名声', value: c.reputation || 0 }],
+    };
+  }
+
+  function resolveActionContext(actionOrTemplate, context = {}) {
+    const isTemplate = actionOrTemplate && (
+      actionOrTemplate.id != null ||
+      actionOrTemplate.contact_type != null ||
+      actionOrTemplate.category != null ||
+      actionOrTemplate.risky_details != null
+    );
+    const template = isTemplate ? actionOrTemplate : null;
+    const base = isTemplate ? context : actionOrTemplate || {};
+    return {
+      templateId: template?.id,
+      actionType: base.actionType || (template ? 'interaction' : ''),
+      category: base.category || (template ? getInteractionCat(template) : '叙旧'),
+      sceneId: base.sceneId || '',
+      scenePrivacy: base.scenePrivacy || '',
+      witnessIds: base.witnessIds || [],
+      contactType: base.contactType || (template ? (template.contact_type || 'none') : 'none'),
+      template,
+    };
+  }
+
+  function protocolRoleLabel(rel) {
+    if (!rel) return '平辈往来';
+    const map = {
+      master_to_servant: '主子对仆从',
+      servant_to_master: '仆从对主子',
+      parent_to_child: '长辈对晚辈',
+      child_to_parent: '晚辈对长辈',
+      grandparent_to_child: '祖辈对晚辈',
+      senior_servant_to_junior: '体面仆从对普通仆从',
+      junior_to_senior_servant: '普通仆从对体面仆从',
+      peer: '平辈往来',
+      outsider: '外人相对',
+    };
+    return map[rel] || hierarchyLabel(rel);
   }
 
   function resolveAddress(initType, initiator, target) {
@@ -79,14 +129,125 @@ const IdentityProtocolSystem = (() => {
     return `二人关系为「${initType}」，相称须合礼法，勿搞错长幼尊卑。`;
   }
 
+  function evaluateProtocolBehavior(initiator, target, actionOrTemplate, context = {}) {
+    if (!initiator || !target) return { behavior: 'allowed', reason: '', rel: 'peer', actionType: '', category: '叙旧' };
+    const action = resolveActionContext(actionOrTemplate, context);
+    const hrel = getHierarchyRelation(initiator.id, target.id);
+    const cat = action.category || '叙旧';
+    const tpl = action.template;
+    const rule = getHierarchyRule(hrel, cat);
+    let behavior = rule?.behavior || 'allowed';
+    let reason = '';
+
+    if (rule && behavior === 'conditional' && rule.condition?.desc) {
+      reason = rule.condition.desc;
+    } else if (rule?.behavior === 'risky') {
+      reason = '逾矩有风险，语气宜试探、留余地';
+    } else if (rule?.behavior === 'allowed') {
+      reason = `${hierarchyLabel(hrel)}之间「${cat}」可行。`;
+    } else if (rule?.behavior === 'forbidden') {
+      reason = '礼法所禁，若硬写须体现推拒';
+    }
+
+    let contactType = action.contactType || 'none';
+    if (tpl && contactType === 'none' && tpl.contact_type) {
+      contactType = tpl.contact_type;
+    }
+    if (tpl?.is_risky) behavior = behavior === 'forbidden' ? 'forbidden' : 'risky';
+    if (contactType && contactType !== 'none' && tpl) {
+      const cr = evaluateContactRisk(initiator, target, tpl);
+      if (cr.behavior === 'forbidden') {
+        behavior = 'forbidden';
+        reason = cr.reason || '礼法所禁';
+      } else if (cr.behavior !== 'allowed') {
+        behavior = behavior === 'forbidden' ? behavior : cr.behavior;
+        reason = cr.reason || reason;
+      }
+    } else if (action.contactType) {
+      const temp = { ...tpl, contact_type: action.contactType };
+      const cr = evaluateContactRisk(initiator, target, temp);
+      if (cr.behavior === 'forbidden') {
+        behavior = 'forbidden';
+        reason = cr.reason || '礼法所禁';
+      } else if (cr.behavior !== 'allowed') {
+        behavior = behavior === 'forbidden' ? behavior : cr.behavior;
+        reason = cr.reason || reason;
+      }
+    }
+
+    return {
+      behavior,
+      reason,
+      rel: hrel,
+      category: cat,
+      templateId: action.templateId,
+      actionType: action.actionType,
+      contactType,
+      scenePrivacy: action.scenePrivacy,
+      witnessIds: action.witnessIds,
+    };
+  }
+
+  function protocolSnapshot(initiator, target, actionOrTemplate, context = {}) {
+    const actor = typeof initiator === 'string' ? getChar(initiator) : initiator;
+    const recip = typeof target === 'string' ? getChar(target) : target;
+    if (!actor || !recip) return null;
+    const rankI = getCharRank(actor.id);
+    const rankT = getCharRank(recip.id);
+    const rel = getHierarchyRelation(actor.id, recip.id);
+    const ri = typeof getRelationInfo === 'function' ? getRelationInfo(actor.id, recip.id) : null;
+    const action = resolveActionContext(actionOrTemplate, context);
+    const protocol = evaluateProtocolBehavior(actor, recip, actionOrTemplate, context);
+    return {
+      actorId: actor.id,
+      targetId: recip.id,
+      actorRank: rankI,
+      actorRankLabel: rankLabel(rankI),
+      actorReputation: getReputationContext(actor.id),
+      targetRank: rankT,
+      targetRankLabel: rankLabel(rankT),
+      targetReputation: getReputationContext(recip.id),
+      rankRelation: rel,
+      rankRelationLabel: hierarchyLabel(rel),
+      nominalRelation: ri?.initType || '',
+      kinshipType: ri?.kinshipType || '',
+      addressHint: resolveAddress(ri?.initType || '未定义', actor, recip),
+      relationScore: ri?.score ?? 0,
+      affection: ri?.affection ?? 0,
+      trust: ri?.trust ?? 0,
+      friendship: ri?.friendship ?? 0,
+      submissionActorToTarget: ri?.submissionAtoB ?? 0,
+      submissionTargetToActor: ri?.submissionBtoA ?? 0,
+      compositeRelationLabel: ri?.compositeLabel || ri?.typeLabel || '',
+      protocolRole: protocolRoleLabel(rel),
+      protocolBehavior: protocol.behavior || 'allowed',
+      protocolReason: protocol.reason || '',
+      riskLevel: protocol.behavior === 'risky'
+        ? 'high'
+        : protocol.behavior === 'conditional'
+          ? 'medium'
+          : 'none',
+      actionContext: {
+        actionType: action.actionType,
+        category: action.category,
+        sceneId: action.sceneId,
+        scenePrivacy: action.scenePrivacy,
+        witnessIds: action.witnessIds,
+        contactType: action.contactType,
+      },
+    };
+  }
+
   function formatAddressBlock(initiator, target) {
     if (typeof getRelationInfo !== 'function') return '';
     const ri = getRelationInfo(initiator.id, target.id);
     const lines = [];
     const rankI = getCharRank(initiator.id);
     const rankT = getCharRank(target.id);
-    lines.push(`发起人身份：${rankLabel(rankI)}（${initiator.short}）`);
-    lines.push(`对象身份：${rankLabel(rankT)}（${target.short}）`);
+    const repI = getReputationContext(initiator.id);
+    const repT = getReputationContext(target.id);
+    lines.push(`发起人身份：${rankLabel(rankI)}（${initiator.short}，身份声望${repI.value}）`);
+    lines.push(`对象身份：${rankLabel(rankT)}（${target.short}，身份声望${repT.value}）`);
     if (ri.initType) {
       lines.push(`关系名目：${ri.initType}`);
       lines.push(resolveAddress(ri.initType, initiator, target));
@@ -100,27 +261,21 @@ const IdentityProtocolSystem = (() => {
   }
 
   function formatInteractionProtocol(initiator, target, tpl) {
-    const cat = getInteractionCat(tpl);
-    const hrel = getHierarchyRelation(initiator.id, target.id);
-    const rule = getHierarchyRule(hrel, cat);
-    if (!rule) return '';
-    const parts = [`${hierarchyLabel(hrel)}之间「${cat}」：${rule.behavior || 'allowed'}`];
-    if (rule.behavior === 'risky') parts.push('逾矩有风险，语气宜试探、留余地');
-    if (rule.behavior === 'conditional' && rule.condition?.desc) {
-      parts.push(rule.condition.desc);
-    }
-    if (rule.behavior === 'forbidden') parts.push('礼法所禁，若硬写须体现推拒');
-    if (tpl?.contact_type && tpl.contact_type !== 'none') {
-      const cr = evaluateContactRisk(initiator, target, tpl);
-      if (cr.behavior !== 'allowed' && cr.reason) parts.push(cr.reason);
-    }
+    const protocol = evaluateProtocolBehavior(initiator, target, tpl);
+    const cat = protocol.category || '叙旧';
+    if (protocol.behavior === 'allowed' && cat === '叙旧') return '';
+    const relText = protocolRoleLabel(protocol.rel || getHierarchyRelation(initiator.id, target.id));
+    const parts = [`${relText}中「${cat}」：${protocol.behavior}`];
+    if (protocol.reason) parts.push(protocol.reason);
     return parts.join('；');
   }
 
   function isRomanticOrSpousal(idA, idB) {
-    if (typeof getRelationInfo !== 'function') return false;
-    const ri = getRelationInfo(idA, idB);
-    return ['恋人', '夫妻'].includes(ri.initType);
+    if (typeof getRelationInfo === 'function') {
+      const ri = getRelationInfo(idA, idB);
+      return ['恋人', '夫妻'].includes(ri.initType);
+    }
+    return false;
   }
 
   function isOppositeGender(a, b) {
@@ -183,9 +338,59 @@ const IdentityProtocolSystem = (() => {
   }
 
   return {
-    cfg, getCharRank, getHierarchyRelation, getInteractionCat,
-    getHierarchyRule, hierarchyLabel, rankLabel,
-    formatAddressBlock, formatInteractionProtocol, resolveAddress,
-    evaluateContactRisk, isRomanticOrSpousal,
+    cfg,
+    getCharRank,
+    getHierarchyRelation,
+    getRankRelation,
+    getInteractionCat,
+    getHierarchyRule,
+    hierarchyLabel,
+    rankLabel,
+    resolveActionContext,
+    protocolRoleLabel,
+    evaluateProtocolBehavior,
+    protocolSnapshot,
+    formatAddressBlock,
+    formatInteractionProtocol,
+    resolveAddress,
+    evaluateContactRisk,
+    evaluateProtocol: protocolSnapshot,
+    getReputationContext,
+    isRomanticOrSpousal,
   };
 })();
+
+window.IdentityProtocolSystem = IdentityProtocolSystem;
+
+/* ═══════════════════ SOCIAL CONTEXT (身份位阶×名分×关系×礼法) ═══════════════════ */
+const SocialContextSystem = (() => {
+  function resolve(actorId, targetId, actionOrTemplate = {}, context = {}) {
+    return IdentityProtocolSystem.protocolSnapshot(
+      typeof actorId === 'string' ? getChar(actorId) : actorId,
+      typeof targetId === 'string' ? getChar(targetId) : targetId,
+      actionOrTemplate,
+      context,
+    );
+  }
+
+  function relationFacet(idA, idB) {
+    return typeof getRelationInfo === 'function' ? getRelationInfo(idA, idB) : null;
+  }
+
+  function evaluateProtocol(actor, target, actionOrTemplate = {}, context = {}) {
+    return IdentityProtocolSystem.protocolSnapshot(actor, target, actionOrTemplate, context);
+  }
+
+  function evaluateProtocolBehavior(actor, target, actionOrTemplate = {}, context = {}) {
+    return IdentityProtocolSystem.evaluateProtocolBehavior(actor, target, actionOrTemplate, context);
+  }
+
+  return {
+    resolve,
+    relationFacet,
+    evaluateProtocol,
+    evaluateProtocolBehavior,
+  };
+})();
+
+window.SocialContextSystem = SocialContextSystem;

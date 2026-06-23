@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>互动意愿展示方案 Demo</title>
+  <style>
+    :root {
+      --bg: #f6efe3;
+      --paper: rgba(255, 252, 242, .9);
+      --ink: #3d3026;
+      --soft: #8a7864;
+      --line: rgba(94, 67, 42, .2);
+      --gold: #f5ca67;
+      --green-1: #dbeec9;
+      --green-2: #b8dfa0;
+      --green-3: #86c874;
+      --green-4: #4ca357;
+      --green-5: #26753b;
+      --cold: #b8ccb1;
+      --shadow: 0 18px 50px rgba(76, 54, 32, .12);
+      font-family: "Songti SC", "Noto Serif CJK SC", "STSong", serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(245, 202, 103, .24), transparent 32%),
+        radial-gradient(circle at 84% 0%, rgba(84, 132, 73, .18), transparent 28%),
+        linear-gradient(135deg, #f9f1e3, #f2e6d1 52%, #eadcc6);
+      color: var(--ink);
+      padding: 34px;
+    }
+
+    header {
+      max-width: 1180px;
+      margin: 0 auto 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: end;
+    }
+
+    h1 { margin: 0; font-size: 30px; letter-spacing: .08em; }
+    .note { color: var(--soft); max-width: 620px; line-height: 1.7; font-size: 14px; }
+
+    .grid {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .panel {
+      min-height: 430px;
+      background: var(--paper);
+      border: 1px solid rgba(96, 70, 44, .16);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255,255,255,.38), transparent 34%);
+      pointer-events: none;
+    }
+
+    .panel h2 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      letter-spacing: .06em;
+      position: relative;
+    }
+
+    .panel p {
+      margin: 0 0 16px;
+      font-size: 12px;
+      color: var(--soft);
+      line-height: 1.6;
+      position: relative;
+    }
+
+    .menu {
+      width: 274px;
+      height: 274px;
+      margin: 26px auto 10px;
+      border-radius: 50%;
+      position: relative;
+      background: radial-gradient(circle, #fff9ed 0 33%, rgba(226, 204, 172, .45) 34% 36%, transparent 37%);
+      filter: drop-shadow(0 14px 24px rgba(77, 53, 30, .12));
+    }
+
+    .center {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 92px;
+      height: 92px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      background: #fff8eb;
+      border: 1px solid rgba(90, 62, 34, .2);
+      font-size: 12px;
+      color: #6c5947;
+      z-index: 5;
+    }
+
+    .opt {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 78px;
+      min-height: 58px;
+      transform: translate(-50%, -50%) rotate(var(--a)) translateY(-100px) rotate(calc(-1 * var(--a)));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fffaf0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 8px 6px;
+      font-size: 12px;
+      text-align: center;
+      box-shadow: 0 8px 18px rgba(80, 55, 29, .08);
+    }
+
+    .opt b { font-weight: 600; line-height: 1.15; }
+    .opt small { font-size: 10px; color: var(--soft); }
+
+    .legend {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--soft);
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dots {
+      display: flex;
+      gap: 4px;
+      height: 8px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(127, 115, 96, .18);
+      border: 1px solid rgba(86, 69, 44, .1);
+    }
+
+    .dot.on.need { background: var(--gold); }
+    .dot.on.l1 { background: var(--green-1); }
+    .dot.on.l2 { background: var(--green-2); }
+    .dot.on.l3 { background: var(--green-3); }
+    .dot.on.l4 { background: var(--green-4); }
+    .dot.on.l5 { background: var(--green-5); }
+
+    .scheme-bg .opt {
+      --tone: rgba(184, 204, 177, .48);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.58), rgba(255,255,255,.18)),
+        var(--tone);
+      border-color: rgba(51, 99, 47, .25);
+    }
+    .scheme-bg .need { --tone: rgba(245, 202, 103, .42); border-color: rgba(184, 128, 26, .32); }
+    .scheme-bg .cold { --tone: rgba(201, 216, 195, .34); }
+    .scheme-bg .l1 { --tone: rgba(219, 238, 201, .48); }
+    .scheme-bg .l2 { --tone: rgba(184, 223, 160, .56); }
+    .scheme-bg .l3 { --tone: rgba(134, 200, 116, .62); }
+    .scheme-bg .l4 { --tone: rgba(76, 163, 87, .66); color: #fffaf0; }
+    .scheme-bg .l5 { --tone: rgba(38, 117, 59, .76); color: #fffaf0; }
+    .scheme-bg .l4 small, .scheme-bg .l5 small { color: rgba(255, 250, 235, .78); }
+
+    .scheme-ribbon .opt::after {
+      content: "";
+      width: 42px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--mark, var(--cold));
+      box-shadow: 0 0 0 1px rgba(75, 60, 40, .07);
+    }
+    .scheme-ribbon .need { --mark: var(--gold); }
+    .scheme-ribbon .cold { --mark: #c8d6c1; }
+    .scheme-ribbon .l1 { --mark: var(--green-1); }
+    .scheme-ribbon .l2 { --mark: var(--green-2); }
+    .scheme-ribbon .l3 { --mark: var(--green-3); }
+    .scheme-ribbon .l4 { --mark: var(--green-4); }
+    .scheme-ribbon .l5 { --mark: var(--green-5); }
+
+    .scheme-token .opt {
+      background:
+        radial-gradient(circle at 50% 8px, var(--seal, #c8d6c1) 0 7px, transparent 8px),
+        #fffaf0;
+      padding-top: 15px;
+    }
+    .scheme-token .opt::before {
+      content: "";
+      position: absolute;
+      top: 5px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1px solid rgba(86, 69, 44, .15);
+      box-shadow: inset 0 1px 4px rgba(255,255,255,.65);
+    }
+    .scheme-token .need { --seal: var(--gold); }
+    .scheme-token .cold { --seal: #c8d6c1; }
+    .scheme-token .l1 { --seal: var(--green-1); }
+    .scheme-token .l2 { --seal: var(--green-2); }
+    .scheme-token .l3 { --seal: var(--green-3); }
+    .scheme-token .l4 { --seal: var(--green-4); }
+    .scheme-token .l5 { --seal: var(--green-5); }
+
+    .scheme-wind .opt {
+      border-color: rgba(97, 76, 50, .12);
+    }
+    .scheme-wind .opt::before {
+      content: "";
+      position: absolute;
+      inset: -7px;
+      border-radius: 20px;
+      background:
+        conic-gradient(from -45deg, transparent 0 71%, var(--wind, rgba(200, 214, 193, .7)) 72% 82%, transparent 83%);
+      opacity: var(--wind-alpha, .6);
+      z-index: -1;
+      filter: blur(.2px);
+    }
+    .scheme-wind .need { --wind: rgba(245, 202, 103, .78); --wind-alpha: .52; }
+    .scheme-wind .cold { --wind: rgba(200, 214, 193, .55); --wind-alpha: .34; }
+    .scheme-wind .l1 { --wind: rgba(219, 238, 201, .72); --wind-alpha: .44; }
+    .scheme-wind .l2 { --wind: rgba(184, 223, 160, .82); --wind-alpha: .54; }
+    .scheme-wind .l3 { --wind: rgba(134, 200, 116, .88); --wind-alpha: .64; }
+    .scheme-wind .l4 { --wind: rgba(76, 163, 87, .92); --wind-alpha: .76; }
+    .scheme-wind .l5 { --wind: rgba(38, 117, 59, .95); --wind-alpha: .9; }
+
+    .scheme-halo .opt {
+      --halo: #c8d6c1;
+      --halo-width: 2px;
+      --halo-style: solid;
+      border: var(--halo-width) var(--halo-style) var(--halo);
+      background: #fffaf0;
+      box-shadow: 0 8px 18px rgba(80, 55, 29, .08);
+    }
+
+    .scheme-halo .need {
+      --halo: #f0cf76;
+      --halo-width: 2px;
+      --halo-style: dashed;
+    }
+    .scheme-halo .cold {
+      --halo: #d4e2cf;
+      --halo-width: 1px;
+    }
+    .scheme-halo .l1 {
+      --halo: var(--green-1);
+      --halo-width: 2px;
+    }
+    .scheme-halo .l2 {
+      --halo: var(--green-2);
+      --halo-width: 3px;
+    }
+    .scheme-halo .l3 {
+      --halo: var(--green-3);
+      --halo-width: 4px;
+    }
+    .scheme-halo .l4 {
+      --halo: var(--green-4);
+      --halo-width: 5px;
+    }
+    .scheme-halo .l5 {
+      --halo: var(--green-5);
+      --halo-width: 6px;
+    }
+
+    .scheme-glow .opt {
+      border: 2px solid rgba(129, 111, 84, .18);
+      background: #fffaf0;
+      box-shadow: 0 8px 18px rgba(80, 55, 29, .08);
+      transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+    }
+
+    .scheme-glow .need {
+      border-color: rgba(217, 169, 66, .55);
+      border-style: dashed;
+      filter: saturate(.86);
+    }
+
+    .scheme-glow .cold,
+    .scheme-glow .l1 {
+      border-color: rgba(130, 130, 118, .22);
+      filter: grayscale(.65) opacity(.68);
+    }
+
+    .scheme-glow .l2,
+    .scheme-glow .l3 {
+      border-color: rgba(128, 166, 111, .3);
+    }
+
+    .scheme-glow .l4,
+    .scheme-glow .l5 {
+      border-color: rgba(66, 145, 72, .75);
+      box-shadow:
+        0 8px 18px rgba(80, 55, 29, .08),
+        0 0 0 3px rgba(116, 190, 102, .14),
+        0 0 16px rgba(72, 161, 77, .38);
+    }
+
+    .scheme-glow .l5 {
+      border-color: rgba(38, 117, 59, .9);
+      box-shadow:
+        0 8px 18px rgba(80, 55, 29, .08),
+        0 0 0 4px rgba(116, 190, 102, .18),
+        0 0 24px rgba(38, 117, 59, .52);
+    }
+
+    @media (max-width: 900px) {
+      body { padding: 20px; }
+      header { display: block; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>互动意愿展示方案</h1>
+      <div class="note">同一组互动、同一组关系状态。这里不写“高/中/低/冷/欠情分”，只用视觉符号表达：都可点击，但让玩家感到“对方愿不愿意接”。</div>
+    </div>
+    <div class="note">我个人更偏 方案 3 或 4：信息更安静，不会把环形菜单染得太重；方案 1 最清楚，方案 2 最直觉但容易像禁用/危险提示。</div>
+  </header>
+
+  <main class="grid">
+    <section class="panel scheme-dots">
+      <h2>方案 1：五点谱</h2>
+      <p>文字下方一排五个小点。欠情分只亮浅黄一点；冷到高从浅绿到深绿递增。最像“读数”，策划和玩家都容易理解。</p>
+      <div class="menu">
+        <div class="center">宝玉<br>对黛玉</div>
+        <div class="opt need" style="--a:-82deg"><b>诉衷肠</b><div class="dots"><i class="dot on need"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></div></div>
+        <div class="opt cold" style="--a:-20deg"><b>打趣</b><div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></div></div>
+        <div class="opt l1" style="--a:42deg"><b>寒暄</b><div class="dots"><i class="dot on l1"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></div></div>
+        <div class="opt l3" style="--a:104deg"><b>安慰</b><div class="dots"><i class="dot on l1"></i><i class="dot on l2"></i><i class="dot on l3"></i><i class="dot"></i><i class="dot"></i></div></div>
+        <div class="opt l5" style="--a:166deg"><b>共读</b><div class="dots"><i class="dot on l1"></i><i class="dot on l2"></i><i class="dot on l3"></i><i class="dot on l4"></i><i class="dot on l5"></i></div></div>
+        <div class="opt l4" style="--a:228deg"><b>陪坐</b><div class="dots"><i class="dot on l1"></i><i class="dot on l2"></i><i class="dot on l3"></i><i class="dot on l4"></i><i class="dot"></i></div></div>
+      </div>
+      <div class="legend">
+        <div class="legend-row"><span>优点：</span>可读性最高，不挤占按钮背景。</div>
+        <div class="legend-row"><span>风险：</span>小屏上点太小，视觉稍偏系统化。</div>
+      </div>
+    </section>
+
+    <section class="panel scheme-bg">
+      <h2>方案 2：按钮底色</h2>
+      <p>直接用菜单项背景表达意愿。玩家无需额外寻找标记，但颜色较重，可能和“危险/禁用/选中”状态混淆。</p>
+      <div class="menu">
+        <div class="center">宝玉<br>对黛玉</div>
+        <div class="opt need" style="--a:-82deg"><b>诉衷肠</b><small>仍可尝试</small></div>
+        <div class="opt cold" style="--a:-20deg"><b>打趣</b><small>仍可尝试</small></div>
+        <div class="opt l1" style="--a:42deg"><b>寒暄</b><small>仍可尝试</small></div>
+        <div class="opt l3" style="--a:104deg"><b>安慰</b><small>仍可尝试</small></div>
+        <div class="opt l5" style="--a:166deg"><b>共读</b><small>仍可尝试</small></div>
+        <div class="opt l4" style="--a:228deg"><b>陪坐</b><small>仍可尝试</small></div>
+      </div>
+      <div class="legend">
+        <div class="legend-row"><span>优点：</span>最直觉，鼠标扫一圈就知道冷热。</div>
+        <div class="legend-row"><span>风险：</span>会抢戏，深绿按钮容易像“推荐必点”。</div>
+      </div>
+    </section>
+
+    <section class="panel scheme-token">
+      <h2>方案 3：眉心印</h2>
+      <p>每个选项顶部压一个小圆印，像“情绪温度印章”。文字不变、按钮不染色，信息存在但很克制。</p>
+      <div class="menu">
+        <div class="center">宝玉<br>对黛玉</div>
+        <div class="opt need" style="--a:-82deg"><b>诉衷肠</b><small>关系稍浅</small></div>
+        <div class="opt cold" style="--a:-20deg"><b>打趣</b><small>兴致不足</small></div>
+        <div class="opt l1" style="--a:42deg"><b>寒暄</b><small>可开口</small></div>
+        <div class="opt l3" style="--a:104deg"><b>安慰</b><small>愿意听</small></div>
+        <div class="opt l5" style="--a:166deg"><b>共读</b><small>很合拍</small></div>
+        <div class="opt l4" style="--a:228deg"><b>陪坐</b><small>较合拍</small></div>
+      </div>
+      <div class="legend">
+        <div class="legend-row"><span>优点：</span>适合古风 UI，移植进现有扇区不占空间。</div>
+        <div class="legend-row"><span>风险：</span>需要 hover 或图例让玩家学会颜色含义。</div>
+      </div>
+    </section>
+
+    <section class="panel scheme-wind">
+      <h2>方案 4：风向光晕</h2>
+      <p>按钮外侧加一圈局部光晕，强意愿像“被吸引”，弱意愿很淡。它表达的是氛围，不是数值，很适合戏剧化。</p>
+      <div class="menu">
+        <div class="center">宝玉<br>对黛玉</div>
+        <div class="opt need" style="--a:-82deg"><b>诉衷肠</b><small>试探</small></div>
+        <div class="opt cold" style="--a:-20deg"><b>打趣</b><small>迟疑</small></div>
+        <div class="opt l1" style="--a:42deg"><b>寒暄</b><small>平平</small></div>
+        <div class="opt l3" style="--a:104deg"><b>安慰</b><small>近</small></div>
+        <div class="opt l5" style="--a:166deg"><b>共读</b><small>很近</small></div>
+        <div class="opt l4" style="--a:228deg"><b>陪坐</b><small>亲近</small></div>
+      </div>
+      <div class="legend">
+        <div class="legend-row"><span>优点：</span>最有情绪感，不会把低意愿误读成禁用。</div>
+        <div class="legend-row"><span>风险：</span>实现稍微细一点，颜色过淡时信息不如五点谱明确。</div>
+      </div>
+    </section>
+
+    <section class="panel scheme-halo">
+      <h2>方案 5：亲密光环</h2>
+      <p>只用按钮边框表达关系强度。欠情分用浅黄虚线，冷意愿是淡薄细线，越愿意接这个互动，边框越粗、颜色越深。</p>
+      <div class="menu">
+        <div class="center">宝玉<br>对黛玉</div>
+        <div class="opt need" style="--a:-82deg"><b>诉衷肠</b><small>试探</small></div>
+        <div class="opt cold" style="--a:-20deg"><b>打趣</b><small>犹豫</small></div>
+        <div class="opt l1" style="--a:42deg"><b>寒暄</b><small>淡淡</small></div>
+        <div class="opt l3" style="--a:104deg"><b>安慰</b><small>愿听</small></div>
+        <div class="opt l5" style="--a:166deg"><b>共读</b><small>投契</small></div>
+        <div class="opt l4" style="--a:228deg"><b>陪坐</b><small>亲近</small></div>
+      </div>
+      <div class="legend">
+        <div class="legend-row"><span>优点：</span>最干净，不改变按钮底色，也不增加额外图例。</div>
+        <div class="legend-row"><span>风险：</span>弱意愿和普通按钮边框的差别需要调得足够明显。</div>
+      </div>
+    </section>
+
+    <section class="panel scheme-glow">
+      <h2>方案 6：边框发光</h2>
+      <p>不细分每一档。低意愿直接灰掉，高意愿边框发光；中间保持普通按钮。欠情分用浅黄虚线，表示“可以试，但关系条件还差一点”。</p>
+      <div class="menu">
+        <div class="center">宝玉<br>对黛玉</div>
+        <div class="opt need" style="--a:-82deg"><b>诉衷肠</b><small>试探</small></div>
+        <div class="opt cold" style="--a:-20deg"><b>打趣</b><small>犹豫</small></div>
+        <div class="opt l1" style="--a:42deg"><b>寒暄</b><small>淡淡</small></div>
+        <div class="opt l3" style="--a:104deg"><b>安慰</b><small>普通</small></div>
+        <div class="opt l5" style="--a:166deg"><b>共读</b><small>投契</small></div>
+        <div class="opt l4" style="--a:228deg"><b>陪坐</b><small>亲近</small></div>
+      </div>
+      <div class="legend">
+        <div class="legend-row"><span>优点：</span>玩家只需判断“有戏/没戏”，不会被数值感打断。</div>
+        <div class="legend-row"><span>风险：</span>中间档信息被折叠，适合游戏主界面，不适合策划调试。</div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

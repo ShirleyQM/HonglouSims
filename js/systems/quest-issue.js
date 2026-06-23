@@ -45,6 +45,10 @@ const QuestIssueSystem = (() => {
     if (!perm.targetRelations.includes(rel)) {
       return { ok: false, reason: '你的身份无法差遣此人' };
     }
+    if (rel === 'master_to_servant' && typeof ServantRelationSystem !== 'undefined') {
+      const gate = ServantRelationSystem.checkQuestAuthority(issuerId, targetId, null);
+      if (!gate.ok) return { ok: false, reason: gate.reason };
+    }
     return { ok: true, rel, perm };
   }
 
@@ -57,6 +61,10 @@ const QuestIssueSystem = (() => {
     if (targetId != null) {
       const gate = issuerMayIssueTo(issuerId, targetId);
       if (!gate.ok) return false;
+      if (typeof ServantRelationSystem !== 'undefined') {
+        const servantGate = ServantRelationSystem.checkQuestAuthority(issuerId, targetId, tpl);
+        if (!servantGate.ok) return false;
+      }
     }
     return true;
   }
@@ -170,7 +178,10 @@ const QuestIssueSystem = (() => {
     const gate = issuerMayIssueTo(issuer.id, target.id);
     if (!gate.ok) return gate;
     if (!issuerMayUseCategory(issuer.id, target.id, tpl)) {
-      return { ok: false, reason: '此类差遣不在权限内' };
+      const servantGate = typeof ServantRelationSystem !== 'undefined'
+        ? ServantRelationSystem.checkQuestAuthority(issuer.id, target.id, tpl)
+        : null;
+      return { ok: false, reason: servantGate && !servantGate.ok ? servantGate.reason : '此类差遣不在权限内' };
     }
     if (!templateMatchesHierarchy(tpl, issuer.id, target.id)) {
       return { ok: false, reason: '此任务不合双方身份' };
@@ -184,7 +195,10 @@ const QuestIssueSystem = (() => {
         return { ok: false, reason: `情分不足（需≥${tpl.issuerRelationMin}）` };
       }
     }
-    return { ok: true, reason: formatDeadlineHint(tpl) || '可下发' };
+    const servantHint = typeof ServantRelationSystem !== 'undefined'
+      ? ServantRelationSystem.describeFor(issuer.id, target.id, tpl)
+      : '';
+    return { ok: true, reason: servantHint || formatDeadlineHint(tpl) || '可下发' };
   }
 
   function checkGroupQuestIssueable(issuer, tpl) {
@@ -279,6 +293,17 @@ const QuestIssueSystem = (() => {
     const inst = QuestSystem?.issueOne?.(templateId, issuer.id, target.id);
     if (inst) {
       log(`${issuer.short}吩咐${target.short}：「${tpl.name}」`);
+      if (NarrativeBubbleSystem?.showBubble) {
+        const away = issuer.sceneId !== target.sceneId;
+        const line = tpl.id === 1021 || away ? '这就来。' : '这就去办。';
+        NarrativeBubbleSystem.showBubble({
+          charId: target.id,
+          text: line,
+          style: 'speech',
+          module: 'quest',
+          duration: 3,
+        });
+      }
       uiDirty = true;
     }
     return inst;
@@ -315,7 +340,10 @@ const QuestIssueSystem = (() => {
     const issuer = getChar(issuerId);
     const assignee = getChar(assigneeId);
     if (!issuer || !assignee) return [];
-    return templates.filter(t => !isGroupTemplate(t) && checkQuestIssueable(issuer, assignee, t).ok);
+    return templates.filter(t =>
+      !isGroupTemplate(t)
+      && checkQuestIssueable(issuer, assignee, t).ok
+      && QuestSystem?.isTemplateExecutableBy?.(t, issuer.id, assignee.id, { aiIssue: true }));
   }
 
   function filterAiGroupCandidates(issuer) {

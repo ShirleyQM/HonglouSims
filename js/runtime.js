@@ -13,8 +13,6 @@ let selectedIdx = 0, gameHour = 8, gameMinute = 0, timeAcc = 0, gameDay = 1;
 /** 1 游戏日 = 20 真实分钟；需求/关系按游戏分钟结算 */
 const GAME_DAY_REAL_MIN = 20;
 const GAME_MINUTES_PER_REAL_SEC = 1440 / (GAME_DAY_REAL_MIN * 60);
-const NEED_DECAY_PER_GAME_MIN = 0.11;
-const NEED_RESTORE_PER_GAME_MIN = 0.28;
 let logs = [], hoverCell = null, hoverInst = null, mouseX = 0, mouseY = 0;
 let speechBubble = null, uiDirty = true, previewPath = null;
 let queuePage = 0, actionIdSeq = 1;
@@ -23,7 +21,7 @@ let interactionOnceUsed = new Set();
 let menuTargetIdx = -1;
 let messageLog = [];
 let gameLogs = [];
-let logFilter = 'all';
+let logFilter = 'activity';
 let logUserScrolled = false;
 let gameWeather = '晴';
 let lastStatusScene = '';
@@ -33,7 +31,7 @@ const SEASON_LABELS = ['春','夏','秋','冬'];
 const SEASON_ICONS = ['🌸','☀️','🍂','❄️'];
 const WEATHER_ICONS = { '晴': '☀️', '阴': '🌫', '小雨': '🌧', '微风': '🌬', '雪': '❄️', '雾': '🌫' };
 const SAVE_KEY = 'dgy_save';
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 4;
 const TIME_PERIODS = [
   { id: 'dawn', label: '拂晓', minHour: 5 },
   { id: 'morning', label: '上午', minHour: 8 },
@@ -129,25 +127,59 @@ function eventCategory(type) {
   if (!type) return 'system';
   if (type.startsWith('quest:')) return 'task';
   if (type.startsWith('interaction') || type.startsWith('relation') || type.startsWith('emotion')
-    || type.startsWith('observer') || type.startsWith('bubble') || type.startsWith('family:')) return 'social';
+    || type.startsWith('observer') || type.startsWith('bubble') || type.startsWith('family:')
+    || type.startsWith('reputation')) return 'social';
+  if (type === 'furniture:complete' || type === 'state:add' || type === 'state:remove') return 'activity';
   return 'system';
 }
+
+const USER_LOG_EVENT_TYPES = new Set([
+  'interaction:complete',
+  'furniture:complete',
+  'state:add',
+  'state:remove',
+  'relation:change',
+  'family:switched',
+  'family:fund_changed',
+  'family:event',
+  'observer:executed',
+  'emotion:contagion',
+  'quest:issued',
+  'quest:accepted',
+  'quest:completed',
+  'quest:failed',
+  'quest:declined',
+  'quest:expired',
+  'reputation_domain:change',
+  'time:day',
+]);
 
 function formatLogTimeLabel() {
   return getShichenLabel() + ' · ' + getPeriodLabel();
 }
 
+function trimGameLogs() {
+  let systemCount = 0;
+  gameLogs = gameLogs.filter(entry => {
+    if (entry.category !== 'system') return true;
+    systemCount++;
+    return systemCount <= 60;
+  }).slice(0, 200);
+}
+
 function appendGameLog(entry) {
   gameLogs.unshift(entry);
-  if (gameLogs.length > 200) gameLogs.pop();
-  renderLogSidebar();
+  trimGameLogs();
+  const visible = logFilter === 'activity' ? entry.category !== 'system' : entry.category === logFilter;
+  if (visible) renderLogSidebar();
 }
 
 function renderLogSidebar() {
   const el = document.getElementById('log-list');
   if (!el) return;
   const atTop = el.scrollTop < 8;
-  const filtered = gameLogs.filter(e => logFilter === 'all' || e.category === logFilter);
+  const filtered = gameLogs.filter(e =>
+    logFilter === 'activity' ? e.category !== 'system' : e.category === logFilter);
   el.innerHTML = filtered.map(e => {
     const warn = e.category === 'system' && /状态|危机|擅|拦|失败|无法/.test(e.text) ? ' warn' : '';
     return `<div class="log-entry cat-${e.category}">
@@ -170,11 +202,9 @@ function migrateLogsToGameLogs(lines) {
 
 function tickGameTime(dt) {
   timeAcc += getGameMinuteDelta(dt);
-  let steps = 0;
-  while (timeAcc >= 1 && steps < 20) {
+  while (timeAcc >= 1) {
     timeAcc -= 1;
     advanceGameTime(1);
-    steps++;
   }
 }
 
@@ -184,8 +214,18 @@ function formatEventSummary(evt) {
       return `关系 ${getChar(evt.idA)?.short}↔${getChar(evt.idB)?.short} ${evt.old}→${evt.new}`;
     case 'state:add':
       return `${getChar(evt.charId)?.short} 进入「${evt.stateName}」`;
+    case 'state:remove':
+      return `${getChar(evt.charId)?.short} 解除「${evt.stateName || CONFIG.stateDefs?.[evt.stateId]?.name || evt.stateId}」`;
     case 'interaction:complete':
       return `${getChar(evt.initiatorId)?.short}与${getChar(evt.targetId)?.short}「${evt.interactionName}」`;
+    case 'furniture:complete': {
+      const furniture = getTemplate(evt.templateId)?.name || '家具';
+      return `${getChar(evt.charId)?.short} 使用了${furniture}`;
+    }
+    case 'reputation_domain:change': {
+      const label = ReputationDomainSystem?.domainLabel?.(evt.domain) || evt.domain || '声望';
+      return `${getChar(evt.charId)?.short}${label}${evt.delta > 0 ? '+' : ''}${evt.delta}（${evt.value}）`;
+    }
     case 'memory:add':
       return `${getChar(evt.charId)?.short} 记忆「${evt.text}」`;
     case 'queue:add':
@@ -248,7 +288,7 @@ function initEventSystem() {
     });
   }
   EventBus.on('*', evt => {
-    if (evt.type === 'log:add' || evt.type === 'time:tick') return;
+    if (evt.type === 'log:add' || evt.type === 'time:tick' || evt.type === 'character:effect') return;
     const summary = formatEventSummary(evt);
     messageLog.unshift({
       type: evt.type,
@@ -258,6 +298,7 @@ function initEventSystem() {
       minute: evt.gameMinute,
     });
     if (messageLog.length > 200) messageLog.pop();
+    if (!USER_LOG_EVENT_TYPES.has(evt.type)) return;
     const cat = eventCategory(evt.type);
     let text = summary;
     if (cat === 'task') text = '⚠ ' + text;
@@ -273,18 +314,44 @@ function initEventSystem() {
     saveTimer = setTimeout(() => saveGameToStorage(true), 2500);
   };
   ['relation:change', 'interaction:complete', 'time:day', 'memory:add',
-    'quest:issued', 'quest:accepted', 'quest:completed', 'quest:failed', 'quest:declined'].forEach(t =>
+    'quest:issued', 'quest:accepted', 'quest:completed', 'quest:failed', 'quest:declined',
+    'health:changed', 'dream:progress', 'dream:milestone', 'reputation_domain:change'].forEach(t =>
     EventBus.on(t, scheduleAutoSave));
 }
 
 
 function getNeedDefs() { return CONFIG.needDefs; }
 
+function cameraSafeInsets() {
+  const actionPanel = document.getElementById('action-queue-panel')?.getBoundingClientRect();
+  const bottomHud = document.getElementById('bottom-info-panel')?.getBoundingClientRect();
+  const left = Math.max(0, Math.ceil((actionPanel?.right || 0) + 20));
+  const lowestOverlayTop = Math.min(actionPanel?.top || window.innerHeight, bottomHud?.top || window.innerHeight);
+  const bottom = Math.max(0, Math.ceil(window.innerHeight - lowestOverlayTop + 20));
+  return { left, bottom, right: 24, top: 24 };
+}
+
+function clampCameraTarget(x, y) {
+  const inset = cameraSafeInsets();
+  const minX = -inset.left;
+  const minY = -inset.top;
+  const maxX = Math.max(minX, WORLD_COLS * CELL - VIEW_W + inset.right);
+  const maxY = Math.max(minY, WORLD_ROWS * CELL - VIEW_H + inset.bottom);
+  return {
+    x: Math.max(minX, Math.min(x, maxX)),
+    y: Math.max(minY, Math.min(y, maxY)),
+  };
+}
+
 function updateCamera(instant) {
   const c = CHARS[selectedIdx];
   if (!c) return;
-  const tx = Math.max(0, Math.min(c.x - VIEW_W / 2, WORLD_COLS * CELL - VIEW_W));
-  const ty = Math.max(0, Math.min(c.y - VIEW_H / 2, WORLD_ROWS * CELL - VIEW_H));
+  const inset = cameraSafeInsets();
+  const targetX = c.x - Math.max(inset.left + 96, VIEW_W / 2);
+  const targetY = c.y - Math.min(VIEW_H / 2, Math.max(120, VIEW_H - inset.bottom - 96));
+  const target = clampCameraTarget(targetX, targetY);
+  const tx = target.x;
+  const ty = target.y;
   if (instant) { camX = tx; camY = ty; }
   else { camX += (tx - camX) * 0.08; camY += (ty - camY) * 0.08; }
   const sc = sceneAt(Math.floor(c.gridCol), Math.floor(c.gridRow));

@@ -124,14 +124,29 @@ const InteractionSocialSystem = (() => {
   }
 
   function resolveRisk(initiator, target, tpl) {
+    const protocol = typeof SocialContextSystem === 'object' && SocialContextSystem
+      && typeof SocialContextSystem.evaluateProtocol === 'function'
+      ? SocialContextSystem.evaluateProtocol(
+      initiator,
+      target,
+      tpl,
+      { actionType: 'interaction' },
+    ) : null;
     const riskyDefaults = IdentityProtocolSystem?.cfg?.()?.riskyDefaults
       || DEFAULT_CONFIG.identityProtocolConfig?.riskyDefaults || {};
     const rd = tpl.risky_details || {};
-    let isRisky = !!tpl.is_risky;
-    let behavior = 'allowed';
+    let isRisky = protocol?.protocolBehavior === 'risky' || protocol?.protocolBehavior === 'conditional' || !!tpl.is_risky;
+    let behavior = protocol?.protocolBehavior || 'allowed';
     let riskHint = '';
 
-    if (tpl.contact_type && tpl.contact_type !== 'none' && IdentityProtocolSystem?.evaluateContactRisk) {
+    if (protocol?.protocolBehavior === 'forbidden') {
+      return { isRisky: true, forbidden: true, reason: protocol?.protocolReason || '礼法所禁', successRate: 0 };
+    }
+    if (protocol?.protocolBehavior === 'risky' || protocol?.protocolBehavior === 'conditional') {
+      riskHint = protocol.protocolReason || '逾矩有风险';
+    }
+
+    if ((!protocol || protocol?.protocolBehavior === 'allowed') && tpl?.contact_type && tpl.contact_type !== 'none' && IdentityProtocolSystem?.evaluateContactRisk) {
       const cr = IdentityProtocolSystem.evaluateContactRisk(initiator, target, tpl);
       behavior = cr.behavior;
       if (cr.behavior === 'forbidden') {
@@ -191,6 +206,17 @@ const InteractionSocialSystem = (() => {
 
   function emitRiskState(who, stateId, initiator, target, tpl, source) {
     if (!who || !stateId) return;
+    const ctx = {
+      source: `interaction-risk:${tpl.id}`,
+      reason: tpl.name,
+      otherId: who.id === initiator.id ? target.id : initiator.id,
+    };
+    if (typeof CharacterEffectSystem === 'object' && typeof CharacterEffectSystem.apply === 'function') {
+      CharacterEffectSystem.apply({
+        type: 'state', charId: who.id, stateId,
+      }, ctx);
+      return;
+    }
     applyState(who, stateId);
     EventBus.emit('interaction:state', {
       charId: who.id, stateId,
@@ -207,7 +233,13 @@ const InteractionSocialSystem = (() => {
       if (succSt) emitRiskState(initiator, succSt, initiator, target, tpl, 'risk_success');
       if (riskMeta?.witnessCount > 0) {
         log(`⚠ 虽成功，仍有${riskMeta.witnessCount}人在旁，恐生闲话。`, 'social');
-        changeAxis(initiator.id, target.id, 'trust', -2);
+        if (typeof CharacterEffectSystem === 'object' && typeof CharacterEffectSystem.apply === 'function') {
+          CharacterEffectSystem.apply({
+            type: 'axis', idA: initiator.id, idB: target.id, axis: 'trust', delta: -2,
+          }, { source: `interaction-risk:${tpl.id}`, reason: '旁人目击' });
+        } else {
+          changeAxis(initiator.id, target.id, 'trust', -2, { source: `interaction-risk:${tpl.id}`, reason: '旁人目击' });
+        }
       }
       return true;
     }
@@ -216,8 +248,15 @@ const InteractionSocialSystem = (() => {
     emitRiskState(initiator, failSt, initiator, target, tpl, 'risk_fail');
     if (riskMeta?.witnessCount > 0) {
       emitRiskState(target, 'offended', initiator, target, tpl, 'risk_witness');
-      changeAxis(initiator.id, target.id, 'affection', -8);
-      changeAxis(initiator.id, target.id, 'trust', -5);
+      if (typeof CharacterEffectSystem === 'object' && typeof CharacterEffectSystem.applyMany === 'function') {
+        CharacterEffectSystem.applyMany([
+          { type: 'axis', idA: initiator.id, idB: target.id, axis: 'affection', delta: -8 },
+          { type: 'axis', idA: initiator.id, idB: target.id, axis: 'trust', delta: -5 },
+        ], { source: `interaction-risk:${tpl.id}`, reason: '逾矩败露' });
+      } else {
+        changeAxis(initiator.id, target.id, 'affection', -8, { source: `interaction-risk:${tpl.id}`, reason: '逾矩败露' });
+        changeAxis(initiator.id, target.id, 'trust', -5, { source: `interaction-risk:${tpl.id}`, reason: '逾矩败露' });
+      }
       log(`⚠ ${initiator.short}对${target.short}「${tpl.name}」逾矩败露，旁人哗然！`, 'social');
       EventBus.emit('interaction:risky_fail', {
         initiatorId: initiator.id, targetId: target.id,

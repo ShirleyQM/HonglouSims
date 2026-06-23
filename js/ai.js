@@ -148,6 +148,8 @@ function initCharAI(c) {
     failedSceneCooldowns: {},
     recentActionCooldowns: {},
     dailySocialCounts: { day: gameDay, targets: {} },
+    dailyRoutine: { day: gameDay, completed: {} },
+    currentRoutineAnchor: null,
     needAlertCooldowns: {},
     completingPlayerQueue: false,
     decisionLog: [],
@@ -224,6 +226,40 @@ function aiDailySocialLimitReached(c, targetId) {
   return aiDailySocialCount(c, targetId) >= limit;
 }
 
+function ensureDailyRoutine(c) {
+  if (!c?.ai) return { day: gameDay, completed: {} };
+  if (!c.ai.dailyRoutine || c.ai.dailyRoutine.day !== gameDay) {
+    c.ai.dailyRoutine = { day: gameDay, completed: {} };
+  }
+  c.ai.dailyRoutine.completed ||= {};
+  return c.ai.dailyRoutine;
+}
+
+function aiRoutineCompleted(c, anchorId) {
+  return !!ensureDailyRoutine(c).completed?.[anchorId];
+}
+
+function markAIRoutineCompleted(c, anchorId, source = {}) {
+  if (!c?.ai || !anchorId || aiRoutineCompleted(c, anchorId)) return;
+  const store = ensureDailyRoutine(c);
+  store.completed[anchorId] = {
+    ts: getGameTimestamp(),
+    hour: gameHour,
+    minute: Math.floor(gameMinute || 0),
+    ...source,
+  };
+  markAIDirty(c);
+  EventBus.emit('ai:routine_completed', {
+    charId: c.id,
+    anchorId,
+    anchorName: source.anchorName || anchorId,
+    sourceType: source.sourceType || '',
+    category: source.category || '',
+    day: store.day,
+  });
+  if (c.ai.currentRoutineAnchor?.id === anchorId) c.ai.currentRoutineAnchor = null;
+}
+
 function recordAIActiveSocialStart(evt) {
   if (!evt?.autoSocial || !evt.initiatorId || !evt.targetId) return;
   const c = getChar(evt.initiatorId);
@@ -238,6 +274,13 @@ function recordAIActiveSocialStart(evt) {
     day: store.day,
   });
   markAIDirty(c);
+  completeRoutineAnchorsForAction(c, {
+    kind: 'interaction',
+    category: evt.category,
+    tags: ['social', evt.category].filter(Boolean),
+    sourceType: 'interaction',
+    actionId: evt.interactionId,
+  });
 }
 
 function applyAISocialTargetCooldown(evt) {
@@ -359,23 +402,207 @@ function currentAIScheduleWindow(hour = gameHour) {
   return rows.find(row => hourInScheduleWindow(hour, row.from, row.to)) || null;
 }
 
+function hourToMinutes(hour) {
+  return Math.round(((hour || 0) % 24) * 60);
+}
+
+function currentMinuteOfDay() {
+  return (gameHour % 24) * 60 + Math.floor(gameMinute || 0);
+}
+
+function wrapDayMinute(minute) {
+  return ((Math.round(minute) % 1440) + 1440) % 1440;
+}
+
+function minuteInWindow(minute, from, to) {
+  const m = wrapDayMinute(minute);
+  const a = wrapDayMinute(from);
+  const b = wrapDayMinute(to);
+  if (a <= b) return m >= a && m < b;
+  return m >= a || m < b;
+}
+
+function scheduleEffects(c) {
+  const out = {
+    sleepShiftMinutes: 0,
+    earlyMinutes: 0,
+    deadlineRamp: 1,
+    earlySuppression: 1,
+    hygieneWeightMultiplier: 1,
+    sleepWeightMultiplier: 1,
+    morningFocusMultiplier: 1,
+    wakeEnergyRatioBonus: 0,
+  };
+  for (const row of TraitEffectSystem?.effectsOf?.(c) || []) {
+    const schedule = row.effects?.schedule || {};
+    out.sleepShiftMinutes += schedule.sleepShiftMinutes || 0;
+    out.earlyMinutes = Math.max(out.earlyMinutes, schedule.earlyMinutes || 0);
+    out.deadlineRamp *= schedule.deadlineRamp || 1;
+    out.earlySuppression *= schedule.earlySuppression || 1;
+    out.hygieneWeightMultiplier *= schedule.hygieneWeightMultiplier || 1;
+    out.sleepWeightMultiplier *= schedule.sleepWeightMultiplier || 1;
+    out.morningFocusMultiplier *= schedule.morningFocusMultiplier || 1;
+    out.wakeEnergyRatioBonus += schedule.wakeEnergyRatioBonus || 0;
+  }
+  return out;
+}
+
+function shiftedAnchorWindow(c, anchor) {
+  const effects = scheduleEffects(c);
+  let shift = 0;
+  if (anchor.habitShift === 'sleep') shift += effects.sleepShiftMinutes;
+  const early = effects.earlyMinutes || 0;
+  return {
+    from: hourToMinutes(anchor.from) + shift - early,
+    to: hourToMinutes(anchor.to) + shift,
+    effects,
+  };
+}
+
+function currentRoutineAnchors(c) {
+  const rows = getAIConfig().routineAnchors || [];
+  const now = currentMinuteOfDay();
+  return rows.filter(anchor => {
+    const win = shiftedAnchorWindow(c, anchor);
+    return minuteInWindow(now, win.from, win.to);
+  });
+}
+
+function routineAnchorProgress(c, anchor) {
+  const win = shiftedAnchorWindow(c, anchor);
+  const now = currentMinuteOfDay();
+  const from = wrapDayMinute(win.from);
+  const to = wrapDayMinute(win.to);
+  const span = from <= to ? Math.max(1, to - from) : Math.max(1, 1440 - from + to);
+  const elapsed = from <= to
+    ? Math.max(0, now - from)
+    : (now >= from ? now - from : 1440 - from + now);
+  return Math.max(0, Math.min(1, elapsed / span));
+}
+
+function candMatchesRoutineAnchor(cand, anchor) {
+  if (!cand || !anchor) return false;
+  const completeBy = anchor.completeBy || {};
+  const tags = new Set(cand.tags || []);
+  if (cand.kind === 'interaction') tags.add('social');
+  if (cand.kind === 'seek') tags.add('social');
+  if (cand.questRelated || cand.questUrgent) tags.add('quest');
+  const categories = completeBy.categories || [];
+  const expectedTags = completeBy.tags || [];
+  if (categories.includes(cand.category)) return true;
+  for (const tag of expectedTags) if (tags.has(tag)) return true;
+  return false;
+}
+
+function routineNeedPressure(c, anchor) {
+  const coeffs = calcNeedCoeffs(c);
+  let pressure = 1;
+  for (const key of anchor.needs || []) {
+    const max = Math.max(1, coeffs[key]?.max ?? 100);
+    const ratio = (c.needs[key] ?? 0) / max;
+    if (key === 'hunger') pressure = Math.max(pressure, ratio <= 0.35 ? 1.45 : ratio <= 0.55 ? 1.25 : 1);
+    if (key === 'energy') pressure = Math.max(pressure, ratio <= 0.35 ? 1.35 : ratio <= 0.55 ? 1.15 : 1);
+    if (key === 'hygiene') pressure = Math.max(pressure, ratio <= 0.45 ? 1.35 : ratio <= 0.7 ? 1.12 : 1);
+    if (key === 'social') pressure = Math.max(pressure, ratio <= 0.4 ? 1.2 : 1);
+    if (key === 'fun') pressure = Math.max(pressure, ratio <= 0.4 ? 1.15 : 1);
+    if (key === 'mood') pressure = Math.max(pressure, ratio <= 0.35 ? 1.2 : 1);
+  }
+  return pressure;
+}
+
+function routineHabitMultiplier(c, anchor) {
+  const effects = scheduleEffects(c);
+  let factor = 1;
+  if (anchor.id === 'morning_hygiene') factor *= effects.hygieneWeightMultiplier;
+  if (anchor.id === 'night_sleep') factor *= effects.sleepWeightMultiplier;
+  if (anchor.id === 'morning_focus') factor *= effects.morningFocusMultiplier;
+  if (effects.deadlineRamp !== 1 || effects.earlySuppression !== 1) {
+    const progress = routineAnchorProgress(c, anchor);
+    if (progress < 0.45) factor *= effects.earlySuppression;
+    factor *= 1 + (effects.deadlineRamp - 1) * progress;
+  }
+  return Math.max(0.25, Math.min(2, factor));
+}
+
+function isMealRoutine(anchor) {
+  return ['breakfast', 'lunch', 'dinner'].includes(anchor?.id);
+}
+
+function calcRoutineFactor(c, raw, tags) {
+  const anchors = currentRoutineAnchors(c);
+  if (!anchors.length) return { factor: 1, anchor: null };
+  let factor = 1;
+  let best = null;
+  for (const anchor of anchors) {
+    const completed = aiRoutineCompleted(c, anchor.id);
+    const localTags = [...tags];
+    if (raw.kind === 'interaction' || raw.kind === 'seek') localTags.push('social', raw.category);
+    if (raw.questRelated || raw.questUrgent) localTags.push('quest');
+    let local = applyTagMods(1, localTags, completed ? { cut: anchor.completeCut || {} } : anchor);
+    if (raw.kind === 'furniture') local = applyTagMods(local, [raw.category || ''], completed ? { cut: anchor.completeCut || {} } : anchor);
+    if (!completed && isMealRoutine(anchor) && raw.category === 'snack' && !c.ai?.urgentNeed) {
+      const coeffs = calcNeedCoeffs(c);
+      const hungerRatio = (c.needs.hunger ?? 0) / Math.max(1, coeffs.hunger?.max ?? 100);
+      local *= hungerRatio <= 0.25 ? 0.75 : 0.18;
+    }
+    if (!completed && candMatchesRoutineAnchor(raw, anchor)) {
+      local *= routineNeedPressure(c, anchor);
+      local *= routineHabitMultiplier(c, anchor);
+    } else if (!completed && ['breakfast', 'lunch', 'dinner', 'morning_hygiene', 'night_sleep'].includes(anchor.id)) {
+      if (raw.kind === 'interaction' || raw.kind === 'seek' || raw.kind === 'wander') local *= 0.25;
+      else if (raw.kind === 'furniture') local *= 0.55;
+    }
+    local = Math.max(0.04, Math.min(5.5, local));
+    factor *= local;
+    if (!best || Math.abs(local - 1) > Math.abs(best.factor - 1)) {
+      best = { id: anchor.id, name: anchor.name, factor: local, completed };
+    }
+  }
+  return {
+    factor: Math.max(0.03, Math.min(6, factor)),
+    anchor: best && Math.abs(best.factor - 1) >= 0.08 ? best : null,
+  };
+}
+
+function completeRoutineAnchorsForAction(c, action = {}) {
+  if (!c?.ai) return;
+  for (const anchor of currentRoutineAnchors(c)) {
+    if (aiRoutineCompleted(c, anchor.id)) continue;
+    if (!candMatchesRoutineAnchor(action, anchor)) continue;
+    markAIRoutineCompleted(c, anchor.id, {
+      anchorName: anchor.name,
+      sourceType: action.sourceType || action.kind || '',
+      category: action.category || '',
+      actionId: action.actionId || '',
+    });
+  }
+}
+
 function calcScheduleFactor(c, raw, tags) {
-  const win = currentAIScheduleWindow();
-  if (!win) return { factor: 1, window: null };
-  let factor = applyTagMods(1, tags, win);
-  const cat = raw.category || '';
-  if (raw.kind === 'furniture') {
-    const inst = getInstance(raw.instanceId);
-    const tpl = inst ? getTemplate(inst.templateId) : null;
-    if (tpl?.category) factor = applyTagMods(factor, [tpl.category], win);
+  const rows = (getAIConfig().scheduleWindows || []).filter(win => hourInScheduleWindow(gameHour, win.from, win.to));
+  if (!rows.length) return { factor: 1, window: null };
+  let factor = 1;
+  const matched = [];
+  for (const win of rows) {
+    let local = applyTagMods(1, tags, win);
+    const cat = raw.category || '';
+    if (raw.kind === 'furniture') {
+      const inst = getInstance(raw.instanceId);
+      const tpl = inst ? getTemplate(inst.templateId) : null;
+      if (tpl?.category) local = applyTagMods(local, [tpl.category], win);
+    }
+    if (raw.kind === 'interaction' || raw.kind === 'seek') {
+      local = applyTagMods(local, ['social', cat], win);
+    }
+    if (raw.questRelated || raw.questUrgent) local = applyTagMods(local, ['quest'], win);
+    factor *= local;
+    if (Math.abs(local - 1) >= 0.08) matched.push({ id: win.id, name: win.name, factor: local });
   }
-  if (raw.kind === 'interaction' || raw.kind === 'seek') {
-    factor = applyTagMods(factor, ['social', cat], win);
-  }
-  if (raw.questRelated || raw.questUrgent) factor = applyTagMods(factor, ['quest'], win);
   return {
     factor: Math.max(0.05, Math.min(4.5, factor)),
-    window: { id: win.id, name: win.name },
+    window: matched.length
+      ? matched.sort((a, b) => Math.abs(b.factor - 1) - Math.abs(a.factor - 1))[0]
+      : { id: rows[0].id, name: rows[0].name },
   };
 }
 
@@ -706,6 +933,7 @@ function candidateScoreFactors(raw) {
     questPressure: roundedFactor(raw.questPressureFactor),
     relation: roundedFactor(raw.relationFactor),
     schedule: roundedFactor(raw.scheduleFactor),
+    routine: roundedFactor(raw.routineFactor),
     dailySocial: roundedFactor(raw.dailySocialFactor),
   };
 }
@@ -819,6 +1047,9 @@ function finalizeCandidate(c, raw, fastOnly) {
   const schedule = calcScheduleFactor(c, raw, tags);
   raw.scheduleFactor = schedule.factor;
   raw.scheduleWindow = schedule.window;
+  const routine = calcRoutineFactor(c, raw, tags);
+  raw.routineFactor = routine.factor;
+  raw.routineAnchor = routine.anchor;
   raw.memoryFactor = calcMemoryFactor(c, tags);
   raw.distanceFactor = distanceFactor;
   raw.specialtyFactor = CharSpecialtySystem.calcFactor(c, raw, tags);
@@ -844,7 +1075,7 @@ function finalizeCandidate(c, raw, fastOnly) {
     * raw.homewardFactor * raw.questFactor * raw.needDriveFactor
     * raw.satiationFactor * raw.failedActionFactor * raw.recentActionFactor
     * raw.questPressureFactor * raw.relationFactor * raw.scheduleFactor
-    * raw.dailySocialFactor;
+    * raw.routineFactor * raw.dailySocialFactor;
   raw.scoreFactors = candidateScoreFactors(raw);
   raw.scoreHints = [...(raw.scoreHints || []), ...candidateScoreHints(raw)].slice(0, 6);
   return raw;
@@ -1135,6 +1366,7 @@ function logAIDecision(c, channel, cand, replaced) {
     scoreHints: cand.scoreHints || candidateScoreHints(cand),
     traitEffects: TraitEffectSystem?.decisionTrace?.(cand) || [],
     scheduleWindow: cand.scheduleWindow || null,
+    routineAnchor: cand.routineAnchor || null,
     ts: getGameTimestamp(),
   });
   if (c.ai.decisionLog.length > 12) c.ai.decisionLog.pop();
@@ -1151,6 +1383,7 @@ function logAIDecision(c, channel, cand, replaced) {
     scoreHints: cand.scoreHints || candidateScoreHints(cand),
     traitEffects: TraitEffectSystem?.decisionTrace?.(cand) || [],
     scheduleWindow: cand.scheduleWindow || null,
+    routineAnchor: cand.routineAnchor || null,
   });
 }
 
@@ -1171,6 +1404,7 @@ function aiReplaceQueue(c, cand, channel) {
   item.aiGenerated = true;
   item.urgent = !!c.ai?.urgentNeed;
   item.aiCandidateKey = cand.key;
+  c.ai.currentRoutineAnchor = cand.routineAnchor?.id ? cand.routineAnchor : null;
   markRecentAICandidate(c, cand);
   cancelAction(c);
   c.actionQueue = [];
@@ -1430,7 +1664,8 @@ function tryWakeFromSleep(c) {
   if (c.ai?.state !== AI_STATE.SLEEPING) return;
   const cfg = getAIConfig();
   const cf = calcNeedCoeffs(c);
-  if (c.needs.energy / cf.energy.max >= cfg.sleepWakeEnergyRatio || (gameHour >= 8 && gameHour < 22)) {
+  const wakeRatio = Math.min(1.08, (cfg.sleepWakeEnergyRatio || 0.9) + (scheduleEffects(c).wakeEnergyRatioBonus || 0));
+  if (c.needs.energy / cf.energy.max >= wakeRatio || (gameHour >= 8 && gameHour < 22)) {
     cancelAction(c);
     c.actionQueue = [];
     setAIState(c, AI_STATE.IDLE);
@@ -1462,7 +1697,11 @@ function fastChannelTick(c) {
   const cfg = getAIConfig();
   const top = [...c.ai.cache.candidates].sort((a, b) => b.finalWeight - a.finalWeight).slice(0, 3);
   const curW = getCurrentActionWeight(c) || 0.01;
-  const threshold = candidateInterruptThreshold(c, top[0], 'fast');
+  let threshold = candidateInterruptThreshold(c, top[0], 'fast');
+  const activeRoutine = c.ai.currentRoutineAnchor;
+  if (activeRoutine?.id && !aiRoutineCompleted(c, activeRoutine.id) && top[0]?.routineAnchor?.id !== activeRoutine.id) {
+    threshold = Math.max(threshold, 2.4);
+  }
   const replaced = !!(top[0] && top[0].finalWeight > curW * threshold);
   if (replaced && typeof BehaviorTelemetry !== 'undefined')
     BehaviorTelemetry.recordEvaluation(c, 'fast', top[0], {
@@ -1504,7 +1743,11 @@ function slowChannelTick(c) {
   const cfg = getAIConfig();
   const curW = getCurrentActionWeight(c);
   const busy = c.action || c.actionQueue.length;
-  const threshold = candidateInterruptThreshold(c, picked, 'slow');
+  let threshold = candidateInterruptThreshold(c, picked, 'slow');
+  const activeRoutine = c.ai.currentRoutineAnchor;
+  if (busy && activeRoutine?.id && !aiRoutineCompleted(c, activeRoutine.id) && picked?.routineAnchor?.id !== activeRoutine.id) {
+    threshold = Math.max(threshold, 2.4);
+  }
   const replaced = !busy || picked.finalWeight > curW * threshold;
   if (typeof BehaviorTelemetry !== 'undefined') BehaviorTelemetry.recordEvaluation(c, 'slow', picked, {
     busy: !!busy,
@@ -1555,12 +1798,29 @@ function initAISystem() {
   EventBus.on('state:remove', e => { const c = getChar(e.charId); if (c) markAIDirty(c); });
   EventBus.on('time:period', () => CHARS.forEach(c => markAIDirty(c)));
   EventBus.on('time:day', () => CHARS.forEach(c => {
-    if (c.ai) c.ai.dailySocialCounts = { day: gameDay, targets: {} };
+    if (c.ai) {
+      c.ai.dailySocialCounts = { day: gameDay, targets: {} };
+      c.ai.dailyRoutine = { day: gameDay, completed: {} };
+      c.ai.currentRoutineAnchor = null;
+    }
     markAIDirty(c);
   }));
   EventBus.on('memory:add', e => { const c = getChar(e.charId); if (c) markAIDirty(c); });
   EventBus.on('interaction:started', recordAIActiveSocialStart);
   EventBus.on('interaction:complete', applyAISocialTargetCooldown);
+  const recordFurnitureRoutine = e => {
+    const c = getChar(e.charId);
+    if (!c?.ai || CHARS.indexOf(c) === selectedIdx) return;
+    completeRoutineAnchorsForAction(c, {
+      kind: 'furniture',
+      category: e.category,
+      tags: [e.category, e.category === 'bed' ? 'sleep' : '', ['meal', 'snack', 'kitchen', 'table'].includes(e.category) ? 'hunger' : '', ['bath', 'wash', 'wardrobe'].includes(e.category) ? 'hygiene' : ''].filter(Boolean),
+      sourceType: 'furniture',
+      actionId: e.actionId,
+    });
+  };
+  EventBus.on('furniture:use_started', recordFurnitureRoutine);
+  EventBus.on('furniture:complete', recordFurnitureRoutine);
   EventBus.on('queue:failed', e => {
     const c = getChar(e.charId);
     if (!c?.ai) return;
@@ -1569,6 +1829,7 @@ function initAISystem() {
       c.ai.failedActionCooldowns ||= {};
       c.ai.failedActionCooldowns[e.candidateKey] = getGameTimestamp() + (severe ? 180 : 45);
     }
+    c.ai.currentRoutineAnchor = null;
     if (e.sceneId && /无法进入|无权|擅入/.test(e.reason || '')) {
       c.ai.failedSceneCooldowns ||= {};
       c.ai.failedSceneCooldowns[e.sceneId] = getGameTimestamp() + 240;
@@ -1637,10 +1898,22 @@ function migrateConfig(cfg) {
     });
   }
   cfg.needDefs = cfg.needDefs || [];
+  const legacyNeedLabels = {
+    hunger: { labels: ['饥'], names: ['饥饿'] },
+    energy: { labels: ['倦'], names: ['精力'] },
+    fun: { labels: ['闷'], names: ['意趣'] },
+    hygiene: { labels: ['洁'], names: ['洁净'] },
+    social: { labels: ['交游'], names: ['交游'] },
+  };
   for (const def of DEFAULT_CONFIG.needDefs || []) {
     const current = cfg.needDefs.find(row => row.key === def.key);
     if (!current) cfg.needDefs.push(JSON.parse(JSON.stringify(def)));
-    else Object.assign(current, { ...def, ...current });
+    else {
+      Object.assign(current, { ...def, ...current });
+      const legacy = legacyNeedLabels[def.key];
+      if (legacy?.labels.includes(current.label)) current.label = def.label;
+      if (legacy?.names.includes(current.name) && current.name !== def.name) current.name = def.name;
+    }
   }
   cfg.needDecayPerGameDay = {
     ...DEFAULT_CONFIG.needDecayPerGameDay,
@@ -1797,6 +2070,14 @@ function migrateConfig(cfg) {
     cfg.lifePathConfig.stages = { ...def.stages, ...cfg.lifePathConfig.stages };
     cfg.lifePathConfig.storyNodes = { ...def.storyNodes, ...cfg.lifePathConfig.storyNodes };
     cfg.lifePathConfig.autoStartChars = { ...def.autoStartChars, ...cfg.lifePathConfig.autoStartChars };
+  }
+  if (!cfg.reputationDomainConfig) {
+    cfg.reputationDomainConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG.reputationDomainConfig || {}));
+  } else {
+    const defRep = DEFAULT_CONFIG.reputationDomainConfig || {};
+    cfg.reputationDomainConfig.domains = { ...defRep.domains, ...cfg.reputationDomainConfig.domains };
+    cfg.reputationDomainConfig.pathDomains = { ...defRep.pathDomains, ...cfg.reputationDomainConfig.pathDomains };
+    cfg.reputationDomainConfig.rewardDomains = { ...defRep.rewardDomains, ...cfg.reputationDomainConfig.rewardDomains };
   }
   if (!cfg.moneyConfig) cfg.moneyConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG.moneyConfig || {}));
   if (!cfg.fortuneConfig) cfg.fortuneConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG.fortuneConfig || {}));

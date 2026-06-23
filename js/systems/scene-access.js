@@ -48,7 +48,7 @@ const SceneAccessSystem = (() => {
           const sid = QuestSystem.resolveSceneId(cond.target, inst);
           if (sid) ids.add(sid);
         }
-        if (cond.type === 'INTERACT_WITH' || cond.type === 'FOLLOW_CHARACTER' || cond.type === 'INTERACT_WITH_DURATION') {
+        if (cond.type === 'INTERACT_WITH' || cond.type === 'INTERACT_WITH_DURATION') {
           const tid = QuestSystem.resolveTargetCharId(cond.target, inst);
           const target = getChar(tid);
           if (target) ids.add(target.sceneId);
@@ -145,6 +145,9 @@ const SceneAccessSystem = (() => {
   function checkPathAccess(c, path, endCol, endRow) {
     if (!path) return { ok: false, reason: 'no_path' };
     for (const sid of scenesOnPath(path, endCol, endRow)) {
+      // 若角色已身处一个后来变为无权的场景，允许其沿路离开；
+      // 否则会出现“越无权越出不来”的软锁。
+      if (sid === c.sceneId) continue;
       const r = canEnterScene(c, sid);
       if (r.ok === false) return { ok: false, reason: 'denied', sceneId: sid, scene: getScene(sid) };
       if (r.ok === 'attempt') return { ok: 'attempt', reason: 'unauthorized', sceneId: sid, scene: r.scene, type: r.type };
@@ -360,13 +363,16 @@ const SceneAccessSystem = (() => {
 
   function tryAISendInvite(inviter) {
     if (!isAIControlled(inviter) || Math.random() > (cfg().inviteBaseChance || 0.04)) return;
-    const others = charsInScene(inviter.sceneId).filter(o => o.id !== inviter.id);
+    const inScene = charsInScene(inviter.sceneId);
+    if (inScene.length >= 5) return; // 场景已拥挤则不再邀约
+    const others = inScene.filter(o => o.id !== inviter.id);
     if (!others.length) return;
     const target = others[Math.floor(Math.random() * others.length)];
     if (getRelationValue(inviter.id, target.id) < 30) return;
     const inv = grantInvitation(inviter, target, inviter.sceneId);
     let acceptChance = 0.5 + getRelationValue(inviter.id, target.id) / 100 * 0.3;
     if (!target.action && !target.actionQueue.length) acceptChance += 0.2;
+    acceptChance = TraitEffectSystem?.invitationAcceptanceChance?.(target, acceptChance) ?? acceptChance;
     if (Math.random() < acceptChance) acceptInvitation(inv);
     else declineInvitation(inv, '婉拒');
   }
@@ -415,7 +421,9 @@ const SceneAccessSystem = (() => {
         sceneId,
         sceneType: type,
       });
-      if (intr?.relationDelta) changeRelation(guard.id, c.id, intr.relationDelta);
+      if (intr?.relationDelta) CharacterEffectSystem.apply({
+        type: 'relation', idA: guard.id, idB: c.id, delta: intr.relationDelta,
+      }, { source: 'scene-access:intrusion', reason: `擅入${sc?.name || '受限场景'}` });
     }
     const bubble = (intr?.bubble || '站住！不得擅入。')
       .replace('{owner}', ownerFamilyName(sc))
@@ -473,7 +481,7 @@ const SceneAccessSystem = (() => {
     unsubs.forEach(fn => { if (typeof fn === 'function') fn(); });
     unsubs = [];
     unsubs.push(EventBus.on('scene:entered', onSceneEntered));
-    unsubs.push(EventBus.on('time:minute', expireInvitations));
+    unsubs.push(EventBus.on('time:tick', expireInvitations));
   }
 
   function serialize() {
@@ -512,6 +520,8 @@ window.SceneAccessSystem = SceneAccessSystem;
 function migrateSceneAccessFields(cfg) {
   if (!cfg.sceneAccessConfig)
     cfg.sceneAccessConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG.sceneAccessConfig));
+  const servantPriv = cfg.sceneAccessConfig.privileges?.find(p => p.role === '仆从');
+  if (servantPriv) servantPriv.allowFollowEntry = true;
   if (!cfg.scenes?.length) {
     cfg.scenes = JSON.parse(JSON.stringify(DEFAULT_CONFIG.scenes));
     cfg.connections = JSON.parse(JSON.stringify(DEFAULT_CONFIG.connections));
@@ -531,4 +541,3 @@ function migrateSceneAccessFields(cfg) {
   if (!cfg.furnitureInstances?.length)
     cfg.furnitureInstances = JSON.parse(JSON.stringify(DEFAULT_CONFIG.furnitureInstances));
 }
-

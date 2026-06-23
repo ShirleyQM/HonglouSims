@@ -78,6 +78,59 @@ const InteractionScoreSystem = (() => {
     return null;
   }
 
+  function relationThresholdFactor(value, min, max) {
+    if (min != null) return Math.max(0.15, Math.min(1.8, 1 + (value - min) / 50));
+    if (max != null) return Math.max(0.15, Math.min(1.8, 1 + (max - value) / 50));
+    return 1;
+  }
+
+  function axisValue(initiator, target, axis) {
+    if (axis === 'score') return getRelationValue(initiator.id, target.id);
+    if (axis === 'intimacy') return getRelationAxis(initiator.id, target.id, 'friendship');
+    return getRelationAxis(initiator.id, target.id, axis);
+  }
+
+  function relationConditionFactor(initiator, target, tpl) {
+    const factors = [];
+    const uc = tpl.unlock_conditions || {};
+    const pairs = [
+      ['min_score', 'score'],
+      ['min_affection', 'affection'],
+      ['min_trust', 'trust'],
+      ['min_friendship', 'friendship'],
+      ['min_intimacy', 'intimacy'],
+    ];
+    for (const [key, axis] of pairs) {
+      if (uc[key] == null) continue;
+      factors.push(relationThresholdFactor(axisValue(initiator, target, axis), uc[key], null));
+    }
+    for (const [axis, cond] of Object.entries(tpl.axisReq || {})) {
+      if (!cond) continue;
+      factors.push(relationThresholdFactor(axisValue(initiator, target, axis), cond.min, cond.max));
+    }
+    if (!factors.length) return 1;
+    return factors.reduce((acc, v) => acc * v, 1);
+  }
+
+  function socialWillingness(initiator, target, tpl) {
+    const categoryFactor = (typeof AiDrama !== 'undefined' && AiDrama?.socialFactor)
+      ? AiDrama.socialFactor(initiator, {
+      kind: 'interaction',
+      category: tpl.category,
+      targetCharId: target.id,
+      tags: tpl.tags || [],
+    }) : 1;
+    const thresholdFactor = relationConditionFactor(initiator, target, tpl);
+    const raw = categoryFactor * thresholdFactor;
+    const strength = Math.max(0, Math.min(1, raw / 3));
+    let label = '平';
+    if (strength >= 0.78) label = '高';
+    else if (strength >= 0.42) label = '中';
+    else if (strength >= 0.18) label = '低';
+    else label = '冷';
+    return { raw, strength, label, categoryFactor, thresholdFactor };
+  }
+
   function lowScoreHint(tpl, initiator, target) {
     const onLow = resolveOnLowScore(tpl, initiator, target);
     const lowState = onLow?.effects?.find(e => e.system === 'state')?.stateId;
@@ -111,7 +164,7 @@ const InteractionScoreSystem = (() => {
   }
 
   return {
-    cfg, getMinScore, resolveOnLowScore, checkSoftLock, lowScoreHint,
+    cfg, getMinScore, resolveOnLowScore, checkSoftLock, lowScoreHint, socialWillingness,
     resolveRiskSuccessState, resolveRiskFailState,
   };
 })();

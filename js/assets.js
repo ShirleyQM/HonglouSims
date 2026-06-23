@@ -1,0 +1,226 @@
+/* ═══════════════════ ASSET LOADER ═══════════════════ */
+/* 预加载精灵图 + manifest，供 draw.js 逐帧动画使用。
+   无资源 / 加载失败时 ready 保持 false，draw.js 自动回退到色块绘制。 */
+const AssetSystem = (() => {
+  let ready = false;
+  let manifest = null;
+  const sheets = {};   // key -> HTMLImageElement（仅含已成功加载的）
+  const avatarUrls = {}; // charKey -> src 路径
+  const portraitUrls = {}; // charKey -> HUD 半身立绘路径
+  const roomBackgrounds = {}; // sceneId -> HTMLImageElement
+  const tileImages = {}; // groundType -> HTMLImageElement
+
+  function loadImage(src) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => { console.warn('[assets] 图片加载失败：', src); resolve(null); };
+      img.src = src;
+    });
+  }
+
+  async function preload(manifestPath = 'assets/manifest.json') {
+    try {
+      const res = await fetch(manifestPath, { cache: 'no-cache' });
+      if (!res.ok) throw new Error('manifest HTTP ' + res.status);
+      manifest = await res.json();
+    } catch (e) {
+      console.warn('[assets] 未加载 manifest，使用色块绘制：', e.message);
+      return false;
+    }
+    const entries = Object.entries(manifest.sheets || {});
+    await Promise.all(entries.map(async ([key, def]) => {
+      const img = await loadImage(def.src);
+      if (img) sheets[key] = img;
+    }));
+    const avatarEntries = Object.entries(manifest.avatars || {});
+    await Promise.all(avatarEntries.map(async ([key, def]) => {
+      const img = await loadImage(def.src);
+      if (img) avatarUrls[key] = def.src;
+    }));
+    const portraitEntries = Object.entries(manifest.portraits || {});
+    await Promise.all(portraitEntries.map(async ([key, def]) => {
+      const src = def.hud || def.portrait;
+      const img = src ? await loadImage(src) : null;
+      if (img) portraitUrls[key] = src;
+    }));
+    const roomEntries = Object.entries(manifest.roomBackgrounds || {});
+    await Promise.all(roomEntries.map(async ([key, def]) => {
+      const img = def.src ? await loadImage(def.src) : null;
+      if (img) roomBackgrounds[key] = img;
+    }));
+    const tileEntries = Object.entries(manifest.tiles?.types || {});
+    await Promise.all(tileEntries.map(async ([key, def]) => {
+      const img = def.src ? await loadImage(def.src) : null;
+      if (img) tileImages[key] = img;
+    }));
+    ready = Object.keys(sheets).length > 0;
+    if (ready) console.log(`[assets] 已加载 ${Object.keys(sheets).length} 张精灵图:`, Object.keys(sheets).join(', '));
+    if (Object.keys(avatarUrls).length) console.log(`[assets] 已加载 ${Object.keys(avatarUrls).length} 张头像:`, Object.keys(avatarUrls).join(', '));
+    if (Object.keys(portraitUrls).length) console.log(`[assets] 已加载 ${Object.keys(portraitUrls).length} 张 HUD 立绘:`, Object.keys(portraitUrls).join(', '));
+    if (Object.keys(roomBackgrounds).length) console.log(`[assets] 已加载 ${Object.keys(roomBackgrounds).length} 张房间背景:`, Object.keys(roomBackgrounds).join(', '));
+    if (Object.keys(tileImages).length) console.log(`[assets] 已加载 ${Object.keys(tileImages).length} 张地面 tile:`, Object.keys(tileImages).join(', '));
+    if (typeof uiDirty !== 'undefined') uiDirty = true;
+    return ready;
+  }
+
+  /** 角色 → 精灵表 key（可配置角色专属图，否则按性别） */
+  const CHAR_SHEET = { daiyu: 'daiyu' };
+
+  function sheetKeyForChar(c) {
+    if (CHAR_SHEET[c.id]) return CHAR_SHEET[c.id];
+    return c.gender === '男' ? 'male' : 'female';
+  }
+
+  function getSheetDef(key) {
+    return manifest?.sheets?.[key] || null;
+  }
+
+  function getSheet(key) { return sheets[key] || null; }
+
+  /** 家具类别 → 用家具时的动画 clip 名（无映射则返回 'rest'） */
+  function furnitureClip(category) {
+    return (manifest?.furnitureAnim && manifest.furnitureAnim[category]) || 'rest';
+  }
+
+  /* ── 程序化地砖（无外部图片，按调色板生成可平铺纹理）── */
+  const tileCache = {};
+
+  function clampByte(v) { return v < 0 ? 0 : v > 255 ? 255 : v | 0; }
+
+  /** 调整 hex 颜色明度，f>0 提亮，f<0 压暗 */
+  function shade(hex, f) {
+    const n = parseInt(hex.slice(1), 16);
+    let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    if (f >= 0) { r += (255 - r) * f; g += (255 - g) * f; b += (255 - b) * f; }
+    else { r *= (1 + f); g *= (1 + f); b *= (1 + f); }
+    return `rgb(${clampByte(r)},${clampByte(g)},${clampByte(b)})`;
+  }
+
+  /** 确定性噪声 [0,1)，按像素+种子稳定，保证每帧纹理一致 */
+  function noise(x, y, seed) {
+    let h = x * 374761393 + y * 668265263 + seed * 144126731;
+    h = (h ^ (h >> 13)) * 1274126177;
+    return ((h ^ (h >> 16)) >>> 0) / 4294967295;
+  }
+
+  function paintTile(g, size, def, seed) {
+    const base = def.base;
+    g.fillStyle = base;
+    g.fillRect(0, 0, size, size);
+    const put = (x, y, color) => { g.fillStyle = color; g.fillRect(x, y, 1, 1); };
+    if (def.style === 'grass') {
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+        const r = noise(x, y, seed);
+        if (r < 0.10) put(x, y, shade(base, -0.18));
+        else if (r > 0.92) put(x, y, shade(base, 0.22));
+        else if (r > 0.85) put(x, y, shade(base, 0.10));
+      }
+    } else if (def.style === 'flagstone') {
+      const seamX = size / 2, seamY = size / 2;
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+        if (x === 0 || y === 0 || x === seamX || y === seamY) { put(x, y, shade(base, -0.35)); continue; }
+        const blk = ((x < seamX ? 0 : 1) + (y < seamY ? 0 : 1) * 2);
+        const tint = [-0.04, 0.05, 0.02, -0.07][blk];
+        const r = noise(x, y, seed);
+        put(x, y, shade(base, tint + (r > 0.9 ? 0.12 : r < 0.08 ? -0.1 : 0)));
+      }
+    } else if (def.style === 'plank_h' || def.style === 'plank_v') {
+      const horiz = def.style === 'plank_h';
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+        const along = horiz ? x : y, across = horiz ? y : x;
+        const seam = across % 8 === 0;
+        const highlight = across % 8 === 1;
+        const grain = noise(along, Math.floor(across / 8), seed);
+        let f = 0;
+        if (seam) f = -0.28;
+        else if (highlight) f = 0.10;
+        else f = grain > 0.85 ? 0.07 : grain < 0.12 ? -0.08 : 0;
+        if (along % 16 === 0) f = -0.2;
+        put(x, y, shade(base, f));
+      }
+    }
+  }
+
+  /** 取地砖纹理 canvas。grass/stone/corridor 用 manifest 调色板；
+      其余（wood 等）以场景 bg 为底色生成木地板纹理。无 manifest.tiles 则返回 null（回退色块）。*/
+  function getGroundTile(groundType, scene) {
+    if (typeof document === 'undefined' || !manifest?.tiles) return null;
+    const types = manifest.tiles.types || {};
+    let def = types[groundType];
+    let base;
+    if (def) { base = def.base; }
+    else { def = types.wood || { style: 'plank_v' }; base = (scene && scene.bg) || def.base || '#4a3028'; }
+    const size = manifest.tiles.size || 32;
+    const img = tileImages[groundType];
+    if (img) {
+      const key = `img:${groundType}:${size}`;
+      if (tileCache[key]) return tileCache[key];
+      const cv = document.createElement('canvas');
+      cv.width = cv.height = size;
+      const g = cv.getContext('2d');
+      g.imageSmoothingEnabled = true;
+      g.drawImage(img, 0, 0, size, size);
+      tileCache[key] = cv;
+      return cv;
+    }
+    const key = (def.style || 'flat') + ':' + base;
+    if (tileCache[key]) return tileCache[key];
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = size;
+    const g = cv.getContext('2d');
+    let seed = 0;
+    for (let i = 0; i < base.length; i++) seed = (seed * 31 + base.charCodeAt(i)) >>> 0;
+    paintTile(g, size, { base, style: def.style }, seed);
+    tileCache[key] = cv;
+    return cv;
+  }
+
+  function furnitureShade() {
+    return manifest?.furniture || { topShade: 0.18, bottomShade: -0.22 };
+  }
+
+  function avatarUrlForChar(c) {
+    if (!c?.id) return null;
+    return avatarUrls[c.id] || null;
+  }
+
+  function avatarUrl(charId) {
+    return avatarUrls[charId] || null;
+  }
+
+  function portraitUrlForChar(c) {
+    return c?.id ? portraitUrls[c.id] || null : null;
+  }
+
+  function fullPortraitUrlForChar(c) {
+    return c?.id ? (manifest?.portraits?.[c.id]?.portrait || portraitUrls[c.id] || null) : null;
+  }
+
+  function roomBackgroundForScene(sceneId) {
+    return roomBackgrounds[String(sceneId)] || null;
+  }
+
+  function roomBackgroundDef(sceneId) {
+    return manifest?.roomBackgrounds?.[String(sceneId)] || null;
+  }
+
+  return {
+    preload,
+    sheetKeyForChar,
+    getSheetDef,
+    getSheet,
+    furnitureClip,
+    getGroundTile,
+    shade,
+    furnitureShade,
+    avatarUrlForChar,
+    avatarUrl,
+    portraitUrlForChar,
+    fullPortraitUrlForChar,
+    roomBackgroundForScene,
+    roomBackgroundDef,
+    get ready() { return ready; },
+    get manifest() { return manifest; },
+  };
+})();

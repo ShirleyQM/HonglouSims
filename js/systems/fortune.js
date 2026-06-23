@@ -28,15 +28,25 @@ const FortuneSystem = (() => {
 
   function applyEffects(c, effects) {
     for (const ef of effects || []) {
-      if (ef.type === 'reputation') LifePathSystem?.changeReputation?.(c, ef.delta, 'fortune');
-      else if (ef.type === 'money') MoneySystem?.changeMoney?.(c, ef.delta, 'fortune');
+      if (ef.type === 'reputation') CharacterEffectSystem.apply({
+        type: 'reputation', charId: c.id, delta: ef.delta,
+      }, { source: 'fortune', reason: '命运事件' });
+      else if (ef.type === 'money') CharacterEffectSystem.apply({
+        type: 'money', charId: c.id, delta: ef.delta,
+      }, { source: 'fortune', reason: '命运事件' });
       else if (ef.type === 'pathFlag') MoneySystem?.setPathFlag?.(c, ef.key, ef.delta);
-      else if (ef.type === 'state') applyState(c, ef.stateId);
+      else if (ef.type === 'state') CharacterEffectSystem.apply({
+        type: 'state', charId: c.id, stateId: ef.stateId,
+      }, { source: 'fortune', reason: '命运事件' });
       else if (ef.type === 'familyFund') {
         const fam = FamilySystem?.findFamilyOfChar?.(c.id);
-        if (fam) MoneySystem?.changeFamilyFund?.(fam.id, ef.delta, 'fortune');
-      } else if (ef.type === 'axis' && typeof changeRelationAxis === 'function') {
-        changeRelationAxis(c.id, ef.targetId, ef.axis, ef.delta);
+        if (fam) CharacterEffectSystem.apply({
+          type: 'familyFund', familyId: fam.id, delta: ef.delta,
+        }, { source: 'fortune', reason: '命运事件', familyId: fam.id });
+      } else if (ef.type === 'axis') {
+        CharacterEffectSystem.apply({
+          type: 'axis', idA: c.id, idB: ef.targetId, axis: ef.axis, delta: ef.delta,
+        }, { source: 'fortune', reason: '命运事件' });
       }
     }
   }

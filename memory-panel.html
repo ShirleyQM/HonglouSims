@@ -1,0 +1,1125 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大观园 · 记忆面板原型</title>
+  <style>
+    :root {
+      --paper: #f6f1e6;
+      --paper-2: #ebe2d1;
+      --ink: #2f2922;
+      --muted: #766a5b;
+      --line: rgba(91, 72, 55, .22);
+      --gold: #a8802e;
+      --green: #5f7f6d;
+      --red: #9a524b;
+      --blue: #4f6f8f;
+      --violet: #6f5d7d;
+      --shadow: 0 18px 45px rgba(51, 38, 26, .18);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Songti SC", "STSong", "PingFang SC", "Microsoft YaHei", serif;
+      background:
+        linear-gradient(90deg, rgba(49, 82, 74, .16), rgba(152, 98, 72, .12)),
+        url("assets/rooms/潇湘馆.png") center / cover fixed,
+        #302c24;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(246, 241, 230, .82);
+      backdrop-filter: blur(2px);
+      z-index: -1;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr) 360px;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .topbar {
+      grid-column: 1 / -1;
+      min-height: 64px;
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid var(--line);
+      background: rgba(246, 241, 230, .72);
+      box-shadow: var(--shadow);
+      padding: 10px 12px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-weight: 500;
+      font-size: 22px;
+      letter-spacing: .12em;
+      color: #2e4b42;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .search {
+      width: 260px;
+      border: 1px solid var(--line);
+      background: rgba(255, 252, 246, .78);
+      padding: 8px 10px;
+      color: var(--ink);
+      outline: none;
+    }
+
+    .tabs, .chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tab, .chip, .icon-btn {
+      border: 1px solid var(--line);
+      background: rgba(255, 252, 246, .72);
+      color: var(--muted);
+      padding: 7px 10px;
+      min-height: 32px;
+    }
+
+    .tab.active, .chip.active {
+      border-color: rgba(168, 128, 46, .62);
+      background: linear-gradient(180deg, rgba(238, 228, 195, .9), rgba(209, 190, 128, .5));
+      color: var(--ink);
+    }
+
+    .side, .main, .detail {
+      min-height: 0;
+      border: 1px solid var(--line);
+      background: rgba(246, 241, 230, .75);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .side {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-head {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(232, 224, 207, .62);
+    }
+
+    .side-head b {
+      display: block;
+      font-size: 15px;
+      font-weight: 500;
+      color: #33564b;
+    }
+
+    .side-head span {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .char-list {
+      overflow: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .char-btn {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      border: 1px solid transparent;
+      background: rgba(255, 252, 246, .42);
+      color: var(--ink);
+      padding: 7px;
+      text-align: left;
+    }
+
+    .char-btn.active {
+      border-color: rgba(95, 127, 109, .62);
+      background: rgba(224, 235, 219, .72);
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      overflow: hidden;
+      border: 1px solid rgba(91, 72, 55, .24);
+      background: linear-gradient(135deg, #e6d9c2, #bfd0c3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(47, 41, 34, .55);
+      font-size: 18px;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 12%;
+      display: block;
+    }
+
+    .char-meta {
+      min-width: 0;
+    }
+
+    .char-meta strong {
+      display: block;
+      font-weight: 500;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .char-meta small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .count {
+      min-width: 24px;
+      height: 24px;
+      border: 1px solid rgba(168, 128, 46, .38);
+      background: rgba(244, 235, 198, .6);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #6f5520;
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .profile {
+      display: grid;
+      grid-template-columns: 148px minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(90deg, rgba(232, 224, 207, .72), rgba(226, 235, 229, .52));
+    }
+
+    .portrait {
+      height: 190px;
+      border: 1px solid var(--line);
+      background: rgba(255, 252, 246, .38);
+      overflow: hidden;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .portrait img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center top;
+      display: block;
+    }
+
+    .profile h2 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      font-weight: 500;
+      color: #2e4b42;
+      letter-spacing: .08em;
+    }
+
+    .profile p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      background: rgba(255, 252, 246, .54);
+      padding: 8px;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 19px;
+      font-weight: 500;
+      color: #594126;
+    }
+
+    .stat span {
+      display: block;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .timeline {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 12px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 4px 0 10px;
+      color: #33564b;
+      font-size: 13px;
+      letter-spacing: .12em;
+    }
+
+    .section-title small {
+      letter-spacing: 0;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .group-title {
+      grid-column: 1 / -1;
+      margin: 4px 0 -2px;
+      color: #33564b;
+      font-size: 12px;
+      letter-spacing: .12em;
+    }
+
+    .group-title small {
+      letter-spacing: 0;
+      color: var(--muted);
+      margin-left: 6px;
+    }
+
+    .secret-help {
+      margin-bottom: 12px;
+    }
+
+    .secret-help details {
+      border: 1px solid var(--line);
+      background: rgba(255, 252, 246, .42);
+    }
+
+    .secret-help summary {
+      min-height: 36px;
+      padding: 8px 10px;
+      color: #33564b;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .secret-help small {
+      color: var(--muted);
+      margin-left: 6px;
+    }
+
+    .secret-atlas {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      padding: 0 10px 10px;
+    }
+
+    .secret-type {
+      border: 1px solid var(--line);
+      background: rgba(255, 252, 246, .5);
+      padding: 8px;
+      min-height: 86px;
+    }
+
+    .secret-type b {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 500;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .secret-type p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      background: rgba(255, 252, 246, .62);
+      padding: 10px;
+      min-height: 124px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+
+    .card.selected {
+      border-color: rgba(168, 128, 46, .76);
+      box-shadow: inset 0 0 0 1px rgba(168, 128, 46, .18);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 3px 7px;
+      border: 1px solid var(--line);
+      background: rgba(236, 229, 211, .72);
+      color: var(--muted);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .badge.positive { border-color: rgba(95, 127, 109, .35); color: var(--green); background: rgba(224, 238, 222, .62); }
+    .badge.negative { border-color: rgba(154, 82, 75, .35); color: var(--red); background: rgba(244, 224, 219, .62); }
+    .badge.neutral { border-color: rgba(79, 111, 143, .35); color: var(--blue); background: rgba(224, 233, 240, .62); }
+    .badge.mixed { border-color: rgba(111, 93, 125, .35); color: var(--violet); background: rgba(233, 226, 239, .62); }
+
+    .card-foot {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .detail {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-head {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(232, 224, 207, .62);
+    }
+
+    .detail-head h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 500;
+      color: #2e4b42;
+    }
+
+    .detail-head p {
+      margin: 5px 0 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .detail-body {
+      overflow: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .detail-block {
+      border: 1px solid var(--line);
+      background: rgba(255, 252, 246, .55);
+      padding: 10px;
+    }
+
+    .detail-block label {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      margin-bottom: 5px;
+    }
+
+    .detail-block b {
+      display: block;
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--ink);
+      line-height: 1.45;
+    }
+
+    .meter {
+      height: 8px;
+      border: 1px solid rgba(91, 72, 55, .18);
+      background: rgba(229, 219, 199, .7);
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .meter span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, #5f7f6d, #a8802e);
+      width: 40%;
+    }
+
+    .empty {
+      border: 1px dashed rgba(91, 72, 55, .28);
+      padding: 26px;
+      color: var(--muted);
+      background: rgba(255, 252, 246, .42);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1180px) {
+      .app { grid-template-columns: 230px minmax(0, 1fr); }
+      .detail { grid-column: 1 / -1; min-height: 360px; }
+    }
+
+    @media (max-width: 820px) {
+      .app { height: auto; min-height: 100vh; grid-template-columns: 1fr; }
+      .topbar { grid-template-columns: 1fr; }
+      .toolbar { justify-content: flex-start; }
+      .search { width: 100%; }
+      .profile { grid-template-columns: 1fr; }
+      .portrait { height: 260px; }
+      .memory-grid { grid-template-columns: 1fr; }
+      .secret-atlas { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1>记忆面板原型</h1>
+        <p>只做可视化名词，不接底层系统。用于观察“记忆 / 梦想 / 秘密”放在一起是否有趣。</p>
+      </div>
+      <div class="toolbar">
+        <input id="search" class="search" placeholder="搜索人物、记忆、秘密、梦想">
+        <div class="tabs" id="tabs"></div>
+      </div>
+    </header>
+
+    <aside class="side">
+      <div class="side-head">
+        <b>人物</b>
+        <span id="char-count">读取中</span>
+      </div>
+      <div id="char-list" class="char-list"></div>
+    </aside>
+
+    <main class="main">
+      <section id="profile" class="profile"></section>
+      <section class="timeline">
+        <div class="section-title">
+          <span id="list-title">全部条目</span>
+          <small id="list-count"></small>
+        </div>
+        <div id="secret-help" class="secret-help"></div>
+        <div id="memory-grid" class="memory-grid"></div>
+      </section>
+    </main>
+
+    <aside class="detail">
+      <div class="detail-head">
+        <h2 id="detail-title">选择一条记录</h2>
+        <p id="detail-subtitle">这里会展示它的性质、来源、关联人物和可想象的玩法动作。</p>
+      </div>
+      <div id="detail-body" class="detail-body"></div>
+    </aside>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script>
+    const state = {
+      selectedCharId: '',
+      selectedItemId: '',
+      tab: 'all',
+      search: '',
+      manifest: null,
+      runtimeMemories: {},
+    };
+
+    const tabs = [
+      ['all', '全部'],
+      ['memory', '记忆'],
+      ['dream', '梦想'],
+      ['secret', '秘密'],
+    ];
+
+    const secretTypeCatalog = {
+      affection: {
+        label: '心意',
+        polarity: 'positive',
+        example: '暗恋、惦念、赠物心意',
+        play: '成全、撮合、传话、误会',
+        actions: ['保守心意', '传话成全', '撮合见面', '制造误会'],
+      },
+      favor: {
+        label: '恩情',
+        polarity: 'positive',
+        example: '某人曾暗中相助',
+        play: '报恩、护短、提升信任',
+        actions: ['保守恩情', '报恩任务', '护短', '提升信任'],
+      },
+      talent: {
+        label: '才华',
+        polarity: 'positive',
+        example: '私下写诗、会管账、会医术',
+        play: '举荐、任务机会、声望提升',
+        actions: ['举荐', '安排机会', '隐藏锋芒', '公开称赞'],
+      },
+      illness: {
+        label: '病症',
+        polarity: 'mixed',
+        example: '体弱、隐疾、心病',
+        play: '照顾、隐瞒、误传、求医',
+        actions: ['私下提醒', '求医', '照顾', '隐瞒病情'],
+      },
+      fear: {
+        label: '忌惮',
+        polarity: 'neutral',
+        example: '怕长辈、怕被逐、怕失宠',
+        play: '安慰、利用、保护',
+        actions: ['安慰', '保护', '利用忌惮', '解除恐惧'],
+      },
+      plan: {
+        label: '计划',
+        polarity: 'neutral',
+        example: '搬屋、求职、筹钱、送礼',
+        play: '协助、阻挠、提前布局',
+        actions: ['协助计划', '阻挠计划', '提前布局', '传话'],
+      },
+      wealth: {
+        label: '私财',
+        polarity: 'mixed',
+        example: '私房钱、借贷、放利钱',
+        play: '借钱、资助、勒索、查账',
+        actions: ['借钱', '资助', '查账', '交换'],
+      },
+      misconduct: {
+        label: '逾矩',
+        polarity: 'negative',
+        example: '私会、偷盗、失礼、违禁物',
+        play: '告密、要挟、搜查、惩罚',
+        actions: ['保守秘密', '告密', '要挟', '求证'],
+      },
+      frame: {
+        label: '伪证',
+        polarity: 'negative',
+        example: '伪造书信、栽赃物',
+        play: '查证、反坐、洗冤',
+        actions: ['查证', '辟谣洗白', '反坐陷害者', '销毁伪证'],
+      },
+    };
+
+    const portraitFallback = {
+      baoyu: '',
+      daiyu: 'assets/lihui/processed/daiyu_portrait.webp',
+      baochai: 'assets/lihui/processed/baochai_portrait.webp',
+      tanchun: 'assets/lihui/processed/tanchun_portrait.webp',
+      xifeng: 'assets/lihui/processed/xifeng_portrait.webp',
+      xiren: 'assets/lihui/processed/xiren_portrait.webp',
+      qingwen: 'assets/lihui/processed/qingwen_portrait.webp',
+      zijuan: 'assets/lihui/processed/zijuan_portrait.webp',
+      xueyan: 'assets/lihui/processed/xueyan_portrait.webp',
+      yinger: 'assets/lihui/processed/yinger_portrait.webp',
+      xiangyun: 'assets/lihui/processed/xiangyun_portrait.webp',
+      sheyue: 'assets/lihui/processed/sheyue_portrait.webp',
+      liwan: 'assets/lihui/processed/liwan_portrait.webp',
+      yingchun: 'assets/lihui/processed/yingchun_portrait.webp',
+      yuanchun: 'assets/lihui/processed/yuanchun_portrait.webp',
+      qinkeqing: 'assets/lihui/processed/qinkeqing_portrait.webp',
+    };
+
+    const dreamSeeds = {
+      baoyu: [['众人无恙', '梦里没有分别，也没有逼人的仕途。', '长期结局中 5 名以上亲近角色没有离散/重病/负向结局，且自己没有被仕途线完全锁死。']],
+      daiyu: [
+        ['一处清净院落', '有竹、有诗、有真正懂她的人。', '长期拥有稳定居所、亲密关系 70 以上至少 1 人，忧愁峰值可被诗词/陪伴缓冲。'],
+        ['癸酉本式补天', '才情不只为自伤，也能替风雨里的贾府留一线生机。', '参考癸酉本红楼梦想象线：把贾府金钱稳定在 200 以上，连续 7 日不触发抄家/大祸事件。'],
+      ],
+      baochai: [['风雨不惊', '家族和人心都能稳稳落地。', '长期家族金钱 180 以上，薛家核心成员健康安全，且至少 3 条关键关系保持 60 以上。']],
+      tanchun: [['另开天地', '有朝一日能按自己的法度做事。', '长期完成 3 次理家改革或远行机会，个人声望达到 75。']],
+      xifeng: [['权柄不坠', '手里的钥匙、账册和人心都不旁落。', '长期掌家权不低于 70，府内金钱不崩盘，且负向秘密没有集中爆发。']],
+      xiren: [['长久安身', '不必再担惊受怕，也有人念她的好。', '长期获得稳定归属，宝玉关系 65 以上，且没有被重大流言驱逐。']],
+      qingwen: [['清清白白', '纵使锋芒刺人，也要被看见真心。', '长期至少 2 名关键人物相信她，负向秘密被澄清，健康不跌破危险线。']],
+      zijuan: [['姑娘遂愿', '她护着的人能少哭几回。', '长期黛玉健康维持 45 以上，亲密关系稳定，且至少完成 2 次守护型事件。']],
+    };
+
+    const secretSeeds = {
+      baoyu: [
+        ['affection', 'positive', '悄悄惦念', '私下问起某人近来可曾展颜。'],
+        ['fear', 'mixed', '怕失去身边人', '越热闹时越怕忽然散了。'],
+      ],
+      daiyu: [
+        ['illness', 'mixed', '夜里咳得更重', '不愿让旁人知道身子又弱了。'],
+        ['affection', 'positive', '心里记着旧话', '一句旧日玩笑，反复想了许多回。'],
+      ],
+      baochai: [
+        ['plan', 'neutral', '替人留后路', '有些话不说破，是为了给人台阶。'],
+        ['favor', 'positive', '暗中周全', '曾替一件小错压下风声。'],
+      ],
+      tanchun: [['talent', 'positive', '理家章程', '私下写过一套更利落的管事法。']],
+      xifeng: [['wealth', 'mixed', '账外人情', '有些银钱去处不能摆在明面。']],
+      xiren: [['favor', 'positive', '替宝玉遮掩', '有些顽皮事她先一步收拾干净。']],
+      qingwen: [['misconduct', 'negative', '顶撞旧怨', '一句气话被有心人记下。']],
+      zijuan: [['plan', 'neutral', '试探真心', '想替姑娘问明一桩不敢问的事。']],
+      xiangyun: [['talent', 'positive', '醉后联句', '酒醒后仍记得半首极好的诗。']],
+      yinger: [['frame', 'negative', '被误解的络子', '有人把一只络子说成私相授受的证物。']],
+    };
+
+    const discoveredSecretSeeds = {
+      baoyu: [
+        ['daiyu', 'illness', 'mixed', '听见夜咳', '听说林黛玉夜里咳得厉害，却不愿惊动众人。'],
+        ['baochai', 'plan', 'neutral', '宝姐姐留了台阶', '看出薛宝钗替别人压下一句难听话。'],
+      ],
+      daiyu: [
+        ['baoyu', 'affection', 'positive', '旧帕子的心意', '知道贾宝玉有些话说得轻，心却未必轻。'],
+        ['baochai', 'favor', 'positive', '替人遮风', '隐约知道薛宝钗替一件小错周全过去。'],
+      ],
+      baochai: [
+        ['baoyu', 'fear', 'mixed', '怕散的心', '知道贾宝玉越在人前热闹，越怕身边人离散。'],
+        ['daiyu', 'illness', 'mixed', '病弱不声张', '知道林黛玉常把不适藏在礼数后面。'],
+      ],
+      xiren: [
+        ['baoyu', 'affection', 'positive', '悄悄惦念', '知道宝玉私下问起某人近来可曾展颜。'],
+        ['qingwen', 'misconduct', 'negative', '旧怨被记', '听见晴雯一句气话被有心人记下。'],
+      ],
+      zijuan: [
+        ['daiyu', 'affection', 'positive', '心里记着旧话', '知道姑娘把一句旧日玩笑反复想了许多回。'],
+        ['baoyu', 'fear', 'mixed', '怕失去身边人', '看得出宝玉在人散时格外失魂。'],
+      ],
+      xifeng: [
+        ['baochai', 'plan', 'neutral', '替人留后路', '知道薛宝钗有些话不说破，是为了给人台阶。'],
+        ['xiren', 'favor', 'positive', '替宝玉遮掩', '知道袭人替宝玉收拾过几件顽皮事。'],
+      ],
+    };
+
+    function esc(text) {
+      return String(text ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    async function loadManifest() {
+      try {
+        const res = await fetch('assets/manifest.json', { cache: 'no-cache' });
+        if (res.ok) state.manifest = await res.json();
+      } catch (e) {
+        state.manifest = null;
+      }
+    }
+
+    function loadRuntimeMemories() {
+      try {
+        const raw = localStorage.getItem('dgy_save');
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        const chars = data.CHARS || data.chars || data.characters || data.state?.CHARS || [];
+        for (const c of chars) {
+          if (c?.id && Array.isArray(c.memories)) state.runtimeMemories[c.id] = c.memories;
+        }
+      } catch (e) {}
+    }
+
+    function portraitFor(c) {
+      return state.manifest?.portraits?.[c.id]?.portrait || state.manifest?.portraits?.[c.id]?.hud || portraitFallback[c.id] || '';
+    }
+
+    function avatarFor(c) {
+      return state.manifest?.portraits?.[c.id]?.hud || state.manifest?.avatars?.[c.id]?.src || portraitFallback[c.id] || '';
+    }
+
+    function splitMemoryPalace(text) {
+      return String(text || '').split(/[；;]\s*/).map(s => s.trim()).filter(Boolean);
+    }
+
+    function charTraits(c) {
+      const p = DEFAULT_CONFIG.charSpecialtyConfig?.profiles?.[c.id];
+      return p?.displayTraits || p?.aiTraits || [];
+    }
+
+    function buildMemoryItems(c) {
+      const palace = splitMemoryPalace(c.memoryPalace).map((text, i) => ({
+        id: `${c.id}:palace:${i}`,
+        kind: 'memory',
+        label: '系统记忆',
+        polarity: i === 0 ? 'positive' : i === 1 ? 'mixed' : 'neutral',
+        title: text.replace(/[「」]/g, ''),
+        body: text,
+        source: 'characters.memoryPalace',
+        strength: 70 - i * 8,
+        tags: ['记忆宫殿', i === 0 ? '核心' : '旧事'],
+      }));
+      const runtime = (state.runtimeMemories[c.id] || []).slice(-8).map((m, i) => ({
+        id: `${c.id}:runtime:${i}`,
+        kind: 'memory',
+        label: '运行记忆',
+        polarity: m.valence > 0 ? 'positive' : m.valence < 0 ? 'negative' : 'neutral',
+        title: m.text || m.tag || m.type || '一段旧事',
+        body: m.text || m.tag || JSON.stringify(m),
+        source: m.source || 'localStorage 存档',
+        strength: Math.round((m.strength || 1) * 55),
+        tags: [m.tag || '记忆', m.with ? `关联 ${m.with}` : ''],
+      }));
+      return [...palace, ...runtime];
+    }
+
+    function buildNamedItems(c, kind, seeds, fallback) {
+      const rows = seeds[c.id] || fallback(c);
+      return rows.map((row, i) => ({
+        id: `${c.id}:${kind}:${i}`,
+        kind,
+        label: kind === 'dream' ? '梦想' : '秘密',
+        polarity: kind === 'secret' ? row[1] : kind === 'dream' ? 'positive' : 'neutral',
+        type: kind === 'secret' ? row[0] : kind,
+        title: kind === 'secret' ? row[2] : row[0],
+        body: kind === 'secret' ? row[3] : row[1],
+        condition: kind === 'secret' ? '' : row[2],
+        secretScope: kind === 'secret' ? 'own' : '',
+        ownerId: kind === 'secret' ? c.id : '',
+        ownerName: kind === 'secret' ? (c.short || c.name) : '',
+        source: '可视化原型样例',
+        strength: 55 + i * 12,
+        tags: kind === 'secret' ? ['自己的秘密', secretTypeLabel(row[0]), polarityLabel(row[1])] : [kind === 'dream' ? '长期目标' : '短期目标', '有达成条件'],
+      }));
+    }
+
+    function buildDiscoveredSecrets(c) {
+      const rows = discoveredSecretSeeds[c.id] || [];
+      return rows.map((row, i) => {
+        const owner = characterById(row[0]);
+        return {
+          id: `${c.id}:secret:heard:${i}`,
+          kind: 'secret',
+          label: '探听',
+          polarity: row[2],
+          type: row[1],
+          title: row[3],
+          body: row[4],
+          condition: '',
+          secretScope: 'discovered',
+          ownerId: row[0],
+          ownerName: owner?.short || owner?.name || row[0],
+          source: '探听到的别人秘密样例',
+          strength: 50 + i * 10,
+          tags: ['探听到的秘密', secretTypeLabel(row[1]), `属于 ${owner?.short || owner?.name || row[0]}`],
+        };
+      });
+    }
+
+    function fallbackDream(c) {
+      return [['一处安身之地', `${c.short || c.name}盼着有一件事终于能落定。`, '长期拥有稳定居所/关系/收入之一，且连续 5 日没有重大危机。']];
+    }
+
+    function fallbackSecrets(c) {
+      return [['plan', 'neutral', '未说出口的打算', `${c.short || c.name}还有一件暂不愿声张的小计划。`]];
+    }
+
+    function itemsForChar(c) {
+      return [
+        ...buildMemoryItems(c),
+        ...buildNamedItems(c, 'dream', dreamSeeds, fallbackDream),
+        ...buildNamedItems(c, 'secret', secretSeeds, fallbackSecrets),
+        ...buildDiscoveredSecrets(c),
+      ];
+    }
+
+    function secretTypeLabel(type) {
+      return secretTypeCatalog[type]?.label || type || '秘密';
+    }
+
+    function polarityLabel(p) {
+      return { positive: '正向', neutral: '中性', negative: '负向', mixed: '混合' }[p] || p || '中性';
+    }
+
+    function kindLabel(k) {
+      return { memory: '记忆', dream: '梦想', secret: '秘密' }[k] || k;
+    }
+
+    function allCharacters() {
+      return DEFAULT_CONFIG.characters || [];
+    }
+
+    function characterById(id) {
+      return allCharacters().find(c => c.id === id);
+    }
+
+    function selectedChar() {
+      return allCharacters().find(c => c.id === state.selectedCharId) || allCharacters()[0];
+    }
+
+    function visibleItems(c) {
+      const q = state.search.trim().toLowerCase();
+      return itemsForChar(c).filter(item => {
+        if (state.tab !== 'all' && item.kind !== state.tab) return false;
+        if (!q) return true;
+        return [item.title, item.body, item.condition, item.ownerName, item.label, item.source, ...(item.tags || []), c.name, c.short, c.id].join(' ').toLowerCase().includes(q);
+      });
+    }
+
+    function renderTabs() {
+      document.getElementById('tabs').innerHTML = tabs.map(([id, label]) =>
+        `<button class="tab ${state.tab === id ? 'active' : ''}" data-tab="${id}">${label}</button>`
+      ).join('');
+      document.querySelectorAll('[data-tab]').forEach(btn => {
+        btn.onclick = () => {
+          state.tab = btn.dataset.tab;
+          state.selectedItemId = '';
+          render();
+        };
+      });
+    }
+
+    function renderCharList() {
+      const chars = allCharacters();
+      const q = state.search.trim().toLowerCase();
+      const filtered = chars.filter(c => {
+        if (!q) return true;
+        const hay = [c.name, c.short, c.id, c.memoryPalace, ...itemsForChar(c).map(i => `${i.title} ${i.body} ${i.condition || ''} ${i.ownerName || ''}`)].join(' ').toLowerCase();
+        return hay.includes(q);
+      });
+      document.getElementById('char-count').textContent = `${filtered.length} / ${chars.length} 人`;
+      document.getElementById('char-list').innerHTML = filtered.map(c => {
+        const count = itemsForChar(c).length;
+        const img = avatarFor(c);
+        return `<button class="char-btn ${c.id === state.selectedCharId ? 'active' : ''}" data-char="${c.id}">
+          <span class="avatar">${img ? `<img src="${esc(img)}" alt="">` : esc((c.short || c.name || '?').slice(0, 1))}</span>
+          <span class="char-meta"><strong>${esc(c.short || c.name)}</strong><small>${esc(c.shortComment || c.personality || c.id)}</small></span>
+          <span class="count">${count}</span>
+        </button>`;
+      }).join('') || '<div class="empty">没有匹配人物</div>';
+      document.querySelectorAll('[data-char]').forEach(btn => {
+        btn.onclick = () => {
+          state.selectedCharId = btn.dataset.char;
+          state.selectedItemId = '';
+          render();
+        };
+      });
+    }
+
+    function renderProfile(c) {
+      const img = portraitFor(c);
+      const all = itemsForChar(c);
+      const stats = {
+        memory: all.filter(i => i.kind === 'memory').length,
+        dream: all.filter(i => i.kind === 'dream').length,
+        secret: all.filter(i => i.kind === 'secret').length,
+      };
+      document.getElementById('profile').innerHTML = `
+        <div class="portrait">${img ? `<img src="${esc(img)}" alt="">` : `<div class="avatar" style="width:90px;height:90px">${esc((c.short || c.name || '?').slice(0, 1))}</div>`}</div>
+        <div>
+          <h2>${esc(c.name || c.short)}</h2>
+          <p>${esc(c.shortComment || c.personality || '暂无人物摘要')}</p>
+          <p>${esc(charTraits(c).join(' · ') || '未配置性格')} · ${esc(c.memoryPalace || '暂无记忆宫殿')}</p>
+          <div class="stats">
+            <div class="stat"><b>${stats.memory}</b><span>记忆</span></div>
+            <div class="stat"><b>${stats.dream}</b><span>梦想</span></div>
+            <div class="stat"><b>${stats.secret}</b><span>秘密</span></div>
+          </div>
+        </div>`;
+    }
+
+    function renderItems(c) {
+      const items = visibleItems(c);
+      if (!state.selectedItemId || !items.some(i => i.id === state.selectedItemId)) {
+        state.selectedItemId = items[0]?.id || '';
+      }
+      document.getElementById('list-title').textContent = `${tabs.find(t => t[0] === state.tab)?.[1] || '全部'}条目`;
+      document.getElementById('list-count').textContent = `${items.length} 条`;
+      renderSecretAtlas();
+      document.getElementById('memory-grid').innerHTML = state.tab === 'secret' ? renderSecretGroups(items) : renderCardList(items);
+      document.querySelectorAll('[data-item]').forEach(card => {
+        card.onclick = () => {
+          state.selectedItemId = card.dataset.item;
+          render();
+        };
+      });
+      renderDetail(c, items.find(i => i.id === state.selectedItemId));
+    }
+
+    function renderCardList(items) {
+      return items.map(item => `
+        <article class="card ${item.id === state.selectedItemId ? 'selected' : ''}" data-item="${esc(item.id)}">
+          <div class="card-top">
+            <h3>${esc(item.title)}</h3>
+            <span class="badge ${esc(item.polarity)}">${esc(item.label)}</span>
+          </div>
+          <p>${esc(item.body)}</p>
+          ${item.condition ? `<p><b>${esc(item.kind === 'dream' ? '长期达成' : '达成条件')}：</b>${esc(item.condition)}</p>` : ''}
+          ${item.kind === 'secret' && item.secretScope === 'discovered' ? `<p><b>属于：</b>${esc(item.ownerName)}</p>` : ''}
+          <div class="card-foot">
+            <span class="badge ${esc(item.polarity)}">${esc(polarityLabel(item.polarity))}</span>
+            ${(item.tags || []).filter(Boolean).slice(0, 3).map(t => `<span class="badge">${esc(t)}</span>`).join('')}
+          </div>
+        </article>
+      `).join('') || '<div class="empty">当前筛选下没有条目。换个人或切到“全部”看看。</div>';
+    }
+
+    function renderSecretGroups(items) {
+      if (!items.length) return '<div class="empty">当前筛选下没有秘密。换个人或切到“全部”看看。</div>';
+      const own = items.filter(item => item.secretScope !== 'discovered');
+      const discovered = items.filter(item => item.secretScope === 'discovered');
+      return [
+        own.length ? `<div class="group-title">自己的秘密 <small>${own.length} 条</small></div>${renderCardList(own)}` : '',
+        discovered.length ? `<div class="group-title">探听到的别人秘密 <small>${discovered.length} 条</small></div>${renderCardList(discovered)}` : '',
+      ].join('');
+    }
+
+    function renderSecretAtlas() {
+      const el = document.getElementById('secret-help');
+      if (state.tab !== 'secret') {
+        el.innerHTML = '';
+        return;
+      }
+      el.innerHTML = `
+        <details>
+          <summary>秘密类型帮助 <small>9 类，可展开查看，不占用条目列表</small></summary>
+          <div class="secret-atlas">
+            ${Object.entries(secretTypeCatalog).map(([type, row]) => `
+              <div class="secret-type">
+                <b>${esc(row.label)}<span class="badge ${esc(row.polarity)}">${esc(polarityLabel(row.polarity))}</span></b>
+                <p>${esc(row.example)}</p>
+                <p>${esc(row.play)}</p>
+              </div>
+            `).join('')}
+          </div>
+        </details>
+      `;
+    }
+
+    function renderDetail(c, item) {
+      const title = document.getElementById('detail-title');
+      const subtitle = document.getElementById('detail-subtitle');
+      const body = document.getElementById('detail-body');
+      if (!item) {
+        title.textContent = '选择一条记录';
+        subtitle.textContent = '这里会展示它的性质、来源、关联人物和可想象的玩法动作。';
+        body.innerHTML = '<div class="empty">暂无详情</div>';
+        return;
+      }
+      title.textContent = item.title;
+      subtitle.textContent = `${c.short || c.name} · ${kindLabel(item.kind)} · ${polarityLabel(item.polarity)}`;
+      const actions = actionNouns(item);
+      const typeInfo = item.kind === 'secret' ? secretTypeCatalog[item.type] : null;
+      body.innerHTML = `
+        <div class="detail-block"><label>说明</label><b>${esc(item.body)}</b></div>
+        ${item.condition ? `<div class="detail-block"><label>梦想达成条件</label><b>${esc(item.condition)}</b></div>` : ''}
+        ${item.kind === 'secret' ? `<div class="detail-block"><label>秘密归属</label><b>${item.secretScope === 'discovered' ? `${esc(c.short || c.name)}探听到：属于 ${esc(item.ownerName)}` : `${esc(c.short || c.name)}自己的秘密`}</b></div>` : ''}
+        <div class="detail-block"><label>来源</label><b>${esc(item.source)}</b></div>
+        <div class="detail-block"><label>性质</label><b>${esc(kindLabel(item.kind))} / ${esc(item.type ? secretTypeLabel(item.type) : item.label)} / ${esc(polarityLabel(item.polarity))}</b></div>
+        ${typeInfo ? `<div class="detail-block"><label>秘密类型说明</label><b>${esc(typeInfo.example)}；玩法方向：${esc(typeInfo.play)}</b></div>` : ''}
+        <div class="detail-block"><label>强度感</label><b>${item.strength}</b><div class="meter"><span style="width:${Math.max(8, Math.min(100, item.strength))}%"></span></div></div>
+        <div class="detail-block"><label>${item.kind === 'secret' ? '对应操作' : '可想象的玩法名词'}</label><div class="chips">${actions.map(a => `<span class="chip">${esc(a)}</span>`).join('')}</div></div>
+        <div class="detail-block"><label>标签</label><div class="chips">${(item.tags || []).filter(Boolean).map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div></div>
+      `;
+    }
+
+    function actionNouns(item) {
+      if (item.kind === 'memory') return ['回忆浮现', '触景生情', '旧事重提', '关系回声'];
+      if (item.kind === 'dream') return ['人生路径', '愿望任务', '成就节点', '遗憾回响'];
+      if (item.kind === 'secret' && secretTypeCatalog[item.type]?.actions) return secretTypeCatalog[item.type].actions;
+      if (item.polarity === 'positive') return ['保守秘密', '私下提醒', '成全', '举荐'];
+      if (item.polarity === 'negative') return ['传闲话', '告密', '要挟', '辟谣'];
+      if (item.polarity === 'mixed') return ['交换', '遮掩', '误会', '求助'];
+      return ['询问', '传话', '暂存', '观察'];
+    }
+
+    function render() {
+      const chars = allCharacters();
+      if (!state.selectedCharId && chars[0]) state.selectedCharId = chars[0].id;
+      const c = selectedChar();
+      renderTabs();
+      renderCharList();
+      if (c) {
+        renderProfile(c);
+        renderItems(c);
+      }
+    }
+
+    document.getElementById('search').addEventListener('input', evt => {
+      state.search = evt.target.value;
+      state.selectedItemId = '';
+      render();
+    });
+
+    (async function init() {
+      await loadManifest();
+      loadRuntimeMemories();
+      render();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>折扇互动菜单原型</title>
+  <style>
+    :root {
+      --ink: #3d3026;
+      --soft: #8a7864;
+      --line: rgba(91, 67, 43, .25);
+      --line-strong: rgba(91, 67, 43, .56);
+      --paper: #fff8e8;
+      --paper-deep: #ead8b8;
+      --gold: #c99734;
+      --gold-soft: rgba(226, 184, 72, .26);
+      --jade: #dce8d5;
+      --shadow: 0 18px 50px rgba(76, 54, 32, .14);
+      font-family: "Songti SC", "Noto Serif CJK SC", "STSong", serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background: #efe0c8;
+      padding: 28px;
+    }
+
+    .page {
+      width: min(1180px, calc(100vw - 40px));
+      display: grid;
+      gap: 18px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: end;
+    }
+    h1 { margin: 0; font-size: 30px; letter-spacing: .08em; }
+    .note {
+      max-width: 640px;
+      color: var(--soft);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .card {
+      position: relative;
+      min-height: 660px;
+      overflow: hidden;
+      border-radius: 28px;
+      border: 1px solid rgba(91,67,43,.18);
+      background: rgba(255, 250, 238, .92);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .stage {
+      position: relative;
+      height: 560px;
+      border-radius: 24px;
+      border: 1px solid rgba(91,67,43,.12);
+      background: rgba(238, 226, 199, .34);
+      overflow: visible;
+    }
+
+    .fan-field {
+      position: absolute;
+      left: 50%;
+      bottom: 34px;
+      width: 720px;
+      height: 500px;
+      transform: translateX(-50%);
+      overflow: visible;
+    }
+
+    .fan {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      width: 0;
+      height: 0;
+      transform: translateX(-50%);
+    }
+
+    .leaf {
+      --angle: 0deg;
+      --spin: 0deg;
+      --label-angle: calc(-1 * var(--angle));
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 102px;
+      height: 395px;
+      transform-origin: 50% 100%;
+      transform: translateX(-50%) rotate(calc(var(--angle) + var(--spin)));
+      clip-path: polygon(50% 100%, 3% 22%, 4% 14%, 8% 8%, 18% 3%, 50% 0%, 82% 3%, 92% 8%, 96% 14%, 97% 22%);
+      border: 2px solid rgba(91,67,43,.34);
+      background: var(--paper);
+      box-shadow:
+        7px 0 0 rgba(91,67,43,.08),
+        0 4px 12px rgba(76, 54, 32, .08);
+      transition: opacity .12s ease, filter .12s ease, box-shadow .12s ease;
+      z-index: var(--z, 40);
+      cursor: pointer;
+    }
+
+    .leaf::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      clip-path: polygon(50% 100%, 3% 22%, 4% 14%, 8% 8%, 18% 3%, 50% 0%, 82% 3%, 92% 8%, 96% 14%, 97% 22%);
+      border: 2px solid rgba(91,67,43,.28);
+      pointer-events: none;
+    }
+
+    .leaf span {
+      position: absolute;
+      left: 50%;
+      top: 70px;
+      transform: translateX(-50%) rotate(calc(-1 * (var(--angle) + var(--spin))));
+      writing-mode: vertical-rl;
+      letter-spacing: .2em;
+      font-size: 16px;
+      color: var(--ink);
+      text-shadow: 0 1px 0 rgba(255,255,255,.7);
+      white-space: nowrap;
+    }
+
+    .leaf.low {
+      border-color: rgba(116, 106, 92, .46);
+      border-style: dashed;
+      opacity: .72;
+      filter: saturate(.7);
+    }
+    .leaf.low::after {
+      border-color: rgba(116, 106, 92, .62);
+      border-style: dashed;
+    }
+    .leaf.dim {
+      opacity: .44;
+      filter: grayscale(.3);
+    }
+    .leaf.hot {
+      border-color: rgba(226,184,72,.82);
+      box-shadow:
+        7px 0 0 rgba(91,67,43,.08),
+        0 0 18px rgba(226,184,72,.32);
+    }
+    .leaf.hot::after {
+      border-color: rgba(226,184,72,.9);
+      box-shadow: 0 0 13px rgba(226,184,72,.38);
+    }
+    .leaf.risky span::before {
+      content: "△";
+      margin-block-start: 8px;
+      color: var(--gold);
+      font-size: 12px;
+      letter-spacing: 0;
+    }
+    .leaf:hover {
+      filter: saturate(1.12);
+      box-shadow:
+        0 0 0 2px rgba(201,151,52,.16),
+        0 8px 18px rgba(76,54,32,.14);
+    }
+
+    .leaf.outside {
+      opacity: .08;
+      pointer-events: none;
+      filter: grayscale(.55);
+    }
+    .leaf.edge {
+      opacity: .34;
+      pointer-events: none;
+    }
+
+    .sweep-zone {
+      position: absolute;
+      bottom: 0;
+      width: 150px;
+      height: 430px;
+      z-index: 110;
+      cursor: e-resize;
+    }
+    .sweep-zone.right {
+      left: calc(50% + 170px);
+      transform-origin: 0 100%;
+      transform: rotate(48deg);
+      clip-path: polygon(0 100%, 36% 4%, 100% 20%, 100% 100%);
+    }
+    .sweep-zone.left {
+      right: calc(50% + 170px);
+      bottom: 0;
+      transform-origin: 0 100%;
+      transform: rotate(-48deg);
+      clip-path: polygon(0 20%, 64% 4%, 100% 100%, 0 100%);
+      cursor: w-resize;
+    }
+    .sweep-zone::after {
+      content: "";
+      position: absolute;
+      top: 34px;
+      bottom: 42px;
+      width: 3px;
+      border-radius: 999px;
+      background: rgba(142, 103, 62, .34);
+      box-shadow: 0 0 0 1px rgba(255,248,232,.28);
+    }
+    .sweep-zone.right::after { right: 18px; }
+    .sweep-zone.left::after { left: 18px; }
+    .sweep-zone:hover::after {
+      background: rgba(142, 103, 62, .58);
+    }
+
+    .sweep-hint {
+      position: absolute;
+      right: 104px;
+      bottom: 112px;
+      color: var(--soft);
+      font-size: 12px;
+      letter-spacing: .08em;
+      writing-mode: vertical-rl;
+      opacity: .78;
+      transition: opacity .16s ease;
+      pointer-events: none;
+    }
+    .fan-field.moving .sweep-hint { opacity: 0; }
+
+    .fan-point {
+      position: absolute;
+      left: 50%;
+      bottom: -10px;
+      width: 112px;
+      height: 92px;
+      transform: translateX(-50%);
+      clip-path: polygon(50% 100%, 0 12%, 100% 12%);
+      border: 1px solid rgba(91,67,43,.4);
+      background: #b99255;
+      z-index: 118;
+      box-shadow: 0 8px 18px rgba(76,54,32,.18);
+    }
+    .fan-pin {
+      position: absolute;
+      left: 50%;
+      bottom: 42px;
+      width: 36px;
+      height: 36px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      border: 3px double rgba(91,67,43,.58);
+      background: #fff7e8;
+      display: grid;
+      place-items: center;
+      color: var(--gold);
+      z-index: 122;
+      box-shadow: 0 4px 12px rgba(76,54,32,.18);
+    }
+    .target {
+      position: absolute;
+      left: 50%;
+      bottom: 86px;
+      width: 108px;
+      height: 60px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      border: 2px solid rgba(91,67,43,.42);
+      background: rgba(255,248,232,.9);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      z-index: 124;
+      color: #6d4d32;
+      box-shadow: 0 4px 12px rgba(76,54,32,.12);
+    }
+
+    .rule {
+      position: absolute;
+      left: 22px;
+      top: 22px;
+      width: 260px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(91,67,43,.16);
+      background: rgba(255,250,238,.78);
+      color: var(--soft);
+      font-size: 12px;
+      line-height: 1.65;
+      z-index: 140;
+    }
+    .rule b { color: var(--ink); }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+      color: var(--soft);
+      font-size: 12px;
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 9px;
+      border: 1px solid rgba(91,67,43,.16);
+      border-radius: 999px;
+      background: rgba(255,250,238,.64);
+    }
+    .sample {
+      width: 22px;
+      height: 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(91,67,43,.38);
+      background: var(--paper);
+    }
+    .sample.low { border-style: dashed; opacity: .7; }
+    .sample.hot { border-color: var(--gold); box-shadow: 0 0 10px rgba(226,184,72,.4); }
+    .sample.risky::after { content: "△"; color: var(--gold); margin-left: 27px; font-size: 10px; }
+
+    @media (max-width: 860px) {
+      body { padding: 18px; }
+      header { display: block; }
+      .card { min-height: 620px; padding: 14px; }
+      .stage { height: 520px; }
+      .fan-field { transform: translateX(-50%) scale(.82); transform-origin: 50% 100%; }
+      .rule { position: relative; left: auto; top: auto; width: auto; margin-bottom: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div>
+        <h1>折扇互动菜单原型</h1>
+        <div class="note">只保留折扇方案：意愿用外框标记，中间最多显示 8 根扇骨。中间可点击，移到两侧边缘才拨动换项。</div>
+      </div>
+      <div class="note">底部是扇骨汇聚的尖尖扇柄。往右拨，右侧选项转到中间；往左拨，左侧选项转回来。</div>
+    </header>
+
+    <section class="card">
+      <div class="stage">
+        <div class="rule">
+          <b>排序规则</b><br>
+          意愿只看外框：高意愿金框发光，低意愿灰虚线。<br>
+          鼠标左右滑动时，整把扇子像轮盘一样转动，中间最多露出 8 根扇骨。
+        </div>
+
+        <div class="fan-field" id="fan-field">
+          <div class="fan">
+            <button class="leaf dim" data-angle="-70"><span>问安</span></button>
+            <button class="leaf" data-angle="-56"><span>寒暄</span></button>
+            <button class="leaf" data-angle="-42"><span>闲谈</span></button>
+            <button class="leaf" data-angle="-28"><span>品茗</span></button>
+            <button class="leaf hot" data-angle="-14"><span>陪坐</span></button>
+            <button class="leaf hot" data-angle="0"><span>倾听</span></button>
+            <button class="leaf risky" data-angle="14"><span>握手</span></button>
+            <button class="leaf risky" data-angle="28"><span>挽臂</span></button>
+            <button class="leaf low" data-angle="42"><span>梳头</span></button>
+            <button class="leaf low" data-angle="56"><span>捶腿</span></button>
+            <button class="leaf dim" data-angle="70"><span>对弈</span></button>
+            <button class="leaf dim" data-angle="84"><span>评文</span></button>
+            <button class="leaf dim" data-angle="98"><span>联句</span></button>
+            <button class="leaf low" data-angle="112"><span>倾诉</span></button>
+          </div>
+
+          <div class="sweep-zone left" data-dir="left" aria-hidden="true"></div>
+          <div class="sweep-zone right" data-dir="right" aria-hidden="true"></div>
+          <div class="sweep-hint">移到两侧拨扇</div>
+          <div class="fan-point"></div>
+          <div class="fan-pin">◆</div>
+          <div class="target">贾母<br><span style="font-size:12px;color:var(--soft)">叙旧</span></div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span><i class="sample"></i>普通意愿，细棕外框</span>
+        <span><i class="sample hot"></i>高意愿，靠中间且发光</span>
+        <span><i class="sample low"></i>低意愿，可试但淡化</span>
+        <span><i class="sample risky"></i>逾矩风险，只给小三角</span>
+        <span>中间稳定可点，移到左右边缘才转动换项</span>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const field = document.getElementById('fan-field');
+    const leaves = [...document.querySelectorAll('.leaf')].map((leaf) => ({
+      leaf,
+      base: Number(leaf.dataset.angle || 0),
+    }));
+    let spin = 0;
+    let targetSpin = 0;
+    let sweepTimer = 0;
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function renderFan(nextSpin) {
+      spin = clamp(nextSpin, -112, 28);
+      for (const item of leaves) {
+        const eff = item.base + spin;
+        const abs = Math.abs(eff);
+        item.leaf.style.setProperty('--angle', `${item.base}deg`);
+        item.leaf.style.setProperty('--spin', `${spin}deg`);
+        item.leaf.style.setProperty('--z', String(220 - Math.round(abs)));
+        item.leaf.classList.toggle('outside', abs > 64);
+        item.leaf.classList.toggle('edge', abs > 52 && abs <= 64);
+      }
+    }
+
+    renderFan(0);
+
+    function stopSweep() {
+      window.clearInterval(sweepTimer);
+      sweepTimer = 0;
+      field.classList.remove('moving');
+    }
+
+    function startSweep(dir, event) {
+      stopSweep();
+      field.classList.add('moving');
+      const step = dir === 'right' ? -14 : 14;
+      const zoneRect = event.currentTarget.getBoundingClientRect();
+      const local = clamp((event.clientX - zoneRect.left) / zoneRect.width, 0, 1);
+      const strength = dir === 'right' ? local : 1 - local;
+      targetSpin = clamp(spin + step * (0.55 + strength * 0.9), -112, 28);
+      renderFan(targetSpin);
+      sweepTimer = window.setInterval(() => {
+        targetSpin = clamp(targetSpin + step * 0.65, -112, 28);
+        renderFan(targetSpin);
+      }, 180);
+    }
+
+    document.querySelectorAll('.sweep-zone').forEach((zone) => {
+      zone.addEventListener('mouseenter', (event) => startSweep(zone.dataset.dir, event));
+      zone.addEventListener('mousemove', (event) => {
+        if (!sweepTimer) startSweep(zone.dataset.dir, event);
+      });
+      zone.addEventListener('mouseleave', stopSweep);
+    });
+    field.addEventListener('mouseleave', stopSweep);
+  </script>
+</body>
+</html>

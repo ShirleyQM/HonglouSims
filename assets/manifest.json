@@ -1,0 +1,263 @@
+{
+  "frameW": 64,
+  "frameH": 64,
+  "draw": {
+    "w": 48,
+    "h": 48,
+    "footFrac": 0.92
+  },
+  "sheets": {
+    "male": {
+      "src": "assets/sprites/chars/male.png"
+    },
+    "female": {
+      "src": "assets/sprites/chars/female.png"
+    },
+    "daiyu": {
+      "src": "assets/sprites/chars/daiyu.png"
+    }
+  },
+  "avatars": {
+    "daiyu": {
+      "src": "assets/avatars/daiyu.png"
+    }
+  },
+  "animations": {
+    "idle": {
+      "rows": {
+        "up": 8,
+        "left": 9,
+        "down": 10,
+        "right": 11
+      },
+      "frames": [
+        0
+      ],
+      "fps": 1
+    },
+    "walk": {
+      "rows": {
+        "up": 8,
+        "left": 9,
+        "down": 10,
+        "right": 11
+      },
+      "frames": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "fps": 9
+    },
+    "useHands": {
+      "rows": {
+        "up": 0,
+        "left": 1,
+        "down": 2,
+        "right": 3
+      },
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        2,
+        1
+      ],
+      "fps": 6,
+      "bob": 0
+    },
+    "useWipe": {
+      "rows": {
+        "up": 12,
+        "left": 13,
+        "down": 14,
+        "right": 15
+      },
+      "frames": [
+        1,
+        2,
+        3,
+        4,
+        3,
+        2
+      ],
+      "fps": 6,
+      "bob": 0
+    },
+    "rest": {
+      "rows": {
+        "up": 8,
+        "left": 9,
+        "down": 10,
+        "right": 11
+      },
+      "frames": [
+        0
+      ],
+      "fps": 1,
+      "bob": 1.6
+    }
+  },
+  "furnitureAnim": {
+    "meal": "useHands",
+    "snack": "useHands",
+    "table": "useHands",
+    "wine": "useHands",
+    "desk": "useHands",
+    "workdesk": "useHands",
+    "instrument": "useHands",
+    "wardrobe": "useHands",
+    "kitchen": "useWipe",
+    "wash": "useWipe",
+    "garden": "useWipe",
+    "bed": "rest",
+    "rest": "rest",
+    "seat": "rest",
+    "bath": "rest",
+    "pavilion": "rest",
+    "travel_rest": "rest"
+  },
+  "tiles": {
+    "size": 32,
+    "types": {
+      "grass": {
+        "base": "#3a4a32",
+        "style": "grass",
+        "src": "assets/tiles/ground_grass_01.png"
+      },
+      "grass_lush": {
+        "base": "#3a4a32",
+        "style": "grass",
+        "src": "assets/tiles/ground_grass_02.png"
+      },
+      "grass_mottled": {
+        "base": "#3f4a2f",
+        "style": "grass",
+        "src": "assets/tiles/ground_grass_03.png"
+      },
+      "grass_sparse": {
+        "base": "#6a6042",
+        "style": "grass",
+        "src": "assets/tiles/ground_grass_04.png"
+      },
+      "grass_moss": {
+        "base": "#2f3f26",
+        "style": "grass",
+        "src": "assets/tiles/ground_grass_05.png"
+      },
+      "stone": {
+        "base": "#2f3a2f",
+        "style": "flagstone",
+        "src": "assets/tiles/ground_stone_02.png"
+      },
+      "stone_irregular": {
+        "base": "#465046",
+        "style": "flagstone",
+        "src": "assets/tiles/ground_stone_01.png"
+      },
+      "stone_herringbone": {
+        "base": "#3f473f",
+        "style": "flagstone",
+        "src": "assets/tiles/ground_stone_03.png"
+      },
+      "stone_pebble": {
+        "base": "#4a4a3e",
+        "style": "flagstone",
+        "src": "assets/tiles/ground_stone_04.png"
+      },
+      "stone_muddy": {
+        "base": "#5a4732",
+        "style": "flagstone",
+        "src": "assets/tiles/ground_stone_05.png"
+      },
+      "corridor": {
+        "base": "#4a4038",
+        "style": "plank_h",
+        "src": "assets/tiles/ground_stone_03.png"
+      },
+      "wood": {
+        "base": "#4a3028",
+        "style": "plank_v"
+      }
+    }
+  },
+  "furniture": {
+    "topShade": 0.18,
+    "bottomShade": -0.22
+  },
+  "portraits": {
+    "daiyu": {
+      "portrait": "assets/lihui/processed/daiyu_portrait.webp",
+      "hud": "assets/lihui/processed/daiyu_hud.webp"
+    },
+    "baochai": {
+      "portrait": "assets/lihui/processed/baochai_portrait.webp",
+      "hud": "assets/lihui/processed/baochai_hud.webp"
+    },
+    "tanchun": {
+      "portrait": "assets/lihui/processed/tanchun_portrait.webp",
+      "hud": "assets/lihui/processed/tanchun_hud.webp"
+    },
+    "xifeng": {
+      "portrait": "assets/lihui/processed/xifeng_portrait.webp",
+      "hud": "assets/lihui/processed/xifeng_hud.webp"
+    },
+    "zijuan": {
+      "portrait": "assets/lihui/processed/zijuan_portrait.webp",
+      "hud": "assets/lihui/processed/zijuan_hud.webp"
+    },
+    "xueyan": {
+      "portrait": "assets/lihui/processed/xueyan_portrait.webp",
+      "hud": "assets/lihui/processed/xueyan_hud.webp"
+    },
+    "yinger": {
+      "portrait": "assets/lihui/processed/yinger_portrait.webp",
+      "hud": "assets/lihui/processed/yinger_hud.webp"
+    },
+    "xiangyun": {
+      "portrait": "assets/lihui/processed/xiangyun_portrait.webp",
+      "hud": "assets/lihui/processed/xiangyun_hud.webp"
+    },
+    "xiren": {
+      "portrait": "assets/lihui/processed/xiren_portrait.webp",
+      "hud": "assets/lihui/processed/xiren_hud.webp"
+    },
+    "qingwen": {
+      "portrait": "assets/lihui/processed/qingwen_portrait.webp",
+      "hud": "assets/lihui/processed/qingwen_hud.webp"
+    },
+    "sheyue": {
+      "portrait": "assets/lihui/processed/sheyue_portrait.webp",
+      "hud": "assets/lihui/processed/sheyue_hud.webp"
+    },
+    "liwan": {
+      "portrait": "assets/lihui/processed/liwan_portrait.webp",
+      "hud": "assets/lihui/processed/liwan_hud.webp"
+    },
+    "yingchun": {
+      "portrait": "assets/lihui/processed/yingchun_portrait.webp",
+      "hud": "assets/lihui/processed/yingchun_hud.webp"
+    },
+    "yuanchun": {
+      "portrait": "assets/lihui/processed/yuanchun_portrait.webp",
+      "hud": "assets/lihui/processed/yuanchun_hud.webp"
+    },
+    "qinkeqing": {
+      "portrait": "assets/lihui/processed/qinkeqing_portrait.webp",
+      "hud": "assets/lihui/processed/qinkeqing_hud.webp"
+    }
+  },
+  "roomBackgrounds": {
+    "1": {
+      "src": "assets/rooms/潇湘馆.png",
+      "fit": "cover",
+      "dim": 0.04
+    }
+  }
+}

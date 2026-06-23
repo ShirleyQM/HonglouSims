@@ -220,15 +220,13 @@
       p -= (distance - 5) * obs.distancePenaltyPerGrid;
     }
 
+    p *= TraitEffectSystem?.socialJoinMultiplier?.(observer) || 1;
     return clamp(p, 0, 1);
   }
 
   function getCharTraits(char) {
-    // 复用 ai.js 的 trait 系统
-    if (typeof CHAR_DEFAULT_TRAITS !== 'undefined') {
-      return CHAR_DEFAULT_TRAITS[char.id] || [];
-    }
-    return [];
+    return TraitEffectSystem?.traitsOf?.(char)
+      || (typeof CHAR_DEFAULT_TRAITS !== 'undefined' ? CHAR_DEFAULT_TRAITS[char.id] || [] : []);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -461,14 +459,19 @@
                       this.topic?.tone === 'negative' ? -1 : 0;
       
       for (const char of this.participants) {
-        if (!char.memories) char.memories = [];
-        char.memories.push({
+        const memory = {
           type: 'dialogue',
           tag: memoryTag,
           participants: this.participants.map(p => p.id).filter(id => id !== char.id),
           valence,
           timestamp: typeof getGameTimestamp === 'function' ? getGameTimestamp() : Date.now(),
-        });
+        };
+        if (typeof TraitBehaviorSystem !== 'undefined') {
+          TraitBehaviorSystem.addMemory(char, memory, { baseChance: 0.8 });
+          continue;
+        }
+        if (!char.memories) char.memories = [];
+        char.memories.push(memory);
       }
     }
 
@@ -722,15 +725,20 @@
       const memoryTag = this.topic?.name || '群聊';
       
       for (const char of this.participants) {
-        if (!char.memories) char.memories = [];
-        char.memories.push({
+        const memory = {
           type: 'groupchat',
           tag: memoryTag,
           participants: this.participants.map(p => p.id).filter(id => id !== char.id),
-          valence: 1, // 群聊通常是正向的
+          valence: 1,
           timestamp: typeof getGameTimestamp === 'function' ? getGameTimestamp() : Date.now(),
           scene: this.scene?.name,
-        });
+        };
+        if (typeof TraitBehaviorSystem !== 'undefined') {
+          TraitBehaviorSystem.addMemory(char, memory, { baseChance: 0.7 });
+          continue;
+        }
+        if (!char.memories) char.memories = [];
+        char.memories.push(memory);
       }
     }
 

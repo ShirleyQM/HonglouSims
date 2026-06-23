@@ -1,0 +1,24 @@
+{
+  "charName": "Zijuan",
+  "bodyRatio": "1:2.3",
+  "hairSilhouette": "near-black hair, neat maid hairstyle, small delicate hair ornament, soft side locks",
+  "mainColors": {
+    "outerRobe": "pale blue-green",
+    "innerSkirt": "light warm pink",
+    "waistSash": "muted lavender gray",
+    "hair": "near black"
+  },
+  "fixedDetails": [
+    "pale blue-green hanfu outer robe",
+    "light warm pink inner skirt visible below the robe",
+    "muted lavender-gray waist sash",
+    "small delicate hair ornament",
+    "refined but simple servant styling"
+  ],
+  "forbidden": [
+    "do not make the body toddler-like or super-deformed chibi",
+    "do not change outfit colors between frames",
+    "do not add weapons, fans, umbrellas, pets, scenery, text, or watermark"
+  ],
+  "portrait": "assets/lihui/紫鹃.png"
+}

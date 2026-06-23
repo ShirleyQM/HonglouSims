@@ -1,18 +1,12 @@
 /* ═══════════════════ ADMIN ═══════════════════ */
 const ADMIN_TABS = [
-  { id: 'chars', label: '【人物】总览' },
   { id: 'specialties', label: '【人物】性格配置' },
-  { id: 'personalityMeta', label: '【人物】性格系统' },
   { id: 'needs', label: '【人物】需求' },
   { id: 'states', label: '【人物】状态' },
-  { id: 'identityProtocol', label: '【人物】身份' },
   { id: 'lifePath', label: '【人物】路径' },
   { id: 'relInit', label: '关系初始化' },
   { id: 'interTpl', label: '互动模板' },
-  { id: 'narrative', label: '叙事气泡' },
-  { id: 'quests', label: '任务系统' },
   { id: 'multiInteract', label: '多人互动' },
-  { id: 'furnTpl', label: '家具模板' },
   { id: 'furnReact', label: '家具反应' },
   { id: 'scenes', label: '场景配置' },
   { id: 'sceneAccess', label: '场景权限' },
@@ -20,10 +14,11 @@ const ADMIN_TABS = [
 ];
 
 let adminMode = 'v2';
-let adminTab = 'chars', adminSelChar = 0, adminSelRelIdx = 0, adminSelState = 'drunk';
+let adminTab = 'specialties', adminSelChar = 0, adminSelRelIdx = 0, adminSelState = 'drunk';
 let adminSelTpl = 101, adminSelInter = 101;
 let adminV2Section = 'furnitureTemplates', adminV2SelectedTpl = null, adminV2SelectedInst = null, adminV2Search = '', adminV2CharacterFamilyId = null, adminV2CharacterEditing = false, adminV2RelationLabelsEditing = false, adminV2RelationLabelsDraft = null;
-let adminV2TraitFocusId = null, adminV2TraitSavedMessage = '';
+let adminV2TraitFocusId = null, adminV2TraitSavedMessage = '', adminV2SelectedNarrativeRule = null;
+let adminV2DreamFocusId = null, adminV2DreamSavedMessage = '', adminV2DreamDiagCharId = '';
 const adminV2CharacterTraitCollapsed = {};
 const adminCrudGroup = {
   specialties: 'profiles',
@@ -50,6 +45,7 @@ function renderAdmin() {
     renderAdminV2();
     return;
   }
+  if (!ADMIN_TABS.some(t => t.id === adminTab)) adminTab = ADMIN_TABS[0]?.id || 'io';
   document.getElementById('admin-tabs').innerHTML = ADMIN_TABS.map(t =>
     `<div class="adm-tab${t.id === adminTab ? ' active' : ''}" data-tab="${t.id}">${t.label}</div>`
   ).join('') + `<div class="adm-tab" id="btn-admin-v2-return">后台 v2</div>`;
@@ -82,29 +78,27 @@ const ADMIN_V2_GROUPS = [
     { id: 'dashboard', label: '配置总览', status: '占位' },
   ] },
   { id: 'people', label: '人物', items: [
-    { id: 'characters', label: '人物总表', status: '部分迁移' },
     { id: 'characterEditor', label: '人物设定', status: '预览' },
     { id: 'personalityMeta', label: '性格系统', status: '已迁移' },
+    { id: 'dreamSystem', label: '梦想系统', status: '已迁移' },
     { id: 'needs', label: '基础需求', status: '待迁移' },
     { id: 'states', label: '状态标签', status: '待迁移' },
   ] },
-  { id: 'behavior', label: '行为', items: [
-    { id: 'furnitureTemplates', label: '家具模板', status: '已迁移' },
-    { id: 'furnitureInstances', label: '家具摆放', status: '已迁移' },
-    { id: 'interactions', label: '互动模板', status: '待迁移' },
-    { id: 'ai', label: 'AI / Utility', status: '待迁移' },
-  ] },
-  { id: 'tasks', label: '任务', items: [
-    { id: 'questTemplates', label: '任务模板', status: '待迁移' },
-    { id: 'servants', label: '仆从职责', status: '待迁移' },
-  ] },
   { id: 'relations', label: '关系', items: [
-    { id: 'relationInit', label: '初始关系', status: '待迁移' },
+    { id: 'identitySystem', label: '身份系统', status: '已迁移' },
     { id: 'relationLabels', label: '关系标签', status: '已迁移' },
   ] },
+  { id: 'tasks', label: '任务', items: [
+    { id: 'questTemplates', label: '任务系统', status: '已迁移' },
+  ] },
+  { id: 'behavior', label: '行为', items: [
+    { id: 'ai', label: 'AI / Utility', status: '已迁移' },
+    { id: 'interactions', label: '互动系统', status: '待迁移' },
+    { id: 'narrativeRules', label: '叙事气泡', status: '已迁移' },
+  ] },
   { id: 'world', label: '世界', items: [
-    { id: 'scenes', label: '场景', status: '待迁移' },
-    { id: 'sceneAccess', label: '场景权限', status: '待迁移' },
+    { id: 'furnitureTemplates', label: '家具配置', status: '已迁移' },
+    { id: 'scenes', label: '场景配置', status: '待迁移' },
   ] },
   { id: 'debug', label: '调试', items: [
     { id: 'legacy', label: '旧后台', status: '保留' },
@@ -209,6 +203,25 @@ function renderAdminV2() {
       .character-trait-name:hover { color:var(--jn-title);background:rgba(250,248,244,.28);border-color:rgba(168,128,46,.28) }
       .character-trait-name.selected { color:var(--jn-title);background:linear-gradient(180deg,rgba(246,235,197,.72),rgba(213,190,128,.36));border-color:rgba(168,128,46,.58);font-weight:600;box-shadow:0 0 0 1px rgba(201,162,39,.1),inset 0 1px 0 rgba(255,255,255,.4) }
       .character-specialty-column textarea { width:100%;resize:vertical;background:rgba(250,248,244,.2);border:1px solid rgba(107,90,76,.5);border-radius:6px;color:var(--jn-title);font-family:monospace;font-size:10px;padding:7px;box-sizing:border-box }
+      .character-dream-panel { border:1px solid var(--jn-border-3);border-radius:12px;background:rgba(250,248,244,.1);padding:12px;min-width:0 }
+      .character-dream-head { display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:9px }
+      .character-dream-head h4 { color:var(--jn-heading);font-size:14px;font-weight:normal;letter-spacing:.12em }
+      .character-dream-head p { color:var(--jn-text-soft);font-size:11px;line-height:1.5 }
+      .character-dream-grid { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px }
+      .character-dream-card { border:1px solid rgba(107,90,76,.24);border-radius:10px;background:rgba(255,252,245,.14);padding:8px;min-height:92px;color:var(--jn-text-soft);font-family:inherit;text-align:left }
+      .character-dream-card b { display:block;color:var(--jn-title);font-size:13px;font-weight:normal;margin-bottom:4px }
+      .character-dream-card span { display:inline-block;color:var(--jn-text-dim);font-size:10px;margin-bottom:5px }
+      .character-dream-card p { font-size:10px;line-height:1.45 }
+      .character-dream-card.selected { border-color:rgba(168,128,46,.64);background:linear-gradient(180deg,rgba(246,235,197,.55),rgba(213,190,128,.18));box-shadow:inset 0 1px 0 rgba(255,255,255,.35) }
+      .character-dream-card.editable { cursor:pointer }
+      .character-dream-form { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px }
+      .character-dream-form .cfg-field:last-child { grid-column:1 / -1 }
+      .dream-meta-table { min-width:1680px }
+      .dream-meta-table th,.dream-meta-table td { padding:4px;border-right:1px solid var(--jn-border-3) }
+      .dream-meta-table input,.dream-meta-table select { border-radius:2px;padding:4px 5px;min-width:92px }
+      .dream-meta-table .dream-id-cell { min-width:130px;font-family:monospace;font-size:10px }
+      .dream-meta-table .dream-desc-cell { min-width:230px }
+      .dream-meta-table .dream-json-cell { min-width:180px;font-family:monospace;font-size:10px }
       @media (max-width: 1180px) { .character-trait-columns { grid-template-columns:repeat(2,minmax(0,1fr)) } }
       .character-trait-name.editable { cursor:pointer }
       .character-editor-tooltip { position:relative }
@@ -219,6 +232,44 @@ function renderAdminV2() {
       .admin-v2-trait-json details { margin-bottom:8px }
       .admin-v2-trait-json summary { cursor:pointer;color:var(--jn-heading);margin-bottom:6px }
       .admin-v2-trait-json textarea { width:100%;min-height:180px;background:rgba(250,248,244,.18);border:1px solid rgba(107,90,76,.5);border-radius:6px;color:var(--jn-title);font-family:monospace;font-size:10px;padding:8px }
+      .furniture-admin-page { display:flex;flex-direction:column;gap:10px;min-width:0 }
+      .furniture-admin-summary { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px }
+      .furniture-admin-card { border:1px solid var(--jn-border-3);border-radius:10px;background:rgba(250,248,244,.12);padding:9px 10px;min-width:0 }
+      .furniture-admin-card b { display:block;color:var(--jn-heading);font-size:17px;font-weight:normal }
+      .furniture-admin-card span { display:block;color:var(--jn-text-soft);font-size:10px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+      .furniture-admin-content { display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:10px;min-height:0 }
+      .furniture-admin-table { min-width:1160px }
+      .furniture-admin-table th,.furniture-admin-table td { padding:5px 6px;border-right:1px solid var(--jn-border-3) }
+      .furniture-admin-table input,.furniture-admin-table select { border-radius:3px;padding:4px 5px;min-height:24px }
+      .furniture-admin-table .furn-name-cell { min-width:104px }
+      .furniture-admin-table .furn-category-cell { min-width:90px }
+      .furniture-detail-panel { border:1px solid var(--jn-border-2);border-radius:12px;background:rgba(250,248,244,.12);padding:10px;overflow:auto;max-height:58vh }
+      .furniture-detail-head { display:flex;gap:10px;align-items:center;margin-bottom:10px }
+      .furniture-detail-icon { width:42px;height:42px;border:1px solid rgba(168,128,46,.42);border-radius:10px;background:linear-gradient(180deg,rgba(246,235,197,.45),rgba(213,190,128,.18));display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:inset 0 1px 0 rgba(255,255,255,.35) }
+      .furniture-detail-title { min-width:0 }
+      .furniture-detail-title h4 { color:var(--jn-heading);font-size:14px;font-weight:normal;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap }
+      .furniture-detail-title p { color:var(--jn-text-soft);font-size:10px;line-height:1.45 }
+      .furniture-detail-grid { display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px }
+      .furniture-detail-field { border:1px solid var(--jn-border-3);border-radius:8px;background:rgba(255,252,245,.12);padding:6px;min-width:0 }
+      .furniture-detail-field label { display:block;color:var(--jn-text-dim);font-size:10px;margin-bottom:4px }
+      .furniture-detail-field b { color:var(--jn-title);font-size:12px;font-weight:normal }
+      .furniture-detail-panel textarea { width:100%;min-height:128px;background:rgba(250,248,244,.18);border:1px solid rgba(107,90,76,.5);border-radius:6px;color:var(--jn-title);font-family:monospace;font-size:10px;padding:8px;box-sizing:border-box }
+      .furniture-prompt-preview { white-space:pre-wrap;color:var(--jn-text-soft);font-size:11px;line-height:1.55;border:1px dashed var(--jn-border-3);border-radius:8px;background:rgba(250,248,244,.1);padding:8px;margin:8px 0 }
+      .narrative-admin-page { display:flex;flex-direction:column;gap:10px;min-width:0 }
+      .narrative-admin-summary { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px }
+      .narrative-admin-card { border:1px solid var(--jn-border-3);border-radius:10px;background:rgba(250,248,244,.12);padding:9px 10px;min-width:0 }
+      .narrative-admin-card b { display:block;color:var(--jn-heading);font-size:17px;font-weight:normal }
+      .narrative-admin-card span { display:block;color:var(--jn-text-soft);font-size:10px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+      .narrative-admin-content { display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:10px;min-height:0 }
+      .narrative-settings-grid { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px }
+      .narrative-rules-table { min-width:1180px }
+      .narrative-rules-table th,.narrative-rules-table td { padding:5px 6px;border-right:1px solid var(--jn-border-3) }
+      .narrative-rules-table input,.narrative-rules-table select { border-radius:3px;padding:4px 5px;min-height:24px }
+      .narrative-rule-detail { border:1px solid var(--jn-border-2);border-radius:12px;background:rgba(250,248,244,.12);padding:10px;overflow:auto;max-height:58vh }
+      .narrative-rule-detail h4 { color:var(--jn-heading);font-size:14px;font-weight:normal;margin-bottom:8px }
+      .narrative-rule-detail textarea { width:100%;min-height:128px;background:rgba(250,248,244,.18);border:1px solid rgba(107,90,76,.5);border-radius:6px;color:var(--jn-title);font-family:monospace;font-size:10px;padding:8px;box-sizing:border-box }
+      .narrative-rule-tags { display:flex;gap:4px;flex-wrap:wrap }
+      .narrative-rule-tags .meta-tag { margin:0 }
       .relation-label-page { display:flex;flex-direction:column;gap:12px;min-width:0 }
       .relation-label-actions { display:flex;justify-content:flex-end;gap:8px }
       .relation-label-actions button { background:linear-gradient(180deg,var(--jn-btn-top),var(--jn-btn-bottom));border:1px solid var(--jn-border);border-radius:999px;color:var(--jn-title);padding:5px 14px;font-family:inherit;cursor:pointer }
@@ -240,7 +291,64 @@ function renderAdminV2() {
       .admin-v2-kpi { border:1px solid var(--jn-border-3);border-radius:10px;background:rgba(250,248,244,.12);padding:10px }
       .admin-v2-kpi b { display:block;color:var(--jn-heading);font-size:18px }
       .admin-v2-kpi span { color:var(--jn-text-soft);font-size:10px }
-      @media (max-width:900px) { .admin-v2 { grid-template-columns:1fr } .admin-v2-content { grid-template-columns:1fr } }
+      .quest-v2-page { display:flex;flex-direction:column;gap:10px;min-width:0 }
+      .quest-v2-controls { display:grid;grid-template-columns:repeat(3,minmax(110px,150px)) minmax(0,1fr);gap:8px;align-items:stretch }
+      .quest-v2-card { border:1px solid var(--jn-border-3);border-radius:10px;background:rgba(250,248,244,.14);padding:10px }
+      .quest-v2-card b { display:block;color:var(--jn-heading);font-size:18px;font-weight:normal }
+      .quest-v2-card span { color:var(--jn-text-soft);font-size:10px }
+      .quest-v2-switches { border:1px solid var(--jn-border-3);border-radius:10px;background:rgba(250,248,244,.1);padding:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center }
+      .quest-v2-switches label { color:var(--jn-title);font-size:11px;display:flex;align-items:center;gap:4px;white-space:nowrap }
+      .quest-v2-switches input[type="checkbox"] { width:auto }
+      .quest-v2-small-grid { flex:1 1 420px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px }
+      .quest-v2-content { display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:10px;min-height:0 }
+      .quest-v2-table { min-width:1120px }
+      .quest-v2-table td:nth-child(9),.quest-v2-table td:nth-child(10) { max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+      .quest-v2-drawer .cfg-grid { grid-template-columns:1fr 1fr }
+      .quest-v2-summary { border:1px solid var(--jn-border-3);border-radius:8px;background:rgba(250,248,244,.12);padding:7px 8px;margin-bottom:7px }
+      .quest-v2-summary b { display:block;color:var(--jn-heading);font-size:11px;font-weight:normal;margin-bottom:3px }
+      .quest-v2-summary span { color:var(--jn-text-soft);font-size:10px;line-height:1.45 }
+      .quest-v2-test { border:1px solid var(--jn-border-2);border-radius:10px;background:rgba(250,248,244,.12);padding:10px;display:grid;grid-template-columns:minmax(180px,260px) minmax(0,1fr) auto;gap:10px;align-items:end }
+      .quest-v2-test h4 { color:var(--jn-heading);font-size:13px;font-weight:normal;margin-bottom:4px }
+      .quest-v2-test p { color:var(--jn-text-soft);font-size:10px;line-height:1.45 }
+      .quest-v2-test-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px }
+      .identity-v2-page { display:flex;flex-direction:column;gap:10px;min-width:0 }
+      .identity-v2-summary { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px }
+      .identity-v2-card { border:1px solid var(--jn-border-3);border-radius:10px;background:rgba(250,248,244,.14);padding:9px 10px;min-width:0 }
+      .identity-v2-card b { display:block;color:var(--jn-heading);font-size:17px;font-weight:normal }
+      .identity-v2-card span { color:var(--jn-text-soft);font-size:10px }
+      .identity-v2-content { display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:10px;min-height:0 }
+      .identity-v2-stack { display:flex;flex-direction:column;gap:10px;min-width:0 }
+      .identity-v2-module { border:1px solid var(--jn-border-2);border-radius:10px;background:rgba(250,248,244,.1);padding:10px;min-width:0 }
+      .identity-v2-module h4 { color:var(--jn-heading);font-size:13px;font-weight:normal;margin-bottom:7px }
+      .identity-v2-help { color:var(--jn-text-soft);font-size:11px;line-height:1.6;margin-bottom:8px }
+      .identity-v2-table { min-width:760px }
+      .identity-v2-table.compact { min-width:420px }
+      .identity-v2-table th,.identity-v2-table td { padding:5px 6px;border-right:1px solid var(--jn-border-3) }
+      .identity-v2-table input,.identity-v2-table select { border-radius:3px;padding:4px 5px;min-height:24px }
+      .identity-v2-preview { border:1px dashed var(--jn-border-3);border-radius:8px;background:rgba(250,248,244,.12);padding:8px;color:var(--jn-text-soft);font-size:11px;line-height:1.6;white-space:pre-wrap }
+      .ai-v2-page { display:flex;flex-direction:column;gap:10px;min-width:0 }
+      .ai-v2-summary { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px }
+      .ai-v2-card { border:1px solid var(--jn-border-3);border-radius:10px;background:rgba(250,248,244,.14);padding:9px 10px;min-width:0 }
+      .ai-v2-card b { display:block;color:var(--jn-heading);font-size:17px;font-weight:normal }
+      .ai-v2-card span { color:var(--jn-text-soft);font-size:10px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+      .ai-v2-content { display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:10px;min-height:0 }
+      .ai-v2-stack { display:flex;flex-direction:column;gap:10px;min-width:0 }
+      .ai-v2-module { border:1px solid var(--jn-border-2);border-radius:10px;background:rgba(250,248,244,.1);padding:10px;min-width:0 }
+      .ai-v2-module h4 { color:var(--jn-heading);font-size:13px;font-weight:normal;margin-bottom:7px }
+      .ai-v2-help { color:var(--jn-text-soft);font-size:11px;line-height:1.6;margin-bottom:8px }
+      .ai-v2-grid { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px }
+      .ai-v2-grid .cfg-field label { white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+      .ai-v2-table { min-width:1080px }
+      .ai-v2-table.compact { min-width:620px }
+      .ai-v2-table th,.ai-v2-table td { padding:5px 6px;border-right:1px solid var(--jn-border-3);vertical-align:top }
+      .ai-v2-table input { border-radius:3px;padding:4px 5px;min-height:24px }
+      .ai-v2-json-input { font-family:monospace;font-size:10px;min-width:150px }
+      .ai-v2-preview { border:1px dashed var(--jn-border-3);border-radius:8px;background:rgba(250,248,244,.12);padding:8px;color:var(--jn-text-soft);font-size:11px;line-height:1.55;white-space:pre-wrap;margin-bottom:8px }
+      .ai-v2-drawer-list { display:flex;flex-direction:column;gap:6px }
+      .ai-v2-candidate { border:1px solid var(--jn-border-3);border-radius:8px;background:rgba(255,252,245,.1);padding:7px }
+      .ai-v2-candidate b { display:block;color:var(--jn-title);font-size:11px;font-weight:normal;margin-bottom:3px }
+      .ai-v2-candidate span { color:var(--jn-text-soft);font-size:10px;line-height:1.45 }
+      @media (max-width:900px) { .admin-v2 { grid-template-columns:1fr } .admin-v2-content,.furniture-admin-content,.quest-v2-content,.quest-v2-controls,.quest-v2-test,.identity-v2-content,.ai-v2-content { grid-template-columns:1fr } .furniture-admin-summary,.identity-v2-summary,.ai-v2-summary { grid-template-columns:repeat(2,minmax(0,1fr)) } .quest-v2-small-grid,.quest-v2-test-grid,.narrative-settings-grid,.ai-v2-grid { grid-template-columns:1fr 1fr } }
     </style>
     <div class="admin-v2">
       <aside class="admin-v2-side">${renderAdminV2Nav()}</aside>
@@ -267,10 +375,14 @@ function renderAdminV2Header(item) {
   const descriptions = {
     furnitureTemplates: '家具能做什么、恢复什么需求、是否基础生存、是否需要技能，都在这里配置。',
     furnitureInstances: '家具摆在哪里、属于哪个场景、坐标是多少，在这里维护。',
-    characters: '人物总表是全员汇总，一人一行看身份、家庭、性格和摘要。',
     characterEditor: '人物设定是单个人物的捏人页，先预览家庭切换、头像选人、立绘和性格配置布局。',
     personalityMeta: '性格的分类、描述、对偶关系和运行效果。表格改动会自动保存，并同步到人物设定页。',
+    dreamSystem: '梦想系统定义古代版人生志向类型，并给人物分配长期目标、达成条件和玩法方向。',
+    identitySystem: '身份系统配置人物位阶、位阶关系枚举、互动礼法规则和称呼规则；任务权限里的身份关系也读取这里。',
     relationLabels: '关系系统配置：面板四象限名称、综合关系标签、各轴阶段标签。关系面板和运行时阶段判断都会读取这里。',
+    ai: 'Utility AI 的候选评分、日程窗口、作息锚点和调试状态。这里只影响 NPC 自主行为，不限制玩家手动操作。',
+    narrativeRules: '叙事气泡规则：按触发、性格、需求、状态、记忆和冷却共同驱动展示文案。',
+    questTemplates: '任务系统配置：总开关、模板 metadata、分类、是否仆从任务和测试下发都在这里维护。',
     dashboard: '后续会放配置完整度、引用错误、最近改动和重点风险。',
     legacy: '旧后台完整保留，用来兜底尚未迁移的配置。',
   };
@@ -281,10 +393,11 @@ function renderAdminV2Header(item) {
         <p>${escapeHtml(descriptions[adminV2Section] || '该模块还未迁移到 v2，先保留占位。')}</p>
       </div>
       <div class="admin-v2-tools">
-        ${['furnitureTemplates', 'furnitureInstances', 'personalityMeta'].includes(adminV2Section)
+        ${['furnitureTemplates', 'furnitureInstances', 'personalityMeta', 'dreamSystem', 'narrativeRules', 'questTemplates'].includes(adminV2Section)
              ? `<input id="admin-v2-search" value="${adminAttr(adminV2Search)}" placeholder="搜索名称 / ID / 分类">
-               <button class="primary" id="btn-admin-v2-add">${adminV2Section === 'furnitureInstances' ? '新增摆放' : adminV2Section === 'personalityMeta' ? '新增性格' : '新增模板'}</button>
-               <button id="btn-admin-v2-validate">校验</button>`
+               <button class="primary" id="btn-admin-v2-add">${adminV2Section === 'furnitureInstances' ? '新增摆放' : adminV2Section === 'personalityMeta' ? '新增性格' : adminV2Section === 'dreamSystem' ? '新增梦想' : adminV2Section === 'narrativeRules' ? '新增规则' : '新增模板'}</button>
+               <button id="btn-admin-v2-validate">校验</button>
+               ${adminV2Section.startsWith('furniture') ? '<button id="btn-admin-v2-export-furniture-ai">导出素材清单</button>' : ''}`
           : ''}
         <button id="btn-admin-v2-open-legacy">旧后台</button>
       </div>
@@ -292,12 +405,17 @@ function renderAdminV2Header(item) {
 }
 
 function renderAdminV2Section() {
-  if (adminV2Section === 'characters') return renderAdminV2Characters();
+  if (adminV2Section === 'characters') return renderAdminV2CharacterEditor();
   if (adminV2Section === 'characterEditor') return renderAdminV2CharacterEditor();
   if (adminV2Section === 'furnitureTemplates') return renderAdminV2FurnitureTemplates();
   if (adminV2Section === 'furnitureInstances') return renderAdminV2FurnitureInstances();
   if (adminV2Section === 'personalityMeta') return renderAdminV2PersonalityMeta();
+  if (adminV2Section === 'dreamSystem') return renderAdminV2DreamSystem();
+  if (adminV2Section === 'identitySystem') return renderAdminV2IdentitySystem();
   if (adminV2Section === 'relationLabels') return renderAdminV2RelationLabels();
+  if (adminV2Section === 'ai') return renderAdminV2AIUtility();
+  if (adminV2Section === 'narrativeRules') return renderAdminV2NarrativeRules();
+  if (adminV2Section === 'questTemplates') return renderAdminV2QuestTemplates();
   if (adminV2Section === 'dashboard') return renderAdminV2Dashboard();
   if (adminV2Section === 'legacy') {
     return `<div class="admin-v2-empty">旧后台已完整保留。点击右上角「旧后台」会切回原来的多标签配置面板。</div>`;
@@ -531,6 +649,426 @@ function renderAdminV2RelationLabels() {
     <p style="font-size:10px;color:var(--jn-text-soft);line-height:1.6">
       说明：家庭关系用于统一家庭角色/人物摘要；通用关系控制关系面板四象限和阶段名；综合关系规则用于未来把家庭关系与四轴数值组合成戏剧化标签。
     </p>
+  </div>`;
+}
+
+function identityConfigForAdmin() {
+  if (!CONFIG.identityProtocolConfig) CONFIG.identityProtocolConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG.identityProtocolConfig || {}));
+  CONFIG.identityProtocolConfig.rankLabels ||= {};
+  CONFIG.identityProtocolConfig.hierarchyLabels ||= {};
+  const labelAliases = {
+    peer: { '平等': '平级' },
+    master_to_servant: { '主→仆': '主子→仆从' },
+    servant_to_master: { '仆→主': '仆从→主子' },
+    senior_servant_to_junior: { '大丫鬟→仆': '体面仆从→普通仆从' },
+    junior_to_senior_servant: { '仆→大丫鬟': '普通仆从→体面仆从' },
+    parent_to_child: { '长辈→晚辈': '长辈→晚辈主子' },
+    child_to_parent: { '晚辈→长辈': '晚辈主子→长辈' },
+    grandparent_to_child: { '祖辈→晚辈': '至尊→晚辈主子' },
+  };
+  for (const [key, aliases] of Object.entries(labelAliases)) {
+    const cur = CONFIG.identityProtocolConfig.hierarchyLabels[key];
+    if (aliases[cur]) CONFIG.identityProtocolConfig.hierarchyLabels[key] = aliases[cur];
+  }
+  CONFIG.identityProtocolConfig.interactionCatMap ||= {};
+  CONFIG.identityProtocolConfig.addressByInitType ||= {};
+  CONFIG.identityProtocolConfig.rules ||= [];
+  CONFIG.identityProtocolConfig.contactTypeRules ||= {};
+  CONFIG.identityProtocolConfig.riskyDefaults ||= {};
+  return CONFIG.identityProtocolConfig;
+}
+
+function renderIdentityPreview() {
+  const c = CHARS[selectedIdx];
+  const other = CHARS.find(x => x.id !== c?.id);
+  if (!c || !other || typeof IdentityProtocolSystem === 'undefined') return '需要至少两名角色。';
+  const snapshot = typeof SocialContextSystem === 'object' && SocialContextSystem?.resolve
+    ? SocialContextSystem.resolve(c, other, { actionType: 'interaction', category: '叙旧' })
+    : null;
+  const rel = snapshot?.rankRelation || IdentityProtocolSystem.getHierarchyRelation(c.id, other.id);
+  return [
+    `${c.short || c.id} → ${other.short || other.id}`,
+    `身份位阶：${snapshot?.actorRankLabel || IdentityProtocolSystem.rankLabel?.(IdentityProtocolSystem.getCharRank(c.id)) || c.socialRank} → ${snapshot?.targetRankLabel || IdentityProtocolSystem.rankLabel?.(IdentityProtocolSystem.getCharRank(other.id)) || other.socialRank}`,
+    `身份参考声望：${snapshot?.actorReputation?.value ?? 0} → ${snapshot?.targetReputation?.value ?? 0}`,
+    `名分关系：${snapshot?.nominalRelation || '未配置'}${snapshot?.kinshipType ? ` / ${snapshot.kinshipType}` : ''}`,
+    `实际关系：好感 ${Math.round(snapshot?.affection ?? 0)} / 信任 ${Math.round(snapshot?.trust ?? 0)} / 友谊 ${Math.round(snapshot?.friendship ?? 0)} / 综合 ${Math.round(snapshot?.relationScore ?? 0)}`,
+    `礼法判定：${snapshot?.protocolBehavior || 'allowed'}${snapshot?.protocolReason ? `，${snapshot.protocolReason}` : ''}`,
+    `位阶关系：${IdentityProtocolSystem.hierarchyLabel(rel)} (${rel})`,
+    IdentityProtocolSystem.formatAddressBlock?.(c, other) || '',
+  ].filter(Boolean).join('\n');
+}
+
+function identityHierarchySourceNote(id) {
+  const notes = {
+    peer: '双方同级或未命中其他规则',
+    master_to_servant: '发起人等级 0-3，对象等级 4-5',
+    servant_to_master: '发起人等级 4-5，对象等级 0-3',
+    senior_servant_to_junior: '体面仆从(4) → 普通仆从(5)',
+    junior_to_senior_servant: '普通仆从(5) → 体面仆从(4)',
+    parent_to_child: '长辈(1) → 其他主子/仆从',
+    child_to_parent: '其他人 → 长辈(1)',
+    grandparent_to_child: '至尊(0) → 其他人',
+    outsider: '任一方等级为外人(6)',
+  };
+  return notes[id] || '由 IdentityProtocolSystem.getHierarchyRelation 推导';
+}
+
+function identityBehaviorLabel(value) {
+  return {
+    allowed: '正常允许',
+    conditional: '有条件放行',
+    risky: '逾矩有风险',
+    forbidden: '礼法禁止',
+  }[value] || value || '未设置';
+}
+
+function relationInitTypesForAdmin() {
+  const names = new Set();
+  (CONFIG.relationInit || []).forEach(r => { if (r.initType) names.add(r.initType); });
+  (CONFIG.relationPanelConfig?.compositeRelationRules || []).forEach(r => { if (r.familyRelation) names.add(r.familyRelation); });
+  (CONFIG.relationPanelConfig?.familyRelations || []).forEach(r => { if (r.name) names.add(r.name); });
+  return [...names].sort((a, b) => a.localeCompare(b, 'zh'));
+}
+
+function renderIdentityNominalRelationModule() {
+  const initTypes = relationInitTypesForAdmin();
+  const rows = initTypes.map(type => {
+    const count = (CONFIG.relationInit || []).filter(r => r.initType === type).length;
+    const kinship = typeof getKinshipType === 'function' ? getKinshipType(type) : '';
+    const usedByComposite = (CONFIG.relationPanelConfig?.compositeRelationRules || []).some(r => r.familyRelation === type);
+    return `<tr>
+      <td class="meta-id">${escapeHtml(type)}</td>
+      <td>${escapeHtml(kinship || '未分类')}</td>
+      <td>${count}</td>
+      <td>${usedByComposite ? '✓' : ''}</td>
+    </tr>`;
+  }).join('');
+  return `<div class="identity-v2-module">
+    <h4>名分关系</h4>
+    <p class="identity-v2-help">这是两人之间的名义关系，来源是关系系统的 <code>relationInit.initType</code>，和【关系】-【关系标签】使用同一套亲缘分类接口。</p>
+    <div class="admin-v2-table-wrap">
+      <table class="admin-v2-table identity-v2-table compact">
+        <thead><tr><th>名分</th><th>亲缘类型</th><th>初始关系数</th><th>综合标签规则</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="4">暂无名分关系</td></tr>'}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderIdentityActualRelationModule() {
+  const c = CHARS[selectedIdx];
+  const other = CHARS.find(x => x.id !== c?.id);
+  const info = c && other && typeof getRelationInfo === 'function' ? getRelationInfo(c.id, other.id) : null;
+  const rows = [
+    ['affection', '好感', info?.affection ?? 0, '互相喜不喜欢，影响亲昵与反感'],
+    ['trust', '信任', info?.trust ?? 0, '能否托付、相信、告密或护短'],
+    ['friendship', '友谊', info?.friendship ?? 0, '熟络程度、往来频率、知己感'],
+    ['submission', '服从/体恤', info?.submissionAtoB ?? 0, '方向性轴，主仆/长幼语境下解释不同'],
+  ].map(([id, label, value, note]) => `<tr>
+    <td class="meta-id">${escapeHtml(id)}</td>
+    <td>${escapeHtml(label)}</td>
+    <td>${Math.round(value)}</td>
+    <td>${escapeHtml(note)}</td>
+  </tr>`).join('');
+  return `<div class="identity-v2-module">
+    <h4>实际关系四轴</h4>
+    <p class="identity-v2-help">这是两人实际相处状态，来源是运行时 <code>relations</code>；综合分和综合关系标签由关系系统计算，不等同于身份高低。</p>
+    <div class="admin-v2-table-wrap">
+      <table class="admin-v2-table identity-v2-table compact">
+        <thead><tr><th>轴</th><th>显示名</th><th>当前二人数值</th><th>用途</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderAdminV2IdentitySystem() {
+  const cfg = identityConfigForAdmin();
+  const rankRows = Object.entries(cfg.rankLabels || {}).sort((a, b) => (+a[0] || 0) - (+b[0] || 0)).map(([rank, label]) => `
+    <tr>
+      <td class="meta-id">${escapeHtml(rank)}</td>
+      <td><input data-identity-v2-rank="${adminAttr(rank)}" value="${adminAttr(label)}"></td>
+      <td>${(CONFIG.characters || []).filter(c => String(c.socialRank ?? 2) === String(rank)).length}</td>
+    </tr>`).join('');
+  const hierarchyRows = Object.entries(cfg.hierarchyLabels || {}).map(([id, label]) => `
+    <tr>
+      <td class="meta-id">${escapeHtml(id)}</td>
+      <td><input data-identity-v2-hierarchy="${adminAttr(id)}" value="${adminAttr(label)}"></td>
+      <td>${escapeHtml(identityHierarchySourceNote(id))}</td>
+    </tr>`).join('');
+  const cats = Array.from(new Set([
+    ...(CONFIG.interactionCategories || []).map(c => c.name || c.id),
+    ...(cfg.rules || []).map(r => r.cat),
+  ].filter(Boolean)));
+  const rels = Object.keys(cfg.hierarchyLabels || {});
+  const behaviorOptions = ['allowed', 'conditional', 'risky', 'forbidden'];
+  const ruleRows = (cfg.rules || []).map((rule, idx) => `
+    <tr>
+      <td>${idx + 1}</td>
+      <td><select data-identity-v2-rule="${idx}" data-field="rel">${rels.map(v => `<option value="${adminAttr(v)}"${rule.rel === v ? ' selected' : ''}>${escapeHtml(v)}</option>`).join('')}</select></td>
+      <td><input data-identity-v2-rule="${idx}" data-field="cat" list="identity-v2-cats" value="${adminAttr(rule.cat || '')}"></td>
+      <td><select data-identity-v2-rule="${idx}" data-field="behavior">${behaviorOptions.map(v => `<option value="${v}"${rule.behavior === v ? ' selected' : ''}>${v}</option>`).join('')}</select></td>
+      <td><input data-identity-v2-rule-desc="${idx}" value="${adminAttr(rule.condition?.desc || '')}" placeholder="conditional 说明"></td>
+      <td><button data-identity-v2-delete-rule="${idx}">删除</button></td>
+    </tr>`).join('');
+  const addressRows = Object.entries(cfg.addressByInitType || {}).map(([type, row]) => `
+    <tr>
+      <td><input data-identity-v2-address-key="${adminAttr(type)}" value="${adminAttr(type)}"></td>
+      <td><input data-identity-v2-address="${adminAttr(type)}" value="${adminAttr(row?.hint || '')}" placeholder="称呼提示"></td>
+      <td><button data-identity-v2-delete-address="${adminAttr(type)}">删除</button></td>
+    </tr>`).join('');
+  const nominalCount = relationInitTypesForAdmin().length;
+  return `
+    <div class="identity-v2-page">
+      <section class="identity-v2-summary">
+        <div class="identity-v2-card"><b>${Object.keys(cfg.rankLabels || {}).length}</b><span>1 身份位阶</span></div>
+        <div class="identity-v2-card"><b>${nominalCount}</b><span>2 名分关系</span></div>
+        <div class="identity-v2-card"><b>4</b><span>3 实际关系轴</span></div>
+        <div class="identity-v2-card"><b>${(cfg.rules || []).length}</b><span>4 礼法规则</span></div>
+      </section>
+      <section class="identity-v2-content">
+        <div class="identity-v2-stack">
+          <div class="identity-v2-module">
+            <h4>1. 身份位阶</h4>
+            <p class="identity-v2-help">这是人物自身的社会位置，来源是人物 <code>socialRank</code>；它决定任务权限、场景权和礼法初判，不表示两人亲不亲。</p>
+            <div class="admin-v2-table-wrap">
+              <table class="admin-v2-table identity-v2-table compact">
+                <thead><tr><th>等级</th><th>位阶名</th><th>人物数</th></tr></thead>
+                <tbody>${rankRows}</tbody>
+              </table>
+            </div>
+          </div>
+          ${renderIdentityNominalRelationModule()}
+          ${renderIdentityActualRelationModule()}
+          <div class="identity-v2-module">
+            <h4>位阶关系推导</h4>
+            <p class="identity-v2-help">这是两个人的身份位阶相对关系，由 <code>socialRank</code> 推导，不是名分关系。它会作为礼法规则的第一层输入。</p>
+            <div class="admin-v2-table-wrap">
+              <table class="admin-v2-table identity-v2-table">
+                <thead><tr><th>枚举值</th><th>显示名</th><th>当前来源</th></tr></thead>
+                <tbody>${hierarchyRows}</tbody>
+              </table>
+            </div>
+          </div>
+          <div class="identity-v2-module">
+            <h4>4. 礼法判定规则</h4>
+            <p class="identity-v2-help">
+              生效方式：系统先汇总身份位阶、名分关系、实际关系四轴，再按“位阶关系 + 行为大类 + 身体接触 + 场景/见证者”给出 allowed / conditional / risky / forbidden。
+              综合分门槛仍由互动系统校验；礼法规则只决定合不合规矩、是否逾矩、是否禁止。
+            </p>
+            <datalist id="identity-v2-cats">${cats.map(c => `<option value="${adminAttr(c)}"></option>`).join('')}</datalist>
+            <div class="admin-v2-table-wrap">
+              <table class="admin-v2-table identity-v2-table">
+                <thead><tr><th>#</th><th>身份关系</th><th>互动大类</th><th>行为</th><th>条件说明</th><th>操作</th></tr></thead>
+                <tbody>${ruleRows || '<tr><td colspan="6">暂无规则</td></tr>'}</tbody>
+              </table>
+            </div>
+            <div class="adm-actions"><button id="btn-identity-v2-add-rule">新增礼法规则</button></div>
+          </div>
+          <div class="identity-v2-module">
+            <h4>关系称呼覆盖</h4>
+            <p class="identity-v2-help">称呼覆盖的 key 使用名分关系名，例如 主仆、夫妻、母子；默认称呼会同时读取身份位阶和关系系统的 <code>initType</code>。</p>
+            <div class="admin-v2-table-wrap">
+              <table class="admin-v2-table identity-v2-table">
+                <thead><tr><th>初始关系名</th><th>称呼提示</th><th>操作</th></tr></thead>
+                <tbody>${addressRows || '<tr><td colspan="3">暂无覆盖，使用系统默认称呼规则</td></tr>'}</tbody>
+              </table>
+            </div>
+            <div class="adm-actions"><button id="btn-identity-v2-add-address">新增称呼规则</button></div>
+          </div>
+        </div>
+        <aside class="admin-v2-drawer">
+          <h4>当前人物预览</h4>
+          <div class="identity-v2-preview">${escapeHtml(renderIdentityPreview())}</div>
+          <div class="section-title">和关系系统的关系</div>
+          <p class="identity-v2-help">
+            四层关系：身份位阶回答“这个人自身是什么身份”；名分关系回答“两个人名义上是什么关系”；
+            实际关系四轴回答“处得怎么样”；礼法判定回答“当前行为是否合规矩”。
+            后台这里读的是同一套运行时接口：<code>SocialContextSystem.resolve()</code> 汇总，<code>getRelationInfo()</code> 提供名分和四轴。
+            分域声望只作为身份体面解释输入，不直接改写身份位阶；职业阶段仍由人生路径系统决定。
+          </p>
+          <div class="section-title">高级配置</div>
+          <details>
+            <summary style="cursor:pointer;color:var(--jn-heading);font-size:11px;margin-bottom:6px">identityProtocolConfig JSON</summary>
+            <textarea id="identity-v2-json" style="min-height:260px">${escapeHtml(JSON.stringify(cfg, null, 2))}</textarea>
+          </details>
+          <div class="adm-actions">
+            <button class="primary" id="btn-identity-v2-save">保存身份系统</button>
+            <button id="btn-identity-v2-save-json">保存高级 JSON</button>
+          </div>
+        </aside>
+      </section>
+    </div>`;
+}
+
+function aiConfigForAdmin() {
+  if (!CONFIG.aiConfig) CONFIG.aiConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG.aiConfig || {}));
+  const cfg = CONFIG.aiConfig;
+  cfg.demandBaseWeights ||= {};
+  cfg.fastChannelNeeds ||= [];
+  cfg.scheduleWindows ||= [];
+  cfg.routineAnchors ||= [];
+  return cfg;
+}
+
+function aiTimeText(hour) {
+  const h = Math.floor(Number(hour) || 0);
+  const m = Math.round((((Number(hour) || 0) % 1) + 1) % 1 * 60);
+  return `${String((h % 24 + 24) % 24).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function aiTagModText(row, key) {
+  return JSON.stringify(row?.[key] || {});
+}
+
+function aiNeedWeightRows(cfg) {
+  const needDefs = typeof getNeedDefs === 'function' ? getNeedDefs() : [];
+  return needDefs.map(n => {
+    const key = n.key;
+    return `<div class="cfg-field">
+      <label>${escapeHtml(n.label || key)} · ${escapeHtml(key)}</label>
+      <input data-ai-v2-demand="${adminAttr(key)}" type="number" step="0.05" value="${cfg.demandBaseWeights?.[key] ?? ''}">
+    </div>`;
+  }).join('');
+}
+
+function renderAIScheduleRows(cfg) {
+  return (cfg.scheduleWindows || []).map((row, idx) => `<tr>
+    <td class="meta-id"><input data-ai-v2-window="${idx}" data-field="id" value="${adminAttr(row.id || '')}"></td>
+    <td><input data-ai-v2-window="${idx}" data-field="name" value="${adminAttr(row.name || '')}"></td>
+    <td><input data-ai-v2-window-number="${idx}" data-field="from" type="number" step="0.25" value="${row.from ?? ''}"></td>
+    <td><input data-ai-v2-window-number="${idx}" data-field="to" type="number" step="0.25" value="${row.to ?? ''}"></td>
+    <td><input class="ai-v2-json-input" data-ai-v2-window-json="${idx}" data-field="boost" value="${adminAttr(aiTagModText(row, 'boost'))}"></td>
+    <td><input class="ai-v2-json-input" data-ai-v2-window-json="${idx}" data-field="cut" value="${adminAttr(aiTagModText(row, 'cut'))}"></td>
+    <td><button data-ai-v2-delete-window="${idx}">删除</button></td>
+  </tr>`).join('');
+}
+
+function renderAIRoutineRows(cfg) {
+  return (cfg.routineAnchors || []).map((row, idx) => `<tr>
+    <td class="meta-id"><input data-ai-v2-routine="${idx}" data-field="id" value="${adminAttr(row.id || '')}"></td>
+    <td><input data-ai-v2-routine="${idx}" data-field="name" value="${adminAttr(row.name || '')}"></td>
+    <td><input data-ai-v2-routine-number="${idx}" data-field="from" type="number" step="0.25" value="${row.from ?? ''}"></td>
+    <td><input data-ai-v2-routine-number="${idx}" data-field="to" type="number" step="0.25" value="${row.to ?? ''}"></td>
+    <td><input data-ai-v2-routine-list="${idx}" data-field="needs" value="${adminAttr((row.needs || []).join(','))}"></td>
+    <td><input class="ai-v2-json-input" data-ai-v2-routine-json="${idx}" data-field="completeBy" value="${adminAttr(JSON.stringify(row.completeBy || {}))}"></td>
+    <td><input class="ai-v2-json-input" data-ai-v2-routine-json="${idx}" data-field="boost" value="${adminAttr(aiTagModText(row, 'boost'))}"></td>
+    <td><input class="ai-v2-json-input" data-ai-v2-routine-json="${idx}" data-field="cut" value="${adminAttr(aiTagModText(row, 'cut'))}"></td>
+    <td><input class="ai-v2-json-input" data-ai-v2-routine-json="${idx}" data-field="completeCut" value="${adminAttr(JSON.stringify(row.completeCut || {}))}"></td>
+    <td><button data-ai-v2-delete-routine="${idx}">删除</button></td>
+  </tr>`).join('');
+}
+
+function renderAIDebugDrawer(cfg) {
+  const c = CHARS[selectedIdx];
+  const aiApi = typeof ResidentAI === 'object' ? ResidentAI : null;
+  const pool = c?.id && aiApi?.getCandidatePool ? (aiApi.getCandidatePool(c.id) || []) : [];
+  const top = [...pool].sort((a, b) => (b.finalWeight || 0) - (a.finalWeight || 0)).slice(0, 6);
+  const schedule = aiApi?.getScheduleWindow?.();
+  const routine = c?.ai?.currentRoutineAnchor;
+  const candidates = top.map(cand => `<div class="ai-v2-candidate">
+    <b>${escapeHtml(cand.label || cand.name || cand.key || cand.kind || '候选')}</b>
+    <span>${escapeHtml(cand.kind || '')} · ${escapeHtml(cand.provider || '')} · 权重 ${Math.round((cand.finalWeight || 0) * 100) / 100}</span><br>
+    <span>${escapeHtml((cand.scoreHints || []).join(' / ') || cand.reason || '')}</span>
+  </div>`).join('');
+  return `<aside class="admin-v2-drawer">
+    <h4>当前人物 AI</h4>
+    <div class="ai-v2-preview">${escapeHtml([
+      c ? `${c.short || c.id} · ${c.ai?.state || '未初始化'}` : '未选择人物',
+      schedule ? `日程窗口：${schedule.name || schedule.id} (${aiTimeText(schedule.from)}-${aiTimeText(schedule.to)})` : '日程窗口：无',
+      routine ? `作息锚点：${routine.name || routine.id}` : '作息锚点：无',
+      `候选池：${pool.length} 条 / 显示 Top ${top.length}`,
+      `主动社交上限：${cfg.aiDailySocialTargetLimit ?? 10} 次/人/日`,
+    ].join('\n'))}</div>
+    <div class="adm-actions">
+      <button id="btn-ai-v2-rebuild">重建候选池</button>
+      <button id="btn-ai-v2-toggle-log">切换 AI 日志</button>
+    </div>
+    <div class="section-title">Top 候选</div>
+    <div class="ai-v2-drawer-list">${candidates || '<div class="ai-v2-candidate"><span>暂无候选，可能未初始化或当前人物由玩家控制。</span></div>'}</div>
+    <div class="section-title">高级配置</div>
+    <details>
+      <summary style="cursor:pointer;color:var(--jn-heading);font-size:11px;margin-bottom:6px">aiConfig JSON</summary>
+      <textarea id="ai-v2-json" style="min-height:260px">${escapeHtml(JSON.stringify(cfg, null, 2))}</textarea>
+    </details>
+    <div class="adm-actions">
+      <button class="primary" id="btn-ai-v2-save-json">保存高级 JSON</button>
+    </div>
+  </aside>`;
+}
+
+function renderAdminV2AIUtility() {
+  const cfg = aiConfigForAdmin();
+  const providerIds = typeof AiCandidateProviderSystem === 'object' && AiCandidateProviderSystem?.providers
+    ? AiCandidateProviderSystem.providers().map(p => p.id)
+    : ['furniture', 'social', 'wander', 'homeward', 'economy', 'coreNeed', 'quest', 'drama'];
+  return `<div class="ai-v2-page">
+    <section class="ai-v2-summary">
+      <div class="ai-v2-card"><b>${cfg.scheduleWindows?.length || 0}</b><span>日程窗口</span></div>
+      <div class="ai-v2-card"><b>${cfg.routineAnchors?.length || 0}</b><span>作息锚点</span></div>
+      <div class="ai-v2-card"><b>${cfg.candidatePoolSize ?? 5}</b><span>候选池 Top N</span></div>
+      <div class="ai-v2-card"><b>${cfg.aiDailySocialTargetLimit ?? 10}</b><span>每日主动社交上限</span></div>
+    </section>
+    <section class="ai-v2-content">
+      <div class="ai-v2-stack">
+        <div class="ai-v2-module">
+          <h4>全局控制</h4>
+          <p class="ai-v2-help">这些参数控制候选搜索范围、缓存、权重替换阈值、随机扰动和 AI-only 社交频控。</p>
+          <div class="ai-v2-grid">
+            <div class="cfg-field"><label>网格桶大小</label><input id="ai-v2-bucket" type="number" value="${cfg.bucketGridSize ?? 10}"></div>
+            <div class="cfg-field"><label>最大候选距离</label><input id="ai-v2-max-dist" type="number" value="${cfg.maxCandidateDistance ?? 25}"></div>
+            <div class="cfg-field"><label>缓存上限</label><input id="ai-v2-cache-size" type="number" value="${cfg.cacheMaxSize ?? 30}"></div>
+            <div class="cfg-field"><label>候选池 Top N</label><input id="ai-v2-pool-size" type="number" value="${cfg.candidatePoolSize ?? 5}"></div>
+            <div class="cfg-field"><label>快通道替换阈值</label><input id="ai-v2-fast-threshold" type="number" step="0.05" value="${cfg.weightReplaceThresholdFast ?? 1.3}"></div>
+            <div class="cfg-field"><label>慢通道替换阈值</label><input id="ai-v2-slow-threshold" type="number" step="0.05" value="${cfg.weightReplaceThresholdSlow ?? 1.2}"></div>
+            <div class="cfg-field"><label>随机扰动下限</label><input id="ai-v2-random-min" type="number" step="0.05" value="${cfg.randomPerturbMin ?? 0.8}"></div>
+            <div class="cfg-field"><label>随机扰动上限</label><input id="ai-v2-random-max" type="number" step="0.05" value="${cfg.randomPerturbMax ?? 1.2}"></div>
+            <div class="cfg-field"><label>普通社交冷却</label><input id="ai-v2-social-cooldown" type="number" value="${cfg.aiSocialTargetCooldownMinutes ?? 75}"></div>
+            <div class="cfg-field"><label>跨场景找人冷却</label><input id="ai-v2-cross-social-cooldown" type="number" value="${cfg.aiCrossSceneSocialTargetCooldownMinutes ?? 120}"></div>
+            <div class="cfg-field"><label>每日目标上限</label><input id="ai-v2-social-limit" type="number" value="${cfg.aiDailySocialTargetLimit ?? 10}"></div>
+            <div class="cfg-field"><label>醒来精力比例</label><input id="ai-v2-wake-ratio" type="number" step="0.05" value="${cfg.sleepWakeEnergyRatio ?? 0.9}"></div>
+          </div>
+          <div class="adm-actions">
+            <button class="primary" id="btn-ai-v2-save-global">保存全局控制</button>
+            <button id="btn-ai-v2-reload">热重载 AI</button>
+            <button id="btn-ai-v2-connectivity">连通性检查</button>
+          </div>
+        </div>
+        <div class="ai-v2-module">
+          <h4>需求权重</h4>
+          <p class="ai-v2-help">需求越低，对应候选越容易被放大；具体还会叠加性格、状态、日程、距离、关系和任务权重。</p>
+          <div class="ai-v2-grid">${aiNeedWeightRows(cfg)}</div>
+        </div>
+        <div class="ai-v2-module">
+          <h4>日程窗口</h4>
+          <p class="ai-v2-help">按游戏时间给标签 boost/cut，是柔性加权，不会硬锁行为。</p>
+          <div class="admin-v2-table-wrap">
+            <table class="admin-v2-table ai-v2-table">
+              <thead><tr><th>ID</th><th>名称</th><th>开始</th><th>结束</th><th>Boost JSON</th><th>Cut JSON</th><th>操作</th></tr></thead>
+              <tbody>${renderAIScheduleRows(cfg) || '<tr><td colspan="7">暂无日程窗口</td></tr>'}</tbody>
+            </table>
+          </div>
+          <div class="adm-actions"><button id="btn-ai-v2-add-window">新增日程窗口</button></div>
+        </div>
+        <div class="ai-v2-module">
+          <h4>基础作息锚点</h4>
+          <p class="ai-v2-help">作息锚点负责让 NPC 形成三餐、梳洗、日间活动和夜间睡眠的生活节奏；完成后会用 completeCut 抑制重复。</p>
+          <div class="admin-v2-table-wrap">
+            <table class="admin-v2-table ai-v2-table">
+              <thead><tr><th>ID</th><th>名称</th><th>开始</th><th>结束</th><th>覆盖需求</th><th>完成口径</th><th>Boost</th><th>Cut</th><th>完成后 Cut</th><th>操作</th></tr></thead>
+              <tbody>${renderAIRoutineRows(cfg) || '<tr><td colspan="10">暂无作息锚点</td></tr>'}</tbody>
+            </table>
+          </div>
+          <div class="adm-actions"><button id="btn-ai-v2-add-routine">新增作息锚点</button></div>
+        </div>
+        <div class="ai-v2-module">
+          <h4>候选来源</h4>
+          <p class="ai-v2-help">Utility AI 只负责统一收集、评分和选择候选；家具、任务、经济、核心需求、戏剧意图等各自通过 provider 注入候选。</p>
+          <div class="meta-tags">${providerIds.map(id => `<span class="meta-tag">${escapeHtml(id)}</span>`).join('')}</div>
+        </div>
+      </div>
+      ${renderAIDebugDrawer(cfg)}
+    </section>
   </div>`;
 }
 
@@ -1692,6 +2230,220 @@ function renderQuestAdmin() {
     </div>`;
 }
 
+function questConfigForAdmin() {
+  if (!CONFIG.questConfig) CONFIG.questConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG.questConfig || { templates: {} }));
+  if (!CONFIG.questConfig.templates) CONFIG.questConfig.templates = {};
+  if (!CONFIG.questConfig.servantConfig) CONFIG.questConfig.servantConfig = {};
+  if (!CONFIG.questConfig.ui) CONFIG.questConfig.ui = {};
+  return CONFIG.questConfig;
+}
+
+function questTemplateListForAdmin() {
+  const qc = questConfigForAdmin();
+  const q = String(adminV2Search || '').trim().toLowerCase();
+  return Object.values(qc.templates || {})
+    .sort((a, b) => (+a.id || 0) - (+b.id || 0))
+    .filter(t => {
+      if (!q) return true;
+      return [t.id, t.name, t.category, t.questType, t.targetScope].some(v => String(v || '').toLowerCase().includes(q));
+    });
+}
+
+function isServantQuestTemplate(tpl) {
+  if (tpl?.isServantTask != null) return !!tpl.isServantTask;
+  return (tpl?.assigneeRoles || []).includes('仆从')
+    || (tpl?.issuerRelationRequired || []).includes('master_to_servant')
+    || (tpl?.issuerRelationRequired || []).includes('senior_servant_to_junior');
+}
+
+function questCsv(value) {
+  return Array.isArray(value) ? value.join('，') : (value == null ? '' : String(value));
+}
+
+function parseQuestCsv(value) {
+  return String(value || '').split(/[,，、\n]/).map(s => s.trim()).filter(Boolean);
+}
+
+function questConditionSummary(conditions) {
+  if (!conditions?.length) return '无';
+  return conditions.map(c => `${c.description || c.type || '条件'} ${c.targetValue ? `(${c.targetValue})` : ''}`).join(' / ');
+}
+
+function questEffectSummary(effects) {
+  if (!effects?.length) return '无';
+  return effects.map(e => {
+    if (e.type === 'relation') return `关系 ${e.delta > 0 ? '+' : ''}${e.delta || 0}`;
+    if (e.type === 'skillXp') return `${e.skill || '技能'} +${e.delta || 0}`;
+    if (e.type === 'state') return `状态 ${e.stateId || ''}`;
+    if (e.type === 'need') return `${e.key || '需求'} ${e.delta > 0 ? '+' : ''}${e.delta || 0}`;
+    return e.type || '效果';
+  }).join(' / ');
+}
+
+function questDeadlineLabel(tpl) {
+  const modeMap = {
+    NO_DEADLINE: '无截止',
+    GAME_HOURS: '游戏小时',
+    GAME_DAYS: '游戏天',
+    BY_TIME_OF_DAY: '每日时辰',
+    BY_PHASE: '阶段',
+    BEFORE_SLEEP: '睡前',
+  };
+  return `${modeMap[tpl?.deadlineMode] || tpl?.deadlineMode || '默认'}${tpl?.deadlineParam != null ? ` ${tpl.deadlineParam}` : ''}`;
+}
+
+function renderAdminV2QuestTemplates() {
+  const qc = questConfigForAdmin();
+  const templates = questTemplateListForAdmin();
+  if (!adminV2SelectedTpl || !qc.templates?.[adminV2SelectedTpl]) adminV2SelectedTpl = templates[0]?.id || Object.keys(qc.templates || {})[0] || null;
+  const servantCfg = qc.servantConfig || {};
+  const dailyCount = (qc.dailyRoutines || []).length;
+  const dutyCount = (servantCfg.dutyRoutines || []).length;
+  const rotationCount = (servantCfg.followRotations || []).length;
+  const servantCount = Object.values(qc.templates || {}).filter(isServantQuestTemplate).length;
+  return `
+    <div class="quest-v2-page">
+      <section class="quest-v2-controls">
+        <div class="quest-v2-card">
+          <b>${Object.keys(qc.templates || {}).length}</b><span>任务模板</span>
+        </div>
+        <div class="quest-v2-card">
+          <b>${servantCount}</b><span>仆从任务</span>
+        </div>
+        <div class="quest-v2-card">
+          <b>${dailyCount + dutyCount + rotationCount}</b><span>日课 / 轮值</span>
+        </div>
+        <div class="quest-v2-switches">
+          <label><input type="checkbox" id="quest-v2-master" ${qc.masterEnabled !== false ? 'checked' : ''}> 总开关</label>
+          <label><input type="checkbox" id="quest-v2-servant-enabled" ${servantCfg.enabled !== false ? 'checked' : ''}> 仆从契约参与判定</label>
+          <label><input type="checkbox" id="quest-v2-social-links" ${qc.ui?.showSocialLinks !== false ? 'checked' : ''}> 显示社交虚线</label>
+          <div class="quest-v2-small-grid">
+            <div class="cfg-field"><label>AI下发间隔(游戏分)</label><input id="quest-v2-ai-interval" type="number" value="${adminAttr(qc.aiIssueIntervalGameMin ?? 60)}"></div>
+            <div class="cfg-field"><label>待回应过期(游戏分)</label><input id="quest-v2-pending-expire" type="number" value="${adminAttr(qc.pendingExpireGameMin ?? 180)}"></div>
+            <div class="cfg-field"><label>任务行动加权</label><input id="quest-v2-weight" type="number" step="0.1" value="${adminAttr(qc.questWeightBoost ?? 3.5)}"></div>
+            <div class="cfg-field"><label>群体任务冷却(游戏分)</label><input id="quest-v2-group-cooldown" type="number" value="${adminAttr(qc.groupQuestCooldownGameMin ?? 1440)}"></div>
+          </div>
+          <div class="adm-actions">
+            <button class="primary" id="btn-quest-v2-save-global">保存全局控制</button>
+            <button id="btn-quest-v2-reload">热重载</button>
+          </div>
+        </div>
+      </section>
+      <section class="quest-v2-content">
+        <div class="admin-v2-table-wrap">
+          <table class="admin-v2-table quest-v2-table">
+            <thead><tr><th>ID</th><th>任务名</th><th>分类</th><th>类型</th><th>范围</th><th>仆从</th><th>自动</th><th>截止</th><th>条件</th><th>奖励</th></tr></thead>
+            <tbody>${templates.map(t => `
+              <tr class="${String(t.id) === String(adminV2SelectedTpl) ? 'sel' : ''}" data-admin-v2-quest-row="${adminAttr(t.id)}">
+                <td>${escapeHtml(t.id)}</td>
+                <td>${escapeHtml(t.name || '')}</td>
+                <td>${escapeHtml(t.category || '')}</td>
+                <td>${escapeHtml(t.questType || '')}</td>
+                <td>${escapeHtml(t.targetScope || 'single')}</td>
+                <td>${isServantQuestTemplate(t) ? '是' : '否'}</td>
+                <td>${t.autoAccept ? '是' : '否'}</td>
+                <td>${escapeHtml(questDeadlineLabel(t))}</td>
+                <td>${escapeHtml(questConditionSummary(t.completeConditions))}</td>
+                <td>${escapeHtml(questEffectSummary(t.rewards))}</td>
+              </tr>`).join('')}</tbody>
+          </table>
+        </div>
+        ${renderAdminV2QuestDrawer()}
+      </section>
+      ${renderAdminV2QuestTester()}
+    </div>`;
+}
+
+function renderAdminV2QuestDrawer() {
+  const qc = questConfigForAdmin();
+  const tpl = qc.templates?.[adminV2SelectedTpl];
+  if (!tpl) return `<aside class="admin-v2-drawer"><h4>任务设定</h4><p class="logic-muted">还没有任务模板。</p></aside>`;
+  return `
+    <aside class="admin-v2-drawer quest-v2-drawer">
+      <h4>任务设定</h4>
+      <div class="cfg-grid">
+        <div class="cfg-field"><label>ID</label><input data-quest-v2-field="id" value="${adminAttr(tpl.id)}" disabled></div>
+        <div class="cfg-field"><label>任务名</label><input data-quest-v2-field="name" value="${adminAttr(tpl.name || '')}"></div>
+        <div class="cfg-field"><label>分类</label><input data-quest-v2-field="category" list="quest-v2-categories" value="${adminAttr(tpl.category || '')}"></div>
+        <div class="cfg-field"><label>任务类型</label><select data-quest-v2-field="questType">
+          ${['daily', 'directive', 'event'].map(v => `<option value="${v}"${tpl.questType === v ? ' selected' : ''}>${v}</option>`).join('')}
+        </select></div>
+        <div class="cfg-field"><label>目标范围</label><select data-quest-v2-field="targetScope">
+          ${['single', 'group'].map(v => `<option value="${v}"${(tpl.targetScope || 'single') === v ? ' selected' : ''}>${v}</option>`).join('')}
+        </select></div>
+        <div class="cfg-field"><label>是否仆从任务</label><select data-quest-v2-bool="isServantTask">
+          <option value="true"${isServantQuestTemplate(tpl) ? ' selected' : ''}>是</option>
+          <option value="false"${!isServantQuestTemplate(tpl) ? ' selected' : ''}>否</option>
+        </select></div>
+        <div class="cfg-field"><label>自动接受</label><select data-quest-v2-bool="autoAccept">
+          <option value="true"${tpl.autoAccept ? ' selected' : ''}>是</option>
+          <option value="false"${!tpl.autoAccept ? ' selected' : ''}>否</option>
+        </select></div>
+        <div class="cfg-field"><label>可重复</label><select data-quest-v2-bool="repeatable">
+          <option value="true"${tpl.repeatable !== false ? ' selected' : ''}>是</option>
+          <option value="false"${tpl.repeatable === false ? ' selected' : ''}>否</option>
+        </select></div>
+        <div class="cfg-field"><label>截止模式</label><select data-quest-v2-field="deadlineMode">
+          ${['NO_DEADLINE', 'GAME_HOURS', 'GAME_DAYS', 'BY_TIME_OF_DAY', 'BY_PHASE', 'BEFORE_SLEEP'].map(v => `<option value="${v}"${tpl.deadlineMode === v ? ' selected' : ''}>${v}</option>`).join('')}
+        </select></div>
+        <div class="cfg-field"><label>截止参数</label><input type="number" step="0.1" data-quest-v2-number="deadlineParam" value="${adminAttr(tpl.deadlineParam ?? 0)}"></div>
+        <div class="cfg-field"><label>AI单人下发概率</label><input type="number" step="0.001" data-quest-v2-number="issueBaseChance" value="${adminAttr(tpl.issueBaseChance ?? 0)}"></div>
+        <div class="cfg-field"><label>AI群体下发概率</label><input type="number" step="0.001" data-quest-v2-number="groupIssueBaseChance" value="${adminAttr(tpl.groupIssueBaseChance ?? 0)}"></div>
+        <div class="cfg-field"><label>重复冷却(游戏分)</label><input type="number" data-quest-v2-number="repeatCooldownGameMin" value="${adminAttr(tpl.repeatCooldownGameMin ?? 1440)}"></div>
+        <div class="cfg-field"><label>群体冷却(游戏分)</label><input type="number" data-quest-v2-number="groupRepeatCooldownGameMin" value="${adminAttr(tpl.groupRepeatCooldownGameMin ?? '')}"></div>
+      </div>
+      <datalist id="quest-v2-categories">${(questConfigForAdmin().categories || []).map(c => `<option value="${adminAttr(c)}"></option>`).join('')}</datalist>
+      <div class="cfg-field"><label>下发者角色</label><input data-quest-v2-csv="issuerRoles" value="${adminAttr(questCsv(tpl.issuerRoles))}"></div>
+      <div class="cfg-field"><label>执行者角色</label><input data-quest-v2-csv="assigneeRoles" value="${adminAttr(questCsv(tpl.assigneeRoles))}"></div>
+      <div class="cfg-field"><label>允许身份关系</label><input data-quest-v2-csv="issuerRelationRequired" value="${adminAttr(questCsv(tpl.issuerRelationRequired))}"></div>
+      <div class="cfg-grid">
+        <div class="cfg-field"><label>目标最低等级</label><input type="number" data-quest-v2-rank="min" value="${adminAttr(tpl.targetRankRange?.min ?? '')}"></div>
+        <div class="cfg-field"><label>目标最高等级</label><input type="number" data-quest-v2-rank="max" value="${adminAttr(tpl.targetRankRange?.max ?? '')}"></div>
+      </div>
+      <div class="cfg-field"><label>下发文案</label><textarea data-quest-v2-text="issue">${escapeHtml(tpl.texts?.issue || '')}</textarea></div>
+      <div class="cfg-field"><label>完成文案</label><textarea data-quest-v2-text="complete">${escapeHtml(tpl.texts?.complete || '')}</textarea></div>
+      <div class="cfg-field"><label>失败文案</label><textarea data-quest-v2-text="fail">${escapeHtml(tpl.texts?.fail || '')}</textarea></div>
+      <div class="quest-v2-summary"><b>完成条件</b><span>${escapeHtml(questConditionSummary(tpl.completeConditions))}</span></div>
+      <div class="quest-v2-summary"><b>失败条件</b><span>${escapeHtml(questConditionSummary(tpl.failConditions))}</span></div>
+      <div class="quest-v2-summary"><b>奖励 / 惩罚</b><span>${escapeHtml(questEffectSummary(tpl.rewards))} / ${escapeHtml(questEffectSummary(tpl.penalties))}</span></div>
+      <div class="adm-actions">
+        <button class="primary" id="btn-quest-v2-save-template">保存任务设定</button>
+        <button class="danger" id="btn-quest-v2-delete-template">删除模板</button>
+      </div>
+    </aside>`;
+}
+
+function renderAdminV2QuestTester() {
+  const qc = questConfigForAdmin();
+  const chars = CONFIG.characters || [];
+  const selectedTemplateId = adminV2SelectedTpl || Object.keys(qc.templates || {})[0] || '';
+  const current = CHARS[selectedIdx]?.id || chars[0]?.id || '';
+  const defaultIssuer = getChar('daiyu') ? 'daiyu' : current;
+  return `
+    <section class="quest-v2-test">
+      <div>
+        <h4>测试任务</h4>
+        <p>用当前配置直接走 QuestSystem.debugIssue，测试模板、人物和权限链路是否连通。</p>
+      </div>
+      <div class="quest-v2-test-grid">
+        <div class="cfg-field"><label>模板</label><select id="quest-v2-test-template">
+          ${Object.values(qc.templates || {}).sort((a, b) => (+a.id || 0) - (+b.id || 0)).map(t => `<option value="${adminAttr(t.id)}"${String(t.id) === String(selectedTemplateId) ? ' selected' : ''}>${escapeHtml(t.id)} · ${escapeHtml(t.name || '')}</option>`).join('')}
+        </select></div>
+        <div class="cfg-field"><label>下发者</label><select id="quest-v2-test-issuer">
+          <option value="">日常 / 系统</option>
+          ${chars.map(c => `<option value="${adminAttr(c.id)}"${c.id === defaultIssuer ? ' selected' : ''}>${escapeHtml(c.short || c.name || c.id)}</option>`).join('')}
+        </select></div>
+        <div class="cfg-field"><label>执行者</label><select id="quest-v2-test-assignee">
+          ${chars.map(c => `<option value="${adminAttr(c.id)}"${c.id === current ? ' selected' : ''}>${escapeHtml(c.short || c.name || c.id)}</option>`).join('')}
+        </select></div>
+      </div>
+      <div class="adm-actions">
+        <button class="primary" id="btn-quest-v2-test-issue">测试下发</button>
+        <button id="btn-quest-v2-connectivity">连通性检查</button>
+      </div>
+    </section>`;
+}
+
 function furnitureNeedSummary(tpl) {
   const rows = tpl.needRestores || [];
   if (!rows.length) return '—';
@@ -1898,6 +2650,433 @@ function renderAdminV2Dashboard() {
     </div>`;
 }
 
+function furnitureUsageSummaryByTemplate(templateId) {
+  const scenes = new Map();
+  for (const inst of CONFIG.furnitureInstances || []) {
+    if (String(inst.templateId) !== String(templateId)) continue;
+    const scene = getScene?.(inst.sceneId);
+    const name = scene?.name || `场景${inst.sceneId}`;
+    scenes.set(name, (scenes.get(name) || 0) + 1);
+  }
+  return {
+    count: Array.from(scenes.values()).reduce((sum, n) => sum + n, 0),
+    scenes: Array.from(scenes.entries()).map(([name, count]) => ({ name, count })),
+  };
+}
+
+function furnitureTemplateAssetKey(id, tpl) {
+  const base = String(tpl?.category || tpl?.name || 'furniture')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '') || 'furniture';
+  return `furn_${id}_${base}`;
+}
+
+function furnitureAiPrompt(id, tpl) {
+  const size = `${tpl.gridW || 1}x${tpl.gridH || 1}`;
+  const lifeLine = getFurnitureConfig().lifeLineLabels?.[tpl.lifeLine] || tpl.lifeLine || '未分类';
+  const needText = furnitureNeedSummary(tpl) || '装饰/场景交互';
+  return [
+    `红楼梦大观园生活模拟游戏道具「${tpl.name || id}」。`,
+    `用途：${lifeLine}，${needText}，类别 ${tpl.category || 'furniture'}，占地 ${size} 格。`,
+    '生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。',
+    '风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。',
+    '不要人物，不要文字，不要水印，不要复杂背景。'
+  ].join('');
+}
+
+function furnitureAdminSummaryHtml() {
+  const templates = Object.entries(CONFIG.furnitureTemplates || {});
+  const instances = CONFIG.furnitureInstances || [];
+  const categories = new Set(templates.map(([, tpl]) => tpl.category).filter(Boolean));
+  const essential = templates.filter(([, tpl]) => tpl.essential === true).length;
+  return `<div class="furniture-admin-summary">
+    <div class="furniture-admin-card"><b>${templates.length}</b><span>家具模板</span></div>
+    <div class="furniture-admin-card"><b>${instances.length}</b><span>地图摆放</span></div>
+    <div class="furniture-admin-card"><b>${categories.size}</b><span>交互分类</span></div>
+    <div class="furniture-admin-card"><b>${essential}</b><span>基础生存家具</span></div>
+  </div>`;
+}
+
+function buildFurnitureAiAssetBrief() {
+  const templates = Object.entries(CONFIG.furnitureTemplates || {})
+    .sort((a, b) => +a[0] - +b[0])
+    .map(([id, tpl]) => {
+      const usage = furnitureUsageSummaryByTemplate(id);
+      const assetKey = furnitureTemplateAssetKey(id, tpl);
+      return {
+        templateId: +id || id,
+        assetKey,
+        name: tpl.name || id,
+        category: tpl.category || '',
+        lifeLine: tpl.lifeLine || '',
+        lifeLineLabel: getFurnitureConfig().lifeLineLabels?.[tpl.lifeLine] || '',
+        essential: tpl.essential === true,
+        grid: { w: tpl.gridW || 1, h: tpl.gridH || 1, entryOffset: tpl.entryOffset || [0, 1] },
+        recommendedPng: `assets/furniture/${assetKey}.png`,
+        recommendedCanvasPx: {
+          width: Math.max(128, (tpl.gridW || 1) * 128),
+          height: Math.max(128, (tpl.gridH || 1) * 128),
+        },
+        currentCanvasFallback: { icon: tpl.icon || '', color: tpl.color || '' },
+        needRestores: tpl.needRestores || [],
+        actions: (tpl.actions || []).map(action => ({
+          id: action.id,
+          name: action.name,
+          text: action.text || '',
+          tags: action.tags || [],
+        })),
+        usage,
+        promptZh: furnitureAiPrompt(id, tpl),
+      };
+    });
+  return {
+    version: 1,
+    purpose: '家具 AI 素材生成清单；生成后按 recommendedPng 命名，回填到 assets/manifest.json 的 furnitureSprites。',
+    styleGuide: [
+      '透明背景 PNG',
+      '单件家具，不要人物，不要文字，不要水印',
+      '古典中式 / 红楼梦大观园 / 手绘 2D 游戏道具',
+      '微俯视 3/4 或俯视角度，边缘清晰，适合缩放到 canvas 地图',
+      '材质要能看出木、竹、石、水、织物；整体低饱和，避免现代感',
+    ],
+    manifestTargetShape: {
+      furnitureSprites: {
+        '<assetKey>': { src: 'assets/furniture/<assetKey>.png', anchor: 'bottom-center', fit: 'contain' },
+      },
+    },
+    templates,
+    instances: (CONFIG.furnitureInstances || []).map(inst => {
+      const tpl = CONFIG.furnitureTemplates?.[inst.templateId];
+      const scene = getScene?.(inst.sceneId);
+      return {
+        instanceId: inst.instanceId,
+        templateId: inst.templateId,
+        assetKey: tpl ? furnitureTemplateAssetKey(inst.templateId, tpl) : '',
+        templateName: tpl?.name || '',
+        sceneId: inst.sceneId,
+        sceneName: scene?.name || '',
+        anchorCol: inst.anchorCol,
+        anchorRow: inst.anchorRow,
+      };
+    }),
+  };
+}
+
+function downloadAdminJson(filename, data) {
+  const text = JSON.stringify(data, null, 2);
+  const preview = document.getElementById('admin-v2-furniture-ai-export-preview');
+  if (preview) preview.value = text;
+  const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function narrativeConfigForAdmin() {
+  if (!CONFIG.narrativeBubble) CONFIG.narrativeBubble = JSON.parse(JSON.stringify(DEFAULT_CONFIG.narrativeBubble || { settings: {}, drivenRules: [] }));
+  CONFIG.narrativeBubble.settings ||= {};
+  CONFIG.narrativeBubble.drivenRules ||= [];
+  return CONFIG.narrativeBubble;
+}
+
+function narrativeTriggerTypeOptions(current) {
+  const rows = [
+    ['event', '事件'],
+    ['scan', '扫描'],
+    ['need_band', '需求分档'],
+    ['state_add', '状态新增'],
+    ['state_refresh', '状态刷新'],
+    ['interaction', '互动'],
+    ['furniture', '家具'],
+    ['idle', '闲置'],
+  ];
+  return rows.map(([id, label]) => `<option value="${id}"${current === id ? ' selected' : ''}>${label}</option>`).join('');
+}
+
+function narrativeModuleOptions(current) {
+  const rows = ['driven', 'demand', 'interaction', 'memory', 'conflict', 'trait', 'observe'];
+  return rows.map(id => `<option value="${id}"${current === id ? ' selected' : ''}>${id}</option>`).join('');
+}
+
+function narrativeNeedOptions(current) {
+  return [''].concat(getNeedDefs().map(n => n.key)).map(key =>
+    `<option value="${key}"${current === key ? ' selected' : ''}>${key || '无'}</option>`
+  ).join('');
+}
+
+function narrativeTriggerSummary(rule) {
+  const t = rule.trigger || {};
+  return [t.type || 'event', t.event, t.needKey, t.stateId].filter(Boolean).join(' / ');
+}
+
+function narrativeConditionSummary(rule) {
+  const c = rule.conditions || {};
+  const parts = [];
+  if (c.traitsAny?.length) parts.push('性格:' + c.traitsAny.join(','));
+  if (c.specialtiesAny?.length) parts.push('专属:' + c.specialtiesAny.join(','));
+  if (c.needs?.length) parts.push('需求:' + c.needs.map(n => `${n.key || n.needKey || n.need}${n.op || '<='}${n.value ?? n.min ?? ''}`).join(','));
+  if (c.statesAny?.length) parts.push('状态:' + c.statesAny.join(','));
+  if (c.memoryScene) parts.push('同场景记忆');
+  if (c.memoryTarget) parts.push('同目标记忆');
+  if (c.memoryTagsAny?.length) parts.push('记忆:' + c.memoryTagsAny.join(','));
+  return parts.join('；') || '无条件';
+}
+
+function narrativeTextLines(rule) {
+  return (rule.texts || []).join('\n');
+}
+
+function narrativeAdminSummaryHtml(nb) {
+  const s = nb.settings || {};
+  const active = NarrativeBubbleSystem?.getActiveBubbles?.() || [];
+  return `<div class="narrative-admin-summary">
+    <div class="narrative-admin-card"><b>${nb.drivenRules?.length || 0}</b><span>驱动规则</span></div>
+    <div class="narrative-admin-card"><b>${nb.demandBubbles?.length || 0}</b><span>旧需求规则</span></div>
+    <div class="narrative-admin-card"><b>${nb.interactionStateBubbles?.length || 0}</b><span>旧互动状态</span></div>
+    <div class="narrative-admin-card"><b>${nb.memorySurfaces?.length || 0}</b><span>旧记忆浮现</span></div>
+    <div class="narrative-admin-card"><b>${active.length}</b><span>当前气泡 / 上限 ${s.maxOnScreen ?? 3}</span></div>
+  </div>`;
+}
+
+function narrativeRuleKey(source, idx) { return `${source}:${idx}`; }
+
+function narrativeLegacySourceLabel(source) {
+  return {
+    drivenRules: '新驱动规则',
+    demandBubbles: '旧需求气泡',
+    interactionStateBubbles: '旧互动状态',
+    memorySurfaces: '旧记忆浮现',
+    conflictTheaters: '旧冲突剧场',
+  }[source] || source;
+}
+
+function narrativeLegacyToRule(source, row, idx) {
+  if (source === 'demandBubbles') {
+    return {
+      id: `legacy:demand:${row.id ?? idx + 1}`,
+      name: row.name || `需求气泡：${row.needKey || 'need'}`,
+      module: 'demand',
+      trigger: { type: 'need_band', needKey: row.needKey || '' },
+      conditions: {
+        traitsAny: row.condition?.trait ? [row.condition.trait] : [],
+        needs: row.needKey ? [{ key: row.needKey, op: '<=', value: Math.round((row.threshold ?? 0) * 100) }] : [],
+      },
+      score: { priority: row.priority ?? 99, base: 50 },
+      style: row.style || 'thought',
+      icon: row.icon || '',
+      texts: row.texts || [],
+    };
+  }
+  if (source === 'interactionStateBubbles') {
+    return {
+      id: `legacy:interaction-state:${row.stateId || idx + 1}`,
+      name: `互动状态：${row.stateId || 'state'}`,
+      module: 'interaction',
+      trigger: { type: 'state_add', stateId: row.stateId || '' },
+      conditions: { statesAny: row.stateId ? [row.stateId] : [] },
+      score: { priority: 30, base: 70 },
+      style: row.style || 'thought',
+      icon: row.icon || '',
+      texts: row.texts || [],
+    };
+  }
+  if (source === 'memorySurfaces') {
+    return {
+      id: `legacy:memory:${row.id ?? idx + 1}`,
+      name: row.memoryTag ? `记忆浮现：${row.memoryTag}` : '记忆浮现：任意',
+      module: 'memory',
+      trigger: { type: 'event', event: 'scene:entered' },
+      conditions: { memoryTagsAny: row.memoryTag ? [row.memoryTag] : [], memoryScene: true },
+      score: { priority: 45, base: 50, cooldownGameMin: row.cooldownGameMin },
+      style: row.style || 'thought',
+      icon: row.icon || '',
+      texts: row.template ? [row.template] : [],
+    };
+  }
+  return {
+    id: `legacy:conflict:${row.id ?? idx + 1}`,
+    name: row.name || `冲突剧场 ${row.id ?? idx + 1}`,
+    module: 'conflict',
+    trigger: { type: row.triggerType === 'timed' ? 'scan' : 'event', event: row.triggerEvent || '' },
+    conditions: {
+      traitsAny: [row.charATrait, row.charBTrait].filter(t => t && t !== '0'),
+    },
+    score: { priority: 60, base: Math.round((row.probability ?? 0.3) * 100), cooldownGameMin: row.cooldownGameMin },
+    style: 'speech',
+    icon: '',
+    texts: (row.lines || []).map(line => line.text).filter(Boolean),
+  };
+}
+
+function narrativeUnifiedEntries(nb) {
+  const entries = [];
+  (nb.drivenRules || []).forEach((rule, idx) => {
+    entries.push({ source: 'drivenRules', sourceLabel: narrativeLegacySourceLabel('drivenRules'), idx, key: narrativeRuleKey('drivenRules', idx), rule, raw: rule, editable: true });
+  });
+  ['demandBubbles', 'interactionStateBubbles', 'memorySurfaces', 'conflictTheaters'].forEach(source => {
+    (nb[source] || []).forEach((row, idx) => {
+      entries.push({
+        source,
+        sourceLabel: narrativeLegacySourceLabel(source),
+        idx,
+        key: narrativeRuleKey(source, idx),
+        rule: narrativeLegacyToRule(source, row, idx),
+        raw: row,
+        editable: false,
+      });
+    });
+  });
+  return entries;
+}
+
+function narrativeSelectedEntry(nb) {
+  const entries = narrativeUnifiedEntries(nb);
+  if (!entries.length) return null;
+  if (!adminV2SelectedNarrativeRule || !entries.some(e => e.key === adminV2SelectedNarrativeRule)) {
+    adminV2SelectedNarrativeRule = entries[0].key;
+  }
+  return entries.find(e => e.key === adminV2SelectedNarrativeRule) || entries[0];
+}
+
+function renderNarrativeSettingsPanel(nb) {
+  const s = nb.settings || {};
+  return `<section class="relation-module">
+    <div class="relation-module-head"><b>【全局设置】</b><small>保存后会热重载叙事气泡；频率单位为游戏分钟。</small></div>
+    <div class="narrative-settings-grid">
+      <div class="cfg-field"><label>总开关</label><select data-admin-v2-narrative-setting="settings.masterEnabled" data-type="bool"><option value="true"${s.masterEnabled !== false ? ' selected' : ''}>开启</option><option value="false"${s.masterEnabled === false ? ' selected' : ''}>关闭</option></select></div>
+      <div class="cfg-field"><label>需求气泡</label><select data-admin-v2-narrative-setting="settings.demandEnabled" data-type="bool"><option value="true"${s.demandEnabled !== false ? ' selected' : ''}>开启</option><option value="false"${s.demandEnabled === false ? ' selected' : ''}>关闭</option></select></div>
+      <div class="cfg-field"><label>互动气泡</label><select data-admin-v2-narrative-setting="settings.interactionEnabled" data-type="bool"><option value="true"${s.interactionEnabled !== false ? ' selected' : ''}>开启</option><option value="false"${s.interactionEnabled === false ? ' selected' : ''}>关闭</option></select></div>
+      <div class="cfg-field"><label>记忆浮现</label><select data-admin-v2-narrative-setting="settings.memoryEnabled" data-type="bool"><option value="true"${s.memoryEnabled !== false ? ' selected' : ''}>开启</option><option value="false"${s.memoryEnabled === false ? ' selected' : ''}>关闭</option></select></div>
+      <div class="cfg-field"><label>冲突剧场</label><select data-admin-v2-narrative-setting="settings.conflictEnabled" data-type="bool"><option value="true"${s.conflictEnabled !== false ? ' selected' : ''}>开启</option><option value="false"${s.conflictEnabled === false ? ' selected' : ''}>关闭</option></select></div>
+      <div class="cfg-field"><label>同屏上限</label><input type="number" min="1" max="12" data-admin-v2-narrative-setting="settings.maxOnScreen" data-type="number" value="${s.maxOnScreen ?? 3}"></div>
+      <div class="cfg-field"><label>需求间隔</label><input type="number" data-admin-v2-narrative-setting="settings.demand.minIntervalGameMin" data-type="number" value="${s.demand?.minIntervalGameMin ?? 5}"></div>
+      <div class="cfg-field"><label>需求每小时上限</label><input type="number" data-admin-v2-narrative-setting="settings.demand.maxPerCharPerGameMin" data-type="number" value="${s.demand?.maxPerCharPerGameMin ?? 2}"></div>
+      <div class="cfg-field"><label>记忆场景冷却</label><input type="number" data-admin-v2-narrative-setting="settings.memory.sceneCooldownGameMin" data-type="number" value="${s.memory?.sceneCooldownGameMin ?? 180}"></div>
+      <div class="cfg-field"><label>单记忆冷却</label><input type="number" data-admin-v2-narrative-setting="settings.memory.memoryCooldownGameMin" data-type="number" value="${s.memory?.memoryCooldownGameMin ?? 240}"></div>
+      <div class="cfg-field"><label>扫描间隔</label><input type="number" data-admin-v2-narrative-setting="settings.conflict.scanIntervalGameMin" data-type="number" value="${s.conflict?.scanIntervalGameMin ?? 15}"></div>
+      <div class="cfg-field"><label>扫描每轮人数</label><input type="number" min="0" data-admin-v2-narrative-setting="settings.driven.scanMaxChars" data-type="number" value="${s.driven?.scanMaxChars ?? 2}"></div>
+    </div>
+  </section>`;
+}
+
+function renderAdminV2NarrativeRules() {
+  const nb = narrativeConfigForAdmin();
+  const entries = narrativeUnifiedEntries(nb)
+    .filter(entry => adminV2Matches([entry.sourceLabel, entry.rule.id, entry.rule.name, entry.rule.module, narrativeTriggerSummary(entry.rule), narrativeConditionSummary(entry.rule), (entry.rule.texts || []).join(' ')].join(' ')));
+  if (entries.length && (!adminV2SelectedNarrativeRule || !entries.some(e => e.key === adminV2SelectedNarrativeRule))) {
+    adminV2SelectedNarrativeRule = entries[0].key;
+  }
+  const rows = entries.map(entry => `<tr class="${entry.key === adminV2SelectedNarrativeRule ? 'sel' : ''}" data-admin-v2-select-narrative-rule="${entry.key}">
+    <td><span class="meta-tag">${escapeHtml(entry.sourceLabel)}</span></td>
+    <td class="meta-id">${escapeHtml(entry.rule.id || '')}</td>
+    <td>${escapeHtml(entry.rule.name || '')}</td>
+    <td>${escapeHtml(entry.rule.module || '')}</td>
+    <td>${escapeHtml(narrativeTriggerSummary(entry.rule))}</td>
+    <td title="${adminAttr(narrativeConditionSummary(entry.rule))}">${escapeHtml(narrativeConditionSummary(entry.rule)).slice(0, 40)}</td>
+    <td>${escapeHtml(String(entry.rule.score?.priority ?? entry.rule.priority ?? ''))}</td>
+    <td>${escapeHtml(String(entry.rule.score?.cooldownGameMin ?? entry.rule.cooldownGameMin ?? ''))}</td>
+    <td>${entry.editable ? (entry.rule.enabled === false ? '停用' : '启用') : '兼容'}</td>
+    <td>${(entry.rule.texts || []).length}</td>
+    <td>${entry.editable ? `<button class="mini-btn danger" data-admin-v2-delete-narrative-rule="${entry.idx}">删</button>` : `<button class="mini-btn" data-admin-v2-convert-legacy-narrative="${entry.key}">迁移</button>`}</td>
+  </tr>`).join('');
+  return `<div class="narrative-admin-page">
+    ${renderNarrativeSettingsPanel(nb)}
+    <section class="relation-module">
+      <div class="relation-module-head"><b>【叙事规则体系】</b><small>新 drivenRules 与旧 demand / interaction / memory / conflict 统一归一展示；旧规则可查看、编辑原始 JSON 或一键迁移成新规则。</small></div>
+      <div class="narrative-admin-content">
+        <div class="admin-v2-table-wrap">
+          <table class="admin-v2-table narrative-rules-table">
+            <thead><tr><th>来源</th><th>ID</th><th>名称</th><th>模块</th><th>触发</th><th>条件摘要</th><th>优先</th><th>冷却</th><th>状态</th><th>文案</th><th>操作</th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="11" class="logic-muted">暂无匹配规则</td></tr>'}</tbody>
+          </table>
+        </div>
+        ${renderNarrativeRuleDrawer(nb)}
+      </div>
+    </section>
+    <div class="admin-v2-trait-json">
+      <details>
+        <summary>完整 narrativeBubble JSON</summary>
+        <textarea id="admin-v2-narrative-full-json">${escapeHtml(JSON.stringify(nb, null, 2))}</textarea>
+        <div class="adm-actions"><button class="primary" id="btn-admin-v2-save-narrative-full-json">保存完整 JSON</button></div>
+      </details>
+    </div>
+  </div>`;
+}
+
+function renderNarrativeRuleDrawer(nb) {
+  const entry = narrativeSelectedEntry(nb);
+  const rule = entry?.rule;
+  if (!rule) return `<aside class="narrative-rule-detail"><h4>未选中规则</h4><p class="logic-muted">点击“新增规则”创建第一条。</p></aside>`;
+  if (!entry.editable) {
+    return `<aside class="narrative-rule-detail">
+      <h4>${escapeHtml(rule.name || rule.id || '兼容旧规则')}</h4>
+      <div class="narrative-rule-tags">
+        <span class="meta-tag">${escapeHtml(entry.sourceLabel)}</span>
+        <span class="meta-tag">${escapeHtml(rule.module || '')}</span>
+        <span class="meta-tag">${escapeHtml(narrativeTriggerSummary(rule) || '无触发')}</span>
+      </div>
+      <div class="cfg-field"><label>归一规则预览</label><textarea readonly>${escapeHtml(JSON.stringify(rule, null, 2))}</textarea></div>
+      <div class="cfg-field"><label>原始旧规则 JSON（保存仍写回 ${escapeHtml(entry.source)}）</label><textarea data-admin-v2-narrative-legacy-row="${entry.key}">${escapeHtml(JSON.stringify(entry.raw, null, 2))}</textarea></div>
+      <div class="adm-actions">
+        <button class="primary" data-admin-v2-convert-legacy-narrative="${entry.key}">迁移为新 drivenRule</button>
+      </div>
+    </aside>`;
+  }
+  const idx = entry.idx;
+  return `<aside class="narrative-rule-detail">
+    <h4>${escapeHtml(rule.name || rule.id || '未命名规则')}</h4>
+    <div class="narrative-rule-tags">
+      <span class="meta-tag">${escapeHtml(entry.sourceLabel)}</span>
+      <span class="meta-tag">${escapeHtml(rule.module || 'driven')}</span>
+      <span class="meta-tag">${escapeHtml(narrativeTriggerSummary(rule) || '无触发')}</span>
+      <span class="meta-tag">${rule.enabled === false ? '停用' : '启用'}</span>
+    </div>
+    <div class="cfg-field"><label>ID</label><input data-admin-v2-narrative-rule="${idx}" data-field="id" value="${adminAttr(rule.id || '')}"></div>
+    <div class="cfg-field"><label>名称</label><input data-admin-v2-narrative-rule="${idx}" data-field="name" value="${adminAttr(rule.name || '')}"></div>
+    <div class="cfg-field"><label>模块</label><select data-admin-v2-narrative-rule="${idx}" data-field="module">${narrativeModuleOptions(rule.module || 'driven')}</select></div>
+    <div class="cfg-field"><label>触发类型</label><select data-admin-v2-narrative-rule="${idx}" data-field="trigger.type">${narrativeTriggerTypeOptions(rule.trigger?.type || 'event')}</select></div>
+    <div class="cfg-field"><label>触发事件</label><input data-admin-v2-narrative-rule="${idx}" data-field="trigger.event" value="${adminAttr(rule.trigger?.event || '')}" placeholder="scene:entered"></div>
+    <div class="cfg-field"><label>需求 key</label><select data-admin-v2-narrative-rule="${idx}" data-field="trigger.needKey">${narrativeNeedOptions(rule.trigger?.needKey || '')}</select></div>
+    <div class="cfg-field"><label>状态 id</label><input data-admin-v2-narrative-rule="${idx}" data-field="trigger.stateId" value="${adminAttr(rule.trigger?.stateId || '')}"></div>
+    <div class="cfg-field"><label>style</label><input data-admin-v2-narrative-rule="${idx}" data-field="style" value="${adminAttr(rule.style || 'thought')}"></div>
+    <div class="cfg-field"><label>icon</label><input data-admin-v2-narrative-rule="${idx}" data-field="icon" value="${adminAttr(rule.icon || '')}"></div>
+    <div class="cfg-field"><label>启用</label><select data-admin-v2-narrative-rule="${idx}" data-field="enabled" data-type="bool"><option value="true"${rule.enabled !== false ? ' selected' : ''}>启用</option><option value="false"${rule.enabled === false ? ' selected' : ''}>停用</option></select></div>
+    <div class="cfg-field"><label>条件 conditions JSON</label><textarea data-admin-v2-narrative-json="${idx}" data-json-field="conditions">${escapeHtml(JSON.stringify(rule.conditions || {}, null, 2))}</textarea></div>
+    <div class="cfg-field"><label>打分 score JSON</label><textarea data-admin-v2-narrative-json="${idx}" data-json-field="score">${escapeHtml(JSON.stringify(rule.score || {}, null, 2))}</textarea></div>
+    <div class="cfg-field"><label>文案 texts（每行一条）</label><textarea data-admin-v2-narrative-texts="${idx}">${escapeHtml(narrativeTextLines(rule))}</textarea></div>
+    <details>
+      <summary>当前规则完整 JSON</summary>
+      <textarea data-admin-v2-narrative-whole-rule="${idx}">${escapeHtml(JSON.stringify(rule, null, 2))}</textarea>
+    </details>
+    <div class="adm-actions">
+      <button class="primary" data-admin-v2-save-narrative-whole-rule="${idx}">保存规则 JSON</button>
+      <button data-admin-v2-duplicate-narrative-rule="${idx}">复制规则</button>
+    </div>
+  </aside>`;
+}
+
+function validateNarrativeRules() {
+  const nb = narrativeConfigForAdmin();
+  const errors = [];
+  const seen = new Set();
+  (nb.drivenRules || []).forEach((rule, idx) => {
+    if (!rule.id) errors.push(`#${idx + 1} 缺少 id`);
+    if (rule.id && seen.has(rule.id)) errors.push(`重复规则 id：${rule.id}`);
+    if (rule.id) seen.add(rule.id);
+    if (!rule.texts?.length) errors.push(`${rule.id || '#' + (idx + 1)} 缺少 texts`);
+    if (!rule.trigger?.type) errors.push(`${rule.id || '#' + (idx + 1)} 缺少 trigger.type`);
+    if (rule.conditions?.needs && !Array.isArray(rule.conditions.needs)) errors.push(`${rule.id} conditions.needs 必须是数组`);
+    if (rule.conditions?.statesAny && !Array.isArray(rule.conditions.statesAny)) errors.push(`${rule.id} statesAny 必须是数组`);
+  });
+  return errors;
+}
+
 function renderAdminV2FurnitureTemplates() {
   const entries = Object.entries(CONFIG.furnitureTemplates || {})
     .filter(([id, tpl]) => adminV2Matches([id, tpl.name, tpl.category, tpl.lifeLine, furnitureNeedSummary(tpl)].join(' ')));
@@ -1905,10 +3084,11 @@ function renderAdminV2FurnitureTemplates() {
   const lifeLineName = getFurnitureConfig().lifeLineName || '生活类目';
   const rows = entries.map(([id, tpl]) => {
     const entry = tpl.entryOffset || [0, 1];
+    const usage = furnitureUsageSummaryByTemplate(id);
     return `<tr class="${String(id) === String(adminV2SelectedTpl) ? 'sel' : ''}" data-admin-v2-select-template="${id}">
       <td class="meta-id">${escapeHtml(id)}</td>
-      <td><input data-admin-v2-template="${id}" data-field="name" value="${adminAttr(tpl.name || '')}"></td>
-      <td><input data-admin-v2-template="${id}" data-field="category" value="${adminAttr(tpl.category || '')}"></td>
+      <td><input class="furn-name-cell" data-admin-v2-template="${id}" data-field="name" value="${adminAttr(tpl.name || '')}"></td>
+      <td><input class="furn-category-cell" data-admin-v2-template="${id}" data-field="category" value="${adminAttr(tpl.category || '')}"></td>
       <td><select data-admin-v2-template="${id}" data-field="lifeLine">${lifeLineOptionsHtml(tpl.lifeLine)}</select></td>
       <td><select data-admin-v2-template="${id}" data-field="essential" data-type="bool">${essentialOptionsHtml(tpl.essential)}</select></td>
       <td><input class="mini" type="number" data-admin-v2-template="${id}" data-field="gridW" data-type="number" value="${tpl.gridW ?? 1}"> × <input class="mini" type="number" data-admin-v2-template="${id}" data-field="gridH" data-type="number" value="${tpl.gridH ?? 1}"></td>
@@ -1918,26 +3098,55 @@ function renderAdminV2FurnitureTemplates() {
       <td><select data-admin-v2-template="${id}" data-field="skill">${skillOptionsHtml(tpl.skill || '')}</select></td>
       <td>${escapeHtml(furnitureNeedSummary(tpl))}</td>
       <td>${(tpl.actions || []).length || 0}</td>
+      <td>${usage.count}</td>
       <td><button class="mini-btn danger" data-admin-v2-delete-template="${id}">删</button></td>
     </tr>`;
   }).join('');
   return `
-    <div class="admin-v2-content">
-      <div class="admin-v2-table-wrap">
-        <table class="admin-v2-table">
-          <thead><tr><th>ID</th><th>名称</th><th>分类</th><th>${escapeHtml(lifeLineName)}</th><th>基础</th><th>尺寸</th><th>入口</th><th>时长</th><th>人数</th><th>技能</th><th>恢复摘要</th><th>动作</th><th>操作</th></tr></thead>
-          <tbody>${rows || '<tr><td colspan="13" class="logic-muted">没有匹配的家具模板</td></tr>'}</tbody>
-        </table>
+    <div class="furniture-admin-page">
+      ${furnitureAdminSummaryHtml()}
+      <section class="relation-module">
+        <div class="relation-module-head"><b>【家具模板】</b><small>维护家具的交互能力、尺寸入口和基础需求属性；右侧会生成 AI 素材 brief。</small></div>
+        <div class="furniture-admin-content">
+          <div class="admin-v2-table-wrap">
+            <table class="admin-v2-table furniture-admin-table">
+              <thead><tr><th>ID</th><th>名称</th><th>分类</th><th>${escapeHtml(lifeLineName)}</th><th>基础</th><th>尺寸</th><th>入口</th><th>时长</th><th>人数</th><th>技能</th><th>恢复摘要</th><th>动作</th><th>摆放</th><th>操作</th></tr></thead>
+              <tbody>${rows || '<tr><td colspan="14" class="logic-muted">没有匹配的家具模板</td></tr>'}</tbody>
+            </table>
+          </div>
+          ${renderAdminV2FurnitureTemplateDrawer()}
+        </div>
+      </section>
+      <div class="admin-v2-trait-json">
+        <details>
+          <summary>家具 AI 素材清单预览</summary>
+          <textarea readonly id="admin-v2-furniture-ai-export-preview">${escapeHtml(JSON.stringify(buildFurnitureAiAssetBrief(), null, 2))}</textarea>
+        </details>
       </div>
-      ${renderAdminV2FurnitureTemplateDrawer()}
     </div>`;
 }
 
 function renderAdminV2FurnitureTemplateDrawer() {
   const tpl = CONFIG.furnitureTemplates?.[adminV2SelectedTpl];
-  if (!tpl) return `<aside class="admin-v2-drawer"><h4>未选中家具</h4></aside>`;
-  return `<aside class="admin-v2-drawer">
-    <h4>${escapeHtml(tpl.name || adminV2SelectedTpl)} · ${escapeHtml(adminV2SelectedTpl)}</h4>
+  if (!tpl) return `<aside class="furniture-detail-panel"><h4>未选中家具</h4></aside>`;
+  const usage = furnitureUsageSummaryByTemplate(adminV2SelectedTpl);
+  const assetKey = furnitureTemplateAssetKey(adminV2SelectedTpl, tpl);
+  const prompt = furnitureAiPrompt(adminV2SelectedTpl, tpl);
+  return `<aside class="furniture-detail-panel">
+    <div class="furniture-detail-head">
+      <div class="furniture-detail-icon">${escapeHtml(tpl.icon || '具')}</div>
+      <div class="furniture-detail-title">
+        <h4>${escapeHtml(tpl.name || adminV2SelectedTpl)}</h4>
+        <p>${escapeHtml(assetKey)} · ${escapeHtml(adminV2SelectedTpl)}</p>
+      </div>
+    </div>
+    <div class="furniture-detail-grid">
+      <div class="furniture-detail-field"><label>推荐文件</label><b>${escapeHtml(`assets/furniture/${assetKey}.png`)}</b></div>
+      <div class="furniture-detail-field"><label>推荐尺寸</label><b>${Math.max(128, (tpl.gridW || 1) * 128)}×${Math.max(128, (tpl.gridH || 1) * 128)}</b></div>
+      <div class="furniture-detail-field"><label>地图摆放</label><b>${usage.count} 处</b></div>
+      <div class="furniture-detail-field"><label>出现房间</label><b>${escapeHtml(usage.scenes.map(s => `${s.name}×${s.count}`).join('、') || '未摆放')}</b></div>
+    </div>
+    <div class="furniture-prompt-preview">${escapeHtml(prompt)}</div>
     <div class="cfg-field"><label>图标</label><input data-admin-v2-template="${adminV2SelectedTpl}" data-field="icon" value="${adminAttr(tpl.icon || '')}"></div>
     <div class="cfg-field"><label>颜色</label><input data-admin-v2-template="${adminV2SelectedTpl}" data-field="color" value="${adminAttr(tpl.color || '')}"></div>
     <div class="cfg-field"><label>目标需求值</label><input type="number" data-admin-v2-template="${adminV2SelectedTpl}" data-field="targetNeedValue" data-type="optionalNumber" value="${tpl.targetNeedValue ?? ''}" placeholder="留空=不用"></div>
@@ -1961,34 +3170,58 @@ function renderAdminV2FurnitureInstances() {
     <td><select data-admin-v2-instance="${idx}" data-field="sceneId" data-type="number">${sceneOptionsHtml(inst.sceneId)}</select></td>
     <td><select data-admin-v2-instance="${idx}" data-field="templateId" data-type="number">${furnitureOptionsHtml(inst.templateId)}</select></td>
     <td>${escapeHtml(tpl?.name || '未知模板')}</td>
+    <td>${escapeHtml(tpl?.category || '—')}</td>
     <td><input class="mini" type="number" data-admin-v2-instance="${idx}" data-field="anchorCol" data-type="number" value="${inst.anchorCol}"></td>
     <td><input class="mini" type="number" data-admin-v2-instance="${idx}" data-field="anchorRow" data-type="number" value="${inst.anchorRow}"></td>
     <td>${escapeHtml(scene?.name || '未知场景')}</td>
     <td><button class="mini-btn danger" data-admin-v2-delete-instance="${idx}">删</button></td>
   </tr>`).join('');
   return `
-    <div class="admin-v2-content">
-      <div class="admin-v2-table-wrap">
-        <table class="admin-v2-table" style="min-width:860px">
-          <thead><tr><th>实例ID</th><th>场景</th><th>家具模板</th><th>模板名</th><th>列</th><th>行</th><th>场景名</th><th>操作</th></tr></thead>
-          <tbody>${html || '<tr><td colspan="8" class="logic-muted">没有匹配的摆放实例</td></tr>'}</tbody>
-        </table>
+    <div class="furniture-admin-page">
+      ${furnitureAdminSummaryHtml()}
+      <section class="relation-module">
+        <div class="relation-module-head"><b>【家具摆放】</b><small>维护每个家具实例在地图中的场景和格点；模板尺寸决定占地和入口。</small></div>
+        <div class="furniture-admin-content">
+          <div class="admin-v2-table-wrap">
+            <table class="admin-v2-table furniture-admin-table" style="min-width:960px">
+              <thead><tr><th>实例ID</th><th>场景</th><th>家具模板</th><th>模板名</th><th>分类</th><th>列</th><th>行</th><th>场景名</th><th>操作</th></tr></thead>
+              <tbody>${html || '<tr><td colspan="9" class="logic-muted">没有匹配的摆放实例</td></tr>'}</tbody>
+            </table>
+          </div>
+          ${renderAdminV2FurnitureInstanceDrawer()}
+        </div>
+      </section>
+      <div class="admin-v2-trait-json">
+        <details>
+          <summary>家具 AI 素材清单预览</summary>
+          <textarea readonly id="admin-v2-furniture-ai-export-preview">${escapeHtml(JSON.stringify(buildFurnitureAiAssetBrief(), null, 2))}</textarea>
+        </details>
       </div>
-      ${renderAdminV2FurnitureInstanceDrawer()}
     </div>`;
 }
 
 function renderAdminV2FurnitureInstanceDrawer() {
   const inst = CONFIG.furnitureInstances?.[adminV2SelectedInst];
-  if (!inst) return `<aside class="admin-v2-drawer"><h4>未选中摆放</h4></aside>`;
+  if (!inst) return `<aside class="furniture-detail-panel"><h4>未选中摆放</h4></aside>`;
   const tpl = CONFIG.furnitureTemplates?.[inst.templateId];
   const scene = getScene?.(inst.sceneId);
-  return `<aside class="admin-v2-drawer">
-    <h4>摆放 ${escapeHtml(inst.instanceId)}</h4>
-    <p style="color:var(--jn-text-soft);font-size:11px;line-height:1.7;margin-bottom:8px">
-      ${escapeHtml(scene?.name || '未知场景')} · ${escapeHtml(tpl?.name || '未知模板')}
-    </p>
+  const assetKey = tpl ? furnitureTemplateAssetKey(inst.templateId, tpl) : '';
+  return `<aside class="furniture-detail-panel">
+    <div class="furniture-detail-head">
+      <div class="furniture-detail-icon">${escapeHtml(tpl?.icon || '具')}</div>
+      <div class="furniture-detail-title">
+        <h4>摆放 ${escapeHtml(inst.instanceId)}</h4>
+        <p>${escapeHtml(scene?.name || '未知场景')} · ${escapeHtml(tpl?.name || '未知模板')}</p>
+      </div>
+    </div>
+    <div class="furniture-detail-grid">
+      <div class="furniture-detail-field"><label>素材 key</label><b>${escapeHtml(assetKey || '—')}</b></div>
+      <div class="furniture-detail-field"><label>推荐文件</label><b>${escapeHtml(assetKey ? `assets/furniture/${assetKey}.png` : '—')}</b></div>
+      <div class="furniture-detail-field"><label>占地</label><b>${escapeHtml(tpl ? `${tpl.gridW || 1}×${tpl.gridH || 1}` : '—')}</b></div>
+      <div class="furniture-detail-field"><label>坐标</label><b>${escapeHtml(`${inst.anchorCol}, ${inst.anchorRow}`)}</b></div>
+    </div>
     <div class="cfg-field"><label>模板尺寸 / 入口</label><input readonly value="${adminAttr(tpl ? `${tpl.gridW || 1}×${tpl.gridH || 1} / ${((tpl.entryOffset || []).join(','))}` : '—')}"></div>
+    ${tpl ? `<div class="furniture-prompt-preview">${escapeHtml(furnitureAiPrompt(inst.templateId, tpl))}</div>` : ''}
     <div class="cfg-field"><label>实例 JSON</label><textarea readonly>${escapeHtml(JSON.stringify(inst, null, 2))}</textarea></div>
     <div class="adm-actions"><button id="btn-admin-v2-check-connectivity">检测连通性</button></div>
   </aside>`;
@@ -2000,9 +3233,61 @@ const TRAIT_CATEGORY_ASSETS = [
   { category: '习惯', src: 'assets/UI/Personality/2_Habits.png', desc: '日常生活偏好与身体习惯。' },
   { category: '处世', src: 'assets/UI/Personality/3_Social.png', desc: '对人、对局面、对关系的处理方式。' },
 ];
+const DREAM_CATEGORY_OPTIONS = ['家业', '才名', '情缘', '功名', '权柄', '清净', '护佑', '安身', '翻案', '秘闻', '匠作', '逍遥', '修福'];
 
 function normalizeTraitCategoryName(category) {
   return ({ 脾性: '性情', 社交: '处世', 习性: '习惯' })[category] || category || '性情';
+}
+
+function dreamConfigForAdmin() {
+  CONFIG.charSpecialtyConfig ||= {};
+  CONFIG.charSpecialtyConfig.dreamMetadata ||= {};
+  CONFIG.charSpecialtyConfig.dreamProfiles ||= {};
+  return CONFIG.charSpecialtyConfig;
+}
+
+function dreamTypeForAdmin(id) {
+  return dreamConfigForAdmin().dreamMetadata?.[id] || null;
+}
+
+function dreamProfileForChar(charId) {
+  const cfg = dreamConfigForAdmin();
+  cfg.dreamProfiles ||= {};
+  const firstType = Object.keys(cfg.dreamMetadata || {})[0] || '';
+  return cfg.dreamProfiles[charId] || {
+    type: firstType,
+    title: '',
+    description: '',
+    condition: '',
+  };
+}
+
+function dreamCategoryOptionsHtml(selected) {
+  return DREAM_CATEGORY_OPTIONS.map(cat =>
+    `<option value="${cat}"${cat === selected ? ' selected' : ''}>${cat}</option>`
+  ).join('');
+}
+
+function dreamTypeOptionsHtml(selected) {
+  return Object.entries(dreamConfigForAdmin().dreamMetadata || {})
+    .map(([id, row]) => `<option value="${adminAttr(id)}"${id === selected ? ' selected' : ''}>${escapeHtml(row.label || id)} · ${escapeHtml(id)}</option>`)
+    .join('');
+}
+
+function dreamJsonCellValue(row, key) {
+  const value = row?.[key];
+  return value == null ? '' : JSON.stringify(value);
+}
+
+function adminDreamDetailTitle(id, row) {
+  const bits = [
+    row?.description || '',
+    ...(row?.examples || []),
+    (row?.storyHooks || []).length ? `故事钩子：${row.storyHooks.join(' / ')}` : '',
+    (row?.failureHooks || []).length ? `破梦钩子：${row.failureHooks.join(' / ')}` : '',
+    row?.conditions ? `达成条件：${JSON.stringify(row.conditions)}` : '',
+  ].filter(Boolean);
+  return bits.join('\n');
 }
 
 function adminCharAvatarUrl(c) {
@@ -2145,6 +3430,18 @@ function adminSaveCharacterEditor() {
   }
   profile.checks ||= {};
 
+  const dreamType = document.getElementById('admin-v2-char-dream-type')?.value
+    || document.querySelector('.character-dream-card.selected[data-admin-v2-editor-dream]')?.dataset.adminV2EditorDream;
+  if (dreamType != null) {
+    const cfg = dreamConfigForAdmin();
+    cfg.dreamProfiles[c.id] = {
+      type: dreamType,
+      title: document.getElementById('admin-v2-char-dream-title')?.value.trim() || '',
+      description: document.getElementById('admin-v2-char-dream-desc')?.value.trim() || '',
+      condition: document.getElementById('admin-v2-char-dream-condition')?.value.trim() || '',
+    };
+  }
+
   saveConfigToStorage();
   CharSpecialtySystem?.init?.();
   syncTraitLabelsFromMetadata();
@@ -2206,6 +3503,7 @@ function renderAdminV2CharacterEditor() {
   const c = CONFIG.characters[adminSelChar] || CONFIG.characters[0];
   const membership = c ? characterFamilyMembership(c.id) : { family: null, member: null };
   const profile = CONFIG.charSpecialtyConfig?.profiles?.[c?.id] || {};
+  const dreamProfile = c ? dreamProfileForChar(c.id) : {};
   const selectedTraits = new Set([...(profile.aiTraits || []), ...(profile.displayTraits || [])]);
   const editing = adminV2CharacterEditing;
   const familyOptions = families.map(f =>
@@ -2268,6 +3566,36 @@ function renderAdminV2CharacterEditor() {
     <div class="character-trait-list">${specialtyRows || '<span class="logic-muted">暂无专属性格</span>'}</div>
     ${editing ? `<textarea id="admin-v2-char-specialties-json" style="margin-top:8px;min-height:150px">${escapeHtml(JSON.stringify(profile.specialties || [], null, 2))}</textarea>` : ''}
   </section>`;
+  const dreamCards = Object.entries(dreamConfigForAdmin().dreamMetadata || {}).map(([id, row]) => {
+    const selected = dreamProfile.type === id;
+    return `<button type="button" class="character-dream-card character-editor-tooltip${selected ? ' selected' : ''}${editing ? ' editable' : ''}" ${editing ? `data-admin-v2-editor-dream="${adminAttr(id)}"` : ''} data-tooltip="${adminAttr(adminDreamDetailTitle(id, row))}">
+      <b>${escapeHtml(row.label || id)}</b>
+      <span>${escapeHtml(row.category || '未分类')}</span>
+      <p>${escapeHtml((row.storyHooks || row.examples || []).slice(0, 2).join(' / ') || row.description || '')}</p>
+    </button>`;
+  }).join('');
+  const dreamType = dreamTypeForAdmin(dreamProfile.type);
+  const dreamPanel = `<section class="character-dream-panel">
+    <div class="character-dream-head">
+      <div>
+        <h4>梦想</h4>
+        <p>${escapeHtml('长期目标。追求已取消，人物只保留一个人生志向类型，可用标题和达成条件做个体化。')}</p>
+      </div>
+      <span class="meta-tag">${escapeHtml(dreamType?.label || dreamProfile.type || '未配置')}</span>
+    </div>
+    <div class="character-dream-grid">${dreamCards || '<span class="logic-muted">暂无梦想类型</span>'}</div>
+    ${editing ? `<div class="character-dream-form">
+      <div class="cfg-field"><label>梦想标题</label><input id="admin-v2-char-dream-title" value="${adminAttr(dreamProfile.title || '')}" placeholder="如：风雨不惊"></div>
+      <div class="cfg-field"><label>梦想类型</label><select id="admin-v2-char-dream-type">${dreamTypeOptionsHtml(dreamProfile.type || '')}</select></div>
+      <div class="cfg-field"><label>梦想说明</label><input id="admin-v2-char-dream-desc" value="${adminAttr(dreamProfile.description || '')}" placeholder="一句人物化描述"></div>
+      <div class="cfg-field"><label>达成条件</label><textarea id="admin-v2-char-dream-condition" style="min-height:72px">${escapeHtml(dreamProfile.condition || '')}</textarea></div>
+    </div>` : `<div class="character-dream-form">
+      <div class="character-result-card"><label>个人梦想</label><b>${escapeHtml(dreamProfile.title || dreamType?.label || '未配置')}</b><small>${escapeHtml(dreamProfile.description || dreamType?.description || '')}</small></div>
+      <div class="character-result-card"><label>达成条件</label><b>${escapeHtml(dreamProfile.condition || '未配置')}</b></div>
+      <div class="character-result-card"><label>故事钩子</label><b>${escapeHtml((dreamType?.storyHooks || []).join(' / ') || '未配置')}</b></div>
+      <div class="character-result-card"><label>破梦钩子</label><b>${escapeHtml((dreamType?.failureHooks || []).join(' / ') || '未配置')}</b></div>
+    </div>`}
+  </section>`;
   const editorActions = editing
     ? `<button id="btn-admin-v2-char-cancel">取消</button><button class="primary" id="btn-admin-v2-char-save">保存</button>`
     : `<button class="primary" id="btn-admin-v2-char-edit">编辑</button>`;
@@ -2300,6 +3628,7 @@ function renderAdminV2CharacterEditor() {
             : `<b>${escapeHtml(adminIdentityLabel(c))}</b><small>${escapeHtml(membership.family?.name || '未加入家庭')}${membership.member?.role ? ' · ' + escapeHtml(membership.member.role) : ''}</small>`}</div>
         </div>
         <div class="character-trait-columns">${traitColumns}${specialtyPanel}</div>
+        ${dreamPanel}
       </main>
     </div>
   </div>`;
@@ -2539,6 +3868,273 @@ function renderAdminV2PersonalityMeta() {
         </details>
         <div class="adm-actions">
           <button class="primary" id="btn-admin-v2-save-trait-json">保存下方 JSON</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function nextDreamId() {
+  const rows = dreamConfigForAdmin().dreamMetadata || {};
+  let id = 'new_dream';
+  let n = 1;
+  while (rows[id]) id = `new_dream_${++n}`;
+  return id;
+}
+
+function normalizeDreamIdInput(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-zA-Z0-9_\-]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+function adminDreamSaved(msg = '已自动保存') {
+  adminV2DreamSavedMessage = `${msg} · ${new Date().toLocaleTimeString('zh-CN', { hour12: false })}`;
+  const el = document.getElementById('admin-v2-dream-save-status');
+  if (el) el.textContent = adminV2DreamSavedMessage;
+}
+
+function reloadDreamP0Systems() {
+  BehaviorDailyStats?.init?.();
+  HealthSystem?.init?.();
+  DreamProgressStore?.init?.();
+  ReputationDomainSystem?.init?.();
+}
+
+function adminRenameDreamId(oldId, rawNewId) {
+  const newId = normalizeDreamIdInput(rawNewId);
+  const cfg = dreamConfigForAdmin();
+  const meta = cfg.dreamMetadata || {};
+  if (!oldId || !meta[oldId]) return { ok: false, message: '原梦想不存在' };
+  if (!newId) return { ok: false, message: 'ID 不能为空，只支持英文/数字/下划线/短横线' };
+  if (newId === oldId) return { ok: true, id: oldId, message: 'ID 未变化' };
+  if (meta[newId]) return { ok: false, message: `ID「${newId}」已存在` };
+
+  meta[newId] = meta[oldId];
+  delete meta[oldId];
+  for (const profile of Object.values(cfg.dreamProfiles || {})) {
+    if (profile?.type === oldId) profile.type = newId;
+  }
+  saveConfigToStorage();
+  adminV2DreamFocusId = newId;
+  if (adminV2Search === oldId) adminV2Search = newId;
+  adminDreamSaved(`ID 已改为 ${newId}`);
+  return { ok: true, id: newId };
+}
+
+function adminV2AddDream() {
+  const cfg = dreamConfigForAdmin();
+  const id = nextDreamId();
+  cfg.dreamMetadata[id] = {
+    label: '新梦想',
+    category: '家业',
+    description: '',
+    examples: [],
+    conditions: {},
+    gameplay: {},
+  };
+  adminV2Search = id;
+  adminV2DreamFocusId = id;
+  adminDreamSaved(`已新增 ${id}`);
+  saveConfigToStorage();
+  renderAdmin();
+}
+
+function adminV2ValidateDreams() {
+  const cfg = dreamConfigForAdmin();
+  const lines = [];
+  for (const [id, row] of Object.entries(cfg.dreamMetadata || {})) {
+    if (!row.label) lines.push(`${id} 缺标签`);
+    if (!DREAM_CATEGORY_OPTIONS.includes(row.category)) lines.push(`${id} 分类应为 ${DREAM_CATEGORY_OPTIONS.join('/')}`);
+    if (!row.description) lines.push(`${id} 缺描述`);
+    if (row.conditions && typeof row.conditions !== 'object') lines.push(`${id} conditions 不是对象`);
+    if (row.gameplay && typeof row.gameplay !== 'object') lines.push(`${id} gameplay 不是对象`);
+  }
+  for (const [charId, profile] of Object.entries(cfg.dreamProfiles || {})) {
+    if (profile?.type && !cfg.dreamMetadata?.[profile.type]) lines.push(`${charId} 引用了不存在的梦想类型 ${profile.type}`);
+  }
+  alert(lines.length ? lines.join('\n') : '梦想系统校验通过。');
+}
+
+const DREAM_P0_COUNTER_KEYS = [
+  'works', 'praise', 'contestWin', 'studyTasks', 'managedTasks', 'protectedEvents',
+  'clearedNegativeSecrets', 'discoveredSecrets', 'successfulBargains',
+  'craftedWorks', 'praisedWorks', 'workAsClue', 'helpedEvents', 'conflictResolved',
+  'misunderstanding', 'rumor', 'secretLeak', 'falseEvidence', 'harmfulLeaks',
+];
+
+function adminDreamDiagChar() {
+  const fallback = CHARS[selectedIdx]?.id || CHARS[0]?.id || '';
+  if (!adminV2DreamDiagCharId || !getChar(adminV2DreamDiagCharId)) adminV2DreamDiagCharId = fallback;
+  return getChar(adminV2DreamDiagCharId) || CHARS[0] || null;
+}
+
+function renderDreamP0Diagnostics() {
+  const c = adminDreamDiagChar();
+  if (!c) return '<div class="cfg-enums"><b>P0 条件诊断</b><p>暂无人物。</p></div>';
+  const profile = dreamConfigForAdmin().dreamProfiles?.[c.id] || {};
+  const dreamType = profile.type || '';
+  const meta = dreamType ? dreamConfigForAdmin().dreamMetadata?.[dreamType] : null;
+  const evalResult = DreamConditionRegistry?.evaluateDream?.(c.id, dreamType);
+  const family = FamilySystem?.findFamilyOfChar?.(c.id);
+  const dayStats = BehaviorDailyStats?.getWindow?.(c.id, 7) || [];
+  const latest = dayStats[dayStats.length - 1] || {};
+  const progress = c.dreamProgress?.[dreamType] || {};
+  const counters = progress.counters || {};
+  const repExplain = ReputationDomainSystem?.explain?.(c.id);
+  const repRows = (repExplain?.domains || []).map(row => {
+    const isCareer = (repExplain.careerDomains || []).includes(row.id);
+    const isIdentity = (repExplain.identity?.domains || []).some(d => d.domain === row.id);
+    return `
+      <tr>
+        <td>${escapeHtml(row.label)}</td>
+        <td class="meta-id">${escapeHtml(row.id)}</td>
+        <td>${escapeHtml(String(row.value || 0))}</td>
+        <td>${isCareer ? '职业域' : ''}${isCareer && isIdentity ? ' / ' : ''}${isIdentity ? '身份参考' : ''}</td>
+        <td>
+          <button class="mini-btn" data-dream-rep-domain="${adminAttr(row.id)}" data-delta="10">+10</button>
+          <button class="mini-btn" data-dream-rep-domain="${adminAttr(row.id)}" data-delta="-10">-10</button>
+          <button class="mini-btn" data-dream-rep-domain="${adminAttr(row.id)}" data-set="0">清零</button>
+        </td>
+      </tr>`;
+  }).join('');
+  const repLogRows = (repExplain?.log || []).map(row => `
+    <tr>
+      <td>第${escapeHtml(row.day ?? '?')}日</td>
+      <td>${escapeHtml(ReputationDomainSystem?.domainLabel?.(row.domain) || row.domain)}</td>
+      <td>${row.delta > 0 ? '+' : ''}${escapeHtml(row.delta || 0)}</td>
+      <td>${escapeHtml(row.reason || row.source || '—')}</td>
+      <td>${escapeHtml(row.pathId || '—')}</td>
+    </tr>`).join('');
+  const charOptions = (CHARS || []).map(row =>
+    `<option value="${adminAttr(row.id)}" ${row.id === c.id ? 'selected' : ''}>${escapeHtml(row.short || row.name || row.id)}</option>`).join('');
+  const conditionRows = (evalResult?.results || []).map(row => `
+    <tr>
+      <td>${row.ok ? '已满足' : row.source === 'unknown' ? '未知' : '未满足'}</td>
+      <td class="meta-id">${escapeHtml(row.key)}</td>
+      <td>${escapeHtml(row.label || row.key)}</td>
+      <td>${escapeHtml(String(row.value ?? '—'))}</td>
+      <td>${escapeHtml(String(row.target ?? '—'))}</td>
+      <td>${Math.round((row.progress || 0) * 100)}%</td>
+      <td>${escapeHtml(row.source || '')}</td>
+      <td>${escapeHtml(row.reason || '')}</td>
+    </tr>`).join('');
+  const counterRows = DREAM_P0_COUNTER_KEYS.map(key => `
+    <tr>
+      <td class="meta-id">${escapeHtml(key)}</td>
+      <td>${escapeHtml(String(counters[key] || 0))}</td>
+      <td>
+        <button class="mini-btn" data-dream-p0-counter="${adminAttr(key)}" data-delta="1">+1</button>
+        <button class="mini-btn" data-dream-p0-counter="${adminAttr(key)}" data-delta="-1">-1</button>
+        <button class="mini-btn" data-dream-p0-counter="${adminAttr(key)}" data-set="0">清零</button>
+      </td>
+    </tr>`).join('');
+  const statsRows = dayStats.map(row => `
+    <tr>
+      <td>第${row.day}日</td>
+      <td>${escapeHtml(JSON.stringify(row.needMin || {}))}</td>
+      <td>${escapeHtml(Object.entries(row.actionTagMinutes || {}).map(([k, v]) => `${k}:${v}`).join(' / ') || '—')}</td>
+      <td>${escapeHtml((row.visitedSceneIds || []).join(' / ') || '—')}</td>
+      <td>${escapeHtml(Object.entries(row.flags || {}).filter(([, v]) => v).map(([k]) => k).join(' / ') || '—')}</td>
+    </tr>`).join('');
+  return `
+    <div class="cfg-enums">
+      <b>P0 条件诊断</b>
+      <p>只读现有底座：健康、每日统计、梦想计数、关系/公账。背包和秘密类条件在 P0 先用计数器承接。</p>
+      <div class="cfg-grid" style="margin-top:8px">
+        <div class="cfg-field"><label>人物</label><select id="admin-v2-dream-diag-char">${charOptions}</select></div>
+        <div class="cfg-field"><label>梦想</label><input readonly value="${adminAttr(meta?.label || dreamType || '未配置')}"></div>
+        <div class="cfg-field"><label>健康</label><input readonly value="${adminAttr(HealthSystem?.getHealth?.(c.id) ?? c.health ?? 100)} / ${adminAttr(HealthSystem?.getIllnessLevel?.(c.id) || 'none')}"></div>
+        <div class="cfg-field"><label>家庭公账</label><input readonly value="${adminAttr(family ? FamilySystem.getFund(family.id) : '无家庭')}"></div>
+        <div class="cfg-field"><label>职业声望域</label><input readonly value="${adminAttr((repExplain?.careerDomains || []).map(d => ReputationDomainSystem?.domainLabel?.(d) || d).join(' / ') || '总体名声')}"></div>
+        <div class="cfg-field"><label>身份参考声望</label><input readonly value="${adminAttr(repExplain?.identity?.value ?? c.reputation ?? 0)}"></div>
+      </div>
+    </div>
+    <div class="admin-v2-table-wrap" style="max-height:24vh;margin-bottom:10px">
+      <table class="admin-v2-table">
+        <thead><tr><th>状态</th><th>Key</th><th>条件</th><th>当前</th><th>目标</th><th>进度</th><th>来源</th><th>说明</th></tr></thead>
+        <tbody>${conditionRows || '<tr><td colspan="8" class="logic-muted">当前人物没有可判定的梦想条件</td></tr>'}</tbody>
+      </table>
+    </div>
+    <div class="admin-v2-table-wrap" style="max-height:22vh;margin-bottom:10px">
+      <table class="admin-v2-table">
+        <thead><tr><th>计数器</th><th>当前值</th><th>调试推进</th></tr></thead>
+        <tbody>${counterRows}</tbody>
+      </table>
+    </div>
+    <div class="admin-v2-table-wrap" style="max-height:22vh;margin-bottom:10px">
+      <table class="admin-v2-table">
+        <thead><tr><th>声望域</th><th>ID</th><th>当前值</th><th>绑定来源</th><th>调试</th></tr></thead>
+        <tbody>${repRows || '<tr><td colspan="5" class="logic-muted">分域声望系统未初始化</td></tr>'}</tbody>
+      </table>
+    </div>
+    <div class="admin-v2-table-wrap" style="max-height:16vh;margin-bottom:10px">
+      <table class="admin-v2-table">
+        <thead><tr><th>日期</th><th>声望域</th><th>变化</th><th>原因</th><th>路径</th></tr></thead>
+        <tbody>${repLogRows || '<tr><td colspan="5" class="logic-muted">暂无声望变更记录</td></tr>'}</tbody>
+      </table>
+    </div>
+    <div class="admin-v2-table-wrap" style="max-height:22vh;margin-bottom:10px">
+      <table class="admin-v2-table">
+        <thead><tr><th>日期</th><th>最低需求</th><th>行为标签分钟</th><th>访问场景</th><th>Flags</th></tr></thead>
+        <tbody>${statsRows || '<tr><td colspan="5" class="logic-muted">暂无每日统计，运行一会儿游戏后会自动生成</td></tr>'}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderAdminV2DreamSystem() {
+  const cfg = dreamConfigForAdmin();
+  const meta = cfg.dreamMetadata || {};
+  const entries = Object.entries(meta)
+    .filter(([id, row]) => adminV2Matches([id, row.label, row.category, row.description, ...(row.examples || [])].join(' ')))
+    .sort((a, b) => {
+      if ((a[1].category || '') !== (b[1].category || '')) return (a[1].category || '').localeCompare(b[1].category || '', 'zh-Hans-CN');
+      return (a[1].label || a[0]).localeCompare(b[1].label || b[0], 'zh-Hans-CN');
+    });
+  const rows = entries.map(([id, row]) => {
+    const used = Object.values(cfg.dreamProfiles || {}).filter(profile => profile?.type === id).length;
+    return `<tr data-admin-v2-dream-row="${adminAttr(id)}">
+      <td class="meta-id"><input class="dream-id-cell" data-admin-v2-dream-id="${adminAttr(id)}" value="${adminAttr(id)}"></td>
+      <td><input data-admin-v2-dream="${id}" data-field="label" value="${adminAttr(row.label || '')}"></td>
+      <td><select data-admin-v2-dream="${id}" data-field="category">${dreamCategoryOptionsHtml(row.category || '家业')}</select></td>
+      <td><input class="dream-desc-cell" data-admin-v2-dream="${id}" data-field="description" value="${adminAttr(row.description || '')}"></td>
+      <td><input class="dream-desc-cell" data-admin-v2-dream="${id}" data-field="examples" value="${adminAttr((row.examples || []).join(' | '))}" placeholder="用 | 分隔"></td>
+      <td><input class="dream-desc-cell" data-admin-v2-dream="${id}" data-field="storyHooks" value="${adminAttr((row.storyHooks || []).join(' | '))}" placeholder="用 | 分隔"></td>
+      <td><input class="dream-desc-cell" data-admin-v2-dream="${id}" data-field="failureHooks" value="${adminAttr((row.failureHooks || []).join(' | '))}" placeholder="用 | 分隔"></td>
+      <td><input class="dream-json-cell" data-admin-v2-dream-json="${id}" data-json-field="conditions" value="${adminAttr(dreamJsonCellValue(row, 'conditions'))}" placeholder="{}"></td>
+      <td><input class="dream-json-cell" data-admin-v2-dream-json="${id}" data-json-field="gameplay" value="${adminAttr(dreamJsonCellValue(row, 'gameplay'))}" placeholder="{}"></td>
+      <td>${used}</td>
+      <td><button class="mini-btn danger" data-admin-v2-delete-dream="${id}">删</button></td>
+    </tr>`;
+  }).join('');
+  return `
+    <div class="admin-v2-trait-page admin-v2-dream-page">
+      <div class="cfg-enums"><b>梦想系统</b><p>古代版人生志向类型。人物设定页只分配“长期梦想”，追求已取消。 <span class="meta-tag" id="admin-v2-dream-save-status">${escapeHtml(adminV2DreamSavedMessage || '等待改动')}</span></p>
+        <p>分类：${enumTags(DREAM_CATEGORY_OPTIONS)}</p>
+        <p>字段：${enumTags(['label', 'category', 'description', 'examples', 'storyHooks', 'failureHooks', 'conditions', 'gameplay'])}</p>
+      </div>
+      ${renderDreamP0Diagnostics()}
+      <div class="admin-v2-table-wrap" style="max-height:48vh">
+        <table class="admin-v2-table dream-meta-table">
+          <thead><tr>
+            <th>ID</th><th>标签</th><th>分类</th><th>描述</th><th>典型梦想</th><th>故事钩子</th><th>破梦钩子</th><th>达成条件 JSON</th><th>玩法 JSON</th><th>人物数</th><th>操作</th>
+          </tr></thead>
+          <tbody>${rows || '<tr><td colspan="11" class="logic-muted">没有匹配的梦想类型</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div class="admin-v2-trait-json">
+        <details open>
+          <summary>高级 JSON：人物梦想 dreamProfiles</summary>
+          <textarea id="admin-v2-dream-profiles-json">${escapeHtml(JSON.stringify(cfg.dreamProfiles || {}, null, 2))}</textarea>
+        </details>
+        <details>
+          <summary>高级 JSON：完整 dreamMetadata</summary>
+          <textarea id="admin-v2-dream-metadata-json">${escapeHtml(JSON.stringify(cfg.dreamMetadata || {}, null, 2))}</textarea>
+        </details>
+        <div class="adm-actions">
+          <button class="primary" id="btn-admin-v2-save-dream-json">保存下方 JSON</button>
         </div>
       </div>
     </div>`;
@@ -2990,6 +4586,455 @@ function adminDeleteCompositeRelationRule(idx) {
   renderAdmin();
 }
 
+function adminUniqueNarrativeRuleId(base = 'bubble_rule') {
+  const rules = narrativeConfigForAdmin().drivenRules || [];
+  const safeBase = String(base || 'bubble_rule').replace(/[^a-zA-Z0-9_:-]+/g, '_').replace(/^_+|_+$/g, '') || 'bubble_rule';
+  const used = new Set(rules.map(rule => rule.id));
+  let id = safeBase;
+  let n = 1;
+  while (used.has(id)) id = `${safeBase}_${++n}`;
+  return id;
+}
+
+function adminV2AddNarrativeRule() {
+  const rules = narrativeConfigForAdmin().drivenRules;
+  const id = adminUniqueNarrativeRuleId('bubble_rule');
+  rules.push({
+    id,
+    name: '新叙事气泡',
+    module: 'driven',
+    enabled: true,
+    trigger: { type: 'need_band', needKey: 'mood' },
+    conditions: {
+      needs: [{ key: 'mood', op: '<=', value: 45 }],
+      statesAny: ['needMoodLow', 'needMoodCritical'],
+    },
+    score: { base: 60, priority: 50, cooldownGameMin: 60, dailyMaxPerChar: 3 },
+    style: 'thought',
+    icon: '💭',
+    texts: ['{name}心里有些说不出的滋味。'],
+  });
+  adminV2SelectedNarrativeRule = narrativeRuleKey('drivenRules', rules.length - 1);
+  adminSaveNarrativeAndReload(true);
+}
+
+function adminSaveNarrativeAndReload(shouldRender) {
+  saveConfigToStorage();
+  NarrativeBubbleSystem?.reloadConfig?.();
+  if (shouldRender) renderAdmin();
+}
+
+function adminV2ValidateNarrativeRules() {
+  const errors = validateNarrativeRules();
+  alert(errors.length ? `叙事规则校验失败：\n${errors.join('\n')}` : '叙事规则校验通过。');
+}
+
+function adminV2SaveQuestGlobal() {
+  const qc = questConfigForAdmin();
+  qc.masterEnabled = document.getElementById('quest-v2-master')?.checked !== false;
+  qc.servantConfig = qc.servantConfig || {};
+  qc.servantConfig.enabled = document.getElementById('quest-v2-servant-enabled')?.checked !== false;
+  qc.ui = qc.ui || {};
+  qc.ui.showSocialLinks = document.getElementById('quest-v2-social-links')?.checked !== false;
+  qc.aiIssueIntervalGameMin = +document.getElementById('quest-v2-ai-interval')?.value || 60;
+  qc.pendingExpireGameMin = +document.getElementById('quest-v2-pending-expire')?.value || 180;
+  qc.questWeightBoost = +document.getElementById('quest-v2-weight')?.value || 3.5;
+  qc.groupQuestCooldownGameMin = +document.getElementById('quest-v2-group-cooldown')?.value || 1440;
+  saveConfigToStorage();
+  QuestSystem?.init?.();
+  CharSpecialtySystem?.init?.();
+  MultiInteractSystem?.init?.();
+  log('任务 v2：全局控制已保存并热重载。');
+  renderAdmin();
+}
+
+function adminV2SaveQuestTemplate() {
+  const qc = questConfigForAdmin();
+  const tpl = qc.templates?.[adminV2SelectedTpl];
+  if (!tpl) return;
+  document.querySelectorAll('[data-quest-v2-field]').forEach(el => {
+    if (el.dataset.questV2Field === 'id') return;
+    tpl[el.dataset.questV2Field] = el.value;
+  });
+  document.querySelectorAll('[data-quest-v2-number]').forEach(el => {
+    const key = el.dataset.questV2Number;
+    const raw = String(el.value || '').trim();
+    if (raw === '') delete tpl[key];
+    else tpl[key] = +raw;
+  });
+  document.querySelectorAll('[data-quest-v2-bool]').forEach(el => {
+    tpl[el.dataset.questV2Bool] = el.value === 'true';
+  });
+  document.querySelectorAll('[data-quest-v2-csv]').forEach(el => {
+    const key = el.dataset.questV2Csv;
+    tpl[key] = parseQuestCsv(el.value);
+  });
+  document.querySelectorAll('[data-quest-v2-text]').forEach(el => {
+    tpl.texts = tpl.texts || {};
+    tpl.texts[el.dataset.questV2Text] = el.value;
+  });
+  const rankMin = document.querySelector('[data-quest-v2-rank="min"]')?.value;
+  const rankMax = document.querySelector('[data-quest-v2-rank="max"]')?.value;
+  if (rankMin !== '' || rankMax !== '') {
+    tpl.targetRankRange = {};
+    if (rankMin !== '') tpl.targetRankRange.min = +rankMin;
+    if (rankMax !== '') tpl.targetRankRange.max = +rankMax;
+  } else {
+    delete tpl.targetRankRange;
+  }
+  if (!qc.categories) qc.categories = [];
+  if (tpl.category && !qc.categories.includes(tpl.category)) qc.categories.push(tpl.category);
+  saveConfigToStorage();
+  QuestSystem?.init?.();
+  log(`任务 v2：已保存模板「${tpl.name || tpl.id}」。`);
+  renderAdmin();
+}
+
+function adminV2AddQuestTemplate() {
+  const qc = questConfigForAdmin();
+  const ids = Object.keys(qc.templates || {}).map(id => +id).filter(Number.isFinite);
+  const id = String(Math.max(1000, ...ids) + 1);
+  qc.templates[id] = {
+    id: +id,
+    name: '新任务模板',
+    category: qc.categories?.[0] || '差遣',
+    questType: 'directive',
+    targetScope: 'single',
+    issuerRoles: [],
+    assigneeRoles: [],
+    issuerRelationRequired: [],
+    autoAccept: true,
+    isServantTask: false,
+    deadlineMode: 'GAME_HOURS',
+    deadlineParam: 4,
+    issueBaseChance: 0,
+    completeConditions: [],
+    failConditions: [],
+    rewards: [],
+    penalties: [],
+    declinePenalties: [],
+    repeatable: true,
+    repeatCooldownGameMin: 1440,
+    texts: { issue: '', complete: '', fail: '', decline: '' },
+  };
+  adminV2SelectedTpl = +id;
+  saveConfigToStorage();
+  renderAdmin();
+}
+
+function adminV2DeleteQuestTemplate() {
+  const qc = questConfigForAdmin();
+  const tpl = qc.templates?.[adminV2SelectedTpl];
+  if (!tpl) return;
+  if (!confirm(`删除任务模板「${tpl.name || tpl.id}」？`)) return;
+  delete qc.templates[adminV2SelectedTpl];
+  adminV2SelectedTpl = Object.keys(qc.templates || {})[0] || null;
+  saveConfigToStorage();
+  QuestSystem?.init?.();
+  renderAdmin();
+}
+
+function adminV2ValidateQuests(silent = false) {
+  const qc = questConfigForAdmin();
+  const errors = [];
+  const chars = new Set((CONFIG.characters || []).map(c => c.id));
+  for (const [id, tpl] of Object.entries(qc.templates || {})) {
+    if (String(tpl.id) !== String(id)) errors.push(`${id}：模板 key 与 id 不一致`);
+    if (!tpl.name) errors.push(`${id}：缺少任务名`);
+    if (!tpl.category) errors.push(`${id}：缺少分类`);
+    if (!['daily', 'directive', 'event'].includes(tpl.questType)) errors.push(`${id}：questType 无效`);
+    if (!Array.isArray(tpl.completeConditions)) errors.push(`${id}：完成条件不是数组`);
+    for (const cond of tpl.completeConditions || []) {
+      if (!cond.type) errors.push(`${id}：完成条件缺少 type`);
+      if (cond.targetValue == null) errors.push(`${id}：完成条件 ${cond.type || ''} 缺少 targetValue`);
+    }
+  }
+  for (const rule of qc.dailyRoutines || []) {
+    if (!qc.templates?.[rule.templateId]) errors.push(`旧日常 ${rule.slotId || ''}：模板 ${rule.templateId} 不存在`);
+    if (!chars.has(rule.charId)) errors.push(`旧日常 ${rule.slotId || ''}：人物 ${rule.charId} 不存在`);
+  }
+  for (const contract of qc.servantConfig?.contracts || []) {
+    if (!chars.has(contract.masterId)) errors.push(`契约 ${contract.id}：主子 ${contract.masterId} 不存在`);
+    if (!chars.has(contract.servantId)) errors.push(`契约 ${contract.id}：仆从 ${contract.servantId} 不存在`);
+  }
+  for (const rule of qc.servantConfig?.dutyRoutines || []) {
+    if (!qc.templates?.[rule.templateId]) errors.push(`契约日课 ${rule.slotId || ''}：模板 ${rule.templateId} 不存在`);
+    if (!(qc.servantConfig?.contracts || []).some(c => c.id === rule.contractId)) errors.push(`契约日课 ${rule.slotId || ''}：契约 ${rule.contractId} 不存在`);
+  }
+  if (!silent) alert(errors.length ? `任务系统校验失败：\n${errors.slice(0, 30).join('\n')}${errors.length > 30 ? `\n…另有 ${errors.length - 30} 条` : ''}` : '任务系统校验通过。');
+  return errors;
+}
+
+function adminV2TestQuestIssue() {
+  const templateId = document.getElementById('quest-v2-test-template')?.value;
+  const issuerId = document.getElementById('quest-v2-test-issuer')?.value || null;
+  const assigneeId = document.getElementById('quest-v2-test-assignee')?.value;
+  const inst = QuestSystem?.debugIssue?.(Number(templateId) || templateId, issuerId, assigneeId);
+  if (inst) {
+    const tpl = questConfigForAdmin().templates?.[templateId];
+    log(`任务 v2 测试下发成功：${tpl?.name || templateId}（${getChar(issuerId)?.short || '系统'} → ${getChar(assigneeId)?.short || assigneeId}）`);
+  } else {
+    log('任务 v2 测试下发失败：请检查模板、人物、身份关系、冷却或总开关。');
+  }
+}
+
+function adminV2QuestConnectivityCheck() {
+  const errors = adminV2ValidateQuests(true);
+  QuestSystem?.init?.();
+  const qc = questConfigForAdmin();
+  const tpl = qc.templates?.[adminV2SelectedTpl] || Object.values(qc.templates || {})[0];
+  let sample = null;
+  if (tpl && QuestIssueSystem?.checkQuestIssueable) {
+    const chars = (CONFIG.characters || []).map(c => getChar(c.id)).filter(Boolean);
+    for (const issuer of chars) {
+      for (const target of chars) {
+        if (issuer.id === target.id) continue;
+        const check = QuestIssueSystem.checkQuestIssueable(issuer, target, tpl);
+        if (check?.ok) {
+          sample = { ...check, issuer, target };
+          break;
+        }
+        if (!sample) sample = { ...check, issuer, target };
+      }
+      if (sample?.ok) break;
+    }
+  }
+  const parts = [
+    errors.length ? `配置错误 ${errors.length} 条` : '配置校验通过',
+    QuestSystem?.getInstances ? 'QuestSystem 可访问' : 'QuestSystem 不可访问',
+    tpl ? `样例模板：${tpl.name || tpl.id}` : '没有模板',
+    sample ? `样例权限：${sample.ok ? `可下发（${sample.issuer?.short || sample.issuer?.id} → ${sample.target?.short || sample.target?.id}）` : sample.reason}` : '样例权限：跳过',
+  ];
+  alert(`任务 v2 连通性检查：\n${parts.join('\n')}`);
+}
+
+function adminV2SaveIdentitySystem(shouldRender = true) {
+  const cfg = identityConfigForAdmin();
+  document.querySelectorAll('[data-identity-v2-rank]').forEach(el => {
+    cfg.rankLabels[el.dataset.identityV2Rank] = el.value;
+  });
+  document.querySelectorAll('[data-identity-v2-hierarchy]').forEach(el => {
+    cfg.hierarchyLabels[el.dataset.identityV2Hierarchy] = el.value;
+  });
+  document.querySelectorAll('[data-identity-v2-rule]').forEach(el => {
+    const rule = cfg.rules?.[+el.dataset.identityV2Rule];
+    if (!rule) return;
+    rule[el.dataset.field] = el.value;
+  });
+  document.querySelectorAll('[data-identity-v2-rule-desc]').forEach(el => {
+    const rule = cfg.rules?.[+el.dataset.identityV2RuleDesc];
+    if (!rule) return;
+    const raw = el.value.trim();
+    if (raw) rule.condition = { ...(rule.condition || {}), desc: raw };
+    else delete rule.condition;
+  });
+  const nextAddresses = {};
+  document.querySelectorAll('[data-identity-v2-address-key]').forEach(el => {
+    const oldKey = el.dataset.identityV2AddressKey;
+    const key = el.value.trim();
+    if (!key) return;
+    const hint = document.querySelector(`[data-identity-v2-address="${CSS.escape(oldKey)}"]`)?.value || '';
+    nextAddresses[key] = { ...(cfg.addressByInitType?.[oldKey] || {}), hint };
+  });
+  cfg.addressByInitType = nextAddresses;
+  saveConfigToStorage();
+  log('身份系统已保存。');
+  if (shouldRender) renderAdmin();
+}
+
+function adminV2AddIdentityRule() {
+  const cfg = identityConfigForAdmin();
+  cfg.rules.push({ rel: 'peer', cat: '叙旧', behavior: 'allowed' });
+  saveConfigToStorage();
+  renderAdmin();
+}
+
+function adminV2AddIdentityAddress() {
+  const cfg = identityConfigForAdmin();
+  let idx = 1;
+  let key = '新关系';
+  while (cfg.addressByInitType[key]) key = `新关系${++idx}`;
+  cfg.addressByInitType[key] = { hint: '称呼规则' };
+  saveConfigToStorage();
+  renderAdmin();
+}
+
+function adminV2SaveIdentityJson() {
+  let parsed;
+  try { parsed = JSON.parse(document.getElementById('identity-v2-json')?.value || '{}'); }
+  catch (e) { alert('identityProtocolConfig JSON 无效'); return; }
+  CONFIG.identityProtocolConfig = parsed;
+  saveConfigToStorage();
+  log('身份系统高级 JSON 已保存。');
+  renderAdmin();
+}
+
+function aiParseCsv(value) {
+  return String(value || '').split(',').map(s => s.trim()).filter(Boolean);
+}
+
+function aiParseJsonInput(value, label) {
+  try { return JSON.parse(value || '{}'); }
+  catch (e) { throw new Error(`${label} JSON 无效`); }
+}
+
+function adminV2SaveAIFromForm(shouldRender = true) {
+  const cfg = aiConfigForAdmin();
+  const numberFields = [
+    ['bucketGridSize', 'ai-v2-bucket'],
+    ['maxCandidateDistance', 'ai-v2-max-dist'],
+    ['cacheMaxSize', 'ai-v2-cache-size'],
+    ['candidatePoolSize', 'ai-v2-pool-size'],
+    ['weightReplaceThresholdFast', 'ai-v2-fast-threshold'],
+    ['weightReplaceThresholdSlow', 'ai-v2-slow-threshold'],
+    ['randomPerturbMin', 'ai-v2-random-min'],
+    ['randomPerturbMax', 'ai-v2-random-max'],
+    ['aiSocialTargetCooldownMinutes', 'ai-v2-social-cooldown'],
+    ['aiCrossSceneSocialTargetCooldownMinutes', 'ai-v2-cross-social-cooldown'],
+    ['aiDailySocialTargetLimit', 'ai-v2-social-limit'],
+    ['sleepWakeEnergyRatio', 'ai-v2-wake-ratio'],
+  ];
+  for (const [key, id] of numberFields) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    const raw = String(el.value || '').trim();
+    if (raw === '') delete cfg[key];
+    else cfg[key] = +raw;
+  }
+  cfg.demandBaseWeights ||= {};
+  document.querySelectorAll('[data-ai-v2-demand]').forEach(el => {
+    const raw = String(el.value || '').trim();
+    if (raw === '') delete cfg.demandBaseWeights[el.dataset.aiV2Demand];
+    else cfg.demandBaseWeights[el.dataset.aiV2Demand] = +raw;
+  });
+
+  try {
+    document.querySelectorAll('[data-ai-v2-window]').forEach(el => {
+      const row = cfg.scheduleWindows?.[+el.dataset.aiV2Window];
+      if (row) row[el.dataset.field] = el.value;
+    });
+    document.querySelectorAll('[data-ai-v2-window-number]').forEach(el => {
+      const row = cfg.scheduleWindows?.[+el.dataset.aiV2WindowNumber];
+      if (row) row[el.dataset.field] = +el.value;
+    });
+    document.querySelectorAll('[data-ai-v2-window-json]').forEach(el => {
+      const row = cfg.scheduleWindows?.[+el.dataset.aiV2WindowJson];
+      if (row) row[el.dataset.field] = aiParseJsonInput(el.value, row.name || row.id || '日程窗口');
+    });
+    document.querySelectorAll('[data-ai-v2-routine]').forEach(el => {
+      const row = cfg.routineAnchors?.[+el.dataset.aiV2Routine];
+      if (row) row[el.dataset.field] = el.value;
+    });
+    document.querySelectorAll('[data-ai-v2-routine-number]').forEach(el => {
+      const row = cfg.routineAnchors?.[+el.dataset.aiV2RoutineNumber];
+      if (row) row[el.dataset.field] = +el.value;
+    });
+    document.querySelectorAll('[data-ai-v2-routine-list]').forEach(el => {
+      const row = cfg.routineAnchors?.[+el.dataset.aiV2RoutineList];
+      if (row) row[el.dataset.field] = aiParseCsv(el.value);
+    });
+    document.querySelectorAll('[data-ai-v2-routine-json]').forEach(el => {
+      const row = cfg.routineAnchors?.[+el.dataset.aiV2RoutineJson];
+      if (row) row[el.dataset.field] = aiParseJsonInput(el.value, row.name || row.id || '作息锚点');
+    });
+  } catch (e) {
+    alert(e.message);
+    return false;
+  }
+
+  saveConfigToStorage();
+  log('AI / Utility v2 已保存。');
+  if (shouldRender) renderAdmin();
+  return true;
+}
+
+function adminV2AddAIWindow() {
+  const cfg = aiConfigForAdmin();
+  cfg.scheduleWindows.push({
+    id: `window_${cfg.scheduleWindows.length + 1}`,
+    name: '新日程窗口',
+    from: 8,
+    to: 10,
+    boost: {},
+    cut: {},
+  });
+  saveConfigToStorage();
+  renderAdmin();
+}
+
+function adminV2AddAIRoutine() {
+  const cfg = aiConfigForAdmin();
+  cfg.routineAnchors.push({
+    id: `routine_${cfg.routineAnchors.length + 1}`,
+    name: '新作息锚点',
+    from: 8,
+    to: 10,
+    needs: [],
+    completeBy: { categories: [], tags: [] },
+    boost: {},
+    cut: {},
+    completeCut: {},
+  });
+  saveConfigToStorage();
+  renderAdmin();
+}
+
+function adminV2ValidateAI(silent = false) {
+  const cfg = aiConfigForAdmin();
+  const errors = [];
+  const positiveNumbers = ['bucketGridSize', 'maxCandidateDistance', 'cacheMaxSize', 'candidatePoolSize'];
+  for (const key of positiveNumbers) {
+    if (!(Number(cfg[key]) > 0)) errors.push(`${key} 必须大于 0`);
+  }
+  if ((cfg.randomPerturbMin ?? 0) > (cfg.randomPerturbMax ?? 0)) errors.push('随机扰动下限不能大于上限');
+  const checkWindow = (row, label, idx) => {
+    if (!row.id) errors.push(`${label} ${idx + 1} 缺少 id`);
+    if (!row.name) errors.push(`${label} ${row.id || idx + 1} 缺少名称`);
+    if (!Number.isFinite(+row.from) || !Number.isFinite(+row.to)) errors.push(`${label} ${row.id || idx + 1} 时间无效`);
+    if (typeof row.boost !== 'object' || Array.isArray(row.boost)) errors.push(`${label} ${row.id || idx + 1} boost 必须是对象`);
+    if (typeof row.cut !== 'object' || Array.isArray(row.cut)) errors.push(`${label} ${row.id || idx + 1} cut 必须是对象`);
+  };
+  (cfg.scheduleWindows || []).forEach((row, idx) => checkWindow(row, '日程窗口', idx));
+  (cfg.routineAnchors || []).forEach((row, idx) => {
+    checkWindow(row, '作息锚点', idx);
+    if (!Array.isArray(row.needs)) errors.push(`作息锚点 ${row.id || idx + 1} needs 必须是数组`);
+    if (typeof row.completeBy !== 'object' || Array.isArray(row.completeBy)) errors.push(`作息锚点 ${row.id || idx + 1} completeBy 必须是对象`);
+  });
+  if (!silent) alert(errors.length ? `AI / Utility 校验失败：\n${errors.join('\n')}` : 'AI / Utility 校验通过。');
+  return errors;
+}
+
+function adminV2AIConnectivityCheck() {
+  const saved = adminV2SaveAIFromForm(false);
+  if (!saved) return;
+  const errors = adminV2ValidateAI(true);
+  if (typeof initAISystem === 'function') initAISystem();
+  const c = CHARS[selectedIdx];
+  if (c?.id && typeof ResidentAI === 'object') ResidentAI.forceRebuildCache?.(c.id);
+  const pool = c?.id && typeof ResidentAI === 'object' ? (ResidentAI.getCandidatePool?.(c.id) || []) : [];
+  const providerCount = typeof AiCandidateProviderSystem === 'object' && AiCandidateProviderSystem?.providers
+    ? AiCandidateProviderSystem.providers().length
+    : 0;
+  alert([
+    errors.length ? `配置错误 ${errors.length} 条` : '配置校验通过',
+    typeof initAISystem === 'function' ? 'initAISystem 可访问' : 'initAISystem 不可访问',
+    providerCount ? `候选来源 ${providerCount} 个` : '候选来源：未读取到 provider registry',
+    c ? `当前人物：${c.short || c.id}，候选池 ${pool.length} 条` : '未选择人物',
+  ].join('\n'));
+  renderAdmin();
+}
+
+function adminV2SaveAIJson() {
+  let parsed;
+  try { parsed = JSON.parse(document.getElementById('ai-v2-json')?.value || '{}'); }
+  catch (e) { alert('aiConfig JSON 无效'); return; }
+  CONFIG.aiConfig = parsed;
+  saveConfigToStorage();
+  if (typeof initAISystem === 'function') initAISystem();
+  log('AI / Utility 高级 JSON 已保存。');
+  renderAdmin();
+}
+
 function bindAdminV2Events() {
   bindAdminFloatingTooltips(document.getElementById('admin-body') || document);
   document.getElementById('btn-admin-v2-legacy')?.addEventListener('click', adminV2SwitchLegacy);
@@ -3007,10 +5052,100 @@ function bindAdminV2Events() {
   if (add) add.onclick = () => {
     if (adminV2Section === 'furnitureInstances') adminV2AddInstance();
     else if (adminV2Section === 'personalityMeta') adminV2AddTrait();
+    else if (adminV2Section === 'dreamSystem') adminV2AddDream();
+    else if (adminV2Section === 'narrativeRules') adminV2AddNarrativeRule();
+    else if (adminV2Section === 'questTemplates') adminV2AddQuestTemplate();
     else adminV2AddTemplate();
   };
   const validate = document.getElementById('btn-admin-v2-validate');
-  if (validate) validate.onclick = () => adminV2Section === 'personalityMeta' ? adminV2ValidateTraits() : adminV2ValidateFurniture();
+  if (validate) validate.onclick = () => {
+    if (adminV2Section === 'personalityMeta') adminV2ValidateTraits();
+    else if (adminV2Section === 'dreamSystem') adminV2ValidateDreams();
+    else if (adminV2Section === 'ai') adminV2ValidateAI();
+    else if (adminV2Section === 'narrativeRules') adminV2ValidateNarrativeRules();
+    else if (adminV2Section === 'questTemplates') adminV2ValidateQuests();
+    else adminV2ValidateFurniture();
+  };
+  const exportFurnitureAi = document.getElementById('btn-admin-v2-export-furniture-ai');
+  if (exportFurnitureAi) exportFurnitureAi.onclick = () => {
+    downloadAdminJson('furniture_ai_asset_brief.json', buildFurnitureAiAssetBrief());
+  };
+
+  document.querySelectorAll('[data-admin-v2-quest-row]').forEach(row => row.onclick = () => {
+    const raw = row.dataset.adminV2QuestRow;
+    adminV2SelectedTpl = Number.isFinite(+raw) ? +raw : raw;
+    renderAdmin();
+  });
+  document.getElementById('btn-quest-v2-save-global')?.addEventListener('click', adminV2SaveQuestGlobal);
+  document.getElementById('btn-quest-v2-reload')?.addEventListener('click', () => {
+    QuestSystem?.init?.();
+    reloadDreamP0Systems();
+    CharSpecialtySystem?.init?.();
+    MultiInteractSystem?.init?.();
+    log('任务 v2：已热重载。');
+  });
+  document.getElementById('btn-quest-v2-save-template')?.addEventListener('click', adminV2SaveQuestTemplate);
+  document.getElementById('btn-quest-v2-delete-template')?.addEventListener('click', adminV2DeleteQuestTemplate);
+  document.getElementById('btn-quest-v2-test-issue')?.addEventListener('click', adminV2TestQuestIssue);
+  document.getElementById('btn-quest-v2-connectivity')?.addEventListener('click', adminV2QuestConnectivityCheck);
+
+  document.getElementById('btn-ai-v2-save-global')?.addEventListener('click', () => adminV2SaveAIFromForm(true));
+  document.getElementById('btn-ai-v2-reload')?.addEventListener('click', () => {
+    if (adminV2SaveAIFromForm(false) && typeof initAISystem === 'function') {
+      initAISystem();
+      const c = CHARS[selectedIdx];
+      if (c?.id && typeof ResidentAI === 'object') ResidentAI.forceRebuildCache?.(c.id);
+      log('AI / Utility v2：已热重载。');
+      renderAdmin();
+    }
+  });
+  document.getElementById('btn-ai-v2-connectivity')?.addEventListener('click', adminV2AIConnectivityCheck);
+  document.getElementById('btn-ai-v2-add-window')?.addEventListener('click', adminV2AddAIWindow);
+  document.getElementById('btn-ai-v2-add-routine')?.addEventListener('click', adminV2AddAIRoutine);
+  document.getElementById('btn-ai-v2-save-json')?.addEventListener('click', adminV2SaveAIJson);
+  document.getElementById('btn-ai-v2-rebuild')?.addEventListener('click', () => {
+    const c = CHARS[selectedIdx];
+    if (c?.id && typeof ResidentAI === 'object') {
+      ResidentAI.forceRebuildCache?.(c.id);
+      renderAdmin();
+    }
+  });
+  document.getElementById('btn-ai-v2-toggle-log')?.addEventListener('click', () => {
+    const c = CHARS[selectedIdx];
+    if (c?.id && typeof ResidentAI === 'object') {
+      ResidentAI.enableAILog?.(c.id, !c.ai?.aiLog);
+      renderAdmin();
+    }
+  });
+  document.querySelectorAll('[data-ai-v2-delete-window]').forEach(btn => btn.onclick = () => {
+    const cfg = aiConfigForAdmin();
+    cfg.scheduleWindows.splice(+btn.dataset.aiV2DeleteWindow, 1);
+    saveConfigToStorage();
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-ai-v2-delete-routine]').forEach(btn => btn.onclick = () => {
+    const cfg = aiConfigForAdmin();
+    cfg.routineAnchors.splice(+btn.dataset.aiV2DeleteRoutine, 1);
+    saveConfigToStorage();
+    renderAdmin();
+  });
+
+  document.getElementById('btn-identity-v2-save')?.addEventListener('click', () => adminV2SaveIdentitySystem(true));
+  document.getElementById('btn-identity-v2-save-json')?.addEventListener('click', adminV2SaveIdentityJson);
+  document.getElementById('btn-identity-v2-add-rule')?.addEventListener('click', adminV2AddIdentityRule);
+  document.getElementById('btn-identity-v2-add-address')?.addEventListener('click', adminV2AddIdentityAddress);
+  document.querySelectorAll('[data-identity-v2-delete-rule]').forEach(btn => btn.onclick = () => {
+    const cfg = identityConfigForAdmin();
+    cfg.rules.splice(+btn.dataset.identityV2DeleteRule, 1);
+    saveConfigToStorage();
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-identity-v2-delete-address]').forEach(btn => btn.onclick = () => {
+    const cfg = identityConfigForAdmin();
+    delete cfg.addressByInitType[btn.dataset.identityV2DeleteAddress];
+    saveConfigToStorage();
+    renderAdmin();
+  });
 
   document.querySelectorAll('[data-admin-v2-char-row]').forEach(row => row.onclick = () => {
     adminSelectCharById(row.dataset.adminV2CharRow);
@@ -3059,6 +5194,17 @@ function bindAdminV2Events() {
       if (peer !== btn) peer.classList.remove('selected');
     });
     btn.classList.toggle('selected', !wasSelected);
+  });
+  document.querySelectorAll('[data-admin-v2-editor-dream]').forEach(btn => btn.onclick = () => {
+    if (!adminV2CharacterEditing) return;
+    document.querySelectorAll('[data-admin-v2-editor-dream]').forEach(peer => peer.classList.toggle('selected', peer === btn));
+    const select = document.getElementById('admin-v2-char-dream-type');
+    if (select) select.value = btn.dataset.adminV2EditorDream;
+  });
+  document.getElementById('admin-v2-char-dream-type')?.addEventListener('change', evt => {
+    document.querySelectorAll('[data-admin-v2-editor-dream]').forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.adminV2EditorDream === evt.target.value);
+    });
   });
 
   document.querySelectorAll('[data-admin-v2-select-template]').forEach(row => row.onclick = evt => {
@@ -3151,6 +5297,115 @@ function bindAdminV2Events() {
     const validation = validateFurnitureActions(tpl?.actions || []);
     alert(validation.errors.length ? `校验失败：\n${validation.errors.join('\n')}` : 'actions 校验通过。');
   });
+
+  document.querySelectorAll('[data-admin-v2-select-narrative-rule]').forEach(row => row.onclick = evt => {
+    if (evt.target.closest('input,select,button,textarea')) return;
+    adminV2SelectedNarrativeRule = row.dataset.adminV2SelectNarrativeRule;
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-narrative-setting]').forEach(el => el.onchange = () => {
+    const nb = narrativeConfigForAdmin();
+    const raw = el.type === 'checkbox' ? el.checked : el.value;
+    setAdminPathValue(nb, el.dataset.adminV2NarrativeSetting, parseAdminFieldValue(raw, el.dataset.type || 'string'));
+    adminSaveNarrativeAndReload(false);
+  });
+  document.querySelectorAll('[data-admin-v2-narrative-rule]').forEach(el => el.onchange = () => {
+    const rule = narrativeConfigForAdmin().drivenRules?.[+el.dataset.adminV2NarrativeRule];
+    if (!rule) return;
+    const raw = el.type === 'checkbox' ? el.checked : el.value;
+    setAdminPathValue(rule, el.dataset.field, parseAdminFieldValue(raw, el.dataset.type || 'string'));
+    if (el.dataset.field === 'id') adminV2SelectedNarrativeRule = narrativeRuleKey('drivenRules', +el.dataset.adminV2NarrativeRule);
+    adminSaveNarrativeAndReload(false);
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-narrative-json]').forEach(el => el.onchange = () => {
+    const rule = narrativeConfigForAdmin().drivenRules?.[+el.dataset.adminV2NarrativeJson];
+    if (!rule) return;
+    try { rule[el.dataset.jsonField] = JSON.parse(el.value || '{}'); }
+    catch (e) { alert(`${el.dataset.jsonField} JSON 无效`); return; }
+    adminSaveNarrativeAndReload(false);
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-narrative-texts]').forEach(el => el.onchange = () => {
+    const rule = narrativeConfigForAdmin().drivenRules?.[+el.dataset.adminV2NarrativeTexts];
+    if (!rule) return;
+    rule.texts = el.value.split('\n').map(line => line.trim()).filter(Boolean);
+    adminSaveNarrativeAndReload(false);
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-narrative-legacy-json]').forEach(el => el.onchange = () => {
+    const key = el.dataset.adminV2NarrativeLegacyJson;
+    let parsed;
+    try { parsed = JSON.parse(el.value || '[]'); }
+    catch (e) { alert(`${key} JSON 无效`); return; }
+    if (!Array.isArray(parsed)) { alert(`${key} 必须是数组`); return; }
+    narrativeConfigForAdmin()[key] = parsed;
+    adminSaveNarrativeAndReload(true);
+  });
+  document.querySelectorAll('[data-admin-v2-narrative-legacy-row]').forEach(el => el.onchange = () => {
+    const [source, idxRaw] = el.dataset.adminV2NarrativeLegacyRow.split(':');
+    const idx = +idxRaw;
+    let parsed;
+    try { parsed = JSON.parse(el.value || '{}'); }
+    catch (e) { alert(`${source} 规则 JSON 无效`); return; }
+    const nb = narrativeConfigForAdmin();
+    nb[source] ||= [];
+    nb[source][idx] = parsed;
+    adminV2SelectedNarrativeRule = narrativeRuleKey(source, idx);
+    adminSaveNarrativeAndReload(true);
+  });
+  document.querySelectorAll('[data-admin-v2-save-narrative-whole-rule]').forEach(btn => btn.onclick = () => {
+    const idx = +btn.dataset.adminV2SaveNarrativeWholeRule;
+    const area = document.querySelector(`[data-admin-v2-narrative-whole-rule="${idx}"]`);
+    let parsed;
+    try { parsed = JSON.parse(area?.value || '{}'); }
+    catch (e) { alert('规则 JSON 无效'); return; }
+    if (!parsed.id) { alert('规则必须包含 id'); return; }
+    narrativeConfigForAdmin().drivenRules[idx] = parsed;
+    adminSaveNarrativeAndReload(true);
+  });
+  document.querySelectorAll('[data-admin-v2-duplicate-narrative-rule]').forEach(btn => btn.onclick = () => {
+    const idx = +btn.dataset.adminV2DuplicateNarrativeRule;
+    const rules = narrativeConfigForAdmin().drivenRules;
+    const base = rules[idx];
+    if (!base) return;
+    const copy = JSON.parse(JSON.stringify(base));
+    copy.id = adminUniqueNarrativeRuleId(`${base.id || 'rule'}_copy`);
+    copy.name = `${base.name || base.id || '规则'} 副本`;
+    rules.splice(idx + 1, 0, copy);
+    adminV2SelectedNarrativeRule = narrativeRuleKey('drivenRules', idx + 1);
+    adminSaveNarrativeAndReload(true);
+  });
+  document.querySelectorAll('[data-admin-v2-convert-legacy-narrative]').forEach(btn => btn.onclick = evt => {
+    evt.stopPropagation();
+    const entry = narrativeUnifiedEntries(narrativeConfigForAdmin()).find(e => e.key === btn.dataset.adminV2ConvertLegacyNarrative);
+    if (!entry) return;
+    const copy = JSON.parse(JSON.stringify(entry.rule));
+    copy.id = adminUniqueNarrativeRuleId(copy.id.replace(/^legacy:/, ''));
+    copy.name = `${copy.name || copy.id}（迁移）`;
+    copy.enabled = true;
+    narrativeConfigForAdmin().drivenRules.push(copy);
+    adminV2SelectedNarrativeRule = narrativeRuleKey('drivenRules', narrativeConfigForAdmin().drivenRules.length - 1);
+    adminSaveNarrativeAndReload(true);
+  });
+  document.querySelectorAll('[data-admin-v2-delete-narrative-rule]').forEach(btn => btn.onclick = evt => {
+    evt.stopPropagation();
+    const idx = +btn.dataset.adminV2DeleteNarrativeRule;
+    const rule = narrativeConfigForAdmin().drivenRules?.[idx];
+    if (!rule || !confirm(`确认删除叙事规则「${rule.name || rule.id}」？`)) return;
+    narrativeConfigForAdmin().drivenRules.splice(idx, 1);
+    adminV2SelectedNarrativeRule = narrativeRuleKey('drivenRules', Math.max(0, Math.min(idx, narrativeConfigForAdmin().drivenRules.length - 1)));
+    adminSaveNarrativeAndReload(true);
+  });
+  const saveNarrativeFullJson = document.getElementById('btn-admin-v2-save-narrative-full-json');
+  if (saveNarrativeFullJson) saveNarrativeFullJson.onclick = () => {
+    let parsed;
+    try { parsed = JSON.parse(document.getElementById('admin-v2-narrative-full-json')?.value || '{}'); }
+    catch (e) { alert('narrativeBubble JSON 无效'); return; }
+    CONFIG.narrativeBubble = parsed;
+    adminV2SelectedNarrativeRule = narrativeRuleKey('drivenRules', 0);
+    adminSaveNarrativeAndReload(true);
+  };
   document.getElementById('btn-admin-v2-check-connectivity')?.addEventListener('click', () => {
     buildWorldGrid();
     const badScenes = SceneAccessSystem.checkAllScenesConnectivity().filter(r => !r.ok);
@@ -3250,6 +5505,93 @@ function bindAdminV2Events() {
     renderAdmin();
   };
 
+  document.querySelectorAll('[data-admin-v2-dream]').forEach(el => el.onchange = () => {
+    const row = dreamConfigForAdmin().dreamMetadata?.[el.dataset.adminV2Dream];
+    if (!row) return;
+    if (['examples', 'storyHooks', 'failureHooks'].includes(el.dataset.field)) {
+      row[el.dataset.field] = el.value.split('|').map(s => s.trim()).filter(Boolean);
+    } else {
+      row[el.dataset.field] = el.value;
+    }
+    saveConfigToStorage();
+    adminV2DreamFocusId = el.dataset.adminV2Dream;
+    adminDreamSaved('已自动保存');
+  });
+  document.querySelectorAll('[data-admin-v2-dream-id]').forEach(el => el.onchange = () => {
+    const oldId = el.dataset.adminV2DreamId;
+    const result = adminRenameDreamId(oldId, el.value);
+    if (!result.ok) {
+      alert(result.message);
+      el.value = oldId;
+      return;
+    }
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-dream-json]').forEach(el => el.onchange = () => {
+    const row = dreamConfigForAdmin().dreamMetadata?.[el.dataset.adminV2DreamJson];
+    if (!row) return;
+    const raw = el.value.trim();
+    if (!raw) {
+      delete row[el.dataset.jsonField];
+    } else {
+      try { row[el.dataset.jsonField] = JSON.parse(raw); }
+      catch (e) { alert(`${row.label || el.dataset.adminV2DreamJson} 的 ${el.dataset.jsonField} JSON 无效`); return; }
+    }
+    saveConfigToStorage();
+    adminV2DreamFocusId = el.dataset.adminV2DreamJson;
+    adminDreamSaved('已自动保存');
+  });
+  document.querySelectorAll('[data-admin-v2-delete-dream]').forEach(btn => btn.onclick = () => {
+    const id = btn.dataset.adminV2DeleteDream;
+    const cfg = dreamConfigForAdmin();
+    const label = cfg.dreamMetadata?.[id]?.label || id;
+    const used = Object.values(cfg.dreamProfiles || {}).filter(profile => profile?.type === id).length;
+    if (!confirm(used ? `「${label}」已有 ${used} 个人物使用。删除后这些人物会变成未配置，确认吗？` : `确认删除梦想「${label}」？`)) return;
+    delete cfg.dreamMetadata[id];
+    for (const profile of Object.values(cfg.dreamProfiles || {})) {
+      if (profile?.type === id) profile.type = '';
+    }
+    saveConfigToStorage();
+    adminDreamSaved(`已删除 ${label}`);
+    renderAdmin();
+  });
+  const saveDreamJson = document.getElementById('btn-admin-v2-save-dream-json');
+  if (saveDreamJson) saveDreamJson.onclick = () => {
+    let metadata, profiles;
+    try { profiles = JSON.parse(document.getElementById('admin-v2-dream-profiles-json')?.value || '{}'); }
+    catch (e) { alert('dreamProfiles JSON 无效'); return; }
+    try { metadata = JSON.parse(document.getElementById('admin-v2-dream-metadata-json')?.value || '{}'); }
+    catch (e) { alert('dreamMetadata JSON 无效'); return; }
+    const cfg = dreamConfigForAdmin();
+    cfg.dreamMetadata = metadata;
+    cfg.dreamProfiles = profiles;
+    saveConfigToStorage();
+    adminDreamSaved('JSON 已保存');
+    alert('梦想系统 JSON 已保存。');
+    renderAdmin();
+  };
+  const dreamDiagChar = document.getElementById('admin-v2-dream-diag-char');
+  if (dreamDiagChar) dreamDiagChar.onchange = () => {
+    adminV2DreamDiagCharId = dreamDiagChar.value;
+    renderAdmin();
+  };
+  document.querySelectorAll('[data-dream-p0-counter]').forEach(btn => btn.onclick = () => {
+    const c = adminDreamDiagChar();
+    if (!c) return;
+    const key = btn.dataset.dreamP0Counter;
+    if (btn.dataset.set != null) DreamProgressStore?.setCounter?.(c.id, key, +btn.dataset.set, { source: 'admin' });
+    else DreamProgressStore?.addCounter?.(c.id, key, +(btn.dataset.delta || 0), { source: 'admin' });
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-dream-rep-domain]').forEach(btn => btn.onclick = () => {
+    const c = adminDreamDiagChar();
+    if (!c) return;
+    const domain = btn.dataset.dreamRepDomain;
+    if (btn.dataset.set != null) ReputationDomainSystem?.set?.(c.id, domain, +btn.dataset.set, { source: 'admin', reason: '后台调试' });
+    else ReputationDomainSystem?.change?.(c.id, domain, +(btn.dataset.delta || 0), '后台调试', { source: 'admin' });
+    renderAdmin();
+  });
+
   if (adminV2Section === 'personalityMeta' && adminV2TraitFocusId) {
     requestAnimationFrame(() => {
       const row = document.querySelector(`[data-admin-v2-trait-row="${CSS.escape(adminV2TraitFocusId)}"]`);
@@ -3258,6 +5600,16 @@ function bindAdminV2Events() {
       input?.focus?.();
       input?.select?.();
       adminV2TraitFocusId = null;
+    });
+  }
+  if (adminV2Section === 'dreamSystem' && adminV2DreamFocusId) {
+    requestAnimationFrame(() => {
+      const row = document.querySelector(`[data-admin-v2-dream-row="${CSS.escape(adminV2DreamFocusId)}"]`);
+      row?.scrollIntoView?.({ block: 'center', inline: 'nearest' });
+      const input = document.querySelector(`[data-admin-v2-dream-id="${CSS.escape(adminV2DreamFocusId)}"]`);
+      input?.focus?.();
+      input?.select?.();
+      adminV2DreamFocusId = null;
     });
   }
 }
@@ -4269,6 +6621,7 @@ function bindAdminEvents() {
     LifePathSystem?.init?.();
     FamilySystem.init();
     QuestSystem.init();
+    reloadDreamP0Systems();
     CharSpecialtySystem.init();
     MultiInteractSystem.init();
     initAISystem();

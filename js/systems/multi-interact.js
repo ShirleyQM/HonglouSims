@@ -229,7 +229,9 @@ const MultiInteractSystem = (() => {
         removeStatus(who, ef.statusId || ef.statusTag);
       }
       if (ef.type === 'relation_shift') {
-        changeRelation(observer.id, observed.id, ef.amount || 0);
+        CharacterEffectSystem.apply({
+          type: 'relation', idA: observer.id, idB: observed.id, delta: ef.amount || 0,
+        }, { source: 'multi-interact:additional', reason: '观察附加效果' });
       }
     }
   }
@@ -271,8 +273,10 @@ const MultiInteractSystem = (() => {
       const who = p.target === 'observer' ? observer : p.target === 'both' ? null : observed;
       const sid = resolveStatusId(p.statusId);
       if (sid) {
-        if (who) applyState(who, sid);
-        else { applyState(observer, sid); applyState(observed, sid); }
+        const targets = who ? [who] : [observer, observed];
+        targets.forEach(c => CharacterEffectSystem.apply({
+          type: 'state', charId: c.id, stateId: sid,
+        }, { source: `observer:${row.id || 'reaction'}`, reason: row.name || '观察反应' }));
       }
     } else if (rt === 'send_bubble') {
       const text = pickBubbleText(row, observer, observed, { target: observed.action?.target });
@@ -298,7 +302,9 @@ const MultiInteractSystem = (() => {
         enqueueAction(observer, makeMoveItem(col, row), true);
       }
     } else if (rt === 'relation_shift') {
-      changeRelation(observer.id, observed.id, p.amount || p.delta || 0);
+      CharacterEffectSystem.apply({
+        type: 'relation', idA: observer.id, idB: observed.id, delta: p.amount || p.delta || 0,
+      }, { source: `observer:${row.id || 'reaction'}`, reason: row.name || '观察反应' });
     }
 
     applyAdditional(observer, observed, row.additionalEffects);
@@ -471,4 +477,3 @@ const MultiInteractSystem = (() => {
   };
 })();
 window.MultiInteractSystem = MultiInteractSystem;
-

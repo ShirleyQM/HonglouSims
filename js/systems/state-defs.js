@@ -20,8 +20,12 @@ const STATE_CONFLICT_GROUPS = {
 
 // 注入所有 CSV 状态到 CONFIG.stateDefs（在 config.js 后执行）
 (function injectCSVStates() {
-  if (!window.DEFAULT_CONFIG) { console.warn('[state-defs] DEFAULT_CONFIG not ready'); return; }
-  const defs = DEFAULT_CONFIG.stateDefs || (DEFAULT_CONFIG.stateDefs = {});
+  const root = (typeof globalThis !== 'undefined') ? globalThis : window;
+  const defaultConfig = root.DEFAULT_CONFIG
+    || ((typeof DEFAULT_CONFIG !== 'undefined') ? DEFAULT_CONFIG : null);
+  if (!defaultConfig) { console.warn('[state-defs] DEFAULT_CONFIG not ready'); return; }
+  root.DEFAULT_CONFIG = defaultConfig;
+  const defs = defaultConfig.stateDefs || (defaultConfig.stateDefs = {});
   const csvStates = {
   "S001": {
     "name": "愉悦",

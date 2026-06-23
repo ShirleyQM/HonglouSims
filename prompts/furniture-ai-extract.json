@@ -1,0 +1,439 @@
+{
+  "version": 1,
+  "purpose": "家具 AI 素材清单（从 furniture_ai_asset_brief 提取）",
+  "styleGuide": [
+    "透明背景 PNG",
+    "单件家具，不要人物，不要文字，不要水印",
+    "古典中式 / 红楼梦大观园 / 手绘 2D 游戏道具",
+    "微俯视 3/4 或俯视角度，边缘清晰，适合缩放到 canvas 地图",
+    "材质要能看出木、竹、石、水、织物；整体低饱和，避免现代感"
+  ],
+  "count": 17,
+  "furniture": [
+    {
+      "templateId": 101,
+      "assetKey": "furn_101_desk",
+      "name": "红木书案",
+      "category": "desk",
+      "lifeLine": "闲",
+      "lifeLineLabel": "闲·意趣",
+      "essential": false,
+      "grid": {
+        "w": 2,
+        "h": 1,
+        "entryOffset": [
+          1,
+          1
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_101_desk.png",
+      "recommendedCanvasPx": {
+        "width": 256,
+        "height": 128
+      },
+      "icon": "📚",
+      "color": "#5a4a38",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「红木书案」。用途：闲·意趣，闷+8.5/分，类别 desk，占地 2x1 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 110,
+      "assetKey": "furn_110_meal",
+      "name": "饭桌",
+      "category": "meal",
+      "lifeLine": "食",
+      "lifeLineLabel": "食·饥饿",
+      "essential": true,
+      "grid": {
+        "w": 2,
+        "h": 1,
+        "entryOffset": [
+          1,
+          1
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_110_meal.png",
+      "recommendedCanvasPx": {
+        "width": 256,
+        "height": 128
+      },
+      "icon": "🍚",
+      "color": "#6a5040",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「饭桌」。用途：食·饥饿，饥+12/分，类别 meal，占地 2x1 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 111,
+      "assetKey": "furn_111_snack",
+      "name": "点心案",
+      "category": "snack",
+      "lifeLine": "食",
+      "lifeLineLabel": "食·饥饿",
+      "essential": true,
+      "grid": {
+        "w": 1,
+        "h": 1,
+        "entryOffset": [
+          0,
+          1
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_111_snack.png",
+      "recommendedCanvasPx": {
+        "width": 128,
+        "height": 128
+      },
+      "icon": "🥟",
+      "color": "#7a6048",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「点心案」。用途：食·饥饿，饥+14/分，类别 snack，占地 1x1 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 112,
+      "assetKey": "furn_112_kitchen",
+      "name": "厨房灶台",
+      "category": "kitchen",
+      "lifeLine": "食",
+      "lifeLineLabel": "食·饥饿",
+      "essential": true,
+      "grid": {
+        "w": 2,
+        "h": 2,
+        "entryOffset": [
+          1,
+          2
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_112_kitchen.png",
+      "recommendedCanvasPx": {
+        "width": 256,
+        "height": 256
+      },
+      "icon": "🔥",
+      "color": "#5a4030",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「厨房灶台」。用途：食·饥饿，饥+10/分，类别 kitchen，占地 2x2 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 113,
+      "assetKey": "furn_113_workdesk",
+      "name": "樟木案几",
+      "category": "workdesk",
+      "lifeLine": "住",
+      "lifeLineLabel": "住·精力",
+      "essential": false,
+      "grid": {
+        "w": 2,
+        "h": 1,
+        "entryOffset": [
+          1,
+          1
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_113_workdesk.png",
+      "recommendedCanvasPx": {
+        "width": 256,
+        "height": 128
+      },
+      "icon": "📋",
+      "color": "#5a5040",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「樟木案几」。用途：住·精力，倦+2/分，类别 workdesk，占地 2x1 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 201,
+      "assetKey": "furn_201_bed",
+      "name": "雕花木床",
+      "category": "bed",
+      "lifeLine": "住",
+      "lifeLineLabel": "住·精力",
+      "essential": true,
+      "grid": {
+        "w": 2,
+        "h": 2,
+        "entryOffset": [
+          1,
+          2
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_201_bed.png",
+      "recommendedCanvasPx": {
+        "width": 256,
+        "height": 256
+      },
+      "icon": "🛏️",
+      "color": "#6b4423",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「雕花木床」。用途：住·精力，倦+6/分，类别 bed，占地 2x2 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 211,
+      "assetKey": "furn_211_rest",
+      "name": "竹榻",
+      "category": "rest",
+      "lifeLine": "住",
+      "lifeLineLabel": "住·精力",
+      "essential": true,
+      "grid": {
+        "w": 2,
+        "h": 1,
+        "entryOffset": [
+          1,
+          1
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_211_rest.png",
+      "recommendedCanvasPx": {
+        "width": 256,
+        "height": 128
+      },
+      "icon": "🛋️",
+      "color": "#5a4838",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「竹榻」。用途：住·精力，倦+4.5/分，类别 rest，占地 2x1 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 301,
+      "assetKey": "furn_301_bath",
+      "name": "浴盆",
+      "category": "bath",
+      "lifeLine": "衣",
+      "lifeLineLabel": "衣·洁净",
+      "essential": true,
+      "grid": {
+        "w": 2,
+        "h": 2,
+        "entryOffset": [
+          1,
+          2
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_301_bath.png",
+      "recommendedCanvasPx": {
+        "width": 256,
+        "height": 256
+      },
+      "icon": "🛁",
+      "color": "#3a5a6a",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「浴盆」。用途：衣·洁净，洁+8.7/分，类别 bath，占地 2x2 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 311,
+      "assetKey": "furn_311_wash",
+      "name": "铜面盆",
+      "category": "wash",
+      "lifeLine": "衣",
+      "lifeLineLabel": "衣·洁净",
+      "essential": true,
+      "grid": {
+        "w": 1,
+        "h": 1,
+        "entryOffset": [
+          0,
+          1
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_311_wash.png",
+      "recommendedCanvasPx": {
+        "width": 128,
+        "height": 128
+      },
+      "icon": "🧼",
+      "color": "#4a6a7a",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「铜面盆」。用途：衣·洁净，洁+10/分，类别 wash，占地 1x1 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 312,
+      "assetKey": "furn_312_wardrobe",
+      "name": "梳洗妆台",
+      "category": "wardrobe",
+      "lifeLine": "衣",
+      "lifeLineLabel": "衣·洁净",
+      "essential": true,
+      "grid": {
+        "w": 2,
+        "h": 1,
+        "entryOffset": [
+          1,
+          1
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_312_wardrobe.png",
+      "recommendedCanvasPx": {
+        "width": 256,
+        "height": 128
+      },
+      "icon": "👘",
+      "color": "#5a4a5a",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「梳洗妆台」。用途：衣·洁净，洁+7.5/分，类别 wardrobe，占地 2x1 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 401,
+      "assetKey": "furn_401_table",
+      "name": "茶案",
+      "category": "table",
+      "lifeLine": "食",
+      "lifeLineLabel": "食·饥饿",
+      "essential": true,
+      "grid": {
+        "w": 2,
+        "h": 1,
+        "entryOffset": [
+          1,
+          1
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_401_table.png",
+      "recommendedCanvasPx": {
+        "width": 256,
+        "height": 128
+      },
+      "icon": "🍵",
+      "color": "#4a3728",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「茶案」。用途：食·饥饿，饥+11.2/分，类别 table，占地 2x1 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 501,
+      "assetKey": "furn_501_wine",
+      "name": "酒案",
+      "category": "wine",
+      "lifeLine": "闲",
+      "lifeLineLabel": "闲·意趣",
+      "essential": false,
+      "grid": {
+        "w": 2,
+        "h": 1,
+        "entryOffset": [
+          1,
+          1
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_501_wine.png",
+      "recommendedCanvasPx": {
+        "width": 256,
+        "height": 128
+      },
+      "icon": "🍶",
+      "color": "#5a3a28",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「酒案」。用途：闲·意趣，闷+11.7/分，类别 wine，占地 2x1 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 601,
+      "assetKey": "furn_601_instrument",
+      "name": "琴台",
+      "category": "instrument",
+      "lifeLine": "闲",
+      "lifeLineLabel": "闲·意趣",
+      "essential": false,
+      "grid": {
+        "w": 2,
+        "h": 1,
+        "entryOffset": [
+          1,
+          1
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_601_instrument.png",
+      "recommendedCanvasPx": {
+        "width": 256,
+        "height": 128
+      },
+      "icon": "🎵",
+      "color": "#4a3848",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「琴台」。用途：闲·意趣，闷+7/分，类别 instrument，占地 2x1 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 701,
+      "assetKey": "furn_701_garden",
+      "name": "花圃",
+      "category": "garden",
+      "lifeLine": "闲",
+      "lifeLineLabel": "闲·意趣",
+      "essential": false,
+      "grid": {
+        "w": 2,
+        "h": 1,
+        "entryOffset": [
+          1,
+          1
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_701_garden.png",
+      "recommendedCanvasPx": {
+        "width": 256,
+        "height": 128
+      },
+      "icon": "🌸",
+      "color": "#4a5a3a",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「花圃」。用途：闲·意趣，闷+8.7/分，类别 garden，占地 2x1 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 801,
+      "assetKey": "furn_801_pavilion",
+      "name": "凉亭",
+      "category": "pavilion",
+      "lifeLine": "行",
+      "lifeLineLabel": "行·体力",
+      "essential": false,
+      "grid": {
+        "w": 3,
+        "h": 2,
+        "entryOffset": [
+          1,
+          2
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_801_pavilion.png",
+      "recommendedCanvasPx": {
+        "width": 384,
+        "height": 256
+      },
+      "icon": "🏯",
+      "color": "#5a5040",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「凉亭」。用途：行·体力，倦+3/分 · 闷+4/分，类别 pavilion，占地 3x2 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 901,
+      "assetKey": "furn_901_seat",
+      "name": "石凳",
+      "category": "seat",
+      "lifeLine": "行",
+      "lifeLineLabel": "行·体力",
+      "essential": true,
+      "grid": {
+        "w": 1,
+        "h": 1,
+        "entryOffset": [
+          0,
+          1
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_901_seat.png",
+      "recommendedCanvasPx": {
+        "width": 128,
+        "height": 128
+      },
+      "icon": "🪑",
+      "color": "#6a6a60",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「石凳」。用途：行·体力，倦+5/分，类别 seat，占地 1x1 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    },
+    {
+      "templateId": 902,
+      "assetKey": "furn_902_travel_rest",
+      "name": "轿凳歇脚",
+      "category": "travel_rest",
+      "lifeLine": "行",
+      "lifeLineLabel": "行·体力",
+      "essential": true,
+      "grid": {
+        "w": 1,
+        "h": 1,
+        "entryOffset": [
+          0,
+          1
+        ]
+      },
+      "recommendedPng": "assets/furniture/furn_902_travel_rest.png",
+      "recommendedCanvasPx": {
+        "width": 128,
+        "height": 128
+      },
+      "icon": "🚶",
+      "color": "#5a5a50",
+      "promptZh": "红楼梦大观园生活模拟游戏道具「轿凳歇脚」。用途：行·体力，倦+6/分，类别 travel_rest，占地 1x1 格。生成一张单独家具素材，透明背景 PNG，微俯视 3/4 角度或俯视均可，边缘清晰，适合放入 2D canvas 地图。风格：细腻手绘、古典中式、柔和设色、木质/竹石/织物材质清楚，低饱和但可读性高。不要人物，不要文字，不要水印，不要复杂背景。"
+    }
+  ]
+}
