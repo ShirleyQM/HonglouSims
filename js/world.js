@@ -43,13 +43,14 @@ function buildWorldGrid() {
   INST_MAP = {};
   for (const sc of CONFIG.scenes) {
     const road = !!sc.isTransition;
+    const openEdge = !!sc.openEdges || sc.id === 3;
     for (let c = sc.originCol; c < sc.originCol + sc.cols; c++)
       for (let r = sc.originRow; r < sc.originRow + sc.rows; r++) {
         const edge = c === sc.originCol || r === sc.originRow || c === sc.originCol + sc.cols - 1 || r === sc.originRow + sc.rows - 1;
         const conn = isConnection(c, r);
         WORLD[c][r] = {
-          walkable: road || !edge || conn,
-          ground: road || conn ? 'corridor' : sc.ground,
+          walkable: road || openEdge || !edge || conn,
+          ground: road || (conn && !openEdge) ? 'corridor' : sc.ground,
           sceneId: sc.id,
           furnitureId: 0,
           entryFor: 0,
@@ -59,11 +60,14 @@ function buildWorldGrid() {
   for (const inst of CONFIG.furnitureInstances) {
     const tpl = getTemplate(inst.templateId);
     if (!tpl) continue;
+    const sc = getScene(inst.sceneId);
+    const keepOpenEdge = !!sc && (!!sc.openEdges || sc.id === 3);
     INST_MAP[inst.instanceId] = inst;
     for (let dx = 0; dx < tpl.gridW; dx++)
       for (let dy = 0; dy < tpl.gridH; dy++) {
         const c = inst.anchorCol + dx, r = inst.anchorRow + dy;
-        if (WORLD[c]?.[r]) { WORLD[c][r].walkable = false; WORLD[c][r].furnitureId = inst.instanceId; }
+        const isOpenEdge = keepOpenEdge && (c === sc.originCol || r === sc.originRow || c === sc.originCol + sc.cols - 1 || r === sc.originRow + sc.rows - 1);
+        if (WORLD[c]?.[r]) { WORLD[c][r].walkable = isOpenEdge; WORLD[c][r].furnitureId = inst.instanceId; }
       }
     const ec = inst.anchorCol + tpl.entryOffset[0], er = inst.anchorRow + tpl.entryOffset[1];
     if (WORLD[ec]?.[er]) { WORLD[ec][er].walkable = true; WORLD[ec][er].entryFor = inst.instanceId; WORLD[ec][er].furnitureId = 0; }

@@ -402,8 +402,895 @@ function currentAIScheduleWindow(hour = gameHour) {
   return rows.find(row => hourInScheduleWindow(hour, row.from, row.to)) || null;
 }
 
+function getRoutineGridConfig() {
+  return {
+    ...DEFAULT_CONFIG.aiConfig.routineGridConfig,
+    ...(getAIConfig().routineGridConfig || {}),
+  };
+}
+
+function getRoutineTemplates() {
+  const templates = getAIConfig().routineTemplates;
+  return Array.isArray(templates) ? templates : [];
+}
+
+function getRoutineTemplateById(id) {
+  return getRoutineTemplates().find(t => t.id === id) || {};
+}
+
+function getRoutineProfilesConfig() {
+  return getAIConfig().routineProfiles || {};
+}
+
+function getRoutineRowsDefinition() {
+  const fallback = [
+    { id: 'need', name: '需求', icon: '◇' },
+    { id: 'skill', name: '技能', icon: '◇' },
+    { id: 'profession', name: '职业', icon: '◇' },
+  ];
+  const rows = getRoutineGridConfig().rowDefs || [];
+  const ids = rows.map(row => row?.id);
+  if (ids.includes('need') && ids.includes('skill') && ids.includes('profession')) {
+    return ['need', 'skill', 'profession'].map(id => rows.find(row => row?.id === id)).filter(Boolean);
+  }
+  return fallback;
+}
+
+function normalizeRoutineRowId(rowId, template = {}) {
+  const rows = getRoutineRowsDefinition();
+  const valid = new Set(rows.map(row => row.id));
+  const id = String(rowId || '').trim();
+  if (valid.has(id)) return id;
+  const category = String(template.category || template.templateGroup || '').trim();
+  if (category === 'profession') return 'profession';
+  if (category === 'skill' || (template.requiredSkills || []).length) return 'skill';
+  return 'need';
+}
+
+function getRoutineTemplateByCategory(category) {
+  const c = String(category || '').trim();
+  return getRoutineTemplates().filter(tpl => String(tpl.category || 'common') === c);
+}
+
+function resolveRoutineAnchorExecutionProfile(tpl = {}, block = {}) {
+  const completeBy = {
+    categories: [...new Set([...(tpl.completeBy?.categories || []), ...(block.completeBy?.categories || []), ...(block.categories || [])].filter(Boolean))],
+    tags: [...new Set([...(tpl.completeBy?.tags || []), ...(block.completeBy?.tags || []), ...(block.tags || [])].filter(Boolean))],
+  };
+  const req = collectActionRequirementProfile({
+    requiredProfessions: [...new Set([...(tpl.requiredProfessions || []), ...(block.requiredProfessions || []), ...(tpl.professionTags || [])].filter(Boolean))],
+    requiredSkills: [...new Set([...(tpl.requiredSkills || []), ...(block.requiredSkills || [])].filter(Boolean))],
+    requiredFurniture: [...new Set([...(tpl.requiredFurniture || []), ...(block.requiredFurniture || [])].filter(Boolean))],
+    requiredProfessionTags: [...new Set([...(tpl.requiredProfessionTags || []), ...(block.requiredProfessionTags || [])].filter(Boolean))],
+    skill: tpl.skill || block.skill,
+    skills: [
+      ...(tpl.skills || []),
+      ...(block.skills || []),
+      ...(tpl.skillTags || []),
+      ...(block.skillTags || []),
+    ].filter(Boolean),
+    skillReq: tpl.skillReq || block.skillReq,
+  });
+  return {
+    requirementProfile: req,
+    requiredProfessions: req.requiredProfessions,
+    requiredSkills: req.requiredSkills,
+    requiredSkillsDetail: req.requiredSkillsDetail,
+    requiredSkillMap: req.requiredSkillMap,
+    requiredFurniture: req.requiredFurniture,
+    completeBy,
+    socialTags: [...new Set([...(tpl.socialTags || []), ...(block.socialTags || [])].filter(Boolean))],
+    furnitureTags: [...new Set([...(tpl.furnitureTags || []), ...(block.furnitureTags || [])].filter(Boolean))],
+  };
+}
+
+function getRoutineGridSlotMinutes() {
+  const cfg = getRoutineGridConfig();
+  return Math.max(1, Math.round((cfg.slotMinutes || 30)));
+}
+
+function normalizeRoutineSlot(raw, fallback = 0) {
+  const cfg = getRoutineGridConfig();
+  const slotCount = Math.max(1, Math.round(cfg.slotsPerDay || 48));
+  const v = Number(raw);
+  if (!Number.isFinite(v)) return fallback;
+  const daySlots = 24 * 60 / Math.max(1, Math.round(cfg.slotMinutes || 30));
+  if (Math.abs(v) <= slotCount * 2) {
+    const maybe = Math.round(v * (slotCount / 24));
+    return ((maybe % slotCount) + slotCount) % slotCount;
+  }
+  return ((Math.round(v) % daySlots) + daySlots) % daySlots;
+}
+
+function normalizeRoutineDuration(raw, { from = 0, to } = {}) {
+  const cfg = getRoutineGridConfig();
+  const slotCount = Math.max(1, cfg.slotsPerDay || 48);
+  const maxSpan = Math.max(1, cfg.maxSpanSlots || 16);
+  let duration = Number(raw);
+  if (!Number.isFinite(duration) || duration <= 0) {
+    let fromSlot = normalizeRoutineSlot(from, 0);
+    let toSlot = normalizeRoutineSlot(to, fromSlot + 1);
+    if (toSlot <= fromSlot) toSlot += slotCount;
+    duration = Math.max(1, toSlot - fromSlot);
+  }
+  duration = Math.max(1, Math.round(duration));
+  return Math.max(1, Math.min(maxSpan, duration));
+}
+
+function getCharacterProfessionTags(c) {
+  const def = getCharDef(c?.id) || {};
+  const identity = c?.identity || {};
+  const raw = [
+    def.profession,
+    def.professions,
+    def.career,
+    def.careerPath,
+    identity.profession,
+    identity.professions,
+    identity.career,
+    def.identity?.profession,
+    def.identity?.careers,
+    c?.profession,
+    c?.career,
+  ];
+  const out = [];
+  for (const row of raw) {
+    if (!row) continue;
+    if (Array.isArray(row)) out.push(...row);
+    else out.push(row);
+  }
+  return [...new Set(out.filter(Boolean).map(v => String(v).trim()).filter(Boolean))];
+}
+
+function normalizeTextList(raw) {
+  const out = [];
+  const push = value => {
+    if (value == null) return;
+    if (Array.isArray(value)) {
+      value.forEach(push);
+      return;
+    }
+    const text = String(value).trim();
+    if (text) out.push(text);
+  };
+  if (typeof raw === 'string') {
+    push(raw);
+  } else if (Array.isArray(raw)) {
+    raw.forEach(push);
+  } else if (raw && typeof raw === 'object') {
+    // 部分旧数据把关键词用对象存储，兜底时取键名，便于扩展
+    for (const key of Object.keys(raw)) push(key);
+  }
+  return [...new Set(out.filter(Boolean))];
+}
+
+function normalizeSkillRequirementEntries(raw) {
+  const map = new Map();
+  const add = (skill, level = 0) => {
+    const s = String(skill).trim();
+    if (!s) return;
+    const lv = Number(level);
+    const next = Number.isFinite(lv) ? Math.max(0, Math.round(lv)) : 0;
+    const prev = map.get(s);
+    map.set(s, typeof prev === 'number' ? Math.max(prev, next) : next);
+  };
+  const addOne = value => {
+    if (value == null) return;
+    if (Array.isArray(value)) {
+      value.forEach(addOne);
+      return;
+    }
+    if (typeof value === 'string') {
+      add(value, 0);
+      return;
+    }
+    if (typeof value === 'object') {
+      if (value.skill) {
+        add(value.skill, value.level);
+        return;
+      }
+      for (const [sid, lv] of Object.entries(value)) {
+        if (Array.isArray(lv) || typeof lv === 'object' && lv?.skill) {
+          addOne(lv);
+          continue;
+        }
+        if (typeof lv === 'number' || typeof lv === 'string') {
+          add(sid, lv);
+          continue;
+        }
+        if (typeof lv === 'boolean') {
+          if (lv) add(sid, 0);
+          continue;
+        }
+      }
+    }
+  };
+  addOne(raw);
+  return [...map.entries()].map(([skill, level]) => ({ skill, level }));
+}
+
+function normalizeSkillRequirementMap(raw) {
+  return normalizeSkillRequirementEntries(raw).reduce((acc, row) => {
+    acc[row.skill] = row.level;
+    return acc;
+  }, {});
+}
+
+function collectActionRequirementProfile(raw = {}) {
+  const requiredProfessions = [
+    ...(normalizeTextList(raw.requiredProfessionTags)),
+    ...(normalizeTextList(raw.professionTags)),
+    ...(normalizeTextList(raw.requiredProfessions)),
+  ];
+  const requiredSkillsList = [
+    ...normalizeSkillRequirementEntries(raw.requiredSkills),
+    ...normalizeSkillRequirementEntries(raw.skills),
+    ...normalizeSkillRequirementEntries(raw.skillTags),
+    ...normalizeSkillRequirementEntries(raw.skillReq),
+    ...normalizeSkillRequirementEntries(raw.requiredSkill),
+  ];
+  const requiredSkillsDetail = requiredSkillsList.reduce((acc, row) => {
+    const existing = acc.find(item => item.skill === row.skill);
+    if (existing) existing.level = Math.max(existing.level, row.level);
+    else acc.push(row);
+    return acc;
+  }, []);
+  const requiredSkillMap = requiredSkillsDetail.reduce((acc, row) => {
+    acc[row.skill] = row.level;
+    return acc;
+  }, {});
+  const requiredFurniture = [
+    ...(normalizeTextList(raw.requiredFurniture)),
+    ...(normalizeTextList(raw.furnitureTags)),
+    ...(normalizeTextList(raw.furnitureTag)),
+  ];
+  return {
+    requiredProfessions: [...new Set(requiredProfessions.filter(Boolean))],
+    requiredSkillsDetail,
+    requiredSkills: [...new Set(requiredSkillsDetail.map(r => r.skill).filter(Boolean))],
+    requiredSkillMap,
+    requiredFurniture: [...new Set(requiredFurniture.filter(Boolean))],
+  };
+}
+
+function getCharacterSkillLevels(c) {
+  const def = getCharDef(c?.id) || {};
+  const out = {};
+  const add = (id, level = 1) => {
+    const key = String(id).trim();
+    if (!key) return;
+    const lv = Number(level);
+    const next = Number.isFinite(lv) ? Math.max(0, Math.round(lv)) : 1;
+    if (!out[key]) out[key] = Math.max(out[key], next);
+    else out[key] = Math.max(out[key], next);
+  };
+  const addList = value => {
+    if (!value) return;
+    if (Array.isArray(value)) {
+      value.forEach(skill => add(skill, 1));
+      return;
+    }
+    if (typeof value !== 'object') {
+      add(value, 1);
+      return;
+    }
+    for (const [skill, lv] of Object.entries(value)) {
+      if (Array.isArray(lv) || typeof lv === 'object') continue;
+      add(skill, lv || 1);
+    }
+  };
+  addList(c?.skills);
+  addList(c?.skillLevels);
+  addList(def.skills);
+  addList(def.skillLevels);
+  return out;
+}
+
+function getCharacterSkillIds(c) {
+  return [...new Set(Object.keys(getCharacterSkillLevels(c)))];
+}
+
+function matchActionRequirementState(c, reqProfile = {}) {
+  const actorSkills = getCharacterSkillLevels(c);
+  const actorProfessions = getCharacterProfessionTags(c);
+  const reqProfessions = reqProfile.requiredProfessions || [];
+  const reqSkills = reqProfile.requiredSkillsDetail || [];
+  const professionMatch = !reqProfessions.length || reqProfessions.some(id => actorProfessions.includes(id));
+  const skillMatch = !reqSkills.length || reqSkills.some(row => (actorSkills[row.skill] || 0) >= row.level);
+  const reasons = [];
+  if (reqProfessions.length && !professionMatch) {
+    const missing = reqProfessions.filter(p => !actorProfessions.includes(p));
+    reasons.push(`职业标签不足：${missing.join('、')}`);
+  }
+  if (reqSkills.length && !skillMatch) {
+    const missing = reqSkills.map(row => `${row.skill}${row.level ? ` Lv.${row.level}` : ''}`);
+    reasons.push(`技能标签不足：${missing.join('、')}`);
+  }
+  return { actorProfessions, actorSkills, professionMatch, skillMatch, reasons };
+}
+
+function normalizeRoutineProfileBlock(block = {}) {
+  const cfg = getRoutineGridConfig();
+  const slotCount = Math.max(1, Math.round(cfg.slotsPerDay || 48));
+  const directSlotRaw = block.startSlot ?? block.fromSlot;
+  const directSlot = Number(directSlotRaw);
+  const normalizedFrom = Number.isFinite(directSlot)
+    ? ((Math.round(directSlot) % slotCount) + slotCount) % slotCount
+    : normalizeRoutineSlot(block.from, 0);
+  const normalizedDuration = normalizeRoutineDuration(block.durationSlots || block.duration, {
+    from: normalizedFrom,
+    to: block.toSlot != null ? block.toSlot : block.to,
+  });
+  const rowDefs = getRoutineRowsDefinition();
+  const template = getRoutineTemplateById(block.templateId);
+  const rowId = normalizeRoutineRowId(block.rowId || block.row || template.defaultRow || rowDefs[0]?.id || 'need', template);
+  const maxSpan = Math.max(1, Math.min((cfg.maxRowSpan || 2), rowDefs.length || 1));
+  const rowSpan = Math.max(1, Math.min(maxSpan, Number(block.rowSpan) || Number(block.spanRows) || 1));
+  return {
+    ...block,
+    id: block.id || `${rowId}-${template.id || 'block'}-${normalizedFrom}`,
+    startSlot: ((normalizedFrom % slotCount) + slotCount) % slotCount,
+    durationSlots: normalizedDuration,
+    duration: normalizedDuration,
+    rowId,
+    rowSpan,
+  };
+}
+
+function routineProjectionSourceTypes() {
+  return ['dutyQuest', 'followRotation', 'lifePathDaily', 'professionDaily'];
+}
+
+function isRoutineProjectionBlock(block = {}) {
+  return !!(block.isRoutineProjection || routineProjectionSourceTypes().includes(block.sourceType));
+}
+
+function getQuestTemplateForRoutineProjection(templateId) {
+  if (templateId == null) return null;
+  if (typeof QuestSystem !== 'undefined' && QuestSystem?.tpl) {
+    const tpl = QuestSystem.tpl(templateId);
+    if (tpl) return tpl;
+  }
+  return CONFIG.questConfig?.templates?.[templateId]
+    || DEFAULT_CONFIG.questConfig?.templates?.[templateId]
+    || null;
+}
+
+function getServantContractForRoutineProjection(contractId) {
+  if (!contractId) return null;
+  if (typeof ServantRelationSystem !== 'undefined' && ServantRelationSystem?.getContract) {
+    const contract = ServantRelationSystem.getContract(contractId);
+    if (contract) return contract;
+  }
+  return (CONFIG.questConfig?.servantConfig?.contracts || []).find(row => row.id === contractId) || null;
+}
+
+function resolveDutyRoutineProjection(rule = {}) {
+  if (typeof ServantRelationSystem !== 'undefined' && ServantRelationSystem?.resolveDutyRoutine) {
+    return ServantRelationSystem.resolveDutyRoutine(rule);
+  }
+  const contract = getServantContractForRoutineProjection(rule.contractId);
+  if (!contract) return null;
+  return {
+    ...rule,
+    contract,
+    masterId: contract.masterId,
+    charId: contract.servantId,
+    dailySlotId: `servant:${contract.id}:${rule.slotId || rule.templateId}`,
+  };
+}
+
+function resolveFollowRotationProjection(rule = {}) {
+  if (typeof ServantRelationSystem !== 'undefined' && ServantRelationSystem?.resolveFollowRotation) {
+    return ServantRelationSystem.resolveFollowRotation(rule);
+  }
+  const day = typeof gameDay !== 'undefined' ? gameDay : 1;
+  const weekday = (((day || 1) - 1) % 7) + 1;
+  const row = (rule.rotation || []).find(item => item.weekday === weekday);
+  if (!row) return null;
+  const servantId = row.servantId || row.character_id || row.charId;
+  const contract = (CONFIG.questConfig?.servantConfig?.contracts || [])
+    .find(item => item.masterId === rule.masterId && item.servantId === servantId);
+  if (!contract) return null;
+  return {
+    ...rule,
+    weekday,
+    contract,
+    masterId: rule.masterId,
+    charId: servantId,
+    dailySlotId: `follow:${rule.masterId}:${servantId}:${rule.slotId || rule.templateId}:${weekday}`,
+  };
+}
+
+function routineQuestProjectionDurationSlots(tpl = {}) {
+  const cfg = getRoutineGridConfig();
+  const slotMinutes = Math.max(1, cfg.slotMinutes || 30);
+  const maxSpan = Math.max(1, cfg.maxSpanSlots || 16);
+  const target = Math.max(0, ...(tpl.completeConditions || []).map(cond => Number(cond.targetValue) || 0));
+  if (target > 0) return Math.max(1, Math.min(maxSpan, Math.ceil(target / slotMinutes)));
+  if (tpl.deadlineMode === 'GAME_HOURS' && tpl.deadlineParam) {
+    return Math.max(1, Math.min(maxSpan, Math.ceil(Number(tpl.deadlineParam) * 2)));
+  }
+  return 2;
+}
+
+function routineProjectionStartSlot(triggerHour = 8) {
+  const cfg = getRoutineGridConfig();
+  const slotMinutes = Math.max(1, cfg.slotMinutes || 30);
+  const slotCount = Math.max(1, cfg.slotsPerDay || 48);
+  const raw = Number(triggerHour);
+  const minutes = Number.isFinite(raw) ? (raw <= 24 ? raw * 60 : raw) : 8 * 60;
+  return ((Math.round(minutes / slotMinutes) % slotCount) + slotCount) % slotCount;
+}
+
+function routineProjectionNeedsForQuest(tpl = {}) {
+  const category = tpl.category || '';
+  if (category === '洒扫') return ['hygiene', 'mood'];
+  if (category === '跟随' || category === '陪伴' || category === '侍奉') return ['social', 'mood'];
+  if (category === '传话') return ['social'];
+  if (category === '采办' || category === '跑腿') return ['fun', 'mood'];
+  return ['mood'];
+}
+
+function routineProjectionMatchProfileForQuest(tpl = {}) {
+  const categories = new Set();
+  const tags = new Set(['quest', 'task', 'profession']);
+  if (tpl.category) {
+    categories.add(tpl.category);
+    tags.add(tpl.category);
+  }
+  for (const cond of tpl.completeConditions || []) {
+    const type = cond.type || '';
+    const target = cond.target;
+    if (type === 'FOLLOW_CHARACTER') {
+      categories.add('social');
+      categories.add('xujiu');
+      tags.add('social');
+      tags.add('movement');
+      tags.add('follow');
+      tags.add('跟随');
+    } else if (type === 'INTERACT_WITH' || type === 'INTERACT_WITH_DURATION') {
+      ['social', 'xujiu', 'weijie', 'chuanqing', 'lundao'].forEach(v => categories.add(v));
+      tags.add('social');
+      tags.add('陪伴');
+    } else if (type === 'USE_FURNITURE' || type === 'USE_FURNITURE_DURATION') {
+      if (target) categories.add(String(target));
+      if (target === 'desk') categories.add('workdesk');
+      if (target === 'workdesk') categories.add('desk');
+      tags.add('furniture');
+    } else if (type === 'STAY_IN_SCENE') {
+      tags.add('movement');
+      tags.add('scene');
+      tags.add('stay');
+    }
+  }
+  const boost = {};
+  [...categories, ...tags].filter(Boolean).forEach(key => {
+    boost[key] = Math.max(boost[key] || 1, key === 'movement' || key === 'follow' || key === '跟随' ? 1.8 : 1.35);
+  });
+  boost.quest = Math.max(boost.quest || 1, 1.45);
+  boost.task = Math.max(boost.task || 1, 1.35);
+  return {
+    completeBy: { categories: [...categories], tags: [...tags] },
+    boost,
+  };
+}
+
+function routineProjectionBlockFromQuest(c, source = {}, sourceType = 'dutyQuest') {
+  const tpl = getQuestTemplateForRoutineProjection(source.templateId);
+  if (!c?.id || !tpl) return null;
+  const contract = source.contract || getServantContractForRoutineProjection(source.contractId);
+  const match = routineProjectionMatchProfileForQuest(tpl);
+  const completeType = tpl.completeConditions?.[0]?.type || '';
+  return normalizeRoutineProfileBlock({
+    id: `${sourceType}:${source.dailySlotId || source.contractId || source.masterId || c.id}:${source.templateId}`,
+    name: tpl.name || source.slotId || '职业日课',
+    templateId: 'routine_custom',
+    rowId: 'profession',
+    rowSpan: 1,
+    startSlot: routineProjectionStartSlot(source.triggerHour),
+    durationSlots: routineQuestProjectionDurationSlots(tpl),
+    sourceType,
+    isRoutineProjection: true,
+    isLocked: true,
+    locked: true,
+    questTemplateId: source.templateId,
+    contractId: contract?.id || source.contractId || '',
+    masterId: source.masterId || contract?.masterId || '',
+    role: contract?.role || '',
+    priority: sourceType === 'followRotation' ? 'followDuty' : 'duty',
+    priorityWeight: sourceType === 'followRotation' ? 90 : 80,
+    completeConditionType: completeType,
+    requiredProfessions: [contract?.role, ...(contract?.dutyCategories || [])].filter(Boolean),
+    needs: routineProjectionNeedsForQuest(tpl),
+    completeBy: match.completeBy,
+    boost: match.boost,
+    cut: { fun: 0.8 },
+    completeCut: { quest: 0.55, task: 0.55 },
+  });
+}
+
+function routineProjectionBlocksForCharacter(c) {
+  if (!c?.id) return [];
+  const servantCfg = CONFIG.questConfig?.servantConfig || {};
+  const dutyRules = typeof ServantRelationSystem !== 'undefined' && ServantRelationSystem?.dutyRoutines
+    ? ServantRelationSystem.dutyRoutines()
+    : (servantCfg.dutyRoutines || []);
+  const followRules = typeof ServantRelationSystem !== 'undefined' && ServantRelationSystem?.followRotations
+    ? ServantRelationSystem.followRotations()
+    : (servantCfg.followRotations || []);
+  const rows = [];
+  for (const rule of dutyRules) {
+    const resolved = resolveDutyRoutineProjection(rule);
+    if (resolved?.charId !== c.id) continue;
+    const block = routineProjectionBlockFromQuest(c, resolved, 'dutyQuest');
+    if (block) rows.push(block);
+  }
+  for (const rule of followRules) {
+    const resolved = resolveFollowRotationProjection(rule);
+    if (resolved?.charId !== c.id) continue;
+    const block = routineProjectionBlockFromQuest(c, resolved, 'followRotation');
+    if (block) rows.push(block);
+  }
+  return rows;
+}
+
+function routineMergeSlots(block = {}) {
+  const cfg = getRoutineGridConfig();
+  const slotCount = Math.max(1, cfg.slotsPerDay || 48);
+  const normalized = normalizeRoutineProfileBlock(block);
+  return Array.from({ length: normalized.durationSlots || 1 }, (_, i) => (normalized.startSlot + i) % slotCount);
+}
+
+function routineAvailableMergeDuration(block = {}, occupied = new Set()) {
+  const cfg = getRoutineGridConfig();
+  const slotCount = Math.max(1, cfg.slotsPerDay || 48);
+  const normalized = normalizeRoutineProfileBlock(block);
+  let available = 0;
+  for (let i = 0; i < normalized.durationSlots; i++) {
+    const slot = (normalized.startSlot + i) % slotCount;
+    if (occupied.has(slot)) break;
+    available++;
+  }
+  return available;
+}
+
+function routineOccupyMergeSlots(block = {}, occupied = new Set()) {
+  for (const slot of routineMergeSlots(block)) occupied.add(slot);
+}
+
+function mergeRoutineProjectionBlocks(c, profile = {}) {
+  const projections = routineProjectionBlocksForCharacter(c)
+    .sort((a, b) => (b.priorityWeight || 0) - (a.priorityWeight || 0) || a.startSlot - b.startSlot);
+  const baseBlocks = (Array.isArray(profile.blocks) ? profile.blocks : [])
+    .filter(block => !isRoutineProjectionBlock(block))
+    .map(block => normalizeRoutineProfileBlock(block));
+  if (!projections.length) return { ...profile, blocks: baseBlocks };
+  const occupied = new Set();
+  const acceptedProjections = [];
+  for (const block of projections) {
+    const available = routineAvailableMergeDuration(block, occupied);
+    if (available < 1) continue;
+    const next = normalizeRoutineProfileBlock({ ...block, durationSlots: available, duration: available });
+    acceptedProjections.push(next);
+    routineOccupyMergeSlots(next, occupied);
+  }
+  const acceptedBase = [];
+  for (const block of baseBlocks) {
+    const available = routineAvailableMergeDuration(block, occupied);
+    if (available < 1) continue;
+    const next = normalizeRoutineProfileBlock({ ...block, durationSlots: available, duration: available });
+    acceptedBase.push(next);
+    routineOccupyMergeSlots(next, occupied);
+  }
+  return {
+    ...profile,
+    blocks: [...acceptedBase, ...acceptedProjections].sort((a, b) => a.startSlot - b.startSlot || (a.rowId || '').localeCompare(b.rowId || '')),
+  };
+}
+
+function getBaseRoutineProfileForCharacter(c) {
+  const cfg = getRoutineProfilesConfig();
+  const defaults = Array.isArray(cfg.defaults) ? cfg.defaults : [];
+  const byCharacter = cfg.byCharacter || {};
+  const byId = id => defaults.find(p => p?.id === id);
+  const charDef = c ? byCharacter[c.id] : null;
+  if (typeof charDef === 'string' && charDef) {
+    const p = byId(charDef);
+    if (p) return JSON.parse(JSON.stringify(p));
+  }
+  if (charDef && Array.isArray(charDef.blocks)) {
+    return {
+      ...charDef,
+      blocks: JSON.parse(JSON.stringify(charDef.blocks.map(row => normalizeRoutineProfileBlock(row)))),
+    };
+  }
+  if (charDef && Array.isArray(charDef)) {
+    return {
+      id: `${c.id}_legacy`,
+      name: `${c.name} · 起居注`,
+      blocks: JSON.parse(JSON.stringify(charDef.map(row => normalizeRoutineProfileBlock(row)))),
+    };
+  }
+  const defaultId = cfg.defaultProfileId || 'default';
+  return JSON.parse(JSON.stringify(byId(defaultId) || defaults[0] || {
+    id: 'legacy_default',
+    name: '默认作息',
+    blocks: [],
+  }));
+}
+
+function getRoutineProfileForCharacter(c) {
+  return mergeRoutineProjectionBlocks(c, getBaseRoutineProfileForCharacter(c));
+}
+
+function setRoutineProfileForCharacter(c, profile) {
+  const cfg = getRoutineProfilesConfig();
+  if (!cfg.byCharacter) cfg.byCharacter = {};
+  if (!c?.id) return null;
+  const defaults = Array.isArray(cfg.defaults) ? cfg.defaults : [];
+  if (typeof profile === 'string') {
+    const byId = defaults.find(p => p?.id === profile);
+    cfg.byCharacter[c.id] = JSON.parse(JSON.stringify(byId || defaults[0] || { id: 'custom', name: '默认作息', blocks: [] }));
+    return cfg.byCharacter[c.id];
+  }
+  const copy = JSON.parse(JSON.stringify(profile || {}));
+  const safe = {
+    id: copy?.id || `${c.id}_custom`,
+    name: copy?.name || `${c.short || c.name || '人物'} · 起居注`,
+    blocks: (Array.isArray(copy?.blocks) ? copy.blocks : [])
+      .filter(b => !isRoutineProjectionBlock(b))
+      .map(b => normalizeRoutineProfileBlock(b)),
+    tags: Array.isArray(copy?.tags) ? copy.tags : [],
+  };
+  if (copy.weeklyProfiles && typeof copy.weeklyProfiles === 'object') {
+    safe.weeklyProfiles = Object.entries(copy.weeklyProfiles).reduce((acc, [weekday, row]) => {
+      const blocks = Array.isArray(row?.blocks) ? row.blocks : [];
+      acc[weekday] = {
+        ...row,
+        blocks: blocks.filter(b => !isRoutineProjectionBlock(b)).map(b => normalizeRoutineProfileBlock(b)),
+      };
+      return acc;
+    }, {});
+  }
+  cfg.byCharacter[c.id] = safe;
+  return safe;
+}
+
+function getRoutineProfileCompliance(c, anchor) {
+  if (!c || !anchor) return {
+    icon: '😊',
+    state: 'good',
+    detail: '与当前设定匹配良好',
+    reasons: [],
+    badge: '可执行',
+  };
+  if (anchor.isLocked) {
+    return {
+      icon: '🔒',
+      state: 'locked',
+      detail: '该时段已锁定',
+      reasons: ['该时段锁定，不推荐修改'],
+      badge: '锁',
+    };
+  }
+  const cap = resolveRoutineExecutionCapabilityForCharacter(c, anchor);
+  const req = cap.requirementMatch || { professionMatch: true, skillMatch: true, reasons: [] };
+  const identity = getRoutineIdentityMatch(c, anchor);
+  const detail = req.reasons?.length
+    ? `尚有冲突：${req.reasons.join('；')}`
+    : identity >= 0.9
+      ? '角色倾向与此作息贴近'
+      : identity >= 0.7
+        ? '该时段与角色身份有一定冲突，可能偶有变动'
+        : '与性格/身份冲突较大，较可能不遵守';
+  const icon = req.professionMatch && req.skillMatch
+    ? (identity >= 0.9 ? '😊' : '😐')
+    : '😣';
+  const state = req.professionMatch && req.skillMatch
+    ? (identity >= 0.9 ? 'good' : 'warn')
+    : 'bad';
+  return {
+    icon,
+    state,
+    detail,
+    reasons: req.reasons || [],
+    badge: `${cap.requiredProfessions.length ? '职业' : ''}${cap.requiredProfessions.length && cap.requiredSkills.length ? '/' : ''}${cap.requiredSkills.length ? '技能' : ''}匹配`,
+  };
+}
+
+function getRoutineScheduledProfilesMeta() {
+  const cfg = getRoutineProfilesConfig();
+  if (!cfg.meta) cfg.meta = {};
+  return cfg.meta;
+}
+
+function scheduleRoutineProfileForTomorrow(c, profile) {
+  if (!c?.id) return;
+  const meta = getRoutineScheduledProfilesMeta();
+  meta.nextDay = meta.nextDay || {};
+  meta.nextDay[c.id] = {
+    day: gameDay + 1,
+    profile: JSON.parse(JSON.stringify(profile || getRoutineProfileForCharacter(c))),
+  };
+}
+
+function scheduleRoutineProfileForWeek(c, profile) {
+  if (!c?.id) return;
+  const meta = getRoutineScheduledProfilesMeta();
+  meta.week = meta.week || {};
+  meta.week[c.id] = {
+    dayStart: gameDay,
+    dayEnd: gameDay + 6,
+    profile: JSON.parse(JSON.stringify(profile || getRoutineProfileForCharacter(c))),
+  };
+}
+
+function popRoutineProfileHistory(c) {
+  if (!c?.id) return null;
+  const meta = getRoutineProfilesConfig().meta || {};
+  const list = Array.isArray(meta.history?.[c.id]) ? [...meta.history[c.id]] : [];
+  const targetDay = gameDay - 1;
+  const exact = list.find(row => row.day === targetDay);
+  if (exact) return exact;
+  list.sort((a, b) => b.day - a.day);
+  return list[0] || null;
+}
+
+function saveRoutineProfileHistory(c, profile) {
+  if (!c?.id) return;
+  const meta = getRoutineProfilesConfig();
+  meta.meta ||= {};
+  meta.meta.history ||= {};
+  const target = meta.meta.history[c.id] || [];
+  const entry = {
+    day: gameDay,
+    profile: JSON.parse(JSON.stringify(profile || getRoutineProfileForCharacter(c))),
+  };
+  target.push(entry);
+  meta.meta.history[c.id] = target.filter((row, i, arr) => arr.findIndex(r => r.day === row.day) === i).slice(-12);
+}
+
+function resolveRoutineProfileScheduleRules(c) {
+  const cfg = getRoutineProfilesConfig().meta || {};
+  if (!c?.id) return;
+  const metaNext = cfg.nextDay?.[c.id];
+  if (metaNext && metaNext.day === gameDay) {
+    setRoutineProfileForCharacter(c, metaNext.profile || {});
+    delete cfg.nextDay[c.id];
+    return true;
+  }
+  const w = cfg.week?.[c.id];
+  if (w && w.dayStart != null && w.dayEnd != null && w.dayStart <= gameDay && gameDay <= w.dayEnd) {
+    setRoutineProfileForCharacter(c, w.profile || {});
+    return true;
+  }
+  if (w && w.dayEnd != null && gameDay > w.dayEnd) {
+    delete cfg.week[c.id];
+  }
+  return false;
+}
+
+function getRoutineAnchorFromProfileBlock(block = {}, opts = {}) {
+  const cfg = getRoutineGridConfig();
+  const slotMinutes = cfg.slotMinutes || 30;
+  const slotCount = cfg.slotsPerDay || 48;
+  const rowDefs = getRoutineRowsDefinition();
+  const rowTotal = Math.max(1, rowDefs.length || 1);
+  const rowMap = {};
+  for (let i = 0; i < rowDefs.length; i++) rowMap[rowDefs[i].id] = i;
+  const tpl = getRoutineTemplateById(block.templateId);
+  const executionProfile = resolveRoutineAnchorExecutionProfile(tpl, block);
+  const normalized = normalizeRoutineProfileBlock(block);
+  const fromSlot = normalized.startSlot;
+  const durationSlots = normalized.durationSlots;
+  const rowId = normalized.rowId || block.rowId || block.row || tpl.defaultRow || tpl.rows?.[0] || rowDefs[0].id;
+  const rowSpan = Math.max(1, Math.min(Math.max(1, cfg.maxRowSpan || rowTotal || 1), normalized.rowSpan || 1));
+  const rowIndex = rowMap[rowId] ?? 0;
+  const completeBy = executionProfile.completeBy;
+  return {
+    id: block.id || `${rowId}-${block.templateId || 'block'}-${fromSlot}`,
+    name: block.name || tpl.name || block.templateId || '活动',
+    from: fromSlot * slotMinutes,
+    to: (fromSlot + durationSlots) * slotMinutes,
+    needs: [...new Set([...(tpl.needs || []), ...(block.needs || [])])],
+    completeBy,
+    boost: block.boost || tpl.boost || {},
+    cut: block.cut || tpl.cut || {},
+    completeCut: block.completeCut || tpl.completeCut || {},
+    habitShift: block.habitShift || tpl.habitShift,
+    professionTags: executionProfile.requiredProfessions,
+    requiredSkills: executionProfile.requiredSkills,
+    requiredFurniture: executionProfile.requiredFurniture,
+    executionProfile,
+    requiredProfessions: [...new Set([...(tpl.requiredProfessions || []), ...(block.requiredProfessions || [])].filter(Boolean))],
+    rowId,
+    rowIndex,
+    rowSpan,
+    isLocked: !!(block.isLocked || block.locked),
+    sourceTemplateId: block.templateId,
+    sourceBlock: block,
+  };
+}
+
+function getRoutineProfileAnchorsForCharacter(c) {
+  const profile = getRoutineProfileForCharacter(c);
+  return (profile.blocks || []).map((b, i) => {
+    const anchor = getRoutineAnchorFromProfileBlock(b);
+    if (!anchor.id) anchor.id = `routine_block_${i}`;
+    return anchor;
+  }).filter(Boolean);
+}
+
+function getLegacyRoutineAnchorRows() {
+  return (getAIConfig().routineAnchors || []).map(row => ({
+    ...row,
+    from: hourToMinutes(row.from),
+    to: hourToMinutes(row.to),
+    rowIndex: 0,
+    rowSpan: 1,
+    rowId: 'need',
+    isFallback: true,
+    fallbackType: 'routineAnchor',
+    fallbackSource: 'legacyRoutineAnchors',
+  }));
+}
+
+function scheduleWindowToRoutineAnchor(win = {}) {
+  const tags = [
+    ...Object.keys(win.boost || {}),
+    ...Object.keys(win.cut || {}),
+  ].filter(Boolean);
+  const keys = [...new Set(tags)];
+  return {
+    id: `schedule_${win.id || 'window'}`,
+    name: win.name || win.id || '日程兜底',
+    from: hourToMinutes(win.from),
+    to: hourToMinutes(win.to),
+    needs: [],
+    completeBy: win.completeBy || { categories: keys, tags: keys },
+    boost: win.boost || {},
+    cut: win.cut || {},
+    completeCut: win.completeCut || {},
+    rowIndex: 0,
+    rowSpan: 1,
+    rowId: 'need',
+    isFallback: true,
+    fallbackType: 'scheduleWindow',
+    fallbackSource: 'legacyScheduleWindows',
+    isCompletable: false,
+    sourceWindow: win,
+  };
+}
+
+function getScheduleWindowRoutineAnchors() {
+  return (getAIConfig().scheduleWindows || []).map(scheduleWindowToRoutineAnchor);
+}
+
+function activeRoutineAnchorsFromRows(c, rows = []) {
+  const now = currentMinuteOfDay();
+  return rows.filter(anchor => {
+    const win = shiftedAnchorWindow(c, anchor);
+    return minuteInWindow(now, win.from, win.to);
+  });
+}
+
+function getRoutineAnchorsForCharacter(c) {
+  const profileAnchors = getRoutineProfileAnchorsForCharacter(c);
+  if (profileAnchors.length) return profileAnchors;
+  return [
+    ...getLegacyRoutineAnchorRows(),
+    ...getScheduleWindowRoutineAnchors(),
+  ];
+}
+
 function hourToMinutes(hour) {
-  return Math.round(((hour || 0) % 24) * 60);
+  const h = Number(hour);
+  if (!Number.isFinite(h)) return 0;
+  if (h > 24) return Math.round(h);
+  if (h < 0) return (((h % 24) + 24) % 24) * 60;
+  if (Number.isInteger(h)) return Math.round(h * 60);
+  return Math.round(h * 60);
 }
 
 function currentMinuteOfDay() {
@@ -460,12 +1347,11 @@ function shiftedAnchorWindow(c, anchor) {
 }
 
 function currentRoutineAnchors(c) {
-  const rows = getAIConfig().routineAnchors || [];
-  const now = currentMinuteOfDay();
-  return rows.filter(anchor => {
-    const win = shiftedAnchorWindow(c, anchor);
-    return minuteInWindow(now, win.from, win.to);
-  });
+  const profileAnchors = activeRoutineAnchorsFromRows(c, getRoutineProfileAnchorsForCharacter(c));
+  if (profileAnchors.length) return profileAnchors;
+  const fallbackAnchors = activeRoutineAnchorsFromRows(c, getLegacyRoutineAnchorRows());
+  if (fallbackAnchors.length) return fallbackAnchors;
+  return activeRoutineAnchorsFromRows(c, getScheduleWindowRoutineAnchors());
 }
 
 function routineAnchorProgress(c, anchor) {
@@ -480,12 +1366,121 @@ function routineAnchorProgress(c, anchor) {
   return Math.max(0, Math.min(1, elapsed / span));
 }
 
-function candMatchesRoutineAnchor(cand, anchor) {
+function getRoutineIdentityMatch(c, anchor) {
+  const profile = resolveRoutineExecutionCapabilityForCharacter(c, anchor);
+  const reqProf = profile.requiredProfessions || [];
+  const reqSkills = profile.requiredSkills || [];
+  if (!reqProf.length && !reqSkills.length) return 1;
+  const hasReqProf = profile.matchesProfession;
+  const hasReqSkill = profile.matchesSkills;
+  const base = 1;
+  return base * (hasReqProf ? 1 : 0.78) * (hasReqSkill ? 1 : 0.84);
+}
+
+function resolveRoutineExecutionCapabilityForCharacter(c, anchor = {}) {
+  const actorProfessions = getCharacterProfessionTags(c);
+  const actorSkillLevels = getCharacterSkillLevels(c);
+  const reqProfile = anchor?.requirementProfile || collectActionRequirementProfile({
+    requiredProfessions: [
+      ...new Set([
+        ...(anchor.requiredProfessions || []),
+        ...(anchor.professionTags || []),
+        ...(anchor.requiredProfessionTags || []),
+      ].filter(Boolean)),
+    ],
+    requiredSkills: [
+      ...(anchor.requiredSkills || []),
+      ...(anchor.skills || []),
+      ...(anchor.skillTags || []),
+    ],
+    requiredFurniture: anchor.requiredFurniture || [],
+    skillReq: anchor.skillReq || null,
+    skill: anchor.skill || null,
+    requiredSkill: anchor.requiredSkillMap ? Object.entries(anchor.requiredSkillMap).reduce((acc, row) => {
+      if (!row[0] || row[1] <= 1) return acc;
+      acc[row[0]] = row[1];
+      return acc;
+    }, {}) : null,
+  });
+  const req = matchActionRequirementState(c, reqProfile);
+  return {
+    actorProfessions,
+    actorSkillLevels,
+    actorSkillIds: Object.keys(actorSkillLevels || {}),
+    requiredProfessions: reqProfile.requiredProfessions || [],
+    requiredSkills: reqProfile.requiredSkills || [],
+    requiredSkillsDetail: reqProfile.requiredSkillsDetail || [],
+    requiredSkillMap: reqProfile.requiredSkillMap || {},
+    requiredFurniture: reqProfile.requiredFurniture || [],
+    requirementProfile: reqProfile,
+    matchesProfession: req.professionMatch,
+    matchesSkills: req.skillMatch,
+    requirementMatch: req,
+  };
+}
+
+function resolveRoutineActionRuntimeContext(c, raw = {}) {
+  const kind = String(raw.kind || raw.type || '').toLowerCase();
+  const tags = new Set(Array.isArray(raw.tags) ? raw.tags : []);
+  if (kind === 'interaction' || kind === 'seek') {
+    tags.add('social');
+    if (raw.category) tags.add(raw.category);
+  }
+  if (kind === 'furniture') {
+    tags.add('furniture');
+    if (raw.category) tags.add(raw.category);
+  }
+  if (raw.questRelated || raw.questUrgent) tags.add('quest');
+  const actorProfessions = getCharacterProfessionTags(c);
+  const actorSkills = getCharacterSkillIds(c);
+  return {
+    actionKind: kind,
+    category: raw.category || '',
+    tags: [...tags].filter(Boolean),
+    actor: { actorProfessions, actorSkills },
+    requirementProfile: raw.requirementProfile || null,
+    // 预留：未来可根据技能/家具/社交系统把此上下文继续下沉到同一评分链
+    runtimeIntent: kind === 'interaction' || kind === 'seek'
+      ? 'social'
+      : (kind === 'furniture' ? 'furniture' : 'general'),
+  };
+}
+
+function resolveRoutineExecutionInterface(c, action = {}, anchor = null) {
+  const actionCtx = resolveRoutineActionRuntimeContext(c, action);
+  const capability = resolveRoutineExecutionCapabilityForCharacter(c, anchor || {});
+  const requirementMatch = action.requirementMatch || capability.requirementMatch || {};
+  return {
+    actionKind: actionCtx.runtimeIntent,
+    actionCategory: actionCtx.category,
+    actionTags: actionCtx.tags,
+    anchorId: anchor?.id,
+    requirementProfile: actionCtx.requirementProfile || capability.requirementProfile || null,
+    requirementMatch,
+    actorProfessions: capability.actorProfessions,
+    actorSkills: capability.actorSkills,
+    anchorRequirements: {
+      professions: capability.requiredProfessions,
+      skills: capability.requiredSkills,
+    },
+    matchState: {
+      professionMatch: capability.matchesProfession,
+      skillMatch: capability.matchesSkills,
+    },
+    requirementSatisfied: requirementMatch?.professionMatch && requirementMatch?.skillMatch,
+    requirements: requirementMatch?.reasons || [],
+    // 未来：可直接消费该结果把家具/社交互动的能力匹配接入同一条起居评分链
+  };
+}
+
+function candMatchesRoutineAnchor(cand, anchor, c, overrideCtx = null) {
   if (!cand || !anchor) return false;
+  const policy = getRoutineIdentityMatch(c, anchor);
+  if (policy <= 0.4) return false;
   const completeBy = anchor.completeBy || {};
-  const tags = new Set(cand.tags || []);
-  if (cand.kind === 'interaction') tags.add('social');
-  if (cand.kind === 'seek') tags.add('social');
+  const iface = overrideCtx || resolveRoutineExecutionInterface(c, cand, anchor);
+  const tags = new Set(iface.actionTags || []);
+  if (cand.kind === 'furniture' && cand.category) tags.add(cand.category);
   if (cand.questRelated || cand.questUrgent) tags.add('quest');
   const categories = completeBy.categories || [];
   const expectedTags = completeBy.tags || [];
@@ -513,8 +1508,8 @@ function routineNeedPressure(c, anchor) {
 function routineHabitMultiplier(c, anchor) {
   const effects = scheduleEffects(c);
   let factor = 1;
-  if (anchor.id === 'morning_hygiene') factor *= effects.hygieneWeightMultiplier;
-  if (anchor.id === 'night_sleep') factor *= effects.sleepWeightMultiplier;
+  if (isMorningHygieneRoutine(anchor)) factor *= effects.hygieneWeightMultiplier;
+  if (isNightSleepRoutine(anchor)) factor *= effects.sleepWeightMultiplier;
   if (anchor.id === 'morning_focus') factor *= effects.morningFocusMultiplier;
   if (effects.deadlineRamp !== 1 || effects.earlySuppression !== 1) {
     const progress = routineAnchorProgress(c, anchor);
@@ -524,8 +1519,38 @@ function routineHabitMultiplier(c, anchor) {
   return Math.max(0.25, Math.min(2, factor));
 }
 
+function routineAnchorTemplateId(anchor) {
+  return anchor?.sourceTemplateId || anchor?.sourceBlock?.templateId || anchor?.templateId || '';
+}
+
+function isMorningHygieneRoutine(anchor) {
+  return anchor?.id === 'morning_hygiene' || routineAnchorTemplateId(anchor) === 'routine_hygiene';
+}
+
+function isNightSleepRoutine(anchor) {
+  return anchor?.id === 'night_sleep' || routineAnchorTemplateId(anchor) === 'routine_sleep_night';
+}
+
 function isMealRoutine(anchor) {
-  return ['breakfast', 'lunch', 'dinner'].includes(anchor?.id);
+  return ['breakfast', 'lunch', 'dinner'].includes(anchor?.id)
+    || ['routine_meal_breakfast', 'routine_meal_noon', 'routine_meal_dinner'].includes(routineAnchorTemplateId(anchor));
+}
+
+function isPrimaryNeedRoutine(anchor) {
+  return isMealRoutine(anchor) || isMorningHygieneRoutine(anchor) || isNightSleepRoutine(anchor);
+}
+
+function activeNightSleepAnchor(c) {
+  return currentRoutineAnchors(c).find(isNightSleepRoutine) || null;
+}
+
+function shouldPrioritizeNightSleep(c) {
+  const anchor = activeNightSleepAnchor(c);
+  return !!(anchor && !aiRoutineCompleted(c, anchor.id));
+}
+
+function isSleepFurnitureCategory(category) {
+  return ['bed', 'rest'].includes(category || '');
 }
 
 function calcRoutineFactor(c, raw, tags) {
@@ -535,20 +1560,24 @@ function calcRoutineFactor(c, raw, tags) {
   let best = null;
   for (const anchor of anchors) {
     const completed = aiRoutineCompleted(c, anchor.id);
-    const localTags = [...tags];
-    if (raw.kind === 'interaction' || raw.kind === 'seek') localTags.push('social', raw.category);
-    if (raw.questRelated || raw.questUrgent) localTags.push('quest');
-    let local = applyTagMods(1, localTags, completed ? { cut: anchor.completeCut || {} } : anchor);
+    const iface = resolveRoutineExecutionInterface(c, raw, anchor);
+    const req = iface.requirementMatch || {};
+    const localTags = new Set(tags);
+    (iface.actionTags || []).forEach(tag => localTags.add(tag));
+    let local = applyTagMods(1, [...localTags], completed ? { cut: anchor.completeCut || {} } : anchor);
     if (raw.kind === 'furniture') local = applyTagMods(local, [raw.category || ''], completed ? { cut: anchor.completeCut || {} } : anchor);
     if (!completed && isMealRoutine(anchor) && raw.category === 'snack' && !c.ai?.urgentNeed) {
       const coeffs = calcNeedCoeffs(c);
       const hungerRatio = (c.needs.hunger ?? 0) / Math.max(1, coeffs.hunger?.max ?? 100);
       local *= hungerRatio <= 0.25 ? 0.75 : 0.18;
     }
-    if (!completed && candMatchesRoutineAnchor(raw, anchor)) {
+    if (!completed && candMatchesRoutineAnchor(raw, anchor, c)) {
+      local *= req.professionMatch === false ? 0.78 : 1;
+      local *= req.skillMatch === false ? 0.84 : 1;
       local *= routineNeedPressure(c, anchor);
       local *= routineHabitMultiplier(c, anchor);
-    } else if (!completed && ['breakfast', 'lunch', 'dinner', 'morning_hygiene', 'night_sleep'].includes(anchor.id)) {
+      local *= getRoutineIdentityMatch(c, anchor);
+    } else if (!completed && isPrimaryNeedRoutine(anchor)) {
       if (raw.kind === 'interaction' || raw.kind === 'seek' || raw.kind === 'wander') local *= 0.25;
       else if (raw.kind === 'furniture') local *= 0.55;
     }
@@ -566,9 +1595,19 @@ function calcRoutineFactor(c, raw, tags) {
 
 function completeRoutineAnchorsForAction(c, action = {}) {
   if (!c?.ai) return;
+  const overrideProfile = action.requirementProfile || null;
+  const overrideMatch = action.requirementMatch || null;
   for (const anchor of currentRoutineAnchors(c)) {
+    if (anchor.isCompletable === false) continue;
     if (aiRoutineCompleted(c, anchor.id)) continue;
-    if (!candMatchesRoutineAnchor(action, anchor)) continue;
+    const iface = overrideProfile || overrideMatch
+      ? resolveRoutineExecutionInterface(c, {
+        requirementProfile: overrideProfile,
+        requirementMatch: overrideMatch,
+      }, anchor)
+      : null;
+    if (!candMatchesRoutineAnchor(action, anchor, c, iface)) continue;
+    if (isNightSleepRoutine(anchor) && action.sourceType === 'furniture_start') continue;
     markAIRoutineCompleted(c, anchor.id, {
       anchorName: anchor.name,
       sourceType: action.sourceType || action.kind || '',
@@ -579,30 +1618,22 @@ function completeRoutineAnchorsForAction(c, action = {}) {
 }
 
 function calcScheduleFactor(c, raw, tags) {
-  const rows = (getAIConfig().scheduleWindows || []).filter(win => hourInScheduleWindow(gameHour, win.from, win.to));
-  if (!rows.length) return { factor: 1, window: null };
-  let factor = 1;
-  const matched = [];
-  for (const win of rows) {
-    let local = applyTagMods(1, tags, win);
-    const cat = raw.category || '';
-    if (raw.kind === 'furniture') {
-      const inst = getInstance(raw.instanceId);
-      const tpl = inst ? getTemplate(inst.templateId) : null;
-      if (tpl?.category) local = applyTagMods(local, [tpl.category], win);
-    }
-    if (raw.kind === 'interaction' || raw.kind === 'seek') {
-      local = applyTagMods(local, ['social', cat], win);
-    }
-    if (raw.questRelated || raw.questUrgent) local = applyTagMods(local, ['quest'], win);
-    factor *= local;
-    if (Math.abs(local - 1) >= 0.08) matched.push({ id: win.id, name: win.name, factor: local });
-  }
+  const profileAnchors = activeRoutineAnchorsFromRows(c, getRoutineProfileAnchorsForCharacter(c));
+  if (profileAnchors.length) return { factor: 1, window: null };
+  const routineAnchors = activeRoutineAnchorsFromRows(c, getLegacyRoutineAnchorRows());
+  if (routineAnchors.length) return { factor: 1, window: null };
+  const scheduleAnchors = activeRoutineAnchorsFromRows(c, getScheduleWindowRoutineAnchors());
+  if (!scheduleAnchors.length) return { factor: 1, window: null };
+  const win = scheduleAnchors[0];
   return {
-    factor: Math.max(0.05, Math.min(4.5, factor)),
-    window: matched.length
-      ? matched.sort((a, b) => Math.abs(b.factor - 1) - Math.abs(a.factor - 1))[0]
-      : { id: rows[0].id, name: rows[0].name },
+    factor: 1,
+    window: {
+      id: win.sourceWindow?.id || win.id,
+      name: win.name,
+      factor: 1,
+      source: 'routineFallback',
+      fallbackType: 'scheduleWindow',
+    },
   };
 }
 
@@ -702,6 +1733,40 @@ function aiReachableCell(c, col, row) {
   return true;
 }
 
+function charIntentPosition(ch) {
+  if (!ch) return null;
+  if (ch.action?.type === 'move' && ch.action.destCol != null) {
+    return { col: ch.action.destCol, row: ch.action.destRow };
+  }
+  const queuedMove = (ch.actionQueue || []).find(item => item?.type === 'move' && item.gridCol != null);
+  if (queuedMove) return { col: queuedMove.gridCol, row: queuedMove.gridRow };
+  const activeSeek = ch.action?.type === 'move' && ch.path?.length ? ch.path[ch.path.length - 1] : null;
+  if (activeSeek) return { col: activeSeek.col, row: activeSeek.row };
+  return { col: Math.round(ch.gridCol), row: Math.round(ch.gridRow) };
+}
+
+function crowdNearCell(col, row, excludeIds = [], radius = 2.4) {
+  const ex = new Set(excludeIds);
+  let count = 0;
+  for (const ch of CHARS || []) {
+    if (!ch || ex.has(ch.id)) continue;
+    const p = charIntentPosition(ch);
+    if (!p) continue;
+    if (Math.hypot(p.col - col, p.row - row) <= radius) count++;
+  }
+  return count;
+}
+
+function intendedCellTaken(col, row, excludeIds = []) {
+  const ex = new Set(excludeIds);
+  for (const ch of CHARS || []) {
+    if (!ch || ex.has(ch.id)) continue;
+    const p = charIntentPosition(ch);
+    if (p && Math.round(p.col) === col && Math.round(p.row) === row) return true;
+  }
+  return false;
+}
+
 function walkableNearCharacter(c, target, radius = 2) {
   if (!target) return null;
   const baseCol = Math.round(target.gridCol);
@@ -714,10 +1779,13 @@ function walkableNearCharacter(c, target, radius = 2) {
       const cell = WORLD[col]?.[row];
       if (!cell?.walkable || cell.entryFor) continue;
       if (charAtCell(col, row, [c.id, target.id])) continue;
-      options.push({ col, row, dist: Math.hypot(dc, dr) });
+      if (intendedCellTaken(col, row, [c.id, target.id])) continue;
+      const dist = Math.hypot(dc, dr);
+      const crowd = crowdNearCell(col, row, [c.id, target.id], 2.2);
+      options.push({ col, row, dist, crowd, score: dist + crowd * 1.65 + Math.random() * 0.25 });
     }
   }
-  options.sort((a, b) => a.dist - b.dist);
+  options.sort((a, b) => a.score - b.score);
   return options.find(pos => aiReachableCell(c, pos.col, pos.row)) || null;
 }
 
@@ -801,7 +1869,10 @@ function recentActionFactor(c, raw) {
       return getCharTraits(c).includes('shaochi') ? 0.015 : 0.04;
     }
     if (cat === 'table') return 0.04;
-    if (['bed', 'rest', 'travel_rest'].includes(cat)) return 0.04;
+    if (['bed', 'rest', 'travel_rest'].includes(cat)) {
+      if (shouldPrioritizeNightSleep(c) && isSleepFurnitureCategory(cat)) return 1;
+      return 0.04;
+    }
   }
   return 0.16;
 }
@@ -820,7 +1891,7 @@ function recentCooldownMinutes(c, cand) {
   if (['bed', 'rest', 'travel_rest'].includes(cat)) {
     const cf = calcNeedCoeffs(c);
     const ratio = (c.needs.energy ?? 0) / Math.max(1, cf.energy?.max ?? 100);
-    return ratio >= 0.75 ? 90 : 45;
+    return shouldPrioritizeNightSleep(c) && isSleepFurnitureCategory(cat) ? 10 : (ratio >= 0.75 ? 90 : 45);
   }
   if (['bath', 'wash', 'wardrobe'].includes(cat)) return 75;
   return 45;
@@ -876,7 +1947,10 @@ function furnitureNeedSatiationFactor(c, raw) {
     const energyMax = coeffs.energy?.max ?? 100;
     const energyRatio = (c.needs.energy ?? 0) / Math.max(1, energyMax);
     const night = gameHour >= 22 || gameHour < 6;
-    if (energyRatio >= 0.82) factor = Math.min(factor, 0.008);
+    if (shouldPrioritizeNightSleep(c)) {
+      if (energyRatio >= 0.98) factor = Math.min(factor, 0.55);
+      else if (energyRatio >= 0.9) factor = Math.min(factor, 0.85);
+    } else if (energyRatio >= 0.82) factor = Math.min(factor, 0.008);
     else if (energyRatio >= 0.75) factor = Math.min(factor, 0.025);
     else if (!night && energyRatio >= 0.7) factor = Math.min(factor, 0.08);
     else if (!night && energyRatio >= 0.55) factor = Math.min(factor, 0.25);
@@ -999,9 +2073,12 @@ function relationSeekCandidates(c, accessible) {
     if (pull < 28) continue;
     const spot = walkableNearCharacter(c, other);
     if (!spot) continue;
+    const targetCrowd = crowdNearCell(other.gridCol, other.gridRow, [c.id, other.id], 3.2);
+    if (targetCrowd >= 5) continue;
     const hostile = (info.score || 0) < -20;
     const tags = hostile ? ['social', 'zhengchi'] : ['social', 'relation', 'xujiu'];
-    const baseWeight = Math.max(0.45, Math.min(1.8, 0.45 + pull / 70));
+    const crowdDamp = 1 / (1 + targetCrowd * 0.45 + (spot.crowd || 0) * 0.35);
+    const baseWeight = Math.max(0.2, Math.min(1.8, 0.45 + pull / 70) * crowdDamp);
     rows.push({
       key: `relseek:${other.id}`,
       kind: 'seek',
@@ -1013,7 +2090,10 @@ function relationSeekCandidates(c, accessible) {
       baseWeight,
       relationFactor: hostile ? 1.05 : 1.15,
       label: hostile ? `寻${other.short}理论` : `寻${other.short}`,
-      scoreHints: [{ key: 'relation', value: `${other.short}:${info.typeLabel || '关系牵引'}` }],
+      scoreHints: [
+        { key: 'relation', value: `${other.short}:${info.typeLabel || '关系牵引'}` },
+        ...(targetCrowd ? [{ key: 'crowd', value: `周边拥挤-${targetCrowd}` }] : []),
+      ],
     });
   }
   return rows.sort((a, b) => b.baseWeight - a.baseWeight).slice(0, 3);
@@ -1034,7 +2114,7 @@ function finalizeCandidate(c, raw, fastOnly) {
   } else {
     raw.distance = Math.hypot(raw.gridCol - c.gridCol, raw.gridRow - c.gridRow);
   }
-  if (raw.distance > cfg.maxCandidateDistance) { raw.distanceFactor = 0; raw.finalWeight = 0; return raw; }
+  if (raw.distance > cfg.maxCandidateDistance && !raw.ignoreDistanceLimit) { raw.distanceFactor = 0; raw.finalWeight = 0; return raw; }
   const distanceFactor = 1 / (1 + raw.distance * cfg.distanceDecayFactor);
   const randomFactor = cfg.randomPerturbMin + Math.random() * (cfg.randomPerturbMax - cfg.randomPerturbMin);
   raw.randomFactor = randomFactor;
@@ -1091,12 +2171,23 @@ function ensureBuiltinCandidateProviders() {
     id: 'furniture',
     order: 10,
     provide(c, ctx, pool) {
-      for (const fid of ctx.near.furniture) {
+      const furnitureIds = new Set(ctx.near.furniture);
+      if (shouldPrioritizeNightSleep(c)) {
+        const homeId = (typeof AiHomeward !== 'undefined') ? AiHomeward.getHomeSceneId(c) : c.sceneId;
+        for (const inst of CONFIG.furnitureInstances || []) {
+          const tpl = getTemplate(inst.templateId);
+          if (inst.sceneId === homeId && isSleepFurnitureCategory(tpl?.category)) furnitureIds.add(inst.instanceId);
+        }
+      }
+      for (const fid of furnitureIds) {
         ctx.check('furniture');
         const inst = getInstance(fid);
         if (ctx.accessible && !ctx.accessible.has(inst.sceneId)) { ctx.reject('furniture', 'scene_inaccessible'); continue; }
         if (!aiCanUseScene(c, inst.sceneId)) { ctx.reject('furniture', 'scene_cooldown_or_forbidden'); continue; }
         const tpl = getTemplate(inst.templateId);
+        const nightHomeSleep = shouldPrioritizeNightSleep(c)
+          && isSleepFurnitureCategory(tpl?.category)
+          && inst.sceneId === ((typeof AiHomeward !== 'undefined') ? AiHomeward.getHomeSceneId(c) : c.sceneId);
         for (const action of getFurnitureActions(tpl)) {
           ctx.check('furniture');
           const chk = canUseFurniture(c, inst, action);
@@ -1110,8 +2201,9 @@ function ensureBuiltinCandidateProviders() {
             key: `furn:${fid}:${actionId}`, kind: 'furniture', instanceId: fid,
             actionId, furnitureAction: action,
             tags, category: action.category || tpl.category, primaryNeed,
-            baseWeight: (action.aiWeight ?? tpl.aiWeight ?? 1) * timeWeight,
+            baseWeight: (action.aiWeight ?? tpl.aiWeight ?? 1) * timeWeight * (nightHomeSleep ? 2.5 : 1),
             label: `${tpl.name}·${action.name || '使用'}`,
+            ignoreDistanceLimit: nightHomeSleep,
           }, pool);
         }
       }
@@ -1228,7 +2320,7 @@ function buildCandidatePool(c) {
   const collected = (typeof AiCandidateProviderSystem !== 'undefined')
     ? AiCandidateProviderSystem.collect(c, { accessible, near, diagnostics: { social: socialDiagnostics } })
     : { rows: [], ctx: { stats: {} } };
-  const pool = collected.rows;
+  const pool = collected.rows.map(row => finalizeCandidate(c, row, false));
   const providerStats = collected.ctx.stats;
   const maxSize = cfg.cacheMaxSize;
   const socialPool = pool.filter(row => row.kind === 'interaction' || row.kind === 'seek');
@@ -1238,10 +2330,11 @@ function buildCandidatePool(c) {
   const addRows = (rows, count) => {
     for (const row of rows.slice(0, count)) if (!retained.includes(row)) retained.push(row);
   };
-  addRows(socialPool, Math.min(10, Math.ceil(maxSize * 0.4)));
-  addRows(furniturePool, Math.min(16, Math.ceil(maxSize * 0.55)));
-  addRows(otherPool, Math.max(2, maxSize - retained.length));
-  addRows(pool.filter(row => !retained.includes(row)), maxSize - retained.length);
+  const byWeight = rows => [...rows].sort((a, b) => b.finalWeight - a.finalWeight);
+  addRows(byWeight(socialPool), Math.min(10, Math.ceil(maxSize * 0.4)));
+  addRows(byWeight(furniturePool), Math.min(16, Math.ceil(maxSize * 0.55)));
+  addRows(byWeight(otherPool), Math.max(2, maxSize - retained.length));
+  addRows(byWeight(pool.filter(row => !retained.includes(row))), maxSize - retained.length);
   const countKinds = rows => rows.reduce((out, row) => {
     out[row.kind] = (out[row.kind] || 0) + 1;
     return out;
@@ -1256,7 +2349,7 @@ function buildCandidatePool(c) {
     providers: providerStats,
     social: socialDiagnostics,
   };
-  c.ai.cache.candidates = retained.slice(0, maxSize).map(p => finalizeCandidate(c, p, false));
+  c.ai.cache.candidates = retained.slice(0, maxSize);
   c.ai.cache.dirty = false;
   c.ai.cache.lastRebuild = getGameTimestamp();
   return c.ai.cache.candidates;
@@ -1341,6 +2434,31 @@ function validateCandidateBeforeQueue(c, cand) {
     if (!aiReachableCell(c, cand.gridCol, cand.gridRow)) return { ok: false, reason: '这条路走不通' };
   }
   return { ok: true };
+}
+
+function findCrowdReliefCell(c) {
+  if (!c || c.action || c.actionQueue?.length) return null;
+  const baseCol = Math.round(c.gridCol), baseRow = Math.round(c.gridRow);
+  const hereCrowd = crowdNearCell(baseCol, baseRow, [c.id], 2.1);
+  if (hereCrowd < 3) return null;
+  const options = [];
+  for (let dc = -4; dc <= 4; dc++) {
+    for (let dr = -4; dr <= 4; dr++) {
+      if (!dc && !dr) continue;
+      const col = baseCol + dc, row = baseRow + dr;
+      const cell = WORLD[col]?.[row];
+      if (!cell?.walkable || cell.entryFor) continue;
+      if (sceneAt(col, row)?.id !== c.sceneId) continue;
+      if (charAtCell(col, row, [c.id])) continue;
+      if (intendedCellTaken(col, row, [c.id])) continue;
+      const crowd = crowdNearCell(col, row, [c.id], 2.1);
+      if (crowd >= hereCrowd) continue;
+      const dist = Math.hypot(dc, dr);
+      options.push({ col, row, score: crowd * 2 + dist * 0.35 + Math.random() * 0.2 });
+    }
+  }
+  options.sort((a, b) => a.score - b.score);
+  return options.find(pos => aiReachableCell(c, pos.col, pos.row)) || null;
 }
 
 function getCurrentActionWeight(c) { return c.ai?.cache?.currentWeight || 0; }
@@ -1720,6 +2838,13 @@ function slowChannelTick(c) {
   if (isCompletingPlayerQueue(c)) return;
   MultiInteractSystem.observeAndReact(c, { type: 'tick' });
   if (!c.action && !c.actionQueue.length) SceneAccessSystem.tryAISendInvite(c);
+  if (!c.action && !c.actionQueue.length) {
+    const relief = findCrowdReliefCell(c);
+    if (relief && startPathTo(c, relief.col, relief.row, () => {}, { excludeCharIds: [c.id] })) {
+      c.statusText = '让开些';
+      return;
+    }
+  }
   if (c.ai.urgentNeed || c.ai.state === AI_STATE.URGENT) {
     checkUrgentRecovery(c);
     if (!c.action && !c.actionQueue.length) {
@@ -1799,6 +2924,8 @@ function initAISystem() {
   EventBus.on('time:period', () => CHARS.forEach(c => markAIDirty(c)));
   EventBus.on('time:day', () => CHARS.forEach(c => {
     if (c.ai) {
+      saveRoutineProfileHistory(c, getRoutineProfileForCharacter(c));
+      resolveRoutineProfileScheduleRules(c);
       c.ai.dailySocialCounts = { day: gameDay, targets: {} };
       c.ai.dailyRoutine = { day: gameDay, completed: {} };
       c.ai.currentRoutineAnchor = null;
@@ -1808,14 +2935,26 @@ function initAISystem() {
   EventBus.on('memory:add', e => { const c = getChar(e.charId); if (c) markAIDirty(c); });
   EventBus.on('interaction:started', recordAIActiveSocialStart);
   EventBus.on('interaction:complete', applyAISocialTargetCooldown);
+  EventBus.on('interaction:complete', e => {
+    const c = getChar(e.initiatorId);
+    if (!c?.ai || CHARS.indexOf(c) === selectedIdx) return;
+    completeRoutineAnchorsForAction(c, {
+      kind: 'interaction',
+      category: e.category,
+      tags: ['social', e.category || ''],
+      sourceType: 'interaction',
+      actionId: e.interactionId,
+    });
+  });
   const recordFurnitureRoutine = e => {
     const c = getChar(e.charId);
     if (!c?.ai || CHARS.indexOf(c) === selectedIdx) return;
+    const sourceType = e.type === 'furniture:use_started' ? 'furniture_start' : 'furniture';
     completeRoutineAnchorsForAction(c, {
       kind: 'furniture',
       category: e.category,
       tags: [e.category, e.category === 'bed' ? 'sleep' : '', ['meal', 'snack', 'kitchen', 'table'].includes(e.category) ? 'hunger' : '', ['bath', 'wash', 'wardrobe'].includes(e.category) ? 'hygiene' : ''].filter(Boolean),
-      sourceType: 'furniture',
+      sourceType,
       actionId: e.actionId,
     });
   };
@@ -1928,6 +3067,29 @@ function migrateConfig(cfg) {
     demandBaseWeights: {
       ...DEFAULT_CONFIG.aiConfig.demandBaseWeights,
       ...(cfg.aiConfig?.demandBaseWeights || {}),
+    },
+  };
+  cfg.aiConfig.routineGridConfig = {
+    ...DEFAULT_CONFIG.aiConfig.routineGridConfig,
+    ...(cfg.aiConfig?.routineGridConfig || {}),
+    rowDefs: cfg.aiConfig?.routineGridConfig?.rowDefs?.length
+      ? cfg.aiConfig.routineGridConfig.rowDefs
+      : DEFAULT_CONFIG.aiConfig.routineGridConfig.rowDefs,
+  };
+  cfg.aiConfig.routineTemplates = cfg.aiConfig?.routineTemplates?.length
+    ? cfg.aiConfig.routineTemplates
+    : JSON.parse(JSON.stringify(DEFAULT_CONFIG.aiConfig.routineTemplates || []));
+  cfg.aiConfig.routineProfiles = {
+    defaultProfileId: cfg.aiConfig?.routineProfiles?.defaultProfileId || DEFAULT_CONFIG.aiConfig.routineProfiles.defaultProfileId || 'default',
+    defaults: cfg.aiConfig?.routineProfiles?.defaults?.length
+      ? cfg.aiConfig.routineProfiles.defaults
+      : JSON.parse(JSON.stringify(DEFAULT_CONFIG.aiConfig.routineProfiles?.defaults || [])),
+    byCharacter: {
+      ...(cfg.aiConfig?.routineProfiles?.byCharacter || {}),
+    },
+    meta: {
+      ...(DEFAULT_CONFIG.aiConfig.routineProfiles?.meta || {}),
+      ...(cfg.aiConfig?.routineProfiles?.meta || {}),
     },
   };
   cfg.moneyConfig = deepMerge(

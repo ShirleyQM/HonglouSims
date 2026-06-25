@@ -13,27 +13,76 @@ function setCharGridPosition(c, col, row) {
   const tp = gridToPixel(col, row);
   c.x = tp.x;
   c.y = tp.y;
+  const sc = sceneAt(Math.round(col), Math.round(row));
+  if (sc) {
+    c.sceneId = sc.id;
+    c._lastSceneId = sc.id;
+  }
   moveCharBucket(c);
 }
 
-function tightenInteractionStance(a, b, pose) {
-  const separation = pose.separation || 0.62;
+function isInteractionStandCell(col, row, sceneId = null) {
+  const cell = WORLD[col]?.[row];
+  return !!cell?.walkable && !cell.entryFor && (!sceneId || cell.sceneId === sceneId);
+}
+
+function findInteractionStandCellNear(col, row, selfId, alsoExclude = [], sceneId = null, maxDist = 3) {
+  const options = [];
+  for (let dc = -maxDist; dc <= maxDist; dc++) {
+    for (let dr = -maxDist; dr <= maxDist; dr++) {
+      const nc = col + dc, nr = row + dr;
+      if (!isInteractionStandCell(nc, nr, sceneId)) continue;
+      if (isCellOccupiedByOther(nc, nr, selfId, alsoExclude)) continue;
+      options.push({ col: nc, row: nr, score: Math.hypot(dc, dr) });
+    }
+  }
+  options.sort((a, b) => a.score - b.score);
+  return options[0] || null;
+}
+
+function ensureCharacterOnSafeInteractionCell(c, partner = null) {
+  if (!c) return false;
+  const col = Math.round(c.gridCol);
+  const row = Math.round(c.gridRow);
+  const sceneId = getScene(c.sceneId) ? c.sceneId : (partner?.sceneId || null);
+  if (isInteractionStandCell(col, row, sceneId)) {
+    if (c.gridCol !== col || c.gridRow !== row) setCharGridPosition(c, col, row);
+    return true;
+  }
+  const partnerCol = partner ? Math.round(partner.gridCol) : col;
+  const partnerRow = partner ? Math.round(partner.gridRow) : row;
+  const exclude = partner ? [partner.id] : [];
+  const rescue = findInteractionStandCellNear(col, row, c.id, exclude, sceneId, 4)
+    || findInteractionStandCellNear(partnerCol, partnerRow, c.id, exclude, partner?.sceneId || sceneId, 4)
+    || findInteractionStandCellNear(col, row, c.id, exclude, null, 6);
+  if (!rescue) return false;
+  setCharGridPosition(c, rescue.col, rescue.row);
+  c.path = [];
+  return true;
+}
+
+function faceInteractionPartners(a, b) {
   let dx = a.gridCol - b.gridCol;
   let dy = a.gridRow - b.gridRow;
-  let len = Math.hypot(dx, dy);
-  if (!len) {
-    dx = 1;
-    dy = 0;
-    len = 1;
+  if (!dx && !dy) dx = 1;
+  a.facing = Math.abs(dy) > Math.abs(dx) ? (dy > 0 ? 'up' : 'down') : (dx > 0 ? 'left' : 'right');
+  b.facing = Math.abs(dy) > Math.abs(dx) ? (dy > 0 ? 'down' : 'up') : (dx > 0 ? 'right' : 'left');
+}
+
+function tightenInteractionStance(a, b, pose) {
+  ensureCharacterOnSafeInteractionCell(b, a);
+  ensureCharacterOnSafeInteractionCell(a, b);
+  const aCol = Math.round(a.gridCol), aRow = Math.round(a.gridRow);
+  const bCol = Math.round(b.gridCol), bRow = Math.round(b.gridRow);
+  if (aCol === bCol && aRow === bRow) {
+    const safe = findInteractionStandCellNear(bCol, bRow, a.id, [b.id], b.sceneId, 2)
+      || findInteractionStandCellNear(bCol, bRow, a.id, [b.id], null, 3);
+    if (safe) setCharGridPosition(a, safe.col, safe.row);
+  } else {
+    if (isInteractionStandCell(aCol, aRow, a.sceneId)) setCharGridPosition(a, aCol, aRow);
+    if (isInteractionStandCell(bCol, bRow, b.sceneId)) setCharGridPosition(b, bCol, bRow);
   }
-  const ux = dx / len;
-  const uy = dy / len;
-  const mx = (a.gridCol + b.gridCol) / 2;
-  const my = (a.gridRow + b.gridRow) / 2;
-  setCharGridPosition(a, mx + ux * separation / 2, my + uy * separation / 2);
-  setCharGridPosition(b, mx - ux * separation / 2, my - uy * separation / 2);
-  a.facing = Math.abs(uy) > Math.abs(ux) ? (uy > 0 ? 'up' : 'down') : (ux > 0 ? 'left' : 'right');
-  b.facing = Math.abs(uy) > Math.abs(ux) ? (uy > 0 ? 'down' : 'up') : (ux > 0 ? 'right' : 'left');
+  faceInteractionPartners(a, b);
 }
 
 function setInteractionLock(a, b, poseId = 'stand') {
@@ -87,12 +136,23 @@ function enforceInteractionPosition(c) {
   const dr = c.gridRow - lock.anchorRow;
   const dist = Math.hypot(dc, dr);
   if (dist > lock.radius) {
-    const scale = lock.radius / dist;
-    c.gridCol = lock.anchorCol + dc * scale;
-    c.gridRow = lock.anchorRow + dr * scale;
-    const tp = gridToPixel(c.gridCol, c.gridRow);
-    c.x = tp.x;
-    c.y = tp.y;
+    const partner = getChar(lock.partnerId);
+    const anchorCol = Math.round(lock.anchorCol);
+    const anchorRow = Math.round(lock.anchorRow);
+    const anchor = isInteractionStandCell(anchorCol, anchorRow, c.sceneId)
+      ? { col: anchorCol, row: anchorRow }
+      : findInteractionStandCellNear(
+        partner ? Math.round(partner.gridCol) : anchorCol,
+        partner ? Math.round(partner.gridRow) : anchorRow,
+        c.id,
+        partner ? [partner.id] : [],
+        partner?.sceneId || c.sceneId,
+        4
+      );
+    if (!anchor) return;
+    lock.anchorCol = anchor.col;
+    lock.anchorRow = anchor.row;
+    setCharGridPosition(c, anchor.col, anchor.row);
   }
 }
 
@@ -686,11 +746,13 @@ function walkToCharAdjacent(c, target, onArrive) {
     log(`${c.short}${c._lastActionBlockReason}。`);
     return false;
   }
+  ensureCharacterOnSafeInteractionCell(target, c);
+  ensureCharacterOnSafeInteractionCell(c, target);
   const tCol = Math.round(target.gridCol), tRow = Math.round(target.gridRow);
   const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [-1, 1], [1, -1], [-1, -1]];
   let best = null;
   const currentDist = Math.hypot(Math.round(c.gridCol) - tCol, Math.round(c.gridRow) - tRow);
-  if (currentDist > 0 && currentDist <= 1) {
+  if (currentDist > 0 && currentDist <= 1 && isInteractionStandCell(Math.round(c.gridCol), Math.round(c.gridRow), c.sceneId)) {
     if (onArrive) onArrive();
     return true;
   }
@@ -1147,7 +1209,7 @@ function findFreeCellsNear(col, row, selfId, alsoExclude = [], maxDist = 1) {
     for (let dr = -maxDist; dr <= maxDist; dr++) {
       if (!dc && !dr) continue;
       const nc = col + dc, nr = row + dr;
-      if (!WORLD[nc]?.[nr]?.walkable) continue;
+      if (!WORLD[nc]?.[nr]?.walkable || WORLD[nc][nr].entryFor) continue;
       if (isCellOccupiedByOther(nc, nr, selfId, alsoExclude)) continue;
       cells.push({ col: nc, row: nr, dist: Math.hypot(dc, dr) });
     }

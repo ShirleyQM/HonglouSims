@@ -460,9 +460,23 @@ const SceneAccessSystem = (() => {
   function repairAllCharacterScenes() {
     let fixed = 0;
     for (const c of CHARS) {
-      if (!c?.sceneId || canEnterScene(c, c.sceneId).ok === true) continue;
+      if (!c) continue;
+      const col = Math.round(c.gridCol), row = Math.round(c.gridRow);
+      const cell = WORLD[col]?.[row];
+      const cellSceneId = cell?.sceneId || sceneAt(col, row)?.id || 0;
+      const standingOk = !!(cell?.walkable && cellSceneId && cellSceneId === c.sceneId);
+      if (cell?.walkable && cellSceneId && cellSceneId !== c.sceneId && canEnterScene(c, cellSceneId).ok === true) {
+        c.sceneId = cellSceneId;
+        c._lastSceneId = cellSceneId;
+        syncCharPixel(c);
+        moveCharBucket(c);
+        fixed++;
+        continue;
+      }
+      if (c.sceneId && canEnterScene(c, c.sceneId).ok === true && standingOk) continue;
       const home = FamilySystem.findFamilyOfChar(c.id)?.residenceSceneId || 3;
-      if (ejectToScene(c, home)) fixed++;
+      const targetSceneId = c.sceneId && canEnterScene(c, c.sceneId).ok === true ? c.sceneId : home;
+      if (ejectToScene(c, targetSceneId) || (targetSceneId !== home && ejectToScene(c, home))) fixed++;
     }
     if (fixed) log(`已将 ${fixed} 名角色送回所属院落（权限与位置已校正）。`);
     return fixed;

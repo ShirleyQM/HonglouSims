@@ -1,0 +1,79 @@
+{
+  "name": "前台页面冒烟",
+  "startedAt": "2026-06-25T08:32:12.137Z",
+  "finishedAt": "2026-06-25T08:32:16.813Z",
+  "counts": {
+    "PASS": 10,
+    "WARN": 0,
+    "FAIL": 0
+  },
+  "ok": true,
+  "checks": [
+    {
+      "status": "PASS",
+      "message": "服务可访问：http://127.0.0.1:8765/",
+      "details": {
+        "status": 200
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "Playwright 使用备用依赖路径加载",
+      "details": {
+        "dir": "../../../.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules"
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "页面标题正确",
+      "details": {
+        "title": "大观园模拟"
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "游戏画布存在",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "底部 HUD 存在",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "底栏传令入口存在",
+      "details": {
+        "text": "传令X"
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "底栏起居入口存在",
+      "details": {
+        "text": "起居Q"
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "底栏人物入口存在",
+      "details": {
+        "text": "人物P"
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "当前人物信息已渲染",
+      "details": {
+        "selectedName": "宝玉 😐"
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "页面无致命 JS pageerror",
+      "details": {
+        "pageErrors": []
+      }
+    }
+  ]
+}

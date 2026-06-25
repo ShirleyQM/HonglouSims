@@ -189,7 +189,93 @@
   },
   "furniture": {
     "topShade": 0.18,
-    "bottomShade": -0.22
+    "bottomShade": -0.22,
+    "sprites": {
+      "101": {
+        "name": "红木书案",
+        "sourceName": "书房_书桌1",
+        "src": "assets/furnitures/studyroom/书房_书桌1_1.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
+      "110": {
+        "name": "饭桌",
+        "sourceName": "客厅_点心案竹子",
+        "src": "assets/furnitures/livingroom/客厅_点心案竹子_1.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
+      "111": {
+        "name": "点心案",
+        "sourceName": "客厅_点心案普通",
+        "src": "assets/furnitures/livingroom/客厅_点心案普通_1.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
+      "112": {
+        "name": "厨房灶台",
+        "sourceName": "厨房_灶台",
+        "src": "assets/furnitures/kitchen/厨房_灶台_1.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
+      "113": {
+        "name": "樟木案几",
+        "sourceName": "书房_书桌2",
+        "src": "assets/furnitures/studyroom/书房_书桌2_1.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
+      "201": {
+        "name": "雕花木床",
+        "sourceName": "卧室_粉色顶棚床",
+        "src": "assets/furnitures/bedroom/卧室_粉色顶棚床_1.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
+      "211": {
+        "name": "竹榻",
+        "sourceName": "卧室_竹榻",
+        "src": "assets/furnitures/bedroom/卧室_竹榻_1.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
+      "312": {
+        "name": "梳洗妆台",
+        "sourceName": "卧室_碧纱橱",
+        "src": "assets/furnitures/bedroom/卧室_碧纱橱_1.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
+      "401": {
+        "name": "茶案",
+        "sourceName": "客厅_茶几1",
+        "src": "assets/furnitures/livingroom/客厅_茶几1_1.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
+      "501": {
+        "name": "酒案",
+        "sourceName": "客厅_茶几空",
+        "src": "assets/furnitures/livingroom/客厅_茶几空_1.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
+      "601": {
+        "name": "琴台",
+        "sourceName": "书房_琴",
+        "src": "assets/furnitures/studyroom/书房_琴_1.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
+      "902": {
+        "name": "轿凳歇脚",
+        "sourceName": "客厅_美人靠1",
+        "src": "assets/furnitures/livingroom/客厅_美人靠1_1.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      }
+    }
   },
   "portraits": {
     "daiyu": {

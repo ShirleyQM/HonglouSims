@@ -1,0 +1,1342 @@
+{
+  "source": "assets/furnitures",
+  "dryRun": false,
+  "total": 58,
+  "changed": 58,
+  "results": [
+    {
+      "path": "assets/furnitures/bedroom/卧室_暖阁_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        14,
+        50,
+        405,
+        380
+      ],
+      "width": 441,
+      "height": 402,
+      "edgeBackgroundPixels": 56897,
+      "transparentPixels": 56200,
+      "softenedPixels": 697
+    },
+    {
+      "path": "assets/furnitures/bedroom/卧室_暖阁_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        21,
+        21,
+        411,
+        363
+      ],
+      "width": 435,
+      "height": 376,
+      "edgeBackgroundPixels": 55297,
+      "transparentPixels": 54706,
+      "softenedPixels": 591
+    },
+    {
+      "path": "assets/furnitures/bedroom/卧室_碧纱橱_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        15,
+        16,
+        424,
+        386
+      ],
+      "width": 441,
+      "height": 402,
+      "edgeBackgroundPixels": 45823,
+      "transparentPixels": 44900,
+      "softenedPixels": 923
+    },
+    {
+      "path": "assets/furnitures/bedroom/卧室_碧纱橱_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        45,
+        18,
+        407,
+        425
+      ],
+      "width": 435,
+      "height": 435,
+      "edgeBackgroundPixels": 81728,
+      "transparentPixels": 81328,
+      "softenedPixels": 400
+    },
+    {
+      "path": "assets/furnitures/bedroom/卧室_竹榻_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        11,
+        14,
+        439,
+        221
+      ],
+      "width": 463,
+      "height": 244,
+      "edgeBackgroundPixels": 53623,
+      "transparentPixels": 53107,
+      "softenedPixels": 516
+    },
+    {
+      "path": "assets/furnitures/bedroom/卧室_竹榻_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        9,
+        14,
+        426,
+        228
+      ],
+      "width": 438,
+      "height": 242,
+      "edgeBackgroundPixels": 48824,
+      "transparentPixels": 48235,
+      "softenedPixels": 589
+    },
+    {
+      "path": "assets/furnitures/bedroom/卧室_粉色顶棚床_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        74,
+        12,
+        342,
+        304
+      ],
+      "width": 395,
+      "height": 313,
+      "edgeBackgroundPixels": 50892,
+      "transparentPixels": 50480,
+      "softenedPixels": 412
+    },
+    {
+      "path": "assets/furnitures/bedroom/卧室_粉色顶棚床_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        34,
+        3,
+        308,
+        309
+      ],
+      "width": 354,
+      "height": 312,
+      "edgeBackgroundPixels": 40230,
+      "transparentPixels": 39875,
+      "softenedPixels": 355
+    },
+    {
+      "path": "assets/furnitures/kitchen/厨房_水缸_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        13,
+        10,
+        208,
+        188
+      ],
+      "width": 210,
+      "height": 193,
+      "edgeBackgroundPixels": 12773,
+      "transparentPixels": 12299,
+      "softenedPixels": 474
+    },
+    {
+      "path": "assets/furnitures/kitchen/厨房_灶台2_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        17,
+        13,
+        383,
+        322
+      ],
+      "width": 399,
+      "height": 348,
+      "edgeBackgroundPixels": 51467,
+      "transparentPixels": 50671,
+      "softenedPixels": 796
+    },
+    {
+      "path": "assets/furnitures/kitchen/厨房_灶台3_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        21,
+        7,
+        385,
+        321
+      ],
+      "width": 399,
+      "height": 348,
+      "edgeBackgroundPixels": 52364,
+      "transparentPixels": 51773,
+      "softenedPixels": 591
+    },
+    {
+      "path": "assets/furnitures/kitchen/厨房_灶台4_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        22,
+        24,
+        393,
+        320
+      ],
+      "width": 399,
+      "height": 348,
+      "edgeBackgroundPixels": 49799,
+      "transparentPixels": 49395,
+      "softenedPixels": 404
+    },
+    {
+      "path": "assets/furnitures/kitchen/厨房_灶台_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        7,
+        27,
+        350,
+        188
+      ],
+      "width": 359,
+      "height": 204,
+      "edgeBackgroundPixels": 21312,
+      "transparentPixels": 21144,
+      "softenedPixels": 168
+    },
+    {
+      "path": "assets/furnitures/kitchen/厨房_灶台_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        21,
+        13,
+        340,
+        203
+      ],
+      "width": 359,
+      "height": 204,
+      "edgeBackgroundPixels": 31358,
+      "transparentPixels": 31081,
+      "softenedPixels": 277
+    },
+    {
+      "path": "assets/furnitures/kitchen/厨房_烧水_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        22,
+        6,
+        220,
+        216
+      ],
+      "width": 239,
+      "height": 231,
+      "edgeBackgroundPixels": 29203,
+      "transparentPixels": 28531,
+      "softenedPixels": 672
+    },
+    {
+      "path": "assets/furnitures/kitchen/厨房_碗橱_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        57,
+        24,
+        308,
+        299
+      ],
+      "width": 359,
+      "height": 315,
+      "edgeBackgroundPixels": 51028,
+      "transparentPixels": 50613,
+      "softenedPixels": 415
+    },
+    {
+      "path": "assets/furnitures/kitchen/厨房_碗橱_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        30,
+        9,
+        251,
+        310
+      ],
+      "width": 264,
+      "height": 318,
+      "edgeBackgroundPixels": 30318,
+      "transparentPixels": 30047,
+      "softenedPixels": 271
+    },
+    {
+      "path": "assets/furnitures/livingroom/客厅_屏风_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        36,
+        1,
+        415,
+        214
+      ],
+      "width": 449,
+      "height": 226,
+      "edgeBackgroundPixels": 37098,
+      "transparentPixels": 36554,
+      "softenedPixels": 544
+    },
+    {
+      "path": "assets/furnitures/livingroom/客厅_屏风_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        15,
+        2,
+        333,
+        228
+      ],
+      "width": 348,
+      "height": 242,
+      "edgeBackgroundPixels": 31639,
+      "transparentPixels": 31199,
+      "softenedPixels": 440
+    },
+    {
+      "path": "assets/furnitures/livingroom/客厅_点心案华丽_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        21,
+        10,
+        419,
+        253
+      ],
+      "width": 435,
+      "height": 275,
+      "edgeBackgroundPixels": 36669,
+      "transparentPixels": 35846,
+      "softenedPixels": 823
+    },
+    {
+      "path": "assets/furnitures/livingroom/客厅_点心案普通_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        20,
+        15,
+        386,
+        243
+      ],
+      "width": 407,
+      "height": 274,
+      "edgeBackgroundPixels": 43336,
+      "transparentPixels": 42651,
+      "softenedPixels": 685
+    },
+    {
+      "path": "assets/furnitures/livingroom/客厅_点心案竹子_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        17,
+        25,
+        392,
+        255
+      ],
+      "width": 399,
+      "height": 275,
+      "edgeBackgroundPixels": 39938,
+      "transparentPixels": 39193,
+      "softenedPixels": 745
+    },
+    {
+      "path": "assets/furnitures/livingroom/客厅_美人靠1_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        17,
+        20,
+        358,
+        180
+      ],
+      "width": 364,
+      "height": 182,
+      "edgeBackgroundPixels": 16414,
+      "transparentPixels": 16129,
+      "softenedPixels": 285
+    },
+    {
+      "path": "assets/furnitures/livingroom/客厅_美人靠1_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        20,
+        3,
+        340,
+        199
+      ],
+      "width": 371,
+      "height": 207,
+      "edgeBackgroundPixels": 32356,
+      "transparentPixels": 32068,
+      "softenedPixels": 288
+    },
+    {
+      "path": "assets/furnitures/livingroom/客厅_花瓶桂花_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        99,
+        14,
+        267,
+        405
+      ],
+      "width": 340,
+      "height": 419,
+      "edgeBackgroundPixels": 106121,
+      "transparentPixels": 105252,
+      "softenedPixels": 869
+    },
+    {
+      "path": "assets/furnitures/livingroom/客厅_花瓶白花_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        82,
+        13,
+        272,
+        404
+      ],
+      "width": 340,
+      "height": 419,
+      "edgeBackgroundPixels": 101602,
+      "transparentPixels": 100638,
+      "softenedPixels": 964
+    },
+    {
+      "path": "assets/furnitures/livingroom/客厅_花瓶竹子_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        13,
+        13,
+        274,
+        394
+      ],
+      "width": 340,
+      "height": 419,
+      "edgeBackgroundPixels": 98314,
+      "transparentPixels": 97436,
+      "softenedPixels": 878
+    },
+    {
+      "path": "assets/furnitures/livingroom/客厅_茶几1_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        33,
+        12,
+        362,
+        251
+      ],
+      "width": 394,
+      "height": 266,
+      "edgeBackgroundPixels": 68552,
+      "transparentPixels": 68048,
+      "softenedPixels": 504
+    },
+    {
+      "path": "assets/furnitures/livingroom/客厅_茶几1_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        7,
+        9,
+        349,
+        244
+      ],
+      "width": 359,
+      "height": 250,
+      "edgeBackgroundPixels": 47862,
+      "transparentPixels": 46817,
+      "softenedPixels": 1045
+    },
+    {
+      "path": "assets/furnitures/livingroom/客厅_茶几空_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        37,
+        28,
+        344,
+        165
+      ],
+      "width": 374,
+      "height": 187,
+      "edgeBackgroundPixels": 35047,
+      "transparentPixels": 34911,
+      "softenedPixels": 136
+    },
+    {
+      "path": "assets/furnitures/livingroom/客厅_茶几空_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        11,
+        37,
+        332,
+        188
+      ],
+      "width": 346,
+      "height": 205,
+      "edgeBackgroundPixels": 34183,
+      "transparentPixels": 33720,
+      "softenedPixels": 463
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_书架1_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        31,
+        12,
+        368,
+        422
+      ],
+      "width": 390,
+      "height": 435,
+      "edgeBackgroundPixels": 35177,
+      "transparentPixels": 34787,
+      "softenedPixels": 390
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_书架1_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        33,
+        17,
+        407,
+        448
+      ],
+      "width": 414,
+      "height": 460,
+      "edgeBackgroundPixels": 52839,
+      "transparentPixels": 52086,
+      "softenedPixels": 753
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_书架2_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        29,
+        20,
+        162,
+        435
+      ],
+      "width": 194,
+      "height": 459,
+      "edgeBackgroundPixels": 37273,
+      "transparentPixels": 37081,
+      "softenedPixels": 192
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_书架2_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        28,
+        15,
+        192,
+        433
+      ],
+      "width": 208,
+      "height": 447,
+      "edgeBackgroundPixels": 36028,
+      "transparentPixels": 35783,
+      "softenedPixels": 245
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_书桌1_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        40,
+        22,
+        365,
+        243
+      ],
+      "width": 394,
+      "height": 266,
+      "edgeBackgroundPixels": 64680,
+      "transparentPixels": 64467,
+      "softenedPixels": 213
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_书桌1_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        26,
+        18,
+        365,
+        252
+      ],
+      "width": 389,
+      "height": 268,
+      "edgeBackgroundPixels": 50746,
+      "transparentPixels": 49803,
+      "softenedPixels": 943
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_书桌2_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        45,
+        11,
+        353,
+        232
+      ],
+      "width": 374,
+      "height": 261,
+      "edgeBackgroundPixels": 56624,
+      "transparentPixels": 56175,
+      "softenedPixels": 449
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_书桌2_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        50,
+        19,
+        368,
+        253
+      ],
+      "width": 389,
+      "height": 268,
+      "edgeBackgroundPixels": 56927,
+      "transparentPixels": 55964,
+      "softenedPixels": 963
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_书桌3_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        25,
+        9,
+        509,
+        274
+      ],
+      "width": 521,
+      "height": 297,
+      "edgeBackgroundPixels": 84353,
+      "transparentPixels": 83867,
+      "softenedPixels": 486
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_书桌3_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        6,
+        12,
+        458,
+        322
+      ],
+      "width": 471,
+      "height": 335,
+      "edgeBackgroundPixels": 93418,
+      "transparentPixels": 92563,
+      "softenedPixels": 855
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_棋盘1_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        80,
+        17,
+        372,
+        242
+      ],
+      "width": 463,
+      "height": 252,
+      "edgeBackgroundPixels": 58336,
+      "transparentPixels": 56911,
+      "softenedPixels": 1425
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_棋盘1_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        40,
+        10,
+        374,
+        260
+      ],
+      "width": 413,
+      "height": 292,
+      "edgeBackgroundPixels": 61326,
+      "transparentPixels": 60029,
+      "softenedPixels": 1297
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_琴2_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        7,
+        31,
+        477,
+        214
+      ],
+      "width": 503,
+      "height": 241,
+      "edgeBackgroundPixels": 72696,
+      "transparentPixels": 72266,
+      "softenedPixels": 430
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_琴2_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        27,
+        8,
+        450,
+        240
+      ],
+      "width": 463,
+      "height": 252,
+      "edgeBackgroundPixels": 71674,
+      "transparentPixels": 71417,
+      "softenedPixels": 257
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_琴_1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        11,
+        0,
+        342,
+        155
+      ],
+      "width": 354,
+      "height": 171,
+      "edgeBackgroundPixels": 26294,
+      "transparentPixels": 25758,
+      "softenedPixels": 536
+    },
+    {
+      "path": "assets/furnitures/studyroom/书房_琴_2.png",
+      "changed": true,
+      "beforeAlpha": [
+        0,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        0,
+        0,
+        369,
+        190
+      ],
+      "width": 369,
+      "height": 190,
+      "edgeBackgroundPixels": 33077,
+      "transparentPixels": 23363,
+      "softenedPixels": 9714
+    },
+    {
+      "path": "assets/furnitures/合集图/书案_博古架.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        48,
+        26,
+        1478,
+        982
+      ],
+      "width": 1536,
+      "height": 1024,
+      "edgeBackgroundPixels": 956462,
+      "transparentPixels": 953122,
+      "softenedPixels": 3340
+    },
+    {
+      "path": "assets/furnitures/合集图/书案_博古架补面.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        51,
+        33,
+        1492,
+        990
+      ],
+      "width": 1536,
+      "height": 1024,
+      "edgeBackgroundPixels": 905223,
+      "transparentPixels": 897713,
+      "softenedPixels": 7510
+    },
+    {
+      "path": "assets/furnitures/合集图/厨房四件套.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        26,
+        55,
+        1474,
+        987
+      ],
+      "width": 1536,
+      "height": 1024,
+      "edgeBackgroundPixels": 973509,
+      "transparentPixels": 966243,
+      "softenedPixels": 7266
+    },
+    {
+      "path": "assets/furnitures/合集图/床_屏风_美人靠_琴台.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        70,
+        21,
+        1312,
+        1104
+      ],
+      "width": 1402,
+      "height": 1122,
+      "edgeBackgroundPixels": 800601,
+      "transparentPixels": 793804,
+      "softenedPixels": 6797
+    },
+    {
+      "path": "assets/furnitures/植物1.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        10,
+        24,
+        1472,
+        991
+      ],
+      "width": 1536,
+      "height": 1024,
+      "edgeBackgroundPixels": 970689,
+      "transparentPixels": 959725,
+      "softenedPixels": 10964
+    },
+    {
+      "path": "assets/furnitures/灶台点心花.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        26,
+        72,
+        1232,
+        1163
+      ],
+      "width": 1254,
+      "height": 1254,
+      "edgeBackgroundPixels": 967322,
+      "transparentPixels": 960567,
+      "softenedPixels": 6755
+    },
+    {
+      "path": "assets/furnitures/琴棋书画.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        27,
+        75,
+        1503,
+        964
+      ],
+      "width": 1536,
+      "height": 1024,
+      "edgeBackgroundPixels": 1053058,
+      "transparentPixels": 1045798,
+      "softenedPixels": 7260
+    },
+    {
+      "path": "assets/furnitures/石凳绣花.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        91,
+        13,
+        1390,
+        1001
+      ],
+      "width": 1536,
+      "height": 1024,
+      "edgeBackgroundPixels": 1023090,
+      "transparentPixels": 1015803,
+      "softenedPixels": 7287
+    },
+    {
+      "path": "assets/furnitures/碧纱橱_竹榻_暖阁.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        15,
+        32,
+        1379,
+        1079
+      ],
+      "width": 1402,
+      "height": 1122,
+      "edgeBackgroundPixels": 699735,
+      "transparentPixels": 694311,
+      "softenedPixels": 5424
+    },
+    {
+      "path": "assets/furnitures/花园.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        71,
+        8,
+        1488,
+        1014
+      ],
+      "width": 1536,
+      "height": 1024,
+      "edgeBackgroundPixels": 1079615,
+      "transparentPixels": 1071040,
+      "softenedPixels": 8575
+    },
+    {
+      "path": "assets/furnitures/茶具点心食盒.png",
+      "changed": true,
+      "beforeAlpha": [
+        255,
+        255
+      ],
+      "afterAlpha": [
+        0,
+        255
+      ],
+      "contentBBox": [
+        84,
+        22,
+        1438,
+        967
+      ],
+      "width": 1536,
+      "height": 1024,
+      "edgeBackgroundPixels": 977942,
+      "transparentPixels": 971971,
+      "softenedPixels": 5971
+    }
+  ]
+}

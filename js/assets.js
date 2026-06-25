@@ -9,6 +9,7 @@ const AssetSystem = (() => {
   const portraitUrls = {}; // charKey -> HUD 半身立绘路径
   const roomBackgrounds = {}; // sceneId -> HTMLImageElement
   const tileImages = {}; // groundType -> HTMLImageElement
+  const furnitureImages = {}; // templateId/assetKey -> HTMLImageElement
 
   function loadImage(src) {
     return new Promise((resolve) => {
@@ -54,12 +55,18 @@ const AssetSystem = (() => {
       const img = def.src ? await loadImage(def.src) : null;
       if (img) tileImages[key] = img;
     }));
+    const furnitureEntries = Object.entries(manifest.furniture?.sprites || manifest.furnitureSprites || {});
+    await Promise.all(furnitureEntries.map(async ([key, def]) => {
+      const img = def.src ? await loadImage(def.src) : null;
+      if (img) furnitureImages[key] = img;
+    }));
     ready = Object.keys(sheets).length > 0;
     if (ready) console.log(`[assets] 已加载 ${Object.keys(sheets).length} 张精灵图:`, Object.keys(sheets).join(', '));
     if (Object.keys(avatarUrls).length) console.log(`[assets] 已加载 ${Object.keys(avatarUrls).length} 张头像:`, Object.keys(avatarUrls).join(', '));
     if (Object.keys(portraitUrls).length) console.log(`[assets] 已加载 ${Object.keys(portraitUrls).length} 张 HUD 立绘:`, Object.keys(portraitUrls).join(', '));
     if (Object.keys(roomBackgrounds).length) console.log(`[assets] 已加载 ${Object.keys(roomBackgrounds).length} 张房间背景:`, Object.keys(roomBackgrounds).join(', '));
     if (Object.keys(tileImages).length) console.log(`[assets] 已加载 ${Object.keys(tileImages).length} 张地面 tile:`, Object.keys(tileImages).join(', '));
+    if (Object.keys(furnitureImages).length) console.log(`[assets] 已加载 ${Object.keys(furnitureImages).length} 张家具站位图:`, Object.keys(furnitureImages).join(', '));
     if (typeof uiDirty !== 'undefined') uiDirty = true;
     return ready;
   }
@@ -180,6 +187,15 @@ const AssetSystem = (() => {
     return manifest?.furniture || { topShade: 0.18, bottomShade: -0.22 };
   }
 
+  function furnitureSpriteDef(templateId) {
+    const key = String(templateId);
+    return manifest?.furniture?.sprites?.[key] || manifest?.furnitureSprites?.[key] || null;
+  }
+
+  function furnitureImageForTemplate(templateId) {
+    return furnitureImages[String(templateId)] || null;
+  }
+
   function avatarUrlForChar(c) {
     if (!c?.id) return null;
     return avatarUrls[c.id] || null;
@@ -214,6 +230,8 @@ const AssetSystem = (() => {
     getGroundTile,
     shade,
     furnitureShade,
+    furnitureSpriteDef,
+    furnitureImageForTemplate,
     avatarUrlForChar,
     avatarUrl,
     portraitUrlForChar,

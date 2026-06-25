@@ -19,6 +19,19 @@ let adminSelTpl = 101, adminSelInter = 101;
 let adminV2Section = 'furnitureTemplates', adminV2SelectedTpl = null, adminV2SelectedInst = null, adminV2Search = '', adminV2CharacterFamilyId = null, adminV2CharacterEditing = false, adminV2RelationLabelsEditing = false, adminV2RelationLabelsDraft = null;
 let adminV2TraitFocusId = null, adminV2TraitSavedMessage = '', adminV2SelectedNarrativeRule = null;
 let adminV2DreamFocusId = null, adminV2DreamSavedMessage = '', adminV2DreamDiagCharId = '';
+const ADMIN_V2_LEGACY_BRIDGES = {
+  specialties: 'specialties',
+  lifePath: 'lifePath',
+  needs: 'needs',
+  states: 'states',
+  relInit: 'relInit',
+  interactions: 'interTpl',
+  multiInteract: 'multiInteract',
+  furnReact: 'furnReact',
+  scenes: 'scenes',
+  sceneAccess: 'sceneAccess',
+  io: 'io',
+};
 const adminV2CharacterTraitCollapsed = {};
 const adminCrudGroup = {
   specialties: 'profiles',
@@ -75,33 +88,41 @@ function renderAdmin() {
 
 const ADMIN_V2_GROUPS = [
   { id: 'overview', label: '总览', items: [
-    { id: 'dashboard', label: '配置总览', status: '占位' },
+    { id: 'dashboard', label: '配置总览', status: '概览' },
   ] },
-  { id: 'people', label: '人物', items: [
-    { id: 'characterEditor', label: '人物设定', status: '预览' },
-    { id: 'personalityMeta', label: '性格系统', status: '已迁移' },
-    { id: 'dreamSystem', label: '梦想系统', status: '已迁移' },
-    { id: 'needs', label: '基础需求', status: '待迁移' },
-    { id: 'states', label: '状态标签', status: '待迁移' },
+  { id: 'people', label: '人物配置', items: [
+    { id: 'characterEditor', label: '人物设定', status: '编辑' },
+    { id: 'specialties', label: '性格配置', status: '表格' },
+    { id: 'personalityMeta', label: '性格系统', status: '表格' },
+    { id: 'dreamSystem', label: '梦想系统', status: '表格' },
+    { id: 'lifePath', label: '职业/人生路径', status: '表格' },
+    { id: 'needs', label: '基础需求', status: '表格' },
+    { id: 'states', label: '状态标签', status: '表格' },
   ] },
-  { id: 'relations', label: '关系', items: [
-    { id: 'identitySystem', label: '身份系统', status: '已迁移' },
-    { id: 'relationLabels', label: '关系标签', status: '已迁移' },
+  { id: 'relations', label: '关系与身份', items: [
+    { id: 'identitySystem', label: '身份/礼法', status: '表格' },
+    { id: 'relationLabels', label: '关系标签', status: '表格' },
+    { id: 'relInit', label: '关系初始化', status: '表格' },
   ] },
-  { id: 'tasks', label: '任务', items: [
-    { id: 'questTemplates', label: '任务系统', status: '已迁移' },
+  { id: 'commands', label: '任务与传令', items: [
+    { id: 'questTemplates', label: '任务模板/传令', status: '表格' },
   ] },
-  { id: 'behavior', label: '行为', items: [
-    { id: 'ai', label: 'AI / Utility', status: '已迁移' },
-    { id: 'interactions', label: '互动系统', status: '待迁移' },
-    { id: 'narrativeRules', label: '叙事气泡', status: '已迁移' },
+  { id: 'behavior', label: '行为规则', items: [
+    { id: 'interactions', label: '互动模板', status: '表格' },
+    { id: 'multiInteract', label: '多人互动', status: '表格' },
+    { id: 'furnReact', label: '家具反应', status: '表格' },
+    { id: 'narrativeRules', label: '叙事气泡', status: '表格' },
   ] },
-  { id: 'world', label: '世界', items: [
-    { id: 'furnitureTemplates', label: '家具配置', status: '已迁移' },
-    { id: 'scenes', label: '场景配置', status: '待迁移' },
+  { id: 'world', label: '世界配置', items: [
+    { id: 'furnitureTemplates', label: '家具模板', status: '表格' },
+    { id: 'furnitureInstances', label: '家具摆放', status: '表格' },
+    { id: 'scenes', label: '场景配置', status: '表格' },
+    { id: 'sceneAccess', label: '场景权限', status: '表格' },
   ] },
-  { id: 'debug', label: '调试', items: [
-    { id: 'legacy', label: '旧后台', status: '保留' },
+  { id: 'debug', label: 'AI 与调试', items: [
+    { id: 'ai', label: 'Utility AI', status: '高级' },
+    { id: 'io', label: '导入导出', status: '工具' },
+    { id: 'legacy', label: '旧后台兜底', status: '高级' },
   ] },
 ];
 
@@ -357,6 +378,7 @@ function renderAdminV2() {
         ${renderAdminV2Section()}
       </main>
     </div>`;
+  if (ADMIN_V2_LEGACY_BRIDGES[adminV2Section] && typeof bindAdminEvents === 'function') bindAdminEvents();
   bindAdminV2Events();
 }
 
@@ -375,16 +397,27 @@ function renderAdminV2Header(item) {
   const descriptions = {
     furnitureTemplates: '家具能做什么、恢复什么需求、是否基础生存、是否需要技能，都在这里配置。',
     furnitureInstances: '家具摆在哪里、属于哪个场景、坐标是多少，在这里维护。',
-    characterEditor: '人物设定是单个人物的捏人页，先预览家庭切换、头像选人、立绘和性格配置布局。',
-    personalityMeta: '性格的分类、描述、对偶关系和运行效果。表格改动会自动保存，并同步到人物设定页。',
-    dreamSystem: '梦想系统定义古代版人生志向类型，并给人物分配长期目标、达成条件和玩法方向。',
-    identitySystem: '身份系统配置人物位阶、位阶关系枚举、互动礼法规则和称呼规则；任务权限里的身份关系也读取这里。',
-    relationLabels: '关系系统配置：面板四象限名称、综合关系标签、各轴阶段标签。关系面板和运行时阶段判断都会读取这里。',
-    ai: 'Utility AI 的候选评分、日程窗口、作息锚点和调试状态。这里只影响 NPC 自主行为，不限制玩家手动操作。',
-    narrativeRules: '叙事气泡规则：按触发、性格、需求、状态、记忆和冷却共同驱动展示文案。',
-    questTemplates: '任务系统配置：总开关、模板 metadata、分类、是否仆从任务和测试下发都在这里维护。',
-    dashboard: '后续会放配置完整度、引用错误、最近改动和重点风险。',
-    legacy: '旧后台完整保留，用来兜底尚未迁移的配置。',
+    characterEditor: '人物设定页：像捏人表一样维护头像、立绘、家庭、身份、性格和人物摘要。',
+    specialties: '性格配置表：维护人物性情、习惯、行为倾向和可被 AI 读取的性格标签。',
+    personalityMeta: '性格系统表：维护性格分类、对偶关系、描述和运行效果。',
+    dreamSystem: '梦想系统表：维护长期志向、达成条件、阶段目标和玩法方向。',
+    lifePath: '职业/人生路径表：维护职业身份、阶段、声望、日课和路径任务池。',
+    needs: '基础需求表：维护六需求显示、衰退、危机阈值和恢复规则。',
+    states: '状态标签表：维护状态效果、持续时间、阻断技能和展示标签。',
+    identitySystem: '身份/礼法表：维护位阶、上下级关系、礼法限制、称呼和传令权限基础。',
+    relInit: '关系初始化表：维护开局关系、关系轴和人物初始社交结构。',
+    relationLabels: '关系标签表：维护友谊、姻缘、信任、服从/体恤等关系轴阶段和综合标签。',
+    ai: 'Utility AI 高级页：维护候选评分、作息锚点、日程权重和调试状态。',
+    interactions: '互动模板表：维护社交互动、使用条件、关系变化、状态效果和文案。',
+    multiInteract: '多人互动表：维护旁观、多人反应、传播和连锁互动规则。',
+    furnReact: '家具反应表：维护家具使用后的旁观反应、状态变化和连锁效果。',
+    narrativeRules: '叙事气泡表：维护触发条件、性格/需求/状态匹配、冷却和展示文案。',
+    questTemplates: '任务与传令表：维护任务模板、点名传令、群体传令、权限、条件和奖励。',
+    scenes: '场景配置表：维护地图场景、名称、范围、归属和策划标签。',
+    sceneAccess: '场景权限表：维护身份、任务、邀请、跟随和越界通行规则。',
+    io: '导入导出工具：用于保存、恢复、迁移、校验和热重载配置。',
+    dashboard: '配置总览：集中展示配置完整度、引用错误、最近改动和重点风险。',
+    legacy: '旧后台兜底：只在某个表格入口暂时不够用时回退使用。',
   };
   return `
     <div class="admin-v2-head">
@@ -405,6 +438,9 @@ function renderAdminV2Header(item) {
 }
 
 function renderAdminV2Section() {
+  if (ADMIN_V2_LEGACY_BRIDGES[adminV2Section]) {
+    return renderAdminV2LegacyBridge(ADMIN_V2_LEGACY_BRIDGES[adminV2Section]);
+  }
   if (adminV2Section === 'characters') return renderAdminV2CharacterEditor();
   if (adminV2Section === 'characterEditor') return renderAdminV2CharacterEditor();
   if (adminV2Section === 'furnitureTemplates') return renderAdminV2FurnitureTemplates();
@@ -418,9 +454,44 @@ function renderAdminV2Section() {
   if (adminV2Section === 'questTemplates') return renderAdminV2QuestTemplates();
   if (adminV2Section === 'dashboard') return renderAdminV2Dashboard();
   if (adminV2Section === 'legacy') {
-    return `<div class="admin-v2-empty">旧后台已完整保留。点击右上角「旧后台」会切回原来的多标签配置面板。</div>`;
+    return `<div class="admin-v2-empty">旧后台作为历史兜底入口保留。常用配置已接入后台 v2 左侧导航；若某个旧编辑器还没原生化，可暂时从这里回退。</div>`;
   }
-  return `<div class="admin-v2-empty">这个模块还没迁移。旧后台仍可用，等家具样板稳定后再按同一套表格/详情结构搬过来。</div>`;
+  return `<div class="admin-v2-empty">这个模块尚未登记到后台 v2。请先补导航映射，再接入对应配置编辑器。</div>`;
+}
+
+function renderAdminV2LegacyBridge(tabId) {
+  adminTab = tabId;
+  const notes = {
+    specialties: '表格式配置入口：适合批量维护人物性格标签、行为倾向和 AI 可读性格。',
+    lifePath: '表格式配置入口：适合维护职业/命运路径、阶段、声望和路径任务。',
+    needs: '表格式配置入口：适合维护六需求定义、衰退、展示和恢复规则。',
+    states: '表格式配置入口：适合维护状态效果、阻断技能、持续时间和状态标签。',
+    relInit: '表格式配置入口：适合维护开局人物关系、方向性关系轴和初始社交结构。',
+    interTpl: '表格式配置入口：适合维护社交互动模板、条件、效果和文案。',
+    multiInteract: '表格式配置入口：适合维护旁观、多人反应和扩散规则。',
+    furnReact: '表格式配置入口：适合维护家具使用后的旁观与连锁反应。',
+    scenes: '表格式配置入口：适合维护地图场景、名称、范围和归属。',
+    sceneAccess: '表格式配置入口：适合维护身份、任务、邀请和跟随的通行规则。',
+    io: '配置工具入口：用于保存、恢复、迁移、校验和热重载。',
+  };
+  const renderers = {
+    specialties: () => renderConfigCrudAdmin('specialties'),
+    lifePath: () => renderConfigCrudAdmin('lifePath'),
+    needs: () => renderConfigCrudAdmin('needs'),
+    states: () => renderConfigCrudAdmin('states'),
+    relInit: () => renderRelInitAdmin(),
+    interTpl: () => renderInterTplAdmin(),
+    multiInteract: () => renderMultiInteractAdmin(),
+    furnReact: () => renderFurnitureReactionAdmin(),
+    scenes: () => renderSceneAdmin(),
+    sceneAccess: () => renderSceneAccessAdmin(),
+    io: () => renderIOAdmin(),
+  };
+  const body = renderers[tabId]?.() || '<div class="admin-v2-empty">此模块暂未找到旧后台渲染器。</div>';
+  return `<section class="admin-v2-bridge">
+    <div class="logic-muted" style="margin-bottom:8px">${escapeHtml(notes[tabId] || '此模块已接入后台 v2。')}</div>
+    ${body}
+  </section>`;
 }
 
 function enumTags(items) {
@@ -2206,8 +2277,8 @@ function renderQuestAdmin() {
   const servantRoutineCount = (qc.servantConfig?.dutyRoutines || []).length;
   return `
     <p style="color:var(--jn-text-soft);margin-bottom:8px;line-height:1.5">
-      可插拔任务系统：身份分层差遣（issuePermissions + issuerRelationRequired）与日常时辰表。
-      玩家点击人物菜单「差遣」下发；进度监听家具/互动/跟随；AI 按权限随机下发。
+      可插拔任务系统：身份分层传令（issuePermissions + issuerRelationRequired）与日常时辰表。
+      玩家通过「传令」面板点名或群体下发；进度监听家具/互动/跟随；AI 按权限随机下发。
     </p>
     <div class="cfg-grid">
       <div class="cfg-field"><label>总开关</label><input id="qc-master" type="checkbox" ${qc.masterEnabled !== false ? 'checked' : ''}></div>
@@ -2672,6 +2743,16 @@ function furnitureTemplateAssetKey(id, tpl) {
   return `furn_${id}_${base}`;
 }
 
+function furnitureTemplateSpriteDef(id) {
+  if (typeof AssetSystem === 'undefined' || !AssetSystem.furnitureSpriteDef) return null;
+  return AssetSystem.furnitureSpriteDef(id);
+}
+
+function furnitureTemplateSpritePath(id, tpl) {
+  const def = furnitureTemplateSpriteDef(id);
+  return def?.src || `assets/furnitures/<${tpl?.name || id}>_1.png`;
+}
+
 function furnitureAiPrompt(id, tpl) {
   const size = `${tpl.gridW || 1}x${tpl.gridH || 1}`;
   const lifeLine = getFurnitureConfig().lifeLineLabels?.[tpl.lifeLine] || tpl.lifeLine || '未分类';
@@ -2713,7 +2794,7 @@ function buildFurnitureAiAssetBrief() {
         lifeLineLabel: getFurnitureConfig().lifeLineLabels?.[tpl.lifeLine] || '',
         essential: tpl.essential === true,
         grid: { w: tpl.gridW || 1, h: tpl.gridH || 1, entryOffset: tpl.entryOffset || [0, 1] },
-        recommendedPng: `assets/furniture/${assetKey}.png`,
+        recommendedPng: furnitureTemplateSpritePath(id, tpl),
         recommendedCanvasPx: {
           width: Math.max(128, (tpl.gridW || 1) * 128),
           height: Math.max(128, (tpl.gridH || 1) * 128),
@@ -2732,7 +2813,7 @@ function buildFurnitureAiAssetBrief() {
     });
   return {
     version: 1,
-    purpose: '家具 AI 素材生成清单；生成后按 recommendedPng 命名，回填到 assets/manifest.json 的 furnitureSprites。',
+    purpose: '家具 AI 素材生成清单；游戏站位图优先读取 assets/manifest.json 的 furniture.sprites，正面图使用 _1 结尾文件。',
     styleGuide: [
       '透明背景 PNG',
       '单件家具，不要人物，不要文字，不要水印',
@@ -2741,8 +2822,10 @@ function buildFurnitureAiAssetBrief() {
       '材质要能看出木、竹、石、水、织物；整体低饱和，避免现代感',
     ],
     manifestTargetShape: {
-      furnitureSprites: {
-        '<assetKey>': { src: 'assets/furniture/<assetKey>.png', anchor: 'bottom-center', fit: 'contain' },
+      furniture: {
+        sprites: {
+          '<templateId>': { src: 'assets/furnitures/<分类>/<名称>_1.png', anchor: 'bottom-center', fit: 'contain' },
+        },
       },
     },
     templates,
@@ -3131,6 +3214,7 @@ function renderAdminV2FurnitureTemplateDrawer() {
   if (!tpl) return `<aside class="furniture-detail-panel"><h4>未选中家具</h4></aside>`;
   const usage = furnitureUsageSummaryByTemplate(adminV2SelectedTpl);
   const assetKey = furnitureTemplateAssetKey(adminV2SelectedTpl, tpl);
+  const spritePath = furnitureTemplateSpritePath(adminV2SelectedTpl, tpl);
   const prompt = furnitureAiPrompt(adminV2SelectedTpl, tpl);
   return `<aside class="furniture-detail-panel">
     <div class="furniture-detail-head">
@@ -3141,7 +3225,7 @@ function renderAdminV2FurnitureTemplateDrawer() {
       </div>
     </div>
     <div class="furniture-detail-grid">
-      <div class="furniture-detail-field"><label>推荐文件</label><b>${escapeHtml(`assets/furniture/${assetKey}.png`)}</b></div>
+      <div class="furniture-detail-field"><label>推荐文件</label><b>${escapeHtml(spritePath)}</b></div>
       <div class="furniture-detail-field"><label>推荐尺寸</label><b>${Math.max(128, (tpl.gridW || 1) * 128)}×${Math.max(128, (tpl.gridH || 1) * 128)}</b></div>
       <div class="furniture-detail-field"><label>地图摆放</label><b>${usage.count} 处</b></div>
       <div class="furniture-detail-field"><label>出现房间</label><b>${escapeHtml(usage.scenes.map(s => `${s.name}×${s.count}`).join('、') || '未摆放')}</b></div>
@@ -3206,6 +3290,7 @@ function renderAdminV2FurnitureInstanceDrawer() {
   const tpl = CONFIG.furnitureTemplates?.[inst.templateId];
   const scene = getScene?.(inst.sceneId);
   const assetKey = tpl ? furnitureTemplateAssetKey(inst.templateId, tpl) : '';
+  const spritePath = tpl ? furnitureTemplateSpritePath(inst.templateId, tpl) : '';
   return `<aside class="furniture-detail-panel">
     <div class="furniture-detail-head">
       <div class="furniture-detail-icon">${escapeHtml(tpl?.icon || '具')}</div>
@@ -3216,7 +3301,7 @@ function renderAdminV2FurnitureInstanceDrawer() {
     </div>
     <div class="furniture-detail-grid">
       <div class="furniture-detail-field"><label>素材 key</label><b>${escapeHtml(assetKey || '—')}</b></div>
-      <div class="furniture-detail-field"><label>推荐文件</label><b>${escapeHtml(assetKey ? `assets/furniture/${assetKey}.png` : '—')}</b></div>
+      <div class="furniture-detail-field"><label>推荐文件</label><b>${escapeHtml(spritePath || '—')}</b></div>
       <div class="furniture-detail-field"><label>占地</label><b>${escapeHtml(tpl ? `${tpl.gridW || 1}×${tpl.gridH || 1}` : '—')}</b></div>
       <div class="furniture-detail-field"><label>坐标</label><b>${escapeHtml(`${inst.anchorCol}, ${inst.anchorRow}`)}</b></div>
     </div>
@@ -4697,7 +4782,7 @@ function adminV2AddQuestTemplate() {
   qc.templates[id] = {
     id: +id,
     name: '新任务模板',
-    category: qc.categories?.[0] || '差遣',
+    category: qc.categories?.[0] || '传令',
     questType: 'directive',
     targetScope: 'single',
     issuerRoles: [],

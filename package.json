@@ -2,7 +2,7 @@
   "name": "dayuan-game",
   "version": "1.0.0",
   "private": true,
-  "description": "大观园 · 像素人生 — 本地/局域网/远程可访问的静态游戏服务",
+  "description": "大观园模拟 — 本地/局域网/远程可访问的静态游戏服务",
   "type": "module",
   "engines": {
     "node": ">=18"
@@ -10,6 +10,12 @@
   "scripts": {
     "start": "node serve.mjs",
     "start:local": "BIND_LOCAL=1 node serve.mjs",
+    "test:config": "node tests/config/validate-config.mjs",
+    "test:smoke": "node tests/smoke/smoke-ui.mjs",
+    "test:admin": "node tests/smoke/smoke-admin.mjs",
+    "test:command": "node tests/smoke/smoke-command-panel.mjs",
+    "test:scenario": "node tests/scenarios/run-all.mjs",
+    "test:release": "npm run test:config && npm run test:smoke && npm run test:admin && npm run test:command && npm run test:scenario",
     "test:economy": "node scripts/test-economy.mjs",
     "test:needs": "node scripts/test-need-adaptation.mjs",
     "test:need-states": "node scripts/test-need-states.mjs",

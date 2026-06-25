@@ -1,0 +1,290 @@
+{
+  "name": "配置体检",
+  "startedAt": "2026-06-25T08:32:11.924Z",
+  "finishedAt": "2026-06-25T08:32:11.934Z",
+  "counts": {
+    "PASS": 55,
+    "WARN": 0,
+    "FAIL": 0
+  },
+  "ok": true,
+  "checks": [
+    {
+      "status": "PASS",
+      "message": "关键文件存在：index.html",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "关键文件存在：package.json",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "关键文件存在：js/config.js",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "关键文件存在：js/ui.js",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "关键文件存在：js/ai.js",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "关键文件存在：js/systems/quest.js",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "关键文件存在：js/systems/quest-issue.js",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "关键文件存在：js/systems/servant-relations.js",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "关键文件存在：js/systems/relation.js",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "关键文件存在：prd/系统架构依赖图.md",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "关键文件存在：prd/持续更新_03任务.md",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "关键文件存在：prd/持续更新_23传令与上下级管理面板.md",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "关键文件存在：prd/持续更新_22人物作息.md",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "index.html 注册了前台脚本",
+      "details": {
+        "count": 46
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "config.js 在 quest.js 之前加载",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "quest.js 在 quest-issue.js 之前加载",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "servant-relations.js 在 ai.js 之前加载",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "ai.js 在 ui.js 之前加载",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "config.js 包含配置标记：characters",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "config.js 包含配置标记：scenes",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "config.js 包含配置标记：templates",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "config.js 包含配置标记：questConfig",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "config.js 包含配置标记：servantConfig",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "config.js 包含配置标记：followRotations",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "config.js 包含配置标记：dutyRoutines",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "config.js 包含配置标记：relationPanelConfig",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "config.js 包含配置标记：needDefs",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "ui.js 包含 UI 标记：buildCommandPanel",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "ui.js 包含 UI 标记：openCommandPanel",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "ui.js 包含 UI 标记：commandPanelRelationSignals",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "ui.js 包含 UI 标记：routineProfileForSave",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "ui.js 包含 UI 标记：routineEditorIsProjectionBlock",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "ai.js 包含 AI/起居标记：getRoutineProfileForCharacter",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "ai.js 包含 AI/起居标记：mergeRoutineProjectionBlocks",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "ai.js 包含 AI/起居标记：calcRoutineFactor",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "ai.js 包含 AI/起居标记：calcScheduleFactor",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "ai.js 包含 AI/起居标记：routineProjectionBlocksForCharacter",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "quest-issue.js 包含传令标记：QuestIssueSystem",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "quest-issue.js 包含传令标记：checkQuestIssueable",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "quest-issue.js 包含传令标记：checkGroupQuestIssueable",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "quest-issue.js 包含传令标记：issueTo",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "quest-issue.js 包含传令标记：issueGroupTo",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "关系系统暴露 getRelationAxis",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "关系系统包含服从 submission 方向性轴",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "架构图包含：传令",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "架构图包含：服从",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "架构图包含：起居",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "架构图包含：QuestSystem",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "架构图包含：Utility AI",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "package.json 包含脚本：test:config",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "package.json 包含脚本：test:smoke",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "package.json 包含脚本：test:admin",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "package.json 包含脚本：test:command",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "package.json 包含脚本：test:scenario",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "package.json 包含脚本：test:release",
+      "details": {}
+    }
+  ]
+}

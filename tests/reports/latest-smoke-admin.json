@@ -1,0 +1,143 @@
+{
+  "name": "后台 v2 冒烟",
+  "startedAt": "2026-06-25T08:32:18.401Z",
+  "finishedAt": "2026-06-25T08:32:23.757Z",
+  "counts": {
+    "PASS": 12,
+    "WARN": 0,
+    "FAIL": 0
+  },
+  "ok": true,
+  "checks": [
+    {
+      "status": "PASS",
+      "message": "服务可访问：http://127.0.0.1:8765/",
+      "details": {
+        "status": 200
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "Playwright 使用备用依赖路径加载",
+      "details": {
+        "dir": "../../../.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules"
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "后台 overlay 已打开",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "后台分组存在：人物配置",
+      "details": {
+        "groupTitles": [
+          "总览",
+          "人物配置",
+          "关系与身份",
+          "任务与传令",
+          "行为规则",
+          "世界配置",
+          "AI 与调试"
+        ]
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "后台分组存在：关系与身份",
+      "details": {
+        "groupTitles": [
+          "总览",
+          "人物配置",
+          "关系与身份",
+          "任务与传令",
+          "行为规则",
+          "世界配置",
+          "AI 与调试"
+        ]
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "后台分组存在：任务与传令",
+      "details": {
+        "groupTitles": [
+          "总览",
+          "人物配置",
+          "关系与身份",
+          "任务与传令",
+          "行为规则",
+          "世界配置",
+          "AI 与调试"
+        ]
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "后台分组存在：行为规则",
+      "details": {
+        "groupTitles": [
+          "总览",
+          "人物配置",
+          "关系与身份",
+          "任务与传令",
+          "行为规则",
+          "世界配置",
+          "AI 与调试"
+        ]
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "后台分组存在：世界配置",
+      "details": {
+        "groupTitles": [
+          "总览",
+          "人物配置",
+          "关系与身份",
+          "任务与传令",
+          "行为规则",
+          "世界配置",
+          "AI 与调试"
+        ]
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "后台分组存在：AI 与调试",
+      "details": {
+        "groupTitles": [
+          "总览",
+          "人物配置",
+          "关系与身份",
+          "任务与传令",
+          "行为规则",
+          "世界配置",
+          "AI 与调试"
+        ]
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "后台 v2 导航项已补齐",
+      "details": {
+        "navCount": 23
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "后台 v2 导航点击后主区域存在",
+      "details": {
+        "broken": []
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "页面无致命 JS pageerror",
+      "details": {
+        "pageErrors": []
+      }
+    }
+  ]
+}

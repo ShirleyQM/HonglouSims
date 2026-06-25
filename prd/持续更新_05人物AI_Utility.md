@@ -2,6 +2,49 @@
 
 > AI 与梦想系统的统一分层方案见 `持续更新_19_AI与梦想系统联动.md`。本文继续作为 Utility、作息、候选评分和 AI 行为质量的专项文档。
 
+## 2026-06-25 置顶补充：起居覆盖层与 Utility AI 兜底合并
+
+起居系统已经并入 Utility AI 的候选评分链，不再作为独立脚本执行层。当前口径如下：
+
+- 新起居 profile block 是当前时段的显式覆盖层；当前时段存在新起居块时，只返回新起居锚点。
+- 当前时段没有新起居块时，旧 `routineAnchors` 作为第一层兜底。
+- 当前时段没有新起居块且没有旧 `routineAnchors` 命中时，旧 `scheduleWindows` 转换为宽泛起居锚点作为第二层兜底。
+- `calcScheduleFactor` 不再独立乘入最终权重，固定返回 `factor=1`；`scheduleWindow` 仅保留兜底来源诊断。
+- 起居、旧基础作息、旧日程窗口最终都只通过统一的 `routineFactor` 影响候选，避免新起居、旧作息、旧日程三套权重重复叠乘。
+
+### 起居锚点与候选匹配
+
+每个起居活动最终会转换为同一种 routine anchor。需求、技能、职业活动都使用统一字段接入：
+
+| 字段 | Utility AI 用途 |
+|---|---|
+| `completeBy.categories` | 匹配家具候选的 `category`、家具模板类别，以及社交互动候选的 `category`。 |
+| `completeBy.tags` | 匹配候选 `tags`、需求恢复标签、社交标签。 |
+| `needs` | 参与需求压力计算，低需求会放大未完成锚点。 |
+| `boost/cut/completeCut` | 进入 `calcRoutineFactor` 的乘法加权与完成后抑制。 |
+| `requiredProfessions` | 职业身份接入口；不满足时降低匹配收益。 |
+| `requiredSkills` | 技能系统接入口；不满足时降低匹配收益。 |
+| `requiredFurniture` | 家具互动接入口；用于约束或强调指定家具类型。 |
+
+实际候选来源保持不变：家具 provider 继续产出 `furniture` 候选，社交 provider 继续产出 `interaction/seek` 候选。起居层只在 `finalizeCandidate` 阶段根据当前锚点调用 `candMatchesRoutineAnchor` 和 `calcRoutineFactor` 调整权重。
+
+### 需求活动验收结果
+
+本轮已用本地运行时验证以下链路：
+
+| 起居活动 | 实际候选 | 匹配口径 | 验证结果 |
+|---|---|---|---|
+| 早餐 `routine_meal_breakfast` | 家具候选 `category=meal`、`tags=hunger` | `completeBy.categories=meal/kitchen`，`completeBy.tags=hunger` | `routineFactor=5.5`，`scheduleFactor=1`。 |
+| 梳洗 `routine_hygiene` | 家具候选 `category=bath`、`tags=hygiene` | `completeBy.categories=bath/wash/wardrobe`，`completeBy.tags=hygiene` | `routineFactor≈3.84`，`scheduleFactor=1`。 |
+| 请安 `routine_visit` | 社交互动候选 `category=xujiu`、`tags=social` | `completeBy.categories=xujiu/weijie/chuanqing`，`completeBy.tags=social` | `routineFactor=1.6`，`scheduleFactor=1`。 |
+| 就寝 `routine_sleep_night` | 家具候选 `category=bed`、`tags=sleep/energy` | `completeBy.categories=bed/rest`，`completeBy.tags=sleep/energy` | 跨日 `22:00-06:00` 命中，`routineFactor=5.5`。 |
+
+兜底链路也已验证：
+
+- 新起居就寝时段命中 `routine_sleep_night`，`fallbackType=null`，旧日程不再额外叠乘。
+- 空白 profile 下旧 `routineAnchors` 命中 `morning_hygiene/breakfast`，`fallbackType=routineAnchor`。
+- 临时清空旧 `routineAnchors` 后，旧 `scheduleWindows` 可转为 `schedule_night_rest`，`fallbackType=scheduleWindow`，并标记 `isCompletable=false`，不参与活动完成结算。
+
 ## 2026-06-21 置顶补充：基础作息 PRD
 
 本节定义“AI 日常作息层”的严格口径。它是框架型优化，不为宝玉、黛玉等单个人物写死剧本；人物差异来自通用性格、人物专属性格、身份任务、关系和需求系数。该层只影响 AI 自主行为的候选权重、解释日志和模拟评估，不限制玩家手动操作。
@@ -198,6 +241,8 @@ finalWeight = baseWeight
             × needDriveFactor // 交游/心绪等核心需求牵引
             × satiationFactor // 需求已满足时压低继续使用家具
             × failedActionFactor // 失败候选短期冷却
+            × scheduleFactor  // 当前固定为 1，仅保留旧日程兜底诊断
+            × routineFactor   // 新起居/旧基础作息/旧日程兜底统一加权
 ```
 
 ### 候选类型（`buildCandidatePool`）

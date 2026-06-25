@@ -1,0 +1,103 @@
+{
+  "name": "传令面板冒烟",
+  "startedAt": "2026-06-25T08:32:24.632Z",
+  "finishedAt": "2026-06-25T08:32:29.420Z",
+  "counts": {
+    "PASS": 11,
+    "WARN": 1,
+    "FAIL": 0
+  },
+  "ok": true,
+  "checks": [
+    {
+      "status": "PASS",
+      "message": "服务可访问：http://127.0.0.1:8765/",
+      "details": {
+        "status": 200
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "Playwright 使用备用依赖路径加载",
+      "details": {
+        "dir": "../../../.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules"
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "传令面板 overlay 已打开",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "传令面板存在",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "点名传令栏存在",
+      "details": {
+        "paneTitles": [
+          "点名传令",
+          "群体传令"
+        ]
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "群体传令栏存在",
+      "details": {
+        "paneTitles": [
+          "点名传令",
+          "群体传令"
+        ]
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "点名传令存在可选对象",
+      "details": {
+        "targetCount": 3
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "候选卡展示关系/接受信号",
+      "details": {
+        "targetText": "袭人\n      当值·贴身丫鬟贴身丫鬟服从40信任42预计中职责内\n      任务1 | 晴雯\n      房中丫鬟服从60信任34预计中职责内\n      空闲 | 麝月\n      房中丫鬟服从60信任35预计中职责内\n      空闲"
+      }
+    },
+    {
+      "status": "WARN",
+      "message": "当前角色没有可用群体传令项",
+      "details": {
+        "groupCount": 0
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "当值令角标能打开传令面板",
+      "details": {}
+    },
+    {
+      "status": "PASS",
+      "message": "当值令角标会预选人物",
+      "details": {
+        "hasCommandPanel": true,
+        "checkedTargets": [
+          "xiren"
+        ],
+        "activeNames": [
+          "袭人"
+        ]
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "页面无致命 JS pageerror",
+      "details": {
+        "pageErrors": []
+      }
+    }
+  ]
+}

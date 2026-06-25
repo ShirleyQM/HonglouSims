@@ -3,7 +3,7 @@ function toScreenX(x) { return x - camX; }
 function toScreenY(y) { return y - camY; }
 
 function drawWorld() {
-  ctx.fillStyle = '#d8e8d0';
+  ctx.fillStyle = '#deded8';
   ctx.fillRect(0, 0, VIEW_W, VIEW_H);
   for (const sc of CONFIG.scenes) {
     const x0 = sc.originCol * CELL, y0 = sc.originRow * CELL;
@@ -21,15 +21,13 @@ function drawWorld() {
         const px = toScreenX(gc * CELL), py = toScreenY(gr * CELL);
         if (px + CELL < 0 || py + CELL < 0 || px > VIEW_W || py > VIEW_H) continue;
         const gt = cell.ground;
-        const tile = (typeof AssetSystem !== 'undefined') ? AssetSystem.getGroundTile(gt, sc) : null;
+        const tile = gt === 'corridor' && typeof AssetSystem !== 'undefined' ? AssetSystem.getGroundTile(gt, sc) : null;
         if (tile) {
           ctx.drawImage(tile, px, py);
           if ((gc + gr) % 2) { ctx.fillStyle = 'rgba(0,0,0,.06)'; ctx.fillRect(px, py, CELL, CELL); }
         } else {
-          if (gt === 'grass') ctx.fillStyle = ((gc + gr) % 2 === 0) ? '#7aab72' : '#6a9a66';
-          else if (gt === 'corridor') ctx.fillStyle = '#a89888';
-          else if (gt === 'stone') ctx.fillStyle = ((gc + gr) % 2 === 0) ? '#8ab088' : '#7aa076';
-          else ctx.fillStyle = ((gc + gr) % 2 === 0) ? sc.bg : sc.bgAlt;
+          if (gt === 'corridor') ctx.fillStyle = '#a89888';
+          else ctx.fillStyle = '#eadfba';
           ctx.fillRect(px, py, CELL, CELL);
         }
       }
@@ -90,6 +88,13 @@ function drawFurnitureInstances() {
     const w = tpl.gridW * CELL, h = tpl.gridH * CELL;
     if (x + w < 0 || y + h < 0 || x > VIEW_W || y > VIEW_H) continue;
     const roomMode = !!(typeof AssetSystem !== 'undefined' && AssetSystem.roomBackgroundForScene?.(inst.sceneId));
+    const spriteImg = (typeof AssetSystem !== 'undefined' && AssetSystem.furnitureImageForTemplate)
+      ? AssetSystem.furnitureImageForTemplate(inst.templateId) : null;
+    if (spriteImg) {
+      const spriteDef = AssetSystem.furnitureSpriteDef?.(inst.templateId) || {};
+      drawFurnitureSprite(inst, tpl, x, y, w, h, spriteImg, spriteDef, roomMode);
+      continue;
+    }
     if (roomMode) {
       drawFurnitureHotspot(inst, tpl, x, y, w, h);
       continue;
@@ -121,6 +126,54 @@ function drawFurnitureInstances() {
     ctx.font = '10px "Microsoft YaHei", "PingFang SC", sans-serif';
     ctx.fillText(`${tpl.name} ${tpl.duration}s`, x + w / 2, y + h + 12);
   }
+}
+
+function drawFurnitureSprite(inst, tpl, x, y, w, h, img, def, roomMode) {
+  const rt = FURN_RT[inst.instanceId];
+  const occupied = rt?.users?.length > 0;
+  const hover = hoverInst === inst.instanceId;
+  const minW = Math.max(w, CELL * 2);
+  const minH = Math.max(h, CELL * 2);
+  const maxW = minW * (def.scaleW || def.scale || 1);
+  const maxH = minH * (def.scaleH || def.scale || 1);
+  const scale = Math.min(maxW / img.width, maxH / img.height);
+  const dw = Math.max(1, img.width * scale);
+  const dh = Math.max(1, img.height * scale);
+  const dx = Math.round(x + w / 2 - dw / 2 + (def.offsetX || 0));
+  const dy = Math.round(y + h - dh + (def.offsetY || 0));
+  const cx = x + w / 2;
+  const footY = y + h - 2;
+
+  ctx.save();
+  ctx.fillStyle = roomMode ? 'rgba(0,0,0,.26)' : 'rgba(0,0,0,.18)';
+  ctx.beginPath();
+  ctx.ellipse(cx, footY, Math.max(10, w * 0.44), Math.max(3, h * 0.12), 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(img, dx, dy, dw, dh);
+
+  if (hover || occupied) {
+    ctx.strokeStyle = hover ? '#a8843a' : '#a65d5d';
+    ctx.lineWidth = hover ? 2 : 1.5;
+    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+  }
+  if (hover) {
+    ctx.font = '11px "Microsoft YaHei", "PingFang SC", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    const label = tpl.name;
+    const tw = ctx.measureText(label).width + 12;
+    const lx = Math.max(2, Math.min(VIEW_W - tw - 2, cx - tw / 2));
+    const ly = Math.min(VIEW_H - 22, Math.max(2, y + h + 5));
+    ctx.fillStyle = 'rgba(250,248,244,.94)';
+    ctx.strokeStyle = 'rgba(92,64,51,.72)';
+    ctx.lineWidth = 1;
+    ctx.fillRect(lx, ly, tw, 18);
+    ctx.strokeRect(lx, ly, tw, 18);
+    ctx.fillStyle = '#3d3028';
+    ctx.fillText(label, lx + tw / 2, ly + 13);
+  }
+  ctx.restore();
 }
 
 function drawFurnitureHotspot(inst, tpl, x, y, w, h) {
@@ -353,11 +406,6 @@ function drawCharOverlays(c, x, y, sel, topY) {
   if (social) {
     ctx.font = '12px serif';
     ctx.fillText(social.action.autoSocial ? '💬' : '◌', x + 11, topY - 5);
-  }
-  if (!sel && c.ai && c.ai.state !== AI_STATE.IDLE && c.ai.state !== AI_STATE.PAUSED) {
-    ctx.fillStyle = '#7a6b5c';
-    ctx.font = '8px "Microsoft YaHei", "PingFang SC", sans-serif';
-    ctx.fillText(c.ai.state.slice(0, 3), x, topY - 16);
   }
   ctx.font = '11px "Microsoft YaHei", "PingFang SC", sans-serif';
   if (sel) {

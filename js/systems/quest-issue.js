@@ -1,5 +1,5 @@
 /* ═══════════════════ QUEST ISSUE (身份分层任务下发) ═══════════════════
- * 单人差遣 + 群体传令。配置：issuePermissions、targetScope、groupFilter
+ * 点名传令 + 群体传令。配置：issuePermissions、targetScope、groupFilter
  */
 const QuestIssueSystem = (() => {
   const BLOCKED_RELS = new Set([
@@ -35,15 +35,15 @@ const QuestIssueSystem = (() => {
   }
 
   function issuerMayIssueTo(issuerId, targetId) {
-    if (issuerId === targetId) return { ok: false, reason: '不能差遣自己' };
+    if (issuerId === targetId) return { ok: false, reason: '不能传令给自己' };
     const perm = getIssuerPermission(issuerId);
     if (!perm?.targetRelations?.length) {
-      return { ok: false, reason: '你的身份无法差遣他人' };
+      return { ok: false, reason: '你的身份无法传令他人' };
     }
     const rel = getHierarchyRel(issuerId, targetId);
     if (BLOCKED_RELS.has(rel)) return { ok: false, reason: '礼法不合' };
     if (!perm.targetRelations.includes(rel)) {
-      return { ok: false, reason: '你的身份无法差遣此人' };
+      return { ok: false, reason: '你的身份无法传令此人' };
     }
     if (rel === 'master_to_servant' && typeof ServantRelationSystem !== 'undefined') {
       const gate = ServantRelationSystem.checkQuestAuthority(issuerId, targetId, null);
@@ -181,13 +181,13 @@ const QuestIssueSystem = (() => {
       const servantGate = typeof ServantRelationSystem !== 'undefined'
         ? ServantRelationSystem.checkQuestAuthority(issuer.id, target.id, tpl)
         : null;
-      return { ok: false, reason: servantGate && !servantGate.ok ? servantGate.reason : '此类差遣不在权限内' };
+      return { ok: false, reason: servantGate && !servantGate.ok ? servantGate.reason : '此类传令不在权限内' };
     }
     if (!templateMatchesHierarchy(tpl, issuer.id, target.id)) {
       return { ok: false, reason: '此任务不合双方身份' };
     }
     if (QuestSystem?.canIssue && !QuestSystem.canIssue(tpl.id, issuer.id, target.id)) {
-      return { ok: false, reason: '冷却中或已有同类差遣' };
+      return { ok: false, reason: '冷却中或已有同类传令' };
     }
     if (tpl.issuerRelationMin != null && typeof getRelationValue === 'function') {
       const score = getRelationValue(issuer.id, target.id);
@@ -206,7 +206,7 @@ const QuestIssueSystem = (() => {
     if (!isGroupTemplate(tpl)) return { ok: false, reason: '非群体任务' };
     if (!qc().masterEnabled) return { ok: false, reason: '任务系统未启用' };
     if (!issuerMayIssueGroup(issuer.id)) {
-      return { ok: false, reason: '你的身份不可传令全府' };
+      return { ok: false, reason: '你的身份不可群体传令' };
     }
     if (!issuerMayUseCategory(issuer.id, null, tpl)) {
       return { ok: false, reason: '此类传令不在权限内' };
@@ -292,7 +292,7 @@ const QuestIssueSystem = (() => {
     }
     const inst = QuestSystem?.issueOne?.(templateId, issuer.id, target.id);
     if (inst) {
-      log(`${issuer.short}吩咐${target.short}：「${tpl.name}」`);
+      log(`${issuer.short}传令${target.short}：「${tpl.name}」`);
       if (NarrativeBubbleSystem?.showBubble) {
         const away = issuer.sceneId !== target.sceneId;
         const line = tpl.id === 1021 || away ? '这就来。' : '这就去办。';

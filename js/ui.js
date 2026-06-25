@@ -3,6 +3,11 @@ const charDetailScrollById = {};
 let llmToggleBusy = false;
 let llmToggleMessage = '';
 let questRailCollapsed = true;
+let routineEditorState = null;
+let routineDragState = null;
+let routineTemplatePickerState = null;
+let routineContextMenuState = null;
+let routinePanelDocumentCloseHandler = null;
 
 const HUD_NEED_ORDER = ['mood', 'energy', 'hunger', 'hygiene', 'social', 'fun'];
 const NEED_DISPLAY_FALLBACK = {
@@ -273,10 +278,10 @@ function buildColFamily() {
     const debuff = c.activeStates.some(s => getStateTagClass(s.id) === 'debuff');
     const traitHint = (CharSpecialtySystem?.getDisplayTraits?.(c) || [])[0] || '';
     const duty = dutyByCharId.get(charId);
-    const dutyTitle = duty ? ` · 当值：${duty.contract.role}，点标记派任务` : '';
+    const dutyTitle = duty ? ` · 当值：${duty.contract.role}，点标记选中人物` : '';
     return `<div class="member-av${i === selectedIdx ? ' active' : ''}${debuff ? ' has-debuff' : ''}${duty ? ' on-duty' : ''}" data-idx="${i}" title="${escapeHtml(c.name)}：${escapeHtml(c.statusText || '')}${traitHint ? ' · ' + traitHint : ''}${escapeHtml(dutyTitle)}">
       <span class="av-dot"></span>
-      ${duty ? `<button type="button" class="duty-mark" data-duty-idx="${i}" title="当值：${escapeHtml(duty.contract.role)} · 点击派任务">△</button>` : ''}
+      ${duty ? `<button type="button" class="duty-mark" data-duty-idx="${i}" title="今日当值：${escapeHtml(duty.contract.role)} · 点击打开传令并预选此人">令</button>` : ''}
       ${charAv48Html(c)}
       <div class="av-name">${escapeHtml(c.short)}</div>
       <div class="av-role">${escapeHtml(role)}${traitHint ? ' · ' + escapeHtml(traitHint) : ''}</div>
@@ -298,8 +303,7 @@ function buildColFamily() {
     mark.onclick = (e) => {
       e.stopPropagation();
       const idx = +mark.dataset.dutyIdx;
-      const rect = mark.getBoundingClientRect();
-      openQuestIssueMenu(idx, rect.left + rect.width / 2, rect.top + rect.height / 2, e.shiftKey);
+      openCommandPanel({ targetIdx: idx });
     };
   });
 }
@@ -391,61 +395,222 @@ function buildColQuests() {
   });
 }
 
-function buildGroupIssuePanel() {
-  const issuer = CHARS[selectedIdx];
-  const items = QuestIssueSystem?.getAvailableGroupQuests?.(issuer) || [];
-  if (!items.length) {
-    return `<h3>传令全府</h3><p style="color:var(--jn-text-soft)">当前身份无可传令的群体任务，或暂无符合条件者。</p>
-      <button class="sys-btn" onclick="document.getElementById('panel-overlay').classList.remove('open')">关闭</button>`;
+let commandPanelState = { targetIds: [], singleTemplateId: 0, groupTemplateId: 0 };
+
+function commandPanelSourceLabels(issuer, target) {
+  const labels = [];
+  const duty = (ServantRelationSystem?.todayFollowForMaster?.(issuer?.id) || [])
+    .find(row => row.charId === target?.id);
+  const contract = ServantRelationSystem?.getDirectContract?.(issuer?.id, target?.id);
+  const rel = IdentityProtocolSystem?.getHierarchyRelation?.(issuer?.id, target?.id);
+  if (duty) labels.push(`当值${duty.contract?.role ? '·' + duty.contract.role : ''}`);
+  if (contract) labels.push(contract.role || '直属仆从');
+  if (!labels.length && rel === 'master_to_servant') labels.push('主仆');
+  if (!labels.length && rel === 'parent_to_child') labels.push('长辈');
+  if (!labels.length && rel === 'senior_servant_to_junior') labels.push('管事');
+  if (!labels.length) labels.push(rel || '可传令');
+  return [...new Set(labels)];
+}
+
+function commandPanelRelationSignals(issuer, target, load = 0) {
+  const rel = IdentityProtocolSystem?.getHierarchyRelation?.(issuer?.id, target?.id) || '';
+  const submission = typeof getRelationAxis === 'function'
+    ? Math.round(getRelationAxis(target?.id, issuer?.id, 'submission') || 0)
+    : 0;
+  const trust = typeof getRelationAxis === 'function'
+    ? Math.round(getRelationAxis(issuer?.id, target?.id, 'trust') || 0)
+    : 0;
+  const inDuty = rel === 'master_to_servant' && !!ServantRelationSystem?.getDirectContract?.(issuer?.id, target?.id);
+  let accept = '中';
+  if (submission >= 65 && trust >= 10 && load <= 1) accept = '高';
+  else if (submission < 15 || trust < -35 || load >= 3) accept = '低';
+  const tags = [];
+  if (rel === 'master_to_servant' || submission !== 0) tags.push(`服从${submission}`);
+  if (trust !== 0) tags.push(`信任${trust}`);
+  tags.push(`预计${accept}`);
+  if (inDuty) tags.push('职责内');
+  return { rel, submission, trust, accept, inDuty, tags };
+}
+
+function commandPanelFlatQuests(issuer, target) {
+  return (QuestIssueSystem?.getAvailableQuests?.(issuer, target) || [])
+    .flatMap(group => group.items || []);
+}
+
+function commandPanelSingleTargetRows(issuer) {
+  if (!issuer) return [];
+  return CHARS
+    .filter(ch => ch.id !== issuer.id)
+    .map(ch => {
+      const items = commandPanelFlatQuests(issuer, ch);
+      if (!items.length) return null;
+      const sources = commandPanelSourceLabels(issuer, ch);
+      const load = QuestSystem?.getActiveForChar?.(ch.id)?.length || 0;
+      const relationSignals = commandPanelRelationSignals(issuer, ch, load);
+      return { char: ch, items, sources, load, relationSignals };
+    })
+    .filter(Boolean);
+}
+
+function commandPanelCommonQuests(issuer, targetIds) {
+  const ids = (targetIds || []).filter(Boolean);
+  if (!issuer || !ids.length) return [];
+  let common = null;
+  const byId = new Map();
+  for (const id of ids) {
+    const target = getChar(id);
+    if (!target) continue;
+    const items = commandPanelFlatQuests(issuer, target);
+    const set = new Set(items.map(item => String(item.tpl.id)));
+    items.forEach(item => { if (!byId.has(String(item.tpl.id))) byId.set(String(item.tpl.id), item); });
+    common = common ? new Set([...common].filter(tid => set.has(tid))) : set;
   }
-  const rows = items.map(({ tpl, preview, count, deadline }, i) => `
-    <label class="gi-row" style="display:block;padding:8px;margin-bottom:6px;background:var(--jn-surface-deep);border:1px solid var(--jn-border-2);cursor:pointer;border-radius:6px">
-      <input type="radio" name="gi-tpl" value="${tpl.id}" ${i === 0 ? 'checked' : ''} style="margin-right:6px">
+  return [...(common || [])].map(id => byId.get(id)).filter(Boolean);
+}
+
+function commandPanelSelectedIds(rows) {
+  const valid = new Set(rows.map(row => row.char.id));
+  return (commandPanelState.targetIds || []).filter(id => valid.has(id));
+}
+
+function buildCommandPanel() {
+  const issuer = CHARS[selectedIdx];
+  const targetRows = commandPanelSingleTargetRows(issuer);
+  let selectedIds = commandPanelSelectedIds(targetRows);
+  if (!selectedIds.length && targetRows.length) selectedIds = [targetRows[0].char.id];
+  commandPanelState.targetIds = selectedIds;
+
+  const singleItems = commandPanelCommonQuests(issuer, selectedIds);
+  if (!singleItems.some(item => String(item.tpl.id) === String(commandPanelState.singleTemplateId))) {
+    commandPanelState.singleTemplateId = singleItems[0]?.tpl.id || 0;
+  }
+
+  const items = QuestIssueSystem?.getAvailableGroupQuests?.(issuer) || [];
+  if (!items.some(item => String(item.tpl.id) === String(commandPanelState.groupTemplateId))) {
+    commandPanelState.groupTemplateId = items[0]?.tpl.id || 0;
+  }
+
+  const targetHtml = targetRows.length ? targetRows.map(row => {
+    const checked = selectedIds.includes(row.char.id) ? 'checked' : '';
+    const tags = [...row.sources, ...(row.relationSignals?.tags || [])]
+      .map(s => `<span>${escapeHtml(s)}</span>`).join('');
+    return `<label class="command-target ${checked ? 'active' : ''}">
+      <input type="checkbox" data-command-target="${escapeAttr(row.char.id)}" ${checked}>
+      ${charAv48Html(row.char)}
+      <b>${escapeHtml(row.char.short)}</b>
+      <small>${tags}</small>
+      <em>${row.load ? `任务${row.load}` : '空闲'}</em>
+    </label>`;
+  }).join('') : `<div class="command-empty">当前人物暂无可点名传令对象。</div>`;
+
+  const singleOptions = singleItems.length ? singleItems.map(({ tpl, reason }) => `
+    <option value="${tpl.id}" ${String(tpl.id) === String(commandPanelState.singleTemplateId) ? 'selected' : ''}>
+      ${escapeHtml(tpl.name)}${selectedIds.length > 1 ? ' · 已选均可用' : reason ? ' · ' + escapeHtml(reason) : ''}
+    </option>`).join('') : '';
+
+  const groupRows = items.length ? items.map(({ tpl, preview, count, deadline }, i) => `
+    <label class="command-group-row">
+      <input type="radio" name="gi-tpl" value="${tpl.id}" ${String(tpl.id) === String(commandPanelState.groupTemplateId || items[0]?.tpl.id) ? 'checked' : ''}>
       <span style="color:var(--jn-title)">${escapeHtml(tpl.name)}</span>
       <span style="color:var(--jn-text-soft);font-size:10px">（${escapeHtml(tpl.category)}${deadline ? ' · ' + deadline : ''}）</span>
       <div style="color:var(--jn-text-muted);font-size:10px;margin-top:4px;margin-left:18px">目标：${escapeHtml(preview)}（${count}人）</div>
-    </label>`).join('');
-  return `<h3>${issuer.short} · 传令全府</h3>
-    <p style="color:var(--jn-text-soft);font-size:11px;margin-bottom:10px">择一群体差遣，将向符合条件者逐一传令。</p>
-    <div class="gi-list">${rows}</div>
+    </label>`).join('') : `<div class="command-empty">当前身份无可群体传令任务，或暂无符合条件者。</div>`;
+
+  return `<h3>${issuer.short} · 传令</h3>
+    <p style="color:var(--jn-text-soft);font-size:11px;margin-bottom:10px">左边点名传令给明确对象；右边群体传令给符合条件的一组人。当值只是状态，传令仍走身份和任务权限。</p>
+    <div class="command-panel">
+      <section class="command-pane">
+        <h4>点名传令</h4>
+        <div class="command-targets">${targetHtml}</div>
+        <div class="command-form">
+          <label>选择任务</label>
+          ${singleItems.length
+            ? `<select id="cmd-single-template">${singleOptions}</select>`
+            : `<div class="command-empty">请先选择有共同可用任务的人物。</div>`}
+          <button class="sys-btn primary" id="cmd-single-confirm" ${singleItems.length ? '' : 'disabled'}>发布点名传令</button>
+        </div>
+      </section>
+      <section class="command-pane">
+        <h4>群体传令</h4>
+        <div class="command-groups">${groupRows}</div>
+        <button class="sys-btn primary" id="gi-confirm" ${items.length ? '' : 'disabled'}>发布群体传令</button>
+      </section>
+    </div>
     <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
       <button class="sys-btn" id="gi-cancel">取消</button>
-      <button class="sys-btn primary" id="gi-confirm">传令</button>
     </div>`;
+}
+
+function bindCommandPanelEvents() {
+  const cancel = document.getElementById('gi-cancel');
+  const singleConfirm = document.getElementById('cmd-single-confirm');
+  const groupConfirm = document.getElementById('gi-confirm');
+  if (cancel) cancel.onclick = () => document.getElementById('panel-overlay').classList.remove('open');
+  document.querySelectorAll('[data-command-target]').forEach(input => {
+    input.onchange = () => {
+      commandPanelState.targetIds = [...document.querySelectorAll('[data-command-target]:checked')]
+        .map(el => el.dataset.commandTarget);
+      openPanel(buildCommandPanel());
+      bindCommandPanelEvents();
+    };
+  });
+  const singleSelect = document.getElementById('cmd-single-template');
+  if (singleSelect) singleSelect.onchange = () => { commandPanelState.singleTemplateId = +singleSelect.value; };
+  document.querySelectorAll('input[name="gi-tpl"]').forEach(input => {
+    input.onchange = () => { commandPanelState.groupTemplateId = +input.value; };
+  });
+  if (singleConfirm) singleConfirm.onclick = () => {
+    const issuer = CHARS[selectedIdx];
+    const tid = +(document.getElementById('cmd-single-template')?.value || 0);
+    const targetIds = [...document.querySelectorAll('[data-command-target]:checked')].map(el => el.dataset.commandTarget);
+    if (!issuer || !tid || !targetIds.length) return;
+    targetIds.forEach(id => {
+      const target = getChar(id);
+      if (target) QuestIssueSystem.issueTo(issuer, target, tid);
+    });
+    document.getElementById('panel-overlay').classList.remove('open');
+    buildUI();
+  };
+  if (groupConfirm) groupConfirm.onclick = () => {
+    const issuer = CHARS[selectedIdx];
+    const picked = document.querySelector('input[name="gi-tpl"]:checked');
+    const tid = picked ? +picked.value : 0;
+    if (issuer && tid) QuestIssueSystem.issueGroupTo(issuer, tid);
+    document.getElementById('panel-overlay').classList.remove('open');
+    buildUI();
+  };
+}
+
+function openCommandPanel(opts = {}) {
+  const target = opts.targetIdx != null ? CHARS[opts.targetIdx] : opts.targetId ? getChar(opts.targetId) : null;
+  commandPanelState.targetIds = target ? [target.id] : commandPanelState.targetIds || [];
+  commandPanelState.singleTemplateId = 0;
+  openPanel(buildCommandPanel());
+  bindCommandPanelEvents();
 }
 
 function openGroupIssuePanel() {
   const issuer = CHARS[selectedIdx];
-  if (!QuestIssueSystem?.canIssueGroupAny?.(issuer)) {
-    log('你的身份不可传令全府。');
+  if (!QuestIssueSystem?.canIssueGroupAny?.(issuer) && !commandPanelSingleTargetRows(issuer).length) {
+    log('当前身份暂无可传令对象。');
     return;
   }
-  openPanel(buildGroupIssuePanel());
-  const cancel = document.getElementById('gi-cancel');
-  const confirm = document.getElementById('gi-confirm');
-  if (cancel) cancel.onclick = () => document.getElementById('panel-overlay').classList.remove('open');
-  if (confirm) confirm.onclick = () => {
-    const picked = document.querySelector('input[name="gi-tpl"]:checked');
-    const tid = picked ? +picked.value : 0;
-    if (tid) QuestIssueSystem.issueGroupTo(issuer, tid);
-    document.getElementById('panel-overlay').classList.remove('open');
-    buildUI();
-  };
+  openCommandPanel();
 }
 
 function updateGroupIssueButton() {
   const btn = document.getElementById('btn-group-issue');
   if (!btn) return;
   const issuer = CHARS[selectedIdx];
-  const show = QuestIssueSystem?.canIssueGroupAny?.(issuer);
+  const show = QuestIssueSystem?.canIssueGroupAny?.(issuer) || commandPanelSingleTargetRows(issuer).length;
   btn.style.display = show ? '' : 'none';
 }
 
 function buildHelpPanel() {
   return `<h3>帮助</h3>
     <div style="font-size:11px;color:var(--jn-text-muted);line-height:1.6">
-      <p><b>操作</b>：点击地面/家具行走或使用；点击其他人物打开互动菜单（含单人「差遣」）；底栏「传令」可群体下发；Shift+点击可插队行动。</p>
-      <p><b>快捷键</b>：F 切换家庭；1–9 选择家庭成员；J 任务；R 关系；P 人物；K 技能；M 日志；B 背包；S 设置；H 帮助。</p>
+      <p><b>操作</b>：点击地面/家具行走或使用；点击其他人物打开互动菜单（含「传令」）；头像上的「令」表示今日当值传令快捷入口，点击会打开传令并预选此人；底栏「传令」可点名或群体下发；Shift+点击可插队行动。</p>
+      <p><b>快捷键</b>：F 切换家庭；1–9 选择家庭成员；J 任务；P 人物；Q 起居；R 关系；K 技能；M 日志；B 背包；S 设置；H 帮助。</p>
       <p><b>界面</b>：顶栏为地点、时令和全局入口；左侧任务 J 可收起；行动队列竖向排列；底部为当前人物 HUD、快捷入口和家庭成员头像。</p>
       <p>若地图空荡，请在设置→导入导出→恢复默认配置并应用重载。</p>
     </div>
@@ -1094,9 +1259,990 @@ function buildSkillPanel() {
     <button class="sys-btn" style="margin-top:8px" onclick="document.getElementById('panel-overlay').classList.remove('open')">关闭</button>`;
 }
 
+function routineClockLabel(minute) {
+  const m = ((Math.round(minute) % 1440) + 1440) % 1440;
+  const h = Math.floor(m / 60);
+  const mm = m % 60;
+  return `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+}
+
+function routineWindowForAnchor(c, anchor) {
+  if (typeof shiftedAnchorWindow === 'function') return shiftedAnchorWindow(c, anchor);
+  return { from: Math.round((anchor.from || 0) * 60), to: Math.round((anchor.to || 0) * 60), effects: {} };
+}
+
+function routineAxisPct(minute) {
+  const start = 3 * 60;
+  const shifted = (((Math.round(minute) - start) % 1440) + 1440) % 1440;
+  return Math.max(0, Math.min(100, shifted / 1440 * 100));
+}
+
+function routineSegHtml(anchor, win) {
+  const from = routineAxisPct(win.from);
+  const to = routineAxisPct(win.to);
+  const color = anchor.id === 'night_sleep' ? 'rgba(82,122,148,.46)'
+    : anchor.id?.includes('meal') || ['breakfast', 'lunch', 'dinner'].includes(anchor.id) ? 'rgba(168,132,58,.45)'
+    : anchor.id?.includes('hygiene') ? 'rgba(106,143,168,.38)'
+    : 'rgba(109,143,114,.38)';
+  const title = `${anchor.name || anchor.id} ${routineClockLabel(win.from)}-${routineClockLabel(win.to)}`;
+  const block = (left, width) =>
+    `<span class="routine-seg" title="${escapeHtml(title)}" style="left:${left}%;width:${Math.max(1.5, width)}%;background:${color}"></span>`;
+  if (to > from) return block(from, to - from);
+  return block(from, 100 - from) + block(0, to);
+}
+
+function routineCompliance(c, anchor) {
+  const factor = typeof routineHabitMultiplier === 'function' ? routineHabitMultiplier(c, anchor) : 1;
+  if (anchor.id === 'night_sleep' && typeof shouldPrioritizeNightSleep === 'function' && shouldPrioritizeNightSleep(c)) return '自觉';
+  if (factor >= 1.08) return '自觉';
+  if (factor >= 0.82) return '勉强';
+  return '抗拒';
+}
+
+function routineInfluenceText(c, anchor, win) {
+  const effects = win.effects || {};
+  const tags = [];
+  if (anchor.habitShift === 'sleep' && effects.sleepShiftMinutes) tags.push(`睡眠偏移${effects.sleepShiftMinutes > 0 ? '+' : ''}${effects.sleepShiftMinutes}分`);
+  if (anchor.id === 'morning_hygiene' && effects.hygieneWeightMultiplier !== 1) tags.push('洁净习惯');
+  if (anchor.id === 'night_sleep' && effects.sleepWeightMultiplier !== 1) tags.push('睡眠习惯');
+  if (anchor.id === 'morning_focus' && effects.morningFocusMultiplier !== 1) tags.push('晨间专注');
+  return tags.join(' · ') || '基础作息';
+}
+
+function routineTemplateCategoryForRow(rowId) {
+  if (rowId === 'skill') return 'skill';
+  if (rowId === 'profession') return 'profession';
+  return 'common';
+}
+
+function routineRowTitle(rowId) {
+  if (rowId === 'skill') return '技能';
+  if (rowId === 'profession') return '职业';
+  return '需求';
+}
+
+const ROUTINE_WEEKDAY_LABELS = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+
+function routineClone(value) {
+  return JSON.parse(JSON.stringify(value || {}));
+}
+
+function routineCurrentWeekdayIndex() {
+  const n = Number(gameDay);
+  return Number.isFinite(n) ? ((Math.round(n) % 7) + 7) % 7 : 0;
+}
+
+function routineMarkDirty() {
+  if (routineEditorState) routineEditorState.dirty = true;
+}
+
+function routineTraitSummary(c) {
+  const ids = typeof getCharTraits === 'function' ? getCharTraits(c) : [];
+  const meta = CONFIG.charSpecialtyConfig?.traitMetadata || {};
+  const labels = CONFIG.charSpecialtyConfig?.traitLabels || {};
+  const grouped = {};
+  for (const id of ids) {
+    const row = meta[id] || {};
+    const category = row.category || '性格';
+    const label = row.label || labels[id] || id;
+    grouped[category] ||= [];
+    if (!grouped[category].includes(label)) grouped[category].push(label);
+  }
+  const display = CharSpecialtySystem?.getDisplayTraits?.(c) || [];
+  if (!Object.keys(grouped).length && display.length) grouped['性格'] = display;
+  const out = Object.entries(grouped).map(([category, rows]) => `${category}：${rows.join('、')}`);
+  return out.join('；') || getCharDef(c?.id)?.personality || '未设置';
+}
+
+function routineSkillSummary(c) {
+  const levels = typeof getCharacterSkillLevels === 'function' ? getCharacterSkillLevels(c) : {};
+  const ids = Object.keys(levels || {});
+  if (!ids.length) return '未设置';
+  return ids.map(id => {
+    const name = CONFIG.skillDefs?.[id]?.name || id;
+    const lv = levels[id];
+    return lv ? `${name} Lv.${lv}` : name;
+  }).join('、');
+}
+
+function routineProfessionSummary(c) {
+  const rows = typeof getCharacterProfessionTags === 'function' ? getCharacterProfessionTags(c) : [];
+  return rows.length ? rows.join('、') : '未设置';
+}
+
+function routineSatisfactionSummary(c, blocks = []) {
+  if (!blocks.length) return { score: 100, label: '空白' };
+  const scoreByState = { good: 100, warn: 72, bad: 36, locked: 50 };
+  const scores = blocks.map(block => {
+    const anchor = getRoutineAnchorFromProfileBlock(block);
+    const state = getRoutineProfileCompliance(c, anchor)?.state || 'good';
+    return scoreByState[state] ?? 80;
+  });
+  const score = Math.round(scores.reduce((sum, v) => sum + v, 0) / Math.max(1, scores.length));
+  const label = score >= 88 ? '舒展' : score >= 70 ? '尚可' : score >= 50 ? '勉强' : '抵触';
+  return { score, label };
+}
+
+function routineWeekdayOptions(active = 0) {
+  return ROUTINE_WEEKDAY_LABELS.map((label, idx) =>
+    `<option value="${idx}" ${idx === active ? 'selected' : ''}>${label}</option>`
+  ).join('');
+}
+
+function routineStoreActiveWeekdayDraft() {
+  const state = routineEditorState;
+  if (!state) return;
+  state.weeklyProfiles ||= {};
+  const key = String(state.activeWeekday ?? routineCurrentWeekdayIndex());
+  state.weeklyProfiles[key] = routineProfileFromStateProfile(state.profile);
+}
+
+function routineSwitchWeekday(nextRaw) {
+  const state = routineEditorState;
+  if (!state) return;
+  const next = routineClamp(Number(nextRaw), 0, 6);
+  if (next === state.activeWeekday) return;
+  routineStoreActiveWeekdayDraft();
+  const draft = state.weeklyProfiles?.[String(next)] || state.weeklyProfiles?.[next];
+  state.profile = routineProfileFromStateProfile(draft || state.profile);
+  state.activeWeekday = next;
+  state.activeBlockIdx = null;
+  state.activeRowId = 'need';
+  state.templateSearch = '';
+  routineRebuildAndBind();
+}
+
+function routineProfileForSave(state) {
+  routineStoreActiveWeekdayDraft();
+  const profile = routineProfileFromStateProfile(state.profile);
+  profile.weeklyProfiles = routineClone(state.weeklyProfiles || {});
+  return routineStripProjectionProfile(profile);
+}
+
+function routineEditorIsProjectionBlock(block = {}) {
+  return !!(block.isRoutineProjection || ['dutyQuest', 'followRotation', 'lifePathDaily', 'professionDaily'].includes(block.sourceType));
+}
+
+function routineBlockLocked(block = {}) {
+  return !!(block.isLocked || block.locked || routineEditorIsProjectionBlock(block));
+}
+
+function routineStripProjectionProfile(profile = {}) {
+  const stripBlocks = blocks => (Array.isArray(blocks) ? blocks : []).filter(block => !routineEditorIsProjectionBlock(block));
+  const clean = {
+    ...profile,
+    blocks: stripBlocks(profile.blocks),
+  };
+  if (clean.weeklyProfiles && typeof clean.weeklyProfiles === 'object') {
+    clean.weeklyProfiles = Object.entries(clean.weeklyProfiles).reduce((acc, [weekday, row]) => {
+      acc[weekday] = {
+        ...row,
+        blocks: stripBlocks(row?.blocks),
+      };
+      return acc;
+    }, {});
+  }
+  return clean;
+}
+
+function buildRoutinePanel() {
+  const c = CHARS[selectedIdx];
+  if (!c) return '<h3>起居</h3><p style="color:var(--jn-text-soft)">暂无人物。</p>';
+  if (!routineEditorState || routineEditorState.charId !== c.id) {
+    const cfg = getRoutineGridConfig();
+    const sourceProfile = routineProfileFromStateProfile(getRoutineProfileForCharacter(c));
+    const activeWeekday = routineCurrentWeekdayIndex();
+    const weeklyProfiles = routineClone(sourceProfile.weeklyProfiles || {});
+    const weekdayProfile = weeklyProfiles[String(activeWeekday)] || weeklyProfiles[activeWeekday] || sourceProfile;
+    routineEditorState = {
+      charId: c.id,
+      profiles: getRoutineProfilesConfig(),
+      gridConfig: cfg,
+      rowDefs: getRoutineRowsDefinition(),
+      templates: getRoutineTemplates(),
+      profile: routineProfileFromStateProfile(weekdayProfile),
+      weeklyProfiles,
+      activeWeekday,
+      activeTemplateCategory: 'common',
+      templateSearch: '',
+      activeBlockIdx: null,
+      activeRowId: 'need',
+      dirty: false,
+    };
+    routineEditorState.professions = getCharacterProfessionTags(c);
+    routineEditorState.skills = getCharacterSkillIds(c);
+  }
+  const profile = routineProfileFromStateProfile(routineEditorState.profile);
+  routineEditorState.profile = profile;
+  const rowDefs = (routineEditorState.rowDefs || []).length
+    ? routineEditorState.rowDefs
+    : [
+      { id: 'need', name: '需求', icon: '◇' },
+      { id: 'skill', name: '技能', icon: '◇' },
+      { id: 'profession', name: '职业', icon: '◇' },
+    ];
+  const slotCount = routineEditorState.gridConfig?.slotsPerDay || 48;
+  const slotMins = routineEditorState.gridConfig?.slotMinutes || 30;
+  const axisStart = routineEditorState.gridConfig?.axisStartMinute ?? 0;
+  const rowHeight = Math.max(1, 100 / Math.max(1, rowDefs.length || 1));
+  const nowMin = currentMinuteOfDay();
+  const axisLabels = Array.from({ length: 13 }, (_, i) => {
+    const m = (axisStart + i * 4 * slotMins) % 1440;
+    return `<span>${routineClockLabel(m)}</span>`;
+  }).join('');
+  const blocks = profile.blocks || [];
+  const rowName = rowDefs.map((row, rowIndex) => `
+    <div class="routine-row-bg" data-row-index="${rowIndex}" data-row-id="${escapeHtml(row.id)}" style="top:${rowHeight * rowIndex}%;height:${rowHeight}%;min-height:28px;">
+      <span class="routine-row-name">${escapeHtml(row.icon || '')} ${escapeHtml(row.name || row.id)}</span>
+    </div>`).join('');
+  const rowMap = {};
+  for (let i = 0; i < rowDefs.length; i++) rowMap[rowDefs[i].id] = i;
+  const activeIdx = Number.isInteger(routineEditorState.activeBlockIdx) && routineEditorState.activeBlockIdx >= 0 && routineEditorState.activeBlockIdx < blocks.length
+    ? routineEditorState.activeBlockIdx
+    : null;
+  const activeBlock = activeIdx == null ? null : blocks[activeIdx];
+  const activeRowId = activeBlock?.rowId || routineEditorState.activeRowId || rowDefs[0]?.id || 'need';
+  const activeCategory = routineTemplateCategoryForRow(activeRowId);
+  const satisfaction = routineSatisfactionSummary(c, blocks);
+  const blockHtml = blocks.flatMap((block, idx) => {
+    const anchor = getRoutineAnchorFromProfileBlock(block);
+    const rowId = anchor.rowId || block.rowId || 'need';
+    const rowIndex = rowMap[rowId] ?? 0;
+    const rowSpan = 1;
+    const startSlot = routineClamp(Number(anchor.startSlot || block.startSlot || 0), 0, slotCount - 1);
+    const durationSlots = routineClamp(Number(anchor.durationSlots || block.duration || 1), 1, routineEditorState.gridConfig?.maxSpanSlots || 16);
+    const top = rowIndex * rowHeight;
+    const height = Math.max(18, rowSpan * rowHeight - 6);
+    const tpl = routineGetTemplateById(anchor.sourceTemplateId || block.templateId);
+    const name = block.isBlank ? '空白活动' : (block.name || anchor.name || tpl?.name || '活动');
+    const locked = routineBlockLocked(block);
+    return routineBlockVisualSegments(startSlot, durationSlots, slotCount).map((seg, segIdx, segs) => {
+      const left = seg.startSlot / slotCount * 100;
+      const width = seg.durationSlots / slotCount * 100;
+      return `<div class="routine-block ${idx === activeIdx ? 'active' : ''} ${locked ? 'locked' : ''}" data-routine-block-index="${idx}" data-routine-segment-index="${segIdx}" data-row-id="${escapeHtml(rowId)}" style="left:${left}%;width:${Math.min(100, width)}%;top:${top + 3}%;height:${height}%">
+        <div class="routine-block-head">${escapeHtml(name)}</div>
+        ${!locked && segIdx === 0 ? '<span class="routine-handle resize-left" data-handle="left"></span>' : ''}
+        ${!locked && segIdx === segs.length - 1 ? '<span class="routine-handle resize-right" data-handle="right"></span>' : ''}
+      </div>`;
+    });
+  }).join('');
+  const profileOptions = (getRoutineProfilesConfig().defaults || []).map(p =>
+    `<option value="${escapeHtml(p.id)}" ${((routineEditorState.profile?.id || '') === p.id ? 'selected' : '')}>${escapeHtml(p.name || p.id)}</option>`
+  ).join('');
+  const sidePanel = activeBlock ? `
+    <aside class="routine-side-panel">
+      <div class="rt-head">
+        <div>
+          <div class="rt-title">${escapeHtml(routineRowTitle(activeRowId))}活动</div>
+          <div class="rt-subtitle">${escapeHtml(routineClockLabel((activeBlock.startSlot || 0) * slotMins))} · 30分钟起</div>
+        </div>
+      </div>
+      <input id="rt-template-search" class="rt-search" placeholder="搜索活动">
+      <div class="routine-template-list">
+        ${(routineTemplateCandidates(routineEditorState, activeCategory, routineEditorState.templateSearch || '').map(row => {
+          const tpl = row.tpl;
+          const selected = activeBlock.templateId === tpl.id;
+          const tag = `${tpl.icon || ''} ${tpl.name || tpl.id}`;
+          return `<button type="button" class="routine-template-item ${selected ? 'active' : ''}" data-template-id="${escapeHtml(tpl.id)}"><b>${escapeHtml(tag)}</b>${tpl.tooltip ? `<span>${escapeHtml(tpl.tooltip)}</span>` : ''}</button>`;
+        }).join('') || '<p class="profile-empty">无匹配活动</p>')}
+      </div>
+    </aside>` : `
+    <aside class="routine-side-panel idle">
+      <div class="rt-title">活动面板</div>
+      <p class="profile-empty">点击左侧任意格子创建30分钟活动。</p>
+    </aside>`;
+  const contextMenu = routineContextMenuState ? `
+    <div id="routine-context-menu" class="routine-context-menu" style="left:${routineContextMenuState.x || 0}px;top:${routineContextMenuState.y || 0}px">
+      <div class="rc-title">起居块操作</div>
+      <button type="button" class="sys-btn" data-context-action="copy-nextday">复制到次日</button>
+      <button type="button" class="sys-btn" data-context-action="repeat-week">设为每日重复</button>
+      <button type="button" class="sys-btn" data-context-action="detail">查看详情</button>
+      <button type="button" class="sys-btn" data-context-action="delete">删除</button>
+    </div>` : '';
+  return `<div class="routine-panel">
+    <div class="routine-main-head">
+      <h3>${escapeHtml(c.name)} · 起居</h3>
+    </div>
+    <div class="routine-summary">
+      <div class="routine-card"><b>性格</b><span>${escapeHtml(routineTraitSummary(c))}</span></div>
+      <div class="routine-card"><b>职业</b><span>${escapeHtml(routineProfessionSummary(c))}</span></div>
+      <div class="routine-card"><b>技能</b><span>${escapeHtml(routineSkillSummary(c))}</span></div>
+    </div>
+    <div class="routine-satisfaction">作息满意度 <b>${satisfaction.score}%</b><span>${escapeHtml(satisfaction.label)} · 当前刻 ${escapeHtml(routineClockLabel(nowMin))}</span></div>
+    <div class="routine-toolbar">
+      <div class="routine-toolbar-left">
+        <label class="routine-weekday-select"><span>星期日历</span><select id="routine-weekday-select">${routineWeekdayOptions(routineEditorState.activeWeekday ?? 0)}</select></label>
+        <button type="button" class="sys-btn" data-routine-action="copy-yesterday">复制昨日</button>
+        <button type="button" class="sys-btn" data-routine-action="apply-week">应用到本周</button>
+        <select id="routine-profile-select">${profileOptions}</select>
+        <button type="button" class="sys-btn" data-routine-action="apply-preset">应用模板</button>
+      </div>
+      <div class="routine-toolbar-right">
+        <button type="button" class="sys-btn primary" data-routine-action="save">保存</button>
+        <button type="button" class="sys-btn" data-routine-action="close">关闭</button>
+      </div>
+    </div>
+    <div class="routine-workspace">
+      <div class="routine-grid-shell">
+        <div class="routine-axis-labels">${axisLabels}</div>
+        <div class="routine-grid" id="routine-grid-canvas">
+          <div class="routine-grid-rows">${rowName}</div>
+          <div class="routine-block-layer">${blockHtml || ''}</div>
+        </div>
+      </div>
+      ${sidePanel}
+    </div>
+    ${contextMenu}
+  </div>`;
+}
+
 function openPanel(html) {
-  document.getElementById('panel-content').innerHTML = html;
+  const panel = document.getElementById('panel-content');
+  panel.classList.remove('routine-panel-box');
+  panel.innerHTML = html;
   document.getElementById('panel-overlay').classList.add('open');
+}
+
+function closeRoutinePanelOverlay(force = false) {
+  if (!force && routineEditorState?.dirty && !window.confirm('当前起居尚未保存，确认不保存并关闭吗？')) return false;
+  const overlay = document.getElementById('panel-overlay');
+  if (overlay) overlay.classList.remove('open');
+  document.getElementById('panel-content')?.classList.remove('routine-panel-box');
+  if (routinePanelDocumentCloseHandler) {
+    document.removeEventListener('click', routinePanelDocumentCloseHandler);
+    routinePanelDocumentCloseHandler = null;
+  }
+  routineEditorState = null;
+  routineDragState = null;
+  routineTemplatePickerState = null;
+  routineContextMenuState = null;
+  return true;
+}
+
+function closeRoutineTransientPanels() {
+  const changed = !!routineContextMenuState || !!routineTemplatePickerState;
+  routineContextMenuState = null;
+  routineTemplatePickerState = null;
+  if (changed) routineRebuildAndBind();
+  return changed;
+}
+
+function bindRoutinePanelDismissOnDocument() {
+  if (routinePanelDocumentCloseHandler) {
+    document.removeEventListener('click', routinePanelDocumentCloseHandler);
+    routinePanelDocumentCloseHandler = null;
+  }
+  routinePanelDocumentCloseHandler = (e) => {
+    const overlay = document.getElementById('panel-overlay');
+    if (!overlay || !overlay.classList.contains('open')) return;
+    const panel = document.getElementById('panel-content');
+    if (!panel) return;
+    if (!panel.contains(e.target)) return;
+    const menu = panel.querySelector('#routine-context-menu');
+    const picker = panel.querySelector('#routine-template-picker');
+    if ((menu && menu.contains(e.target)) || (picker && picker.contains(e.target))) return;
+    closeRoutineTransientPanels();
+  };
+  document.addEventListener('click', routinePanelDocumentCloseHandler);
+}
+
+function routineProfileFromStateProfile(profile) {
+  const safe = profile || {};
+  const blocks = Array.isArray(safe.blocks) ? safe.blocks : [];
+  return {
+    ...safe,
+    id: safe.id || `routine-${safe.name || 'custom'}`,
+    name: safe.name || '起居',
+    blocks: blocks.map((block, idx) => normalizeRoutineProfileBlock({
+      id: block?.id || `routine_block_${idx}`,
+      templateId: block?.templateId || 'routine_custom',
+      startSlot: block?.startSlot ?? block?.fromSlot ?? 0,
+      durationSlots: block?.durationSlots || block?.duration || 1,
+      rowId: block?.rowId || block?.row || 'need',
+      rowSpan: block?.rowSpan || block?.spanRows || 1,
+      ...block,
+    })),
+    tags: Array.isArray(safe.tags) ? safe.tags : [],
+  };
+}
+
+function routineClamp(v, min, max) {
+  if (!Number.isFinite(v) || !Number.isFinite(min) || !Number.isFinite(max)) return min;
+  return Math.max(min, Math.min(max, v));
+}
+
+function routineGetTemplateById(tplId) {
+  return getRoutineTemplateById(tplId) || {};
+}
+
+function routineTemplateSearchMatch(tpl, keyword) {
+  if (!keyword) return true;
+  const q = keyword.toLowerCase();
+  const fields = [tpl.name, tpl.id, tpl.icon, tpl.tooltip, tpl.category, tpl.templateGroup]
+    .filter(Boolean)
+    .map(v => String(v).toLowerCase());
+  return fields.some(v => v.includes(q))
+    || (tpl.requiredSkills || []).some(s => String(s).toLowerCase().includes(q))
+    || (tpl.requiredProfessions || []).some(s => String(s).toLowerCase().includes(q));
+}
+
+function routineTemplateCandidates(state, category = 'common', keyword = '') {
+  const templates = Array.isArray(state.templates) ? state.templates : [];
+  const matchesCategory = tpl => {
+    const cat = tpl.category || tpl.templateGroup || 'common';
+    if (category === 'skill') return cat !== 'profession' && (cat === 'skill' || (tpl.requiredSkills || []).length);
+    if (category === 'profession') return cat === 'profession';
+    if (category === 'common') return cat === 'common' && !(tpl.requiredSkills || []).length;
+    return cat === category;
+  };
+  return templates
+    .filter(matchesCategory)
+    .filter(tpl => routineTemplateSearchMatch(tpl, keyword))
+    .map(tpl => ({ tpl }))
+    .sort((a, b) => String(a.tpl.name).localeCompare(String(b.tpl.name)));
+}
+
+function routineProfileBlocks() {
+  return Array.isArray(routineEditorState?.profile?.blocks) ? routineEditorState.profile.blocks : [];
+}
+
+function routineSlotCount() {
+  return Math.max(1, routineEditorState?.gridConfig?.slotsPerDay || 48);
+}
+
+function routineSlotMod(slot, slotCount = routineSlotCount()) {
+  return ((Math.round(Number(slot) || 0) % slotCount) + slotCount) % slotCount;
+}
+
+function routineDurationClamp(duration) {
+  const slotCount = routineSlotCount();
+  const maxSpan = Math.max(1, routineEditorState?.gridConfig?.maxSpanSlots || 16);
+  const value = Math.round(Number(duration) || 1);
+  return Math.max(1, Math.min(maxSpan, slotCount, value));
+}
+
+function routineBlockOccupiedSlots(block, slotCount = routineSlotCount()) {
+  const start = routineSlotMod(block?.startSlot || 0, slotCount);
+  const duration = routineDurationClamp(block?.durationSlots || block?.duration || 1);
+  return Array.from({ length: duration }, (_, i) => (start + i) % slotCount);
+}
+
+function routineSlotsAvailable(startSlot, duration, ignoreIdx = -1) {
+  const slotCount = routineSlotCount();
+  const wanted = new Set(Array.from({ length: routineDurationClamp(duration) }, (_, i) => (routineSlotMod(startSlot, slotCount) + i) % slotCount));
+  const blocks = routineProfileBlocks();
+  for (let i = 0; i < blocks.length; i++) {
+    if (i === ignoreIdx) continue;
+    for (const slot of routineBlockOccupiedSlots(blocks[i], slotCount)) {
+      if (wanted.has(slot)) return false;
+    }
+  }
+  return true;
+}
+
+function routineAvailableDuration(startSlot, desiredDuration, ignoreIdx = -1) {
+  const desired = routineDurationClamp(desiredDuration);
+  let available = 0;
+  for (let duration = 1; duration <= desired; duration++) {
+    if (!routineSlotsAvailable(startSlot, duration, ignoreIdx)) break;
+    available = duration;
+  }
+  return available;
+}
+
+function routineBlockVisualSegments(startSlot, durationSlots, slotCount = routineSlotCount()) {
+  const start = routineSlotMod(startSlot, slotCount);
+  const duration = routineDurationClamp(durationSlots);
+  const first = Math.min(duration, slotCount - start);
+  const rest = duration - first;
+  const rows = [{ startSlot: start, durationSlots: first }];
+  if (rest > 0) rows.push({ startSlot: 0, durationSlots: rest });
+  return rows;
+}
+
+function routineSetBlock(idx, patch) {
+  const blocks = routineProfileBlocks();
+  if (idx < 0 || idx >= blocks.length) return;
+  if (routineBlockLocked(blocks[idx])) {
+    log('职业日课由职责/任务配置生成，不能在起居里直接修改。');
+    return blocks[idx];
+  }
+  const next = normalizeRoutineProfileBlock({ ...blocks[idx], ...patch });
+  blocks[idx] = next;
+  routineEditorState.profile = { ...routineEditorState.profile, blocks };
+  routineMarkDirty();
+  return next;
+}
+
+function routineRemoveBlock(idx) {
+  const blocks = routineProfileBlocks();
+  if (idx < 0 || idx >= blocks.length) return;
+  if (routineBlockLocked(blocks[idx])) {
+    log('职业日课由职责/任务配置生成，不能在起居里删除。');
+    routineContextMenuState = null;
+    routineRebuildAndBind();
+    return;
+  }
+  blocks.splice(idx, 1);
+  routineEditorState.profile = { ...routineEditorState.profile, blocks };
+  routineMarkDirty();
+  if (routineEditorState.activeBlockIdx === idx) routineEditorState.activeBlockIdx = null;
+  else if (routineEditorState.activeBlockIdx > idx) routineEditorState.activeBlockIdx -= 1;
+  routineContextMenuState = null;
+  routineRebuildAndBind();
+}
+
+function routineCreateBlankBlockAt(rowIndex = 0, startSlot = 0) {
+  const state = routineEditorState;
+  if (!state) return;
+  const rows = state.rowDefs || [];
+  const row = rows[routineClamp(rowIndex, 0, Math.max(0, rows.length - 1))] || rows[0] || { id: 'need' };
+  const slotCount = state.gridConfig?.slotsPerDay || 48;
+  const safeStart = routineSlotMod(startSlot, slotCount);
+  const durationSlots = routineAvailableDuration(safeStart, 1, -1);
+  if (durationSlots < 1) {
+    log('该时段已有作息，无法重叠。');
+    return;
+  }
+  const block = normalizeRoutineProfileBlock({
+    id: `routine_blank_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+    templateId: 'routine_custom',
+    rowId: row.id,
+    startSlot: safeStart,
+    durationSlots,
+    rowSpan: 1,
+    isBlank: true,
+  });
+  const blocks = routineProfileBlocks();
+  blocks.push(block);
+  state.profile = { ...state.profile, blocks };
+  state.activeBlockIdx = blocks.length - 1;
+  state.activeRowId = row.id;
+  state.templateSearch = '';
+  routineMarkDirty();
+  routineRebuildAndBind();
+}
+
+function routineOpenTemplatePicker(rowIndex = 0, startSlot = 0) {
+  const state = routineEditorState;
+  if (!state) return;
+  const count = Math.max(1, (state.rowDefs || []).length);
+  routineTemplatePickerState = {
+    open: true,
+    rowIndex: routineClamp(rowIndex, 0, count - 1),
+    rowId: state.rowDefs?.[routineClamp(rowIndex, 0, count - 1)]?.id || 'need',
+    startSlot: routineClamp(startSlot, 0, (state.gridConfig?.slotsPerDay || 48) - 1),
+    category: state.activeTemplateCategory || 'common',
+    search: state.templateSearch || '',
+  };
+  routineRebuildAndBind();
+}
+
+function routineApplyTemplate(templateId) {
+  const state = routineEditorState;
+  if (!state || !templateId) return;
+  const tpl = routineGetTemplateById(templateId);
+  if (!tpl?.id) return;
+  const rowDefs = state.rowDefs || [];
+  let idx = Number.isInteger(state.activeBlockIdx) ? state.activeBlockIdx : -1;
+  const blocks = routineProfileBlocks();
+  if (idx < 0 || idx >= blocks.length) {
+    const row = rowDefs[stateTemplateSafeRowIdx()];
+    const rowId = row?.id || rowDefs[0]?.id || 'need';
+    blocks.push(normalizeRoutineProfileBlock({
+      templateId: 'routine_custom',
+      rowId,
+      startSlot: routineTemplatePickerState?.startSlot || 0,
+      durationSlots: 1,
+      rowSpan: 1,
+      isBlank: true,
+    }));
+    idx = blocks.length - 1;
+    state.activeBlockIdx = idx;
+  }
+  const current = blocks[idx] || {};
+  const rowId = current.rowId || rowDefs[stateTemplateSafeRowIdx()]?.id || 'need';
+  blocks[idx] = normalizeRoutineProfileBlock({
+    ...current,
+    templateId: tpl.id,
+    rowId,
+    durationSlots: current.durationSlots || 1,
+    rowSpan: 1,
+    isBlank: false,
+  });
+  state.profile = { ...state.profile, blocks };
+  routineTemplatePickerState = null;
+  state.activeRowId = rowId;
+  routineMarkDirty();
+  routineRebuildAndBind();
+}
+
+function stateTemplateSafeRowIdx() {
+  const state = routineEditorState;
+  if (!state?.rowDefs?.length) return 0;
+  if (routineTemplatePickerState && Number.isFinite(routineTemplatePickerState.rowIndex)) return routineClamp(routineTemplatePickerState.rowIndex, 0, state.rowDefs.length - 1);
+  return 0;
+}
+
+function routineOpenContextMenu(idx, x = 0, y = 0) {
+  if (!routineEditorState) return;
+  routineEditorState.activeBlockIdx = idx;
+  const block = routineProfileBlocks()[idx];
+  if (block?.rowId) routineEditorState.activeRowId = block.rowId;
+  routineContextMenuState = { open: true, idx, x, y };
+  routineRebuildAndBind();
+}
+
+function routineCloseContextMenu() {
+  routineContextMenuState = null;
+  if (routineTemplatePickerState || routineDragState) return;
+  routineRebuildAndBind();
+}
+
+function routineRestoreDefaultProfile() {
+  const state = routineEditorState;
+  const c = CHARS[selectedIdx];
+  if (!state || !c) return;
+  const cfg = getRoutineProfilesConfig();
+  const defaults = cfg.defaults || [];
+  const target = defaults.find(p => p.id === (cfg.defaultProfileId || 'default')) || defaults[0];
+  if (!target) return;
+  state.profile = routineProfileFromStateProfile(target);
+  state.activeBlockIdx = null;
+  state.activeRowId = 'need';
+  routineMarkDirty();
+  routineRebuildAndBind();
+}
+
+function routineCopyYesterday() {
+  const c = CHARS[selectedIdx];
+  if (!c || !routineEditorState) return;
+  const last = popRoutineProfileHistory(c);
+  if (!last?.profile) {
+    log('昨日起居记录不存在。');
+    return;
+  }
+  routineEditorState.profile = routineProfileFromStateProfile(last.profile);
+  routineEditorState.activeBlockIdx = null;
+  routineEditorState.activeRowId = 'need';
+  routineMarkDirty();
+  routineRebuildAndBind();
+}
+
+function routineApplyToWeek() {
+  const c = CHARS[selectedIdx];
+  if (!c || !routineEditorState) return;
+  routineStoreActiveWeekdayDraft();
+  scheduleRoutineProfileForWeek(c, routineEditorState.profile);
+  log('已应用到本周。');
+}
+
+function routineRepeatTomorrow() {
+  const c = CHARS[selectedIdx];
+  if (!c || !routineEditorState) return;
+  scheduleRoutineProfileForTomorrow(c, routineEditorState.profile);
+  log('已复制到次日。');
+}
+
+function routineApplyPresetProfile() {
+  const state = routineEditorState;
+  const sel = document.getElementById('routine-profile-select');
+  if (!state || !sel) return;
+  const cfg = getRoutineProfilesConfig();
+  const p = (cfg.defaults || []).find(v => v.id === sel.value);
+  if (!p) return;
+  state.profile = routineProfileFromStateProfile(p);
+  state.activeBlockIdx = null;
+  state.activeRowId = 'need';
+  routineMarkDirty();
+  routineRebuildAndBind();
+}
+
+function routineSaveProfile() {
+  const c = CHARS[selectedIdx];
+  if (!c || !routineEditorState) return;
+  const profile = routineProfileForSave(routineEditorState);
+  setRoutineProfileForCharacter(c, profile);
+  routineEditorState.profile = routineProfileFromStateProfile(profile);
+  routineEditorState.dirty = false;
+  log(`已保存 ${c.name} 的起居配置。`);
+  buildUI();
+  closeRoutinePanelOverlay(true);
+}
+
+function routineRenderBlockPosition(blockEl, block) {
+  const state = routineEditorState;
+  if (!blockEl || !block || !state) return;
+  const rows = state.rowDefs || [];
+  const rowMap = {};
+  for (let i = 0; i < rows.length; i++) rowMap[rows[i].id] = i;
+  const slotCount = state.gridConfig?.slotsPerDay || 48;
+  const rowHeight = Math.max(1, 100 / Math.max(1, rows.length || 1));
+  const rowIndex = rowMap[block.rowId] ?? 0;
+  const durationSlots = routineClamp(Number(block.durationSlots || block.duration || 1), 1, state.gridConfig?.maxSpanSlots || 16);
+  const idx = Number(blockEl.dataset.routineBlockIndex || -1);
+  const panel = document.getElementById('panel-content');
+  const els = [...(panel?.querySelectorAll('.routine-block') || [])]
+    .filter(el => Number(el.dataset.routineBlockIndex || -1) === idx);
+  const segments = routineBlockVisualSegments(block.startSlot || 0, durationSlots, slotCount);
+  if (els.length !== segments.length) {
+    routineRebuildAndBind();
+    return;
+  }
+  els.forEach((el, i) => {
+    const seg = segments[i];
+    el.style.left = `${seg.startSlot / slotCount * 100}%`;
+    el.style.width = `${Math.min(100, seg.durationSlots / slotCount * 100)}%`;
+    el.style.top = `${rowIndex * rowHeight + 3}%`;
+    el.style.height = `${Math.max(18, rowHeight - 6)}%`;
+  });
+}
+
+function routineHandleBlockPointerDown(e) {
+  if (!routineEditorState) return;
+  const blockEl = e.currentTarget;
+  const idx = Number(blockEl.dataset.routineBlockIndex || -1);
+  if (idx < 0) return;
+  if (e.button === 2) {
+    e.preventDefault();
+    routineOpenContextMenu(idx, e.clientX, e.clientY);
+    return;
+  }
+  if (e.button !== 0) return;
+  const handle = e.target.closest('.routine-handle');
+  const mode = handle ? handle.dataset.handle : 'move';
+  if (mode !== 'move' && mode !== 'left' && mode !== 'right') return;
+  const layer = document.querySelector('.routine-block-layer');
+  const rect = layer?.getBoundingClientRect();
+  if (!layer || !rect) return;
+  const blocks = routineProfileBlocks();
+  const block = blocks[idx];
+  if (!block) return;
+  const rows = routineEditorState.rowDefs || [];
+  const rowMap = {};
+  for (let i = 0; i < rows.length; i++) rowMap[rows[i].id] = i;
+  routineEditorState.activeBlockIdx = idx;
+  routineEditorState.activeRowId = block.rowId || rows[0]?.id || 'need';
+  panelActiveRoutineBlock(blockEl);
+  routineContextMenuState = null;
+  if (routineBlockLocked(block)) {
+    e.preventDefault();
+    return;
+  }
+  routineDragState = {
+    idx,
+    mode,
+    blockEl,
+    startX: e.clientX,
+    startY: e.clientY,
+    startSlot: Number(block.startSlot || block.fromSlot || 0),
+    startDuration: Number(block.durationSlots || block.duration || 1),
+    startRowId: block.rowId || rows[0]?.id,
+    startRowIndex: routineClamp(rowMap[block.rowId] || 0, 0, Math.max(0, rows.length - 1)),
+    startRowSpan: Number(block.rowSpan || block.spanRows || 1),
+    slotsPerDay: routineEditorState.gridConfig?.slotsPerDay || 48,
+    pxPerSlot: rect.width / (routineEditorState.gridConfig?.slotsPerDay || 48),
+    rowHeight: rect.height / Math.max(1, rows.length || 1),
+    rowCount: rows.length,
+    maxDuration: routineEditorState.gridConfig?.maxSpanSlots || 16,
+  };
+  e.preventDefault();
+  e.stopPropagation();
+  const move = evt => routineBlockPointerMove(evt);
+  const up = () => {
+    routineDragState = null;
+    routineRebuildAndBind();
+    document.removeEventListener('pointermove', move);
+    document.removeEventListener('pointerup', up);
+    document.removeEventListener('pointercancel', up);
+  };
+  document.addEventListener('pointermove', move);
+  document.addEventListener('pointerup', up);
+  document.addEventListener('pointercancel', up);
+}
+
+function panelActiveRoutineBlock(activeEl) {
+  const panel = document.getElementById('panel-content');
+  panel?.querySelectorAll('.routine-block.active').forEach(el => {
+    if (el !== activeEl) el.classList.remove('active');
+  });
+  const idx = activeEl?.dataset?.routineBlockIndex;
+  if (idx == null) {
+    activeEl?.classList.add('active');
+    return;
+  }
+  panel?.querySelectorAll(`.routine-block[data-routine-block-index="${idx}"]`).forEach(el => el.classList.add('active'));
+}
+
+function routineBlockPointerMove(e) {
+  if (!routineDragState) return;
+  const state = routineEditorState;
+  const block = routineProfileBlocks()[routineDragState.idx];
+  if (!state || !block) return;
+  const slotsDelta = Math.round((e.clientX - routineDragState.startX) / routineDragState.pxPerSlot);
+  let nextBlock = null;
+  if (routineDragState.mode === 'move') {
+    const nextSlot = routineSlotMod(routineDragState.startSlot + slotsDelta, routineDragState.slotsPerDay);
+    const nextDuration = routineAvailableDuration(nextSlot, routineDragState.startDuration, routineDragState.idx);
+    if (nextDuration >= 1) {
+      nextBlock = routineSetBlock(routineDragState.idx, { startSlot: nextSlot, durationSlots: nextDuration, rowId: routineDragState.startRowId, rowSpan: 1 });
+    } else {
+      nextBlock = routineSetBlock(routineDragState.idx, { startSlot: routineDragState.startSlot, durationSlots: routineDragState.startDuration, rowId: routineDragState.startRowId, rowSpan: 1 });
+    }
+  } else if (routineDragState.mode === 'left') {
+    const desiredDuration = routineClamp(routineDragState.startDuration - slotsDelta, 1, routineDragState.maxDuration);
+    const nextStart = routineSlotMod(routineDragState.startSlot + slotsDelta, routineDragState.slotsPerDay);
+    const nextDuration = routineAvailableDuration(nextStart, desiredDuration, routineDragState.idx);
+    if (nextDuration >= 1) {
+      nextBlock = routineSetBlock(routineDragState.idx, { startSlot: nextStart, durationSlots: nextDuration });
+    } else {
+      nextBlock = routineSetBlock(routineDragState.idx, { startSlot: routineDragState.startSlot, durationSlots: routineDragState.startDuration });
+    }
+  } else if (routineDragState.mode === 'right') {
+    const desiredDuration = routineClamp(routineDragState.startDuration + slotsDelta, 1, routineDragState.maxDuration);
+    const nextDuration = routineAvailableDuration(routineDragState.startSlot, desiredDuration, routineDragState.idx);
+    if (nextDuration >= 1) {
+      nextBlock = routineSetBlock(routineDragState.idx, { durationSlots: nextDuration, rowSpan: 1 });
+    } else {
+      nextBlock = routineSetBlock(routineDragState.idx, { startSlot: routineDragState.startSlot, durationSlots: routineDragState.startDuration, rowSpan: 1 });
+    }
+  }
+  if (nextBlock) routineRenderBlockPosition(routineDragState.blockEl, nextBlock);
+}
+
+function routineHandleToolbar(btn) {
+  const action = btn.dataset.routineAction;
+  if (action === 'save') {
+    routineSaveProfile();
+    return;
+  }
+  if (action === 'restore-default') {
+    routineRestoreDefaultProfile();
+    return;
+  }
+  if (action === 'copy-yesterday') {
+    routineCopyYesterday();
+    return;
+  }
+  if (action === 'apply-week') {
+    routineApplyToWeek();
+    return;
+  }
+  if (action === 'apply-preset') {
+    routineApplyPresetProfile();
+    return;
+  }
+  if (action === 'close') {
+    closeRoutinePanelOverlay();
+  }
+}
+
+function routineGridDblClick(e) {
+  const row = e.target.closest('.routine-row-bg');
+  if (!row) return;
+  const state = routineEditorState;
+  if (!state) return;
+  const layer = document.querySelector('.routine-block-layer');
+  const rect = layer?.getBoundingClientRect();
+  if (!rect) return;
+  const rowIndex = Number(row.dataset.rowIndex || 0);
+  const xRatio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const startSlot = Math.floor(xRatio * (state.gridConfig?.slotsPerDay || 48));
+  routineCreateBlankBlockAt(rowIndex, startSlot);
+}
+
+function routineHandleContextMenuAction(e) {
+  const btn = e.target.closest('button[data-context-action]');
+  if (!btn || !routineContextMenuState) return;
+  const action = btn.dataset.contextAction;
+  const idx = routineContextMenuState.idx;
+  if (action === 'copy-nextday') {
+    routineRepeatTomorrow();
+  } else if (action === 'repeat-week') {
+    routineApplyToWeek();
+  } else if (action === 'detail') {
+    const block = routineProfileBlocks()[idx];
+    if (block) {
+      const anchor = getRoutineAnchorFromProfileBlock(block);
+      const tpl = routineGetTemplateById(block.templateId);
+      window.alert(`${tpl?.name || '活动'}\n时间：${routineClockLabel(anchor.from)}-${routineClockLabel(anchor.to)}\n行列：${anchor.rowId}`);
+    }
+  } else if (action === 'delete') {
+    routineRemoveBlock(idx);
+  }
+  routineContextMenuState = null;
+  routineRebuildAndBind();
+}
+
+function bindRoutinePanelEvents() {
+  const panel = document.getElementById('panel-content');
+  if (!panel) return;
+  panel.querySelectorAll('button[data-routine-action]').forEach(btn => {
+    btn.onclick = () => routineHandleToolbar(btn);
+  });
+  panel.querySelectorAll('.routine-row-bg').forEach(row => {
+    row.onclick = routineGridDblClick;
+  });
+  panel.querySelectorAll('.routine-block').forEach(block => {
+    block.addEventListener('pointerdown', routineHandleBlockPointerDown);
+    block.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      const idx = Number(block.dataset.routineBlockIndex || -1);
+      routineOpenContextMenu(idx, e.clientX, e.clientY);
+    });
+  });
+  panel.querySelectorAll('.routine-template-item').forEach(btn => {
+    btn.onclick = () => routineApplyTemplate(btn.dataset.templateId);
+  });
+  panel.querySelectorAll('[data-template-category]').forEach(btn => {
+    btn.onclick = () => {
+      if (!routineTemplatePickerState) routineTemplatePickerState = { open: true, rowIndex: 0, rowId: 'need', startSlot: 0, search: '' };
+      routineTemplatePickerState.category = btn.dataset.templateCategory;
+      routineRebuildAndBind();
+    };
+  });
+  const weekday = panel.querySelector('#routine-weekday-select');
+  if (weekday) weekday.onchange = () => routineSwitchWeekday(weekday.value);
+  const search = panel.querySelector('#rt-template-search');
+  if (search) {
+    search.value = routineEditorState?.templateSearch || '';
+    search.oninput = () => {
+      if (!routineEditorState) return;
+      routineEditorState.templateSearch = search.value || '';
+      routineRebuildAndBind();
+    };
+  }
+  const closePicker = panel.querySelector('#rt-picker-close');
+  if (closePicker) closePicker.onclick = () => {
+    routineTemplatePickerState = null;
+    routineRebuildAndBind();
+  };
+  const contextMenu = panel.querySelector('#routine-context-menu');
+  if (contextMenu) {
+    contextMenu.querySelectorAll('button').forEach(btn => {
+      btn.onclick = routineHandleContextMenuAction;
+    });
+  }
+  bindRoutinePanelDismissOnDocument();
+}
+
+function routineRebuildAndBind() {
+  if (!routineEditorState) return;
+  const overlay = document.getElementById('panel-overlay');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  document.getElementById('panel-content').innerHTML = buildRoutinePanel();
+  bindRoutinePanelEvents();
+}
+
+function openRoutinePanel() {
+  const c = CHARS[selectedIdx];
+  if (!c) return;
+  routineEditorState = null;
+  routineTemplatePickerState = null;
+  routineContextMenuState = null;
+  openPanel(buildRoutinePanel());
+  document.getElementById('panel-content')?.classList.add('routine-panel-box');
+  bindRoutinePanelEvents();
 }
 
 function buildUI() {
@@ -1279,7 +2425,7 @@ function renderImCategories() {
   const target = CHARS[menuTargetIdx];
   const displayGroups = imMenuGroups.slice();
   if (QuestIssueSystem?.canIssueAny?.(initiator, target)) {
-    displayGroups.unshift({ cat: { id: '_quest', name: '差遣' }, items: [] });
+    displayGroups.unshift({ cat: { id: '_quest', name: '传令' }, items: [] });
   }
 
   const n = displayGroups.length;
@@ -1357,19 +2503,19 @@ function renderImQuestOptions() {
   const menu = document.getElementById('interaction-menu');
   const sectors = document.getElementById('im-sectors');
   menu.classList.add('im-options', 'im-quest');
-  document.getElementById('im-hint').textContent = '吩咐';
+  document.getElementById('im-hint').textContent = '点名传令';
 
   const items = (QuestIssueSystem?.getAvailableQuests?.(initiator, target) || [])
     .flatMap(g => g.items);
   const n = items.length;
   if (!n) {
     setImRingSize(180);
-    document.getElementById('im-hint').textContent = '暂无可吩咐';
+    document.getElementById('im-hint').textContent = '暂无可传令';
     sectors.innerHTML = `<button type="button" class="im-sector im-opt-sector disabled"
       onpointerdown="handleInteractionMenuSectorClick(event)"
       style="--px:90px;--py:90px" title="当前没有可下发任务">
       <span class="im-sector-inner">
-        <span class="im-sector-label">不可差遣</span>
+        <span class="im-sector-label">不可传令</span>
         <span class="im-quest-hint">暂无任务</span>
       </span>
     </button>`;
@@ -1492,7 +2638,11 @@ function handleInteractionMenuSectorClick(e) {
   }
 
   if (btn.dataset.cat) {
-    if (btn.dataset.cat === '_quest') renderImQuestOptions();
+    if (btn.dataset.cat === '_quest') {
+      const targetIdx = menuTargetIdx;
+      closeInteractionMenu();
+      openCommandPanel({ targetIdx });
+    }
     else renderImOptions(btn.dataset.cat);
     return;
   }
@@ -1560,13 +2710,12 @@ function openInteractionMenu(targetIdx, clientX, clientY, shiftKey) {
 function openQuestIssueMenu(targetIdx, clientX, clientY, shiftKey) {
   const initiator = CHARS[selectedIdx];
   const target = CHARS[targetIdx];
-  openInteractionMenu(targetIdx, clientX, clientY, shiftKey);
   if (!QuestIssueSystem?.canIssueAny?.(initiator, target)) {
     const gate = QuestIssueSystem?.issuerMayIssueTo?.(initiator?.id, target?.id);
-    showActionBlocked(initiator, gate?.reason || '当前不可差遣', 'quest');
+    showActionBlocked(initiator, gate?.reason || '当前不可传令', 'quest');
     return;
   }
-  renderImQuestOptions();
+  openCommandPanel({ targetIdx });
 }
 
 function closeInteractionMenu() {
@@ -1629,12 +2778,15 @@ if (btnGroupIssue) btnGroupIssue.onclick = () => openGroupIssuePanel();
 
 document.getElementById('btn-rel').onclick = () => openPanel(buildRelationsPanel());
 document.getElementById('btn-profile').onclick = () => openCharacterProfilePanel();
+document.getElementById('btn-routine').onclick = () => openRoutinePanel();
 document.getElementById('btn-msg').onclick = () => toggleLogDrawer();
 document.getElementById('btn-bag').onclick = () => openPanel('<h3>背包</h3><p style="color:var(--jn-text-soft)">暂未开放</p><button class="sys-btn" onclick="document.getElementById(\'panel-overlay\').classList.remove(\'open\')">关闭</button>');
 document.getElementById('btn-skill-panel').onclick = () => openPanel(buildSkillPanel());
 document.getElementById('btn-help').onclick = () => openPanel(buildHelpPanel());
 document.getElementById('btn-family-switch-top').onclick = () => FamilySystem.openFamilyPanel();
-document.getElementById('panel-overlay').onclick = (e) => { if (e.target.id === 'panel-overlay') e.target.classList.remove('open'); };
+document.getElementById('panel-overlay').onclick = (e) => {
+  if (e.target.id === 'panel-overlay') closeRoutinePanelOverlay();
+};
 
 document.addEventListener('keydown', e => {
   if (document.getElementById('admin-overlay').classList.contains('open')) return;
@@ -1643,6 +2795,7 @@ document.addEventListener('keydown', e => {
   if (k === 'j') { QuestSystem.openQuestPanel?.(); return; }
   if (k === 'r') { openPanel(buildRelationsPanel()); return; }
   if (k === 'p') { openCharacterProfilePanel(); return; }
+  if (k === 'q') { openRoutinePanel(); return; }
   if (k === 'm') { toggleLogDrawer(); return; }
   if (k === 'k') { openPanel(buildSkillPanel()); return; }
   if (k === 'b') {
