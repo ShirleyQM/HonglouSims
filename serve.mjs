@@ -12,6 +12,7 @@ const PORT = Number(process.env.PORT) || 8765;
 const HOST = process.env.BIND_LOCAL ? '127.0.0.1' : (process.env.HOST || '0.0.0.0');
 const OLLAMA = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'qwen2.5:7b-instruct';
+const LOCAL_CONFIG_FILE = path.join(ROOT, 'js', 'config.local.js');
 let ollamaProcess = null;
 
 const MIME = {
@@ -55,6 +56,43 @@ function writeJson(res, status, data) {
     'Access-Control-Allow-Origin': '*',
   });
   res.end(JSON.stringify(data));
+}
+
+function isLoopbackRequest(req) {
+  const addr = req.socket.remoteAddress || '';
+  return addr === '127.0.0.1' || addr === '::1' || addr === '::ffff:127.0.0.1';
+}
+
+async function writeLocalConfig(req, res) {
+  if (req.method !== 'POST') return writeJson(res, 405, { ok: false, error: 'Method Not Allowed' });
+  if (!isLoopbackRequest(req)) {
+    return writeJson(res, 403, { ok: false, error: '本地配置写回只允许从本机访问' });
+  }
+  let payload;
+  try {
+    payload = JSON.parse((await readBody(req)).toString('utf8') || '{}');
+  } catch (e) {
+    return writeJson(res, 400, { ok: false, error: `JSON 无效: ${e.message}` });
+  }
+  const config = payload.config;
+  if (!config || typeof config !== 'object' || Array.isArray(config)) {
+    return writeJson(res, 400, { ok: false, error: '缺少 config 对象' });
+  }
+  const body = [
+    '/* 本文件由后台“写回本地配置”生成。 */',
+    '/* 作用：本机启动服务时覆盖 DEFAULT_CONFIG；GitHub Pages 也可读取已提交的这个文件。 */',
+    `/* generatedAt: ${new Date().toISOString()} */`,
+    `globalThis.LOCAL_CONFIG_PATCH = ${JSON.stringify(config, null, 2)};`,
+    '',
+  ].join('\n');
+  const tmp = `${LOCAL_CONFIG_FILE}.tmp`;
+  try {
+    fs.writeFileSync(tmp, body, 'utf8');
+    fs.renameSync(tmp, LOCAL_CONFIG_FILE);
+  } catch (e) {
+    return writeJson(res, 500, { ok: false, error: `写入失败: ${e.message}` });
+  }
+  return writeJson(res, 200, { ok: true, file: path.relative(ROOT, LOCAL_CONFIG_FILE) });
 }
 
 async function checkOllama() {
@@ -142,6 +180,9 @@ const server = http.createServer(async (req, res) => {
   }
   if (req.url === '/ollama/start') {
     return startOllama(res);
+  }
+  if (req.url === '/api/config/write') {
+    return writeLocalConfig(req, res);
   }
   if (req.url.startsWith('/ollama/')) {
     return proxyOllama(req, res, req.url.replace('/ollama', ''));

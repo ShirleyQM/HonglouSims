@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "schema_version": 1,
+  "generatedAt": "2026-06-25T15:32:49.842Z",
+  "generated_at": "2026-06-25T15:32:49.842Z",
+  "projectRoot": "/Users/bytedance/Desktop/myCursor/game",
+  "project_root": "/Users/bytedance/Desktop/myCursor/game",
+  "lockfile": "TokRepo.lock",
+  "lockfilePath": "/Users/bytedance/Desktop/myCursor/game/TokRepo.lock",
+  "lockfile_path": "/Users/bytedance/Desktop/myCursor/game/TokRepo.lock",
+  "statePath": "/Users/bytedance/Desktop/myCursor/game/.tokrepo/state.json",
+  "state_path": "/Users/bytedance/Desktop/myCursor/game/.tokrepo/state.json",
+  "count": 1,
+  "summary": {
+    "installed": 1,
+    "staged": 0,
+    "local_changes": 0,
+    "missing_files": 0
+  },
+  "assets": [
+    {
+      "uuid": "71a05a12-e5a9-45ec-84b4-815d567e592e",
+      "title": "Claude Official Skill: frontend-design",
+      "sourceUrl": "https://tokrepo.com/en/workflows/71a05a12-e5a9-45ec-84b4-815d567e592e",
+      "targetTool": "project",
+      "installMode": "skill",
+      "installedAt": "2026-06-25T15:32:49.839Z",
+      "contentHash": "95654d4a446145764d33db26ee6f468ff1b685aaf3bdce1b29b118006c4d4024",
+      "installPlanHash": "e1662dcbdd293a87cb9eaa8905d7684a9003cc7e51cc4cd9f25a4b55869163c6",
+      "sessionId": "",
+      "status": "installed",
+      "files": [
+        {
+          "path": "Claude Official Skill- frontend-design.md",
+          "path_type": "project_relative",
+          "resolvedPath": "/Users/bytedance/Desktop/myCursor/game/Claude Official Skill- frontend-design.md",
+          "sourceName": "Claude Official Skill- frontend-design",
+          "sha256": "5fe05b78b1bacf889d42dcf67d6d896c0d4a19847d2e02dc08ea1f7e2e159754",
+          "actualSha": "5fe05b78b1bacf889d42dcf67d6d896c0d4a19847d2e02dc08ea1f7e2e159754",
+          "exists": true,
+          "changed": false
+        }
+      ],
+      "rollback": [
+        {
+          "type": "remove_file",
+          "path": "Claude Official Skill- frontend-design.md",
+          "path_type": "project_relative"
+        }
+      ]
+    }
+  ]
+}

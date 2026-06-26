@@ -72,6 +72,8 @@ const CHAR_DEFAULT_TRAITS = {
 
 let GridBucket = { map: {}, size: 10 };
 let aiSlowMinuteAcc = 0;
+let aiSlowCursor = 0;
+const AI_SLOW_BATCH_SIZE = 8;
 
 function getAIConfig() { return CONFIG.aiConfig || DEFAULT_CONFIG.aiConfig; }
 
@@ -2890,7 +2892,12 @@ function onAITimeAdvanced(minutes) {
     aiSlowMinuteAcc++;
     if (aiSlowMinuteAcc >= 15) {
       aiSlowMinuteAcc = 0;
-      CHARS.forEach(c => slowChannelTick(c));
+      const count = Math.min(AI_SLOW_BATCH_SIZE, CHARS.length);
+      for (let j = 0; j < count; j++) {
+        const c = CHARS[aiSlowCursor % CHARS.length];
+        aiSlowCursor = (aiSlowCursor + 1) % Math.max(1, CHARS.length);
+        slowChannelTick(c);
+      }
     }
   }
 }
@@ -3004,15 +3011,19 @@ function initAISystem() {
 
 
 function loadConfig() {
+  const cfg = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  const localPatch = globalThis.LOCAL_CONFIG_PATCH;
+  if (localPatch && typeof localPatch === 'object') {
+    deepMerge(cfg, JSON.parse(JSON.stringify(localPatch)));
+  }
   try {
     const s = localStorage.getItem('dgy_config');
     if (s) {
-      const merged = deepMerge(JSON.parse(JSON.stringify(DEFAULT_CONFIG)), JSON.parse(s));
-      migrateConfig(merged);
-      return merged;
+      deepMerge(cfg, JSON.parse(s));
+      migrateConfig(cfg);
+      return cfg;
     }
   } catch (e) { console.warn('loadConfig failed, using defaults:', e); }
-  const cfg = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
   migrateConfig(cfg);
   return cfg;
 }

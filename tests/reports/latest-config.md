@@ -1,7 +1,7 @@
 # 配置体检
 
-- Started: 2026-06-25T08:32:11.924Z
-- Finished: 2026-06-25T08:32:11.934Z
+- Started: 2026-06-26T08:08:30.218Z
+- Finished: 2026-06-26T08:08:30.225Z
 - Result: PASS
 - Counts: PASS 55 / WARN 0 / FAIL 0
 
@@ -20,7 +20,7 @@
 | PASS | 关键文件存在：prd/持续更新_03任务.md | {} |
 | PASS | 关键文件存在：prd/持续更新_23传令与上下级管理面板.md | {} |
 | PASS | 关键文件存在：prd/持续更新_22人物作息.md | {} |
-| PASS | index.html 注册了前台脚本 | {"count":46} |
+| PASS | index.html 注册了前台脚本 | {"count":48} |
 | PASS | config.js 在 quest.js 之前加载 | {} |
 | PASS | quest.js 在 quest-issue.js 之前加载 | {} |
 | PASS | servant-relations.js 在 ai.js 之前加载 | {} |

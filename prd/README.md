@@ -1,7 +1,16 @@
 # 大观园 PRD 索引
 
-> 更新时间：2026-06-23
+> 更新时间：2026-06-25
 > 文档定位：`/prd` 是后续需求更新的主目录；根目录日期文档作为历史来源保留。
+
+## 当前项目基线
+
+- 当前版本定位：v0.1-alpha，面向朋友和早期玩家的静态网页试玩。
+- 前台核心体验：观察人物、点家具/人物、编辑起居、传令、查看人物档案、保存本地进度。
+- 后台核心定位：开发/策划配置，不作为普通玩家主要入口。
+- 当前系统底座：六需求、起居、Utility AI、任务、传令、家具、社交、职业日课、故事路径、关系、存档已形成第一版闭环。
+- 下一步先定项目目标，再决定是优先稳定公开试玩、扩内容，还是做玩家自定义配置。
+
 
 ## 维护规则
 
@@ -34,11 +43,13 @@
 | 后台 / 人物配置 | `持续更新_15后台与人物配置.md` | `js/admin.js`、`js/config.js` |
 | 运行时 / 行动队列 / 存档 | `持续更新_16运行时行动队列与存档.md` | `js/runtime.js`、`js/action-queue.js`、`js/systems/quest.js`、`serve.mjs` |
 | UI 总览 | `持续更新_17_UI总览.md` | `index.html`、`js/ui.js`、`js/draw.js`、`js/admin.js` |
+| 新手引导 | `持续更新_24新手引导.md` | `js/ui.js`、`js/systems/quest.js`、后续 tutorial system |
 | 场景优化 | `持续更新_21场景优化.md` | `js/config.js`、`js/world.js`、`js/draw.js`、`js/assets.js`、`assets/manifest.json` |
 | 经济 | `持续更新_经济系统.md` | `js/systems/economy.js`、`js/systems/money.js` |
 | 职业 | `持续更新_职业系统.md` | `js/systems/life-path.js`、`js/systems/specialty.js` |
 | 地图 | `大观园地图.md` | `js/world.js`、`js/systems/scene-access.js` |
 | 环形互动菜单 | `UI_环形互动菜单.md` | `js/ui.js` |
+| 项目目标 | `项目目标.md` | 项目阶段目标、发版边界、讨论草案 |
 | 开发日志 | `开发日志.md` | 项目整体 |
 
 ## 历史来源对照

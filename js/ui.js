@@ -8,6 +8,7 @@ let routineDragState = null;
 let routineTemplatePickerState = null;
 let routineContextMenuState = null;
 let routinePanelDocumentCloseHandler = null;
+let hudStateTagsExpanded = false;
 
 const HUD_NEED_ORDER = ['mood', 'energy', 'hunger', 'hygiene', 'social', 'fun'];
 const NEED_DISPLAY_FALLBACK = {
@@ -61,6 +62,10 @@ function getNeedDisplayName(def) {
   return NEED_DISPLAY_FALLBACK[def.key] || def.name || def.label || def.key;
 }
 
+function getNeedHudName(def) {
+  return def.shortLabel || def.shortName || def.short || def.abbr || def.hudLabel || def.oneChar || getNeedDisplayName(def);
+}
+
 function getHudNeedDefs() {
   const defs = getNeedDefs();
   const byKey = Object.fromEntries(defs.map(def => [def.key, def]));
@@ -87,9 +92,10 @@ function needLiquidDotHtml(c, def, opts = {}) {
   const color = def.color || needBarColor(value);
   const risk = needRiskClass(value);
   const valueHtml = opts.value ? `<span class="need-dot-value">${value}</span>` : '';
+  const label = opts.short ? getNeedHudName(def) : getNeedDisplayName(def);
   return `<span class="need-dot-item" title="${escapeHtml(title)}">
     <span class="need-liquid-dot ${risk}" style="--fill:${pct}%;--need-color:${escapeHtml(color)}"></span>
-    <span class="need-dot-label">${escapeHtml(getNeedDisplayName(def))}</span>${valueHtml}
+    <span class="need-dot-label">${escapeHtml(label)}</span>${valueHtml}
   </span>`;
 }
 
@@ -222,8 +228,9 @@ function buildColCurrentChar() {
   }
   const oldDetail = container.querySelector('.current-char-details');
   if (oldDetail) charDetailScrollById[c.id] = oldDetail.scrollTop;
-  const needHtml = getHudNeedDefs().map(n => needLiquidDotHtml(c, n)).join('');
-  const states = (c.activeStates || []).map(s => {
+  const needHtml = getHudNeedDefs().map(n => needLiquidDotHtml(c, n, { short: true })).join('');
+  const activeStates = Array.isArray(c.activeStates) ? c.activeStates : [];
+  const states = activeStates.map(s => {
     const cls = getStateTagClass(s.id);
     const sd = CONFIG.stateDefs[s.id];
     const name = sd?.name || s.id;
@@ -231,34 +238,46 @@ function buildColCurrentChar() {
     return `<span class="tag state ${cls}" title="${escapeHtml((sd?.desc || '') + remain)}">${escapeHtml(name)}</span>`;
   }).join('');
   LifePathSystem?.initChar?.(c);
-  const repTier = LifePathSystem?.getCharTier?.(c)?.title || '';
-  const bestRep = ReputationDomainSystem?.getBestDomain?.(c.id);
   const family = FamilySystem?.findFamilyOfChar?.(c.id);
   const role = family ? FamilySystem.getCharRole(c.id, family.id) : '';
   const rankLabel = IdentityProtocolSystem?.rankLabel?.(IdentityProtocolSystem?.getCharRank?.(c.id)) || '';
-  const identityLine = [rankLabel, role, repTier].filter(Boolean).join(' · ');
-  const repLine = bestRep
-    ? `${bestRep.label} ${bestRep.value}`
-    : `声望 ${c.reputation ?? 0}`;
+  const rankValue = IdentityProtocolSystem?.getCharRank?.(c.id);
   const moneyBal = MoneySystem?.getBalance?.(c) ?? 0;
   const fund = family ? Math.round(FamilySystem.getFund(family.id)) : 0;
-  const moneyLine = `公库 ${fund}两 · 私库 ${Math.round(moneyBal)}两`;
+  const roleCanSeePublicFund = !!family
+    && role !== '仆从'
+    && (['家主', '配偶', '长辈', '子女', '手足'].includes(role) || (Number.isFinite(rankValue) && rankValue <= 3));
+  const moneyLine = [
+    roleCanSeePublicFund ? `<span title="${escapeAttr(family.name)}公库">公 ${fund}两</span>` : '',
+    `<span title="人物私库">私 ${Math.round(moneyBal)}两</span>`,
+  ].filter(Boolean).join('');
   const def = getCharDef(c.id);
-  const shortComment = def?.shortComment ? `<div class="char-col-comment" style="font-size:10px;color:var(--jn-text-soft);margin-top:1px">${escapeHtml(def.shortComment)}</div>` : '';
+  const shortComment = def?.shortComment ? `<div class="char-col-comment">${escapeHtml(def.shortComment)}</div>` : '';
+  const statusText = c.statusText || '闲庭漫步';
+  const statusTip = [rankLabel, role].filter(Boolean).join(' · ');
   container.innerHTML = `
     <div class="current-char-layout">
       ${currentCharArtHtml(c)}
       <div class="current-char-details">
-        <div class="char-col-name">${escapeHtml(c.short)} ${getMood(c)}</div>
+        <div class="char-name-row">
+          <div class="char-name-main">
+            <div class="char-col-name">${escapeHtml(c.short)} ${getMood(c)}</div>
+            <span class="hud-status-chip" title="${escapeAttr(statusTip || '当前状态')}">${escapeHtml(statusText)}</span>
+          </div>
+          <div class="hud-money-line">${moneyLine}</div>
+        </div>
         ${shortComment}
-        <div class="char-col-status">${escapeHtml(c.statusText || '闲庭漫步')}</div>
-        <div class="hud-summary-line"><strong>${escapeHtml(identityLine || '园中人物')}</strong><span>${escapeHtml(repLine)}</span><span>${escapeHtml(moneyLine)}</span></div>
-        <div class="need-dots">${needHtml}</div>
-        <div class="state-tags">${states || '<span class="tag state neutral">无状态</span>'}</div>
+        <div class="need-dots hud-need-dots">${needHtml}</div>
+        <div class="state-tags hud-state-tags${hudStateTagsExpanded ? ' expanded' : ''}" id="hud-state-tags" title="点击展开/收起状态标签">${states || '<span class="tag state neutral">无状态</span>'}</div>
       </div>
     </div>`;
   const newDetail = container.querySelector('.current-char-details');
   if (newDetail) newDetail.scrollTop = charDetailScrollById[c.id] || 0;
+  const stateTags = container.querySelector('#hud-state-tags');
+  if (stateTags) stateTags.onclick = () => {
+    hudStateTagsExpanded = !hudStateTagsExpanded;
+    buildUI();
+  };
 }
 
 function buildColFamily() {
@@ -275,7 +294,7 @@ function buildColFamily() {
     if (i < 0) return '';
     const c = CHARS[i];
     const role = FamilySystem.getCharRole(charId) || '';
-    const debuff = c.activeStates.some(s => getStateTagClass(s.id) === 'debuff');
+    const debuff = (c.activeStates || []).some(s => getStateTagClass(s.id) === 'debuff');
     const traitHint = (CharSpecialtySystem?.getDisplayTraits?.(c) || [])[0] || '';
     const duty = dutyByCharId.get(charId);
     const dutyTitle = duty ? ` · 当值：${duty.contract.role}，点标记选中人物` : '';
@@ -637,6 +656,87 @@ function profileBar(label, value, max = 1000, color = 'var(--jn-gold)') {
   </div>`;
 }
 
+function profilePortraitUrl(c) {
+  if (typeof AssetSystem === 'undefined') return '';
+  return AssetSystem.fullPortraitUrlForChar?.(c)
+    || AssetSystem.portraitUrlForChar?.(c)
+    || AssetSystem.avatarUrlForChar?.(c)
+    || '';
+}
+
+function profileNeedCoeffText(cf = {}) {
+  const fmt = n => Number.isFinite(+n) ? Number(+n).toFixed(2).replace(/\.00$/, '') : n;
+  const bits = [];
+  if (cf.decay != null) bits.push(`消耗 x${fmt(cf.decay)}`);
+  if (cf.grow != null) bits.push(`恢复 x${fmt(cf.grow)}`);
+  if (cf.max != null && Number(cf.max) !== 100) bits.push(`上限 ${fmt(cf.max)}`);
+  if (cf.min != null && Number(cf.min) !== 0) bits.push(`下限 ${fmt(cf.min)}`);
+  return bits.join(' · ') || '标准节律';
+}
+
+function profileTraitGroups(c) {
+  const profile = CONFIG.charSpecialtyConfig?.profiles?.[c.id] || {};
+  const meta = CONFIG.charSpecialtyConfig?.traitMetadata || {};
+  const groups = { '性情': [], '习惯': [], '处世': [], '特殊': [] };
+  const pushTrait = id => {
+    if (!id) return;
+    const row = meta[id] || {};
+    const rawCat = row.category || '';
+    const cat = rawCat.includes('习') ? '习惯'
+      : rawCat.includes('处') || rawCat.includes('社交') ? '处世'
+      : rawCat.includes('特殊') || rawCat.includes('专属') ? '特殊'
+      : '性情';
+    const label = row.label || CONFIG.charSpecialtyConfig?.traitLabels?.[id] || id;
+    if (!groups[cat].includes(label)) groups[cat].push(label);
+  };
+  [...(profile.aiTraits || []), ...(profile.displayTraits || [])].forEach(pushTrait);
+  (profile.specialties || []).forEach(spec => {
+    const label = spec.label || spec.name || spec.id;
+    if (label && !groups['特殊'].includes(label)) groups['特殊'].push(label);
+  });
+  return groups;
+}
+
+function buildProfileOverviewBlock(c, repExplain) {
+  const portrait = profilePortraitUrl(c);
+  const baseRank = c._baseSocialRank ?? getCharDef(c.id)?.socialRank ?? c.socialRank ?? 2;
+  const effectiveRank = IdentityProtocolSystem?.getCharRank?.(c.id) ?? baseRank;
+  const rankLabel = IdentityProtocolSystem?.rankLabel?.(effectiveRank) || `等级${effectiveRank}`;
+  const family = FamilySystem?.findFamilyOfChar?.(c.id);
+  const role = family ? FamilySystem.getCharRole(c.id, family.id) : '';
+  const path = c.lifePath ? LifePathSystem?.getPath?.(c.lifePath) : null;
+  const stage = c.currentStage ? LifePathSystem?.getStage?.(c.currentStage) : null;
+  const sceneId = c.currentScene || c.scene || c.sceneId || c.homeScene || '';
+  const scene = sceneId && typeof getScene === 'function' ? getScene(sceneId) : null;
+  const sceneLabel = scene?.name || scene?.title || sceneId || '未定场景';
+  const groups = profileTraitGroups(c);
+  const traitRows = Object.entries(groups).map(([cat, vals]) => {
+    const tagsHtml = vals.slice(0, 4).map(v => `<i>${escapeHtml(v)}</i>`).join('') || '<em>未配置</em>';
+    return `<div class="profile-trait-line"><b>${escapeHtml(cat)}</b><span class="profile-trait-tags">${tagsHtml}</span></div>`;
+  }).join('');
+  const tags = [
+    rankLabel,
+    role ? `${family?.name || '家庭'} · ${role}` : family?.name || '未入家庭',
+    path?.name || '未择职业',
+    repExplain?.best ? `${repExplain.best.label}${repExplain.best.value}` : '',
+  ].filter(Boolean).map(t => `<span>${escapeHtml(t)}</span>`).join('');
+  return `<section class="profile-cover">
+    <div class="profile-cover-art">
+      ${portrait ? `<img src="${escapeHtml(portrait)}" alt="${escapeHtml(c.name || '')}" loading="lazy" decoding="async">` : `<div class="profile-cover-fallback" style="background:${escapeHtml(c.color || '#c8d8c0')}">${escapeHtml(c.short || c.name?.slice(0, 1) || '人')}</div>`}
+    </div>
+    <div class="profile-cover-main">
+      <div class="profile-cover-kicker">人物档案</div>
+      <div class="profile-cover-name">${escapeHtml(c.name || '未名')}</div>
+      <p class="profile-cover-desc">${escapeHtml(c.shortComment || c.personality || '身份、职业、需求与声望会在这里汇总展示。')}</p>
+      <div class="profile-cover-tags">${tags}</div>
+    </div>
+    <div class="profile-trait-panel">
+      <div class="profile-trait-title">性格小记</div>
+      <div class="profile-trait-list">${traitRows}</div>
+    </div>
+  </section>`;
+}
+
 function buildProfileIdentityBlock(c, repExplain) {
   const baseRank = c._baseSocialRank ?? getCharDef(c.id)?.socialRank ?? c.socialRank ?? 2;
   const effectiveRank = IdentityProtocolSystem?.getCharRank?.(c.id) ?? baseRank;
@@ -648,10 +748,26 @@ function buildProfileIdentityBlock(c, repExplain) {
   const identityDomains = (identityRep?.domains || [])
     .map(row => `${row.label}${row.value}`)
     .join(' / ');
+  const colors = ['#caa04f', '#83ad72', '#67aeb0', '#c97d83', '#8d78ad'];
+  const repBars = (identityRep?.domains || repExplain?.domains || []).slice(0, 5).map((row, i) => {
+    const value = Math.round(row.value ?? 0);
+    const pct = Math.max(0, Math.min(100, value / 1000 * 100));
+    const label = row.label || ReputationDomainSystem?.domainLabel?.(row.domain || row.id) || row.domain || row.id || '声望';
+    return `<div class="profile-mini-rep" title="${escapeHtml(label)} ${escapeHtml(value)}">
+      <div class="profile-mini-rep-track"><div class="profile-mini-rep-fill" style="height:${pct}%;background:linear-gradient(180deg, ${colors[i % colors.length]}, #b79b62)"></div></div>
+      <div class="profile-mini-rep-label">${escapeHtml(label)}</div>
+      <div class="profile-mini-rep-value">${escapeHtml(value)}</div>
+    </div>`;
+  }).join('');
   const rows = [
     profileMetricCard('身份位阶', rankLabel, effectiveRank !== baseRank ? `原位阶：${baseLabel}` : '由身份系统判定'),
     profileMetricCard('家庭身份', role || '未入家庭', family?.name || '无家庭归属'),
-    profileMetricCard('身份参考声望', identityRep?.value ?? c.reputation ?? 0, identityDomains || '按身份类型读取声望域'),
+    `<div class="profile-card">
+      <div class="profile-card-label">身份参考声望</div>
+      <div class="profile-card-value">${escapeHtml(identityRep?.value ?? c.reputation ?? 0)}</div>
+      <div class="profile-mini-rep-bars">${repBars || '<span class="profile-card-sub">暂无声望域</span>'}</div>
+      ${identityDomains ? `<div class="profile-card-sub">${escapeHtml(identityDomains)}</div>` : ''}
+    </div>`,
   ].join('');
   return `<section class="profile-section">
     <h4>身份与体面</h4>
@@ -660,7 +776,17 @@ function buildProfileIdentityBlock(c, repExplain) {
 }
 
 function buildProfileStatusBlock(c) {
-  const needs = getHudNeedDefs().map(def => needLiquidDotHtml(c, def, { value: true })).join('');
+  const needPalette = ['#b99a58', '#cb7f82', '#67b8b2', '#d486a7', '#8f74b3', '#80a96e'];
+  const needs = getHudNeedDefs().map((def, i) => {
+    const key = def.key || def.id;
+    const value = c.needs?.[key];
+    const color = def.color || needPalette[i % needPalette.length];
+    return `<span class="profile-need-chip">
+      <i style="background:${escapeHtml(color)}"></i>
+      <b>${escapeHtml(def.label || def.name || key)}</b>
+      <em>${escapeHtml(value == null ? '—' : Math.round(value))}</em>
+    </span>`;
+  }).join('');
   const states = (c.activeStates || []).map(s => {
     const sd = CONFIG.stateDefs[s.id];
     const cls = getStateTagClass(s.id);
@@ -672,12 +798,26 @@ function buildProfileStatusBlock(c) {
   const healthLine = healthValue != null
     ? `健康 ${Math.round(healthValue)}${illnessLevel && illnessLevel !== 'none' ? ' · ' + illnessLevel : ''}`
     : '健康系统未记录异常';
-  return `<section class="profile-section">
-    <h4>状态与需求</h4>
-    <div class="profile-path-card">
-      <div class="profile-path-meta">当前：${escapeHtml(c.statusText || '闲庭漫步')} · ${escapeHtml(healthLine)}</div>
-      <div class="need-dots profile-need-dots">${needs}</div>
-      <div class="state-tags">${states || '<span class="tag state neutral">无状态</span>'}</div>
+  const personal = Math.round(MoneySystem?.getBalance?.(c) ?? 0);
+  const healthPct = Math.max(0, Math.min(100, Number(healthValue ?? 100)));
+  const moneyPct = Math.max(0, Math.min(100, personal));
+  return `<section class="profile-vitals">
+    <div class="profile-vertical-bars">
+      <div class="profile-vbar-card">
+        <div class="profile-vbar-track"><div class="profile-vbar-fill" style="height:${healthPct}%"></div></div>
+        <div class="profile-vbar-label">健康</div>
+        <div class="profile-vbar-value">${escapeHtml(healthValue == null ? '—' : Math.round(healthValue))}</div>
+      </div>
+      <div class="profile-vbar-card money">
+        <div class="profile-vbar-track"><div class="profile-vbar-fill" style="height:${moneyPct}%"></div></div>
+        <div class="profile-vbar-label">私库</div>
+        <div class="profile-vbar-value">${escapeHtml(personal)} 两</div>
+      </div>
+    </div>
+    <div class="profile-need-ribbon">
+      <div class="profile-need-head"><span>当前状态</span><b>${escapeHtml(c.statusText || '闲庭漫步')}</b></div>
+      <div class="profile-need-line">${needs}</div>
+      <div class="profile-status-strip">${states || '<span>无状态</span>'}</div>
     </div>
   </section>`;
 }
@@ -772,26 +912,47 @@ function buildProfileReputationBlock(c, repExplain) {
   </section>`;
 }
 
+function buildProfileQuickFactsBlock(c, repExplain) {
+  const family = FamilySystem?.findFamilyOfChar?.(c.id);
+  const role = family ? FamilySystem.getCharRole(c.id, family.id) : '';
+  const baseRank = c._baseSocialRank ?? getCharDef(c.id)?.socialRank ?? c.socialRank ?? 2;
+  const effectiveRank = IdentityProtocolSystem?.getCharRank?.(c.id) ?? baseRank;
+  const rankLabel = IdentityProtocolSystem?.rankLabel?.(effectiveRank) || `等级${effectiveRank}`;
+  const path = c.lifePath ? LifePathSystem?.getPath?.(c.lifePath) : null;
+  const stage = c.currentStage ? LifePathSystem?.getStage?.(c.currentStage) : null;
+  const domainLine = (repExplain?.domains || [])
+    .slice(0, 3)
+    .map(row => `${row.label}${row.value}`)
+    .join('、');
+  const summary = [
+    family?.name && role ? `${family.name} · ${role}` : family?.name || '未入家庭',
+    rankLabel,
+    `综合声望 ${Math.round(c.reputation || repExplain?.total || 0)}`,
+    domainLine ? `细节声望 ${domainLine}` : '',
+  ].filter(Boolean).join(' · ');
+  return `<section class="profile-quickfacts">
+    <div class="profile-summary-line">${escapeHtml(summary)}</div>
+    <div class="profile-info-cards">
+      <div class="profile-info-card"><b>家庭</b><span>${escapeHtml(family?.name || '未入家庭')}</span></div>
+      <div class="profile-info-card"><b>身份</b><span>${escapeHtml(role || rankLabel)}</span></div>
+      <div class="profile-info-card"><b>职业</b><span>${escapeHtml(stage?.title || path?.name || role || '暂无')}</span></div>
+      <div class="profile-info-card"><b>路径</b><span>${escapeHtml(path?.name ? `${path.name}${stage?.title ? ' · ' + stage.title : ''}` : '暂无')}</span></div>
+    </div>
+  </section>`;
+}
+
 function buildCharacterProfilePanel() {
   const c = CHARS[selectedIdx];
   if (!c) return '<h3>人物</h3><p style="color:var(--jn-text-soft)">暂无人物。</p>';
   LifePathSystem?.initChar?.(c);
   ReputationDomainSystem?.initChar?.(c);
   const repExplain = ReputationDomainSystem?.explain?.(c.id);
-  const titleLine = [
-    LifePathSystem?.getDisplayTitle?.(c),
-    repExplain?.best ? `${repExplain.best.label}${repExplain.best.value}` : '',
-  ].filter(Boolean).join(' · ');
   return `<div class="profile-panel">
-    <div>
-      <h3>${escapeHtml(c.name)} · 人物档案</h3>
-      <p class="profile-subtitle">${escapeHtml(titleLine || '身份、职业与声望')}</p>
-    </div>
+    ${buildProfileOverviewBlock(c, repExplain)}
     ${buildProfileStatusBlock(c)}
+    ${buildProfileQuickFactsBlock(c, repExplain)}
     ${buildProfileIdentityBlock(c, repExplain)}
     ${buildProfileCareerBlock(c)}
-    ${buildProfileMoneyBlock(c)}
-    ${buildProfileReputationBlock(c, repExplain)}
     <div class="profile-actions">
       <button class="sys-btn" id="profile-open-relations">关系网络</button>
       <button class="sys-btn" id="profile-open-life-path">路径详情</button>
@@ -1601,6 +1762,85 @@ function openPanel(html) {
   panel.classList.remove('routine-panel-box');
   panel.innerHTML = html;
   document.getElementById('panel-overlay').classList.add('open');
+}
+
+function savePanelEscape(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function getSavePanelSnapshot() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (err) {
+    return null;
+  }
+}
+
+function formatSavePanelTime(value) {
+  if (!value) return '暂无存档';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '时间未知';
+  return date.toLocaleString('zh-CN', { hour12: false });
+}
+
+function closeSavePanelOverlay() {
+  document.getElementById('panel-overlay')?.classList.remove('open');
+}
+
+function openSavePanel(message = '') {
+  const snapshot = getSavePanelSnapshot();
+  const savedAt = formatSavePanelTime(snapshot?.savedAt);
+  const day = snapshot?.time?.day ? `第 ${snapshot.time.day} 天` : '暂无';
+  const hour = Number.isFinite(snapshot?.time?.hour) ? `${String(snapshot.time.hour).padStart(2, '0')}:00` : '暂无';
+  const version = snapshot?.version ? `v${snapshot.version}` : '暂无';
+  openPanel(`
+    <h2>存档</h2>
+    <div class="hint">进度保存在当前浏览器本地，不会上传云端；换浏览器或清缓存后需要重新开始。</div>
+    ${message ? `<div style="margin:10px 0;padding:10px 12px;border-radius:12px;background:rgba(71,128,92,.13);color:#3f6f50;font-weight:700">${savePanelEscape(message)}</div>` : ''}
+    <div class="admin-card">
+      <h4>当前存档</h4>
+      <div class="meta-grid">
+        <span>保存时间</span><b>${savePanelEscape(savedAt)}</b>
+        <span>游戏日期</span><b>${savePanelEscape(day)}</b>
+        <span>时辰</span><b>${savePanelEscape(hour)}</b>
+        <span>版本</span><b>${savePanelEscape(version)}</b>
+      </div>
+    </div>
+    <div class="routine-actions routine-actions-bottom">
+      <button class="primary" data-save-panel-action="save">保存当前进度</button>
+      <button data-save-panel-action="load" ${snapshot ? '' : 'disabled'}>读取存档</button>
+      <button class="danger" data-save-panel-action="clear" ${snapshot ? '' : 'disabled'}>清除存档</button>
+      <button data-save-panel-action="close">关闭</button>
+    </div>
+  `);
+  bindSavePanelEvents();
+}
+
+function bindSavePanelEvents() {
+  document.querySelectorAll('[data-save-panel-action]').forEach(btn => {
+    btn.onclick = () => {
+      const action = btn.dataset.savePanelAction;
+      if (action === 'save') {
+        if (saveGameToStorage(false)) openSavePanel('已保存当前进度。');
+        return;
+      }
+      if (action === 'load') {
+        if (!confirm('读取存档会覆盖当前未保存进度，确定读取吗？')) return;
+        if (loadGameFromStorage()) openSavePanel('已读取存档。');
+        else openSavePanel('没有可读取的存档。');
+        return;
+      }
+      if (action === 'clear') {
+        if (!confirm('确定清除本浏览器里的存档吗？')) return;
+        clearGameSave();
+        openSavePanel('存档已清除。');
+        return;
+      }
+      closeSavePanelOverlay();
+    };
+  });
 }
 
 function closeRoutinePanelOverlay(force = false) {
@@ -2775,13 +3015,36 @@ canvas.addEventListener('click', e => {
 
 const btnGroupIssue = document.getElementById('btn-group-issue');
 if (btnGroupIssue) btnGroupIssue.onclick = () => openGroupIssuePanel();
+const btnSavePanel = document.getElementById('btn-save-panel');
+if (btnSavePanel) btnSavePanel.onclick = () => openSavePanel();
+const btnMore = document.getElementById('btn-more');
+const moreShortcuts = document.getElementById('more-shortcuts');
+function setMoreShortcutsOpen(open) {
+  if (!btnMore || !moreShortcuts) return;
+  moreShortcuts.hidden = !open;
+  btnMore.classList.toggle('active', open);
+}
+if (btnMore && moreShortcuts) {
+  btnMore.onclick = (e) => {
+    e.stopPropagation();
+    setMoreShortcutsOpen(moreShortcuts.hidden);
+  };
+  moreShortcuts.onclick = (e) => e.stopPropagation();
+  document.addEventListener('click', () => setMoreShortcutsOpen(false));
+}
 
 document.getElementById('btn-rel').onclick = () => openPanel(buildRelationsPanel());
 document.getElementById('btn-profile').onclick = () => openCharacterProfilePanel();
 document.getElementById('btn-routine').onclick = () => openRoutinePanel();
 document.getElementById('btn-msg').onclick = () => toggleLogDrawer();
-document.getElementById('btn-bag').onclick = () => openPanel('<h3>背包</h3><p style="color:var(--jn-text-soft)">暂未开放</p><button class="sys-btn" onclick="document.getElementById(\'panel-overlay\').classList.remove(\'open\')">关闭</button>');
-document.getElementById('btn-skill-panel').onclick = () => openPanel(buildSkillPanel());
+document.getElementById('btn-bag').onclick = () => {
+  setMoreShortcutsOpen(false);
+  openPanel(`<h3>背包</h3><p style="color:var(--jn-text-soft)">暂未开放</p><button class="sys-btn" onclick="document.getElementById('panel-overlay').classList.remove('open')">关闭</button>`);
+};
+document.getElementById('btn-skill-panel').onclick = () => {
+  setMoreShortcutsOpen(false);
+  openPanel(buildSkillPanel());
+};
 document.getElementById('btn-help').onclick = () => openPanel(buildHelpPanel());
 document.getElementById('btn-family-switch-top').onclick = () => FamilySystem.openFamilyPanel();
 document.getElementById('panel-overlay').onclick = (e) => {
@@ -2798,6 +3061,7 @@ document.addEventListener('keydown', e => {
   if (k === 'q') { openRoutinePanel(); return; }
   if (k === 'm') { toggleLogDrawer(); return; }
   if (k === 'k') { openPanel(buildSkillPanel()); return; }
+  if (k === 'v') { openSavePanel(); return; }
   if (k === 'b') {
     openPanel('<h3>背包</h3><p style="color:var(--jn-text-soft)">暂未开放</p><button class="sys-btn" onclick="document.getElementById(\'panel-overlay\').classList.remove(\'open\')">关闭</button>');
     return;

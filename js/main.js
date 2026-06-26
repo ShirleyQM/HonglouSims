@@ -1,6 +1,6 @@
 /* ═══════════════════ LOOP ═══════════════════ */
 const SIM_STEP_SEC = 0.05;
-const MAX_SIM_STEPS_PER_FRAME = 20;
+const MAX_SIM_STEPS_PER_FRAME = 6;
 let lastTime = 0, simBacklog = 0, uiTimer = 0;
 
 function updateSimulation(dt) {
@@ -24,6 +24,7 @@ function loop(ts) {
   const elapsed = Math.max(0, (ts - lastTime) / 1000);
   lastTime = ts;
   if (!document.hidden) simBacklog += elapsed;
+  simBacklog = Math.min(simBacklog, SIM_STEP_SEC * MAX_SIM_STEPS_PER_FRAME);
   let steps = 0;
   while (simBacklog >= SIM_STEP_SEC && steps < MAX_SIM_STEPS_PER_FRAME) {
     simBacklog -= SIM_STEP_SEC;

@@ -557,7 +557,11 @@ function applyLowScoreEffects(initiator, target, tpl, score, onLowOverride) {
   }
 }
 
-function runAwkwardDialogue(c, target, tpl, onComplete, ctx) {
+function runAwkwardDialogue(c, target, tpl, onComplete, ctx = {}) {
+  const depthMode = ctx.depthMode || (ctx.mode === 'lowscore' ? 'low_score' : (ctx.mode || 'low_score'));
+  const depthFallback = ctx.depthOutcome?.line
+    || window.InteractionDepthSystem?.lineFor?.(c, target, tpl, { ...ctx, mode: depthMode });
+  const fallbackText = depthFallback || ctx.fallbackText || '……（神色淡淡，不接这话）';
   const begin = (dialogue) => {
     lockParticipantsForDialogue(c, target, tpl);
     c.action = {
@@ -581,7 +585,7 @@ function runAwkwardDialogue(c, target, tpl, onComplete, ctx) {
       speechBubble = null;
     } else {
       const sp = dialogue.speakers?.[0] ? getChar(dialogue.speakers[0]) : c;
-      speechBubble = { char: sp || c, text: dialogue.lines?.[0] || ctx.fallbackText };
+      speechBubble = { char: sp || c, text: dialogue.lines?.[0] || fallbackText };
     }
     uiDirty = true;
   };
@@ -594,7 +598,7 @@ function runAwkwardDialogue(c, target, tpl, onComplete, ctx) {
   };
   if (InteractionLlmSystem?.tryBeginAwkward?.(c, target, tpl, awkwardCtx, begin)) return;
 
-  speechBubble = { char: target, text: ctx.fallbackText || '……（神色淡淡，不接这话）' };
+  speechBubble = { char: target, text: fallbackText };
   setTimeout(() => { speechBubble = null; if (onComplete) onComplete(); }, 2200);
   uiDirty = true;
 }
@@ -602,12 +606,18 @@ function runAwkwardDialogue(c, target, tpl, onComplete, ctx) {
 function runLowScoreInteraction(c, target, tpl, score, onComplete, onLowOverride) {
   applyLowScoreEffects(c, target, tpl, score, onLowOverride);
   const status = resolveLowScoreStatus(tpl, onLowOverride);
+  const depthOutcome = window.InteractionDepthSystem?.recordFailure?.(c, target, tpl, {
+    mode: 'low_score',
+    score,
+    minScore: InteractionScoreSystem?.getMinScore?.(tpl),
+    onLowScore: onLowOverride,
+  });
   c.statusText = status;
   target.statusText = '话不投机';
   runAwkwardDialogue(c, target, tpl, onComplete, {
-    mode: 'lowscore', score, onLowOverride,
-    statusReason: `互动受阻·${status}`,
-    fallbackText: '……（神色淡淡，不接这话）',
+    mode: 'lowscore', depthMode: 'low_score', score, onLowOverride, depthOutcome,
+    statusReason: `互动受阻·${depthOutcome?.label || status}`,
+    fallbackText: depthOutcome?.line || '……（神色淡淡，不接这话）',
   });
 }
 
@@ -685,6 +695,7 @@ function applyInteractionEffects(initiator, target, tpl, opts = {}) {
   if (skipAxis) {
     checkNeedTriggers(initiator);
     checkNeedTriggers(target);
+    window.InteractionDepthSystem?.recordSuccess?.(initiator, target, tpl);
     EventBus.emit('interaction:effects', { initiatorId: initiator.id, targetId: target.id, interactionId: tpl.id, interactionName: tpl.name });
     uiDirty = true;
     return;
@@ -705,6 +716,7 @@ function applyInteractionEffects(initiator, target, tpl, opts = {}) {
   }
   checkNeedTriggers(initiator);
   checkNeedTriggers(target);
+  window.InteractionDepthSystem?.recordSuccess?.(initiator, target, tpl);
   EventBus.emit('interaction:effects', { initiatorId: initiator.id, targetId: target.id, interactionId: tpl.id, interactionName: tpl.name });
   uiDirty = true;
 }
@@ -777,16 +789,33 @@ function startInteraction(c, target, tpl, onComplete) {
     log(`${c.short}${c._lastActionBlockReason}。`);
     return false;
   }
-  const ignoreCooldown = !!c.actionQueue[0]?.aiGenerated;
+  const autoSocialQueued = !!c.actionQueue[0]?.aiGenerated;
+  const ignoreCooldown = autoSocialQueued;
   const chk = checkInteractionAvailable(c, target, tpl, { ignoreCooldown });
   if (!chk.ok && chk.ok !== 'low') { log(`${tpl.name}不可用：${chk.reason}`); return false; }
+  const rememberAutoSocialCamera = () => {
+    if (autoSocialQueued && CHARS.indexOf(c) === selectedIdx && !c._autoSocialCameraHold) {
+      c._autoSocialCameraHold = {
+        x: camX,
+        y: camY,
+        originX: c.x,
+        originY: c.y,
+        startedAt: Date.now(),
+      };
+    }
+  };
+  const clearAutoSocialCameraIfFailed = () => {
+    if (autoSocialQueued && c._autoSocialCameraHold && !c.action?.autoSocial) delete c._autoSocialCameraHold;
+  };
   // 软锁（关系不足）：走近后触发 onLowScore，并正常结束队列项
   if (chk.ok === 'low') {
     const finish = () => runLowScoreInteraction(c, target, tpl, chk.score, onComplete, chk.onLowScore);
-    if (!walkToCharAdjacent(c, target, finish)) return false;
+    rememberAutoSocialCamera();
+    if (!walkToCharAdjacent(c, target, finish)) { clearAutoSocialCameraIfFailed(); return false; }
     return true;
   }
-  return walkToCharAdjacent(c, target, () => {
+  rememberAutoSocialCamera();
+  const walkingStarted = walkToCharAdjacent(c, target, () => {
     const riskMeta = chk.riskMeta || InteractionSocialSystem?.resolveRisk?.(c, target, tpl);
     if (riskMeta?.isRisky) {
       const roll = Math.random();
@@ -834,6 +863,8 @@ function startInteraction(c, target, tpl, onComplete) {
     if (InteractionLlmSystem?.tryBegin?.(c, target, tpl, begin)) return;
     begin(buildInteractionDialogue(c, target, tpl));
   });
+  if (!walkingStarted) clearAutoSocialCameraIfFailed();
+  return walkingStarted;
 }
 
 function finishInteractionAction(c, opts = {}) {
@@ -953,7 +984,7 @@ function calcNeedCoeffs(c) {
     }
     coeffs[nd.key] = base;
   }
-  for (const st of c.activeStates) {
+  for (const st of c.activeStates || []) {
     const sd = CONFIG.stateDefs[st.id];
     if (!sd?.needMods) continue;
     for (const [nk, mods] of Object.entries(sd.needMods)) {
@@ -967,7 +998,7 @@ function calcNeedCoeffs(c) {
       }
     }
   }
-  for (const tm of c.tempNeedMods) {
+  for (const tm of c.tempNeedMods || []) {
     if (tm.remaining <= 0) continue;
     for (const [nk, mods] of Object.entries(tm.mods)) {
       if (!coeffs[nk]) continue;
@@ -989,7 +1020,7 @@ function calcNeedCoeffs(c) {
 
 function canUseSkill(c, skillId) {
   if (!c.skills.includes(skillId)) return false;
-  for (const st of c.activeStates) {
+  for (const st of c.activeStates || []) {
     const sd = CONFIG.stateDefs[st.id];
     if (sd?.blockedSkills?.includes(skillId)) return false;
   }
@@ -1017,7 +1048,7 @@ function checkNeedTriggers(c) {
     const k = nd.key, v = c.needs[k], pv = prev[k];
     for (const [sid, sd] of Object.entries(CONFIG.stateDefs)) {
       const tr = sd.trigger;
-      if (!tr || tr.action || c.activeStates.some(s => s.id === sid)) continue;
+      if (!tr || tr.action || (c.activeStates || []).some(s => s.id === sid)) continue;
       if (tr.need !== k) continue;
       const hit = tr.op === 'lt' ? (pv >= tr.value && v < tr.value) :
                   tr.op === 'gt' ? (pv <= tr.value && v > tr.value) : false;
@@ -1256,7 +1287,10 @@ function buildPathTo(c, destCol, destRow, opts = {}) {
   return null;
 }
 
-function tryRepathAroundBlock(c) {
+function tryRepathAroundBlock(c, force = false) {
+  const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  if (!force && now < (c._nextRepathAt || 0)) return false;
+  c._nextRepathAt = now + 450 + Math.random() * 250;
   const dest = getMoveDest(c);
   if (!dest) return false;
   snapCharToGrid(c);
@@ -1290,6 +1324,9 @@ function tryRepathAroundBlock(c) {
 function resumeMovePath(c) {
   const dest = getMoveDest(c);
   if (!dest || c.action?.type !== 'move') return false;
+  const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  if (now < (c._nextResumePathAt || 0)) return false;
+  c._nextResumePathAt = now + 450 + Math.random() * 250;
   const path = buildPathTo(c, dest.col, dest.row, { excludeCharIds: c.action.excludeCharIds || [] });
   if (!path?.length) return false;
   c.path = path;
@@ -1321,7 +1358,7 @@ function handleMoveBlocked(c, dt) {
       c.gridRow = sidestep.row;
       syncCharPixel(c);
       moveCharBucket(c);
-      if (tryRepathAroundBlock(c)) return;
+      if (tryRepathAroundBlock(c, true)) return;
     }
   }
   if (c._moveBlockAcc > 3.0) {

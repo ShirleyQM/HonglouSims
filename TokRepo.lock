@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "schema_version": 1,
+  "lockfileVersion": 1,
+  "generatedBy": "tokrepo-cli/3.23.4",
+  "projectRoot": ".",
+  "project_root": ".",
+  "updatedAt": "2026-06-25T15:32:49.841Z",
+  "updated_at": "2026-06-25T15:32:49.841Z",
+  "assets": [
+    {
+      "uuid": "71a05a12-e5a9-45ec-84b4-815d567e592e",
+      "title": "Claude Official Skill: frontend-design",
+      "sourceUrl": "https://tokrepo.com/en/workflows/71a05a12-e5a9-45ec-84b4-815d567e592e",
+      "source_url": "https://tokrepo.com/en/workflows/71a05a12-e5a9-45ec-84b4-815d567e592e",
+      "targetTool": "project",
+      "target_tool": "project",
+      "installMode": "skill",
+      "install_mode": "skill",
+      "status": "installed",
+      "installedAt": "2026-06-25T15:32:49.839Z",
+      "installed_at": "2026-06-25T15:32:49.840Z",
+      "contentHash": "95654d4a446145764d33db26ee6f468ff1b685aaf3bdce1b29b118006c4d4024",
+      "content_hash": "95654d4a446145764d33db26ee6f468ff1b685aaf3bdce1b29b118006c4d4024",
+      "installPlanHash": "e1662dcbdd293a87cb9eaa8905d7684a9003cc7e51cc4cd9f25a4b55869163c6",
+      "install_plan_hash": "e1662dcbdd293a87cb9eaa8905d7684a9003cc7e51cc4cd9f25a4b55869163c6",
+      "sessionId": "",
+      "session_id": "",
+      "sessionPath": "",
+      "session_path": "",
+      "files": [
+        {
+          "path": "Claude Official Skill- frontend-design.md",
+          "path_type": "project_relative",
+          "pathType": "project_relative",
+          "sourceName": "Claude Official Skill- frontend-design",
+          "source_name": "Claude Official Skill- frontend-design",
+          "type": "skill",
+          "sha256": "5fe05b78b1bacf889d42dcf67d6d896c0d4a19847d2e02dc08ea1f7e2e159754",
+          "bytes": 5164,
+          "riskFlags": [],
+          "risk_flags": []
+        }
+      ],
+      "rollback": [
+        {
+          "type": "remove_file",
+          "path": "Claude Official Skill- frontend-design.md",
+          "path_type": "project_relative"
+        }
+      ],
+      "verification": null,
+      "policyDecision": null,
+      "policy_decision": null,
+      "permissionEnvelope": null,
+      "permission_envelope": null
+    }
+  ]
+}

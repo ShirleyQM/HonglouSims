@@ -19,15 +19,50 @@ const TraitEffectSystem = (() => {
   }
 
   function metadata(id) {
-    return CONFIG.charSpecialtyConfig?.traitMetadata?.[id] || {};
+    return CONFIG.charSpecialtyConfig?.traitMetadata?.[id]
+      || CONFIG.charSpecialtyConfig?.specialtyMetadata?.[id]
+      || {};
+  }
+
+  function specialtyId(c, spec) {
+    const raw = typeof spec === 'string'
+      ? spec
+      : (spec?.id || spec?.name || spec?.key || spec?.label);
+    if (!raw) return '';
+    const id = String(raw);
+    const table = CONFIG.charSpecialtyConfig?.specialtyMetadata || {};
+    const scoped = `${c?.id}.${id}`;
+    if (table[scoped]) return scoped;
+    if (table[id] && (!table[id].ownerId || table[id].ownerId === c?.id)) return id;
+    const found = Object.entries(table).find(([key, row]) =>
+      row?.ownerId === c?.id && (key === id || row.id === id || row.label === id));
+    return found?.[0] || id;
+  }
+
+  function specialtiesOf(c) {
+    return (CONFIG.charSpecialtyConfig?.profiles?.[c?.id]?.specialties || [])
+      .map(spec => specialtyId(c, spec))
+      .filter(Boolean);
   }
 
   function effectsOf(c) {
-    return traitsOf(c).map(id => ({ id, effects: metadata(id).effects || {} }));
+    const seen = new Set();
+    const rows = [];
+    for (const id of traitsOf(c)) {
+      if (!id || seen.has(`trait:${id}`)) continue;
+      seen.add(`trait:${id}`);
+      rows.push({ id, type: 'trait', effects: metadata(id).effects || {} });
+    }
+    for (const id of specialtiesOf(c)) {
+      if (!id || seen.has(`specialty:${id}`)) continue;
+      seen.add(`specialty:${id}`);
+      rows.push({ id, type: 'specialty', effects: metadata(id).effects || {} });
+    }
+    return rows;
   }
 
   function has(c, traitId) {
-    return traitsOf(c).includes(traitId);
+    return traitsOf(c).includes(traitId) || specialtiesOf(c).includes(traitId);
   }
 
   function actionTags(cand) {
@@ -236,7 +271,7 @@ const TraitEffectSystem = (() => {
   }
 
   return {
-    has, traitsOf, metadata, effectsOf, modifyActionWeight, modifyNeedCoeffs,
+    has, traitsOf, specialtiesOf, metadata, effectsOf, modifyActionWeight, modifyNeedCoeffs,
     needAttentionMultiplier, stateApplyProbability, modifyStateDuration, stateRecoveryMultiplier,
     modifyRelationDelta, movementMultiplier, socialJoinMultiplier,
     crowdPenaltyMultiplier, questWeightMultiplier, questAcceptanceChance, questEarlyPrepareMinutes,

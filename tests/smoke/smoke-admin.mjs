@@ -20,6 +20,7 @@ await runBrowserSmoke('后台 v2 冒烟', 'smoke-admin', async ({ page, report }
     return {
       overlayOpen: document.querySelector('#admin-overlay')?.classList.contains('open') || false,
       groupTitles,
+      sectionIds: buttons.map(button => button.dataset.adminV2Section),
       navCount: buttons.length,
       clicked,
     };
@@ -29,7 +30,17 @@ await runBrowserSmoke('后台 v2 冒烟', 'smoke-admin', async ({ page, report }
   for (const title of ['人物配置', '关系与身份', '任务与传令', '行为规则', '世界配置', 'AI 与调试']) {
     report.assert(state.groupTitles.includes(title), `后台分组存在：${title}`, { groupTitles: state.groupTitles });
   }
-  report.assert(state.navCount >= 20, '后台 v2 导航项已补齐', { navCount: state.navCount });
+  const requiredSections = [
+    'dashboard', 'characterEditor', 'personalityMeta', 'dreamSystem', 'careerSystem', 'needs',
+    'storySystem', 'identitySystem', 'relationLabels', 'relInit', 'questTemplates',
+    'interactions', 'furnReact', 'narrativeRules', 'furnitureTemplates', 'furnitureInstances',
+    'ai', 'io',
+  ];
+  const missingSections = requiredSections.filter(id => !state.sectionIds.includes(id));
+  report.assert(missingSections.length === 0, '后台 v2 导航项已补齐', {
+    navCount: state.navCount,
+    missingSections,
+  });
   const broken = state.clicked.filter(row => !row.hasMain);
   report.assert(broken.length === 0, '后台 v2 导航点击后主区域存在', { broken });
 });

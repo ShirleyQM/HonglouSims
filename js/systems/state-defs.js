@@ -1645,3 +1645,38 @@ const STATE_CONFLICT_GROUPS = {
     if (defs[id] && !defs[id].conflictGroup) defs[id].conflictGroup = cg;
   }
 })();
+
+/* 互动失败深度补充状态：用于低分收场、逾矩失败、重复冒犯升级。 */
+(function injectInteractionFailureStates() {
+  const root = (typeof globalThis !== 'undefined') ? globalThis : window;
+  const defaultConfig = root.DEFAULT_CONFIG
+    || ((typeof DEFAULT_CONFIG !== 'undefined') ? DEFAULT_CONFIG : null);
+  if (!defaultConfig) return;
+  const defs = defaultConfig.stateDefs || (defaultConfig.stateDefs = {});
+  Object.assign(defs, {
+    awkward: {
+      name: '尴尬',
+      duration: 45,
+      desc: '话不投机或举止失分，一时进退两难。',
+      category: '社交失败状态',
+      stackable: true,
+      conflictGroup: 'social_atmo',
+    },
+    heartbroken: {
+      name: '心碎',
+      duration: 180,
+      desc: '示好被拒或情意落空，心口像被轻轻碾过。',
+      category: '社交失败状态',
+      stackable: true,
+      conflictGroup: 'mood_negative',
+    },
+    sullenAnger: {
+      name: '愠怒',
+      duration: 90,
+      desc: '怒意未必爆发，却已经在心里结了刺。',
+      category: '社交失败状态',
+      stackable: true,
+      conflictGroup: 'mood_negative',
+    },
+  });
+})();

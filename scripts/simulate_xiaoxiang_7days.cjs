@@ -215,6 +215,7 @@ const scripts = [
   'js/systems/relation.js',
   'js/systems/money.js',
   'js/systems/economy.js',
+  'js/systems/reputation-domain.js',
   'js/systems/life-path.js',
   'js/systems/fortune.js',
   'js/systems/identity-protocol.js',

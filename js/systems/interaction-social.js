@@ -243,6 +243,12 @@ const InteractionSocialSystem = (() => {
       }
       return true;
     }
+    const depthOutcome = window.InteractionDepthSystem?.recordFailure?.(initiator, target, tpl, {
+      mode: 'risk_fail',
+      riskMeta,
+      witnessed: !!riskMeta?.witnessCount,
+      witnessCount: riskMeta?.witnessCount || 0,
+    });
     const failSt = InteractionScoreSystem?.resolveRiskFailState?.(initiator, target, tpl, riskMeta)
       || riskMeta?.failStatus || rd.fail_status || 'awkward';
     emitRiskState(initiator, failSt, initiator, target, tpl, 'risk_fail');
@@ -261,6 +267,7 @@ const InteractionSocialSystem = (() => {
       EventBus.emit('interaction:risky_fail', {
         initiatorId: initiator.id, targetId: target.id,
         interactionId: tpl.id, witnesses: riskMeta.witnesses?.map(w => w.id),
+        depthLevel: depthOutcome?.levelId,
       });
     } else {
       log(`⚠ ${initiator.short}对${target.short}「${tpl.name}」逾矩，${CONFIG.stateDefs[failSt]?.name || '未果'}。`, 'social');

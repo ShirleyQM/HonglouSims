@@ -326,8 +326,7 @@ function cameraSafeInsets() {
   const actionPanel = document.getElementById('action-queue-panel')?.getBoundingClientRect();
   const bottomHud = document.getElementById('bottom-info-panel')?.getBoundingClientRect();
   const left = Math.max(0, Math.ceil((actionPanel?.right || 0) + 20));
-  const lowestOverlayTop = Math.min(actionPanel?.top || window.innerHeight, bottomHud?.top || window.innerHeight);
-  const bottom = Math.max(0, Math.ceil(window.innerHeight - lowestOverlayTop + 20));
+  const bottom = Math.max(0, Math.ceil(window.innerHeight - (bottomHud?.top || window.innerHeight) + 20));
   return { left, bottom, right: 24, top: 24 };
 }
 
@@ -346,6 +345,19 @@ function clampCameraTarget(x, y) {
 function updateCamera(instant) {
   const c = CHARS[selectedIdx];
   if (!c) return;
+  const socialHold = c._autoSocialCameraHold;
+  if (socialHold) {
+    const activeAutoSocial = !!c.action?.autoSocial || !!c.actionQueue?.some?.(q => q.aiGenerated && q.type === 'interaction');
+    const awayFromOrigin = Math.hypot((c.x || 0) - (socialHold.originX || 0), (c.y || 0) - (socialHold.originY || 0)) > CELL * 2;
+    const withinGrace = Date.now() - (socialHold.startedAt || 0) < 45000;
+    if (activeAutoSocial || (awayFromOrigin && withinGrace)) {
+      const holdTarget = clampCameraTarget(socialHold.x || 0, socialHold.y || 0);
+      if (instant) { camX = holdTarget.x; camY = holdTarget.y; }
+      else { camX += (holdTarget.x - camX) * 0.08; camY += (holdTarget.y - camY) * 0.08; }
+      return;
+    }
+    delete c._autoSocialCameraHold;
+  }
   const inset = cameraSafeInsets();
   const targetX = c.x - Math.max(inset.left + 96, VIEW_W / 2);
   const targetY = c.y - Math.min(VIEW_H / 2, Math.max(120, VIEW_H - inset.bottom - 96));

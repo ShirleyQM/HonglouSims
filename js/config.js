@@ -1254,7 +1254,7 @@ const DEFAULT_CONFIG = {
       duochou: '多愁', haoshuang: '豪爽', reluo: '热络', gupi: '孤僻', yuanhua: '圆滑',
       gengzhi: '耿直', duoyi: '多疑', qingxin: '轻信', haosheng: '好胜', qianrang: '谦让',
       tanzui: '贪嘴', shaochi: '少食', shishui: '嗜睡', aijie: '爱洁', lata: '邋遢', haodong: '好动',
-      xijing: '喜静', shoushi: '守时', tuoyan: '拖延',
+      xijing: '喜静', shoushi: '守时', tuoyan: '拖延', sanman: '散漫', guihua: '规划',
       jianren: '坚韧', cuiruo: '脆弱', pianzhi: '偏执', yuanrong: '圆融',
       xurong: '虚荣', pushi: '朴实', zhouquan: '周全', zisi: '自私',
       qinmian: '勤勉', xiedai: '懈怠', congming: '聪明', yudun: '愚钝',
@@ -1287,6 +1287,8 @@ const DEFAULT_CONFIG = {
       xijing: { label: '喜静', oppositeTrait: 'haodong', category: '习惯', description: '喜欢安静的室内活动。', effectExamples: ['室内活动权重增加', '移动速度略慢'], effects: { actionWeights: { indoor: 1.25, solitude: 1.45, desk: 1.35, outdoor: 0.65, lively: 0.65 }, movement: { speedMultiplier: 0.92 }, social: { crowdPenaltyMultiplier: 1.35 } } },
       shoushi: { label: '守时', oppositeTrait: 'tuoyan', category: '习惯', description: '严格遵守时间表。', effectExamples: ['日常任务提前一小时进入准备', '任务权重提高'], effects: { actionWeights: { task: 1.35, taskUrgent: 1.4 }, quest: { weightMultiplier: 1.35, urgentWeightMultiplier: 1.5, earlyPrepareMinutes: 60 }, schedule: { earlyMinutes: 30, deadlineRamp: 0.8 } } },
       tuoyan: { label: '拖延', oppositeTrait: 'shoushi', category: '习惯', description: '习惯把事情拖到最后。', effectExamples: ['截止前效率提高', '任务逾期风险增加'], effects: { actionWeights: { task: 0.6, taskUrgent: 1.8 }, quest: { normalWeightMultiplier: 0.55, urgentWeightMultiplier: 2.2 }, schedule: { deadlineRamp: 1.45, earlySuppression: 0.65 } } },
+      sanman: { label: '散漫', oppositeTrait: 'guihua', category: '习惯', description: '随遇而安，不爱提前规划，常凭兴致和临场感觉行事。', effectExamples: ['普通任务权重降低，临近紧急时再明显抬高', '更容易游走、应邀和追逐当下乐趣'], effects: { actionWeights: { movement: 1.18, outdoor: 1.12, lively: 1.12, fun: 1.12, social: 1.06, task: 0.72, taskUrgent: 1.45, desk: 0.86, waiting: 0.8 }, social: { invitationAcceptMultiplier: 1.08 }, quest: { normalWeightMultiplier: 0.72, urgentWeightMultiplier: 1.65 } } },
+      guihua: { label: '规划', oppositeTrait: 'sanman', category: '习惯', description: '喜欢先定次序、预作安排，做事按计划推进。', effectExamples: ['普通任务与书案类行动权重提高', '任务更早进入准备，紧急阶段更稳'], effects: { actionWeights: { task: 1.32, taskUrgent: 1.24, desk: 1.12, waiting: 1.12, movement: 0.92, lively: 0.9 }, social: { invitationAcceptMultiplier: 0.95 }, quest: { weightMultiplier: 1.28, urgentWeightMultiplier: 1.24, earlyPrepareMinutes: 45, acceptMultiplier: 1.08 } } },
       jianren: { label: '坚韧', oppositeTrait: 'cuiruo', category: '性情', description: '打碎了牙往肚里咽，咽完了还能冲你笑一下。', effectExamples: ['负面状态持续更短', '受挫后恢复更快'], effects: { stateDuration: { melancholy: 0.75, ganshang: 0.75, angry: 0.85 }, stateRecovery: { melancholy: 1.35, ganshang: 1.35, angry: 1.15 }, memory: { negativeStrengthMultiplier: 0.75, decayMultiplier: 1.15 } } },
       cuiruo: { label: '脆弱', oppositeTrait: 'jianren', category: '性情', description: '叶子落下来砸到我了', effectExamples: ['更容易陷入低落', '负面记忆更深'], effects: { actionWeights: { comfort: 1.25, solitude: 1.15 }, stateChance: { melancholy: 1.3, ganshang: 1.25, awkward: 1.2 }, stateDuration: { melancholy: 1.3, ganshang: 1.25 }, memory: { negativeStrengthMultiplier: 1.3, decayMultiplier: 0.9 } } },
       pianzhi: { label: '偏执', oppositeTrait: 'yuanrong', category: '性情', description: '这世界只有两种事：认定的，和错的', effectExamples: ['坚持己见，争执和任务执念更强', '关系负面变化略放大'], effects: { actionWeights: { conflict: 1.25, lundao: 1.25, task: 1.15, social: 0.85 }, relation: { positiveMultiplier: 0.9, negativeMultiplier: 1.15 }, stateDuration: { angry: 1.15 } } },
@@ -1331,6 +1333,8 @@ const DEFAULT_CONFIG = {
       xijing: { action: ['寻个安静地方，慢慢消磨才好。', '外头太闹，还是静坐自在。'] },
       shoushi: { action: ['时辰快到了，该早些准备。', '凡事赶在前头，才不至误事。'], accept: ['既应下了，便该按时办妥。'] },
       tuoyan: { action: ['还早呢，迟些做也来得及。', '先忙旁的，临到头再说。'], accept: ['应是应下了……过会儿再办罢。'], fail: ['早知如此，便该早些动手。'] },
+      sanman: { action: ['先随兴走走，兴许路上便有主意了。', '计划赶不上眼前这一桩热闹。'], accept: ['好啊，先应下再说，细处慢慢想。'], fail: ['哎呀，竟忘了还有这事。'] },
+      guihua: { action: ['先理出个次序，照着办便不慌。', '时辰、地点、轻重，都该先盘算清楚。'], accept: ['既应下了，便先排进今日章程。'], fail: ['哪里出了岔子，须得重新排一遍。'] },
     },
     traitModifiers: {
       chiwen: { boost: { chuanqing: 1.5, xujiu: 1.3 }, cut: { lundao: 0.35, desk: 0.35 } },
@@ -1776,6 +1780,7 @@ const DEFAULT_CONFIG = {
     statusTags: {
       痴狂: 'chikuang', 感伤: 'ganshang', 暴怒: 'baonu', 极度愉悦: 'joyful', 开心: 'elated',
       极度悲伤: 'ganshang', 烦躁: 'angry', 温馨满足: 'elated',
+      尴尬: 'awkward', 心碎: 'heartbroken', 愠怒: 'sullenAnger',
     },
     promptTemplates: {
       mediate_conflict: '你是{observer.name}，看到{observed.name}与人争执，上前劝解，一句话不超30字。',
@@ -2665,6 +2670,93 @@ const DEFAULT_CONFIG = {
       },
     },
     riskyDefaults: { fail_status: 'awkward' },
+  },
+  interactionDepthConfig: {
+    enabled: true,
+    decayGameMin: 240,
+    escalationCooldownGameMin: 45,
+    heat: {
+      low_score: 18,
+      risk_fail: 28,
+      witnessedBonus: 10,
+      publicBonus: 8,
+      successReduce: 0.45,
+    },
+    statusHeatModifiers: {
+      target: {
+        angry: 16, offended: 14, awkward: 6, heartbroken: 8, sullenAnger: 14,
+        ganshang: 8, chikuang: 12, selfDemeaning: 8,
+        joyful: -6, elated: -8, teaHeart: -6, tipsySocial: -4, secretCrush: -4,
+      },
+      initiator: {
+        angry: 8, awkward: 4, heartbroken: 6, sullenAnger: 8, ganshang: 4, chikuang: 10, tipsySocial: 5,
+      },
+    },
+    levels: [
+      {
+        id: 'mild', label: '冷场', minCount: 1, minHeat: 0,
+        states: [{ target: 'initiator', stateId: 'awkward', prob: 0.35 }],
+        lines: {
+          low_score: ['{B}只淡淡一笑，并不接这话。', '{B}低头理了理袖口，像没听见。', '{B}道：「这话先不必说了。」'],
+          risk_fail: ['{B}微微避开，场面顿时有些尴尬。', '{B}退了半步，没有接下这份亲近。', '{B}神色一冷，叫{A}一时说不出话。'],
+        },
+      },
+      {
+        id: 'annoyed', label: '不悦', minCount: 2, minHeat: 30,
+        states: [
+          { target: 'target', stateId: 'offended', prob: 0.35 },
+          { target: 'target', stateId: 'sullenAnger', prob: 0.3 },
+          { target: 'initiator', stateId: 'heartbroken', prob: 0.25, categories: ['chuanqing'] },
+        ],
+        axisEffects: [{ axis: 'affection', delta: -1 }],
+        lines: {
+          low_score: ['{B}皱眉道：「怎么又说这个？」', '{B}脸上的笑淡了：「你今日有些没分寸。」', '{B}把话截住：「够了，不必再试探我。」'],
+          risk_fail: ['{B}脸色沉了下来：「这不是你该做的。」', '{B}避开得更明显了，语气也冷了几分。', '{B}低声道：「再这样，旁人瞧见像什么？」'],
+        },
+      },
+      {
+        id: 'retort', label: '回怼', minCount: 3, minHeat: 54,
+        states: [
+          { target: 'target', stateId: 'sullenAnger', prob: 0.55 },
+          { target: 'target', stateId: 'angry', prob: 0.25 },
+          { target: 'initiator', stateId: 'heartbroken', prob: 0.35, categories: ['chuanqing'] },
+        ],
+        axisEffects: [{ axis: 'affection', delta: -2 }, { axis: 'trust', delta: -1 }],
+        escalation: { type: 'force_interaction', templateIds: [601], probability: 0.45, cooldownGameMin: 45, onlyAiTarget: true },
+        lines: {
+          low_score: ['{B}冷笑一声：「你倒会自说自话。」', '{B}抬眼看向{A}：「你是真不懂，还是故意的？」', '{B}不再忍让：「这话我不爱听。」'],
+          risk_fail: ['{B}立刻甩开，压着火道：「放尊重些。」', '{B}眼神一厉：「你再试试？」', '{B}退开一步：「你若再这样，我可不客气了。」'],
+        },
+      },
+      {
+        id: 'public_heat', label: '被人瞧见', minCount: 3, minHeat: 68, witnessedOnly: true,
+        states: [
+          { target: 'initiator', stateId: 'awkward', prob: 0.65 },
+          { target: 'target', stateId: 'sullenAnger', prob: 0.55 },
+          { target: 'target', stateId: 'offended', prob: 0.5 },
+        ],
+        axisEffects: [{ axis: 'affection', delta: -3 }, { axis: 'trust', delta: -2 }],
+        lines: {
+          low_score: ['{B}看了一眼旁人，语气更冷：「别在这里说这些。」', '旁人似乎也听见了，{B}的脸色顿时难看起来。'],
+          risk_fail: ['旁人目光扫来，{B}立刻退开：「你疯了吗？」', '{B}又羞又恼，低声斥道：「这么多人看着！」'],
+        },
+      },
+      {
+        id: 'severe', label: '冲突', minCount: 5, minHeat: 92,
+        states: [
+          { target: 'target', stateId: 'sullenAnger', prob: 0.8 },
+          { target: 'target', stateId: 'angry', prob: 0.75 },
+          { target: 'initiator', stateId: 'awkward', prob: 0.5 },
+          { target: 'initiator', stateId: 'heartbroken', prob: 0.55, categories: ['chuanqing'] },
+        ],
+        axisEffects: [{ axis: 'affection', delta: -5 }, { axis: 'trust', delta: -3 }],
+        escalation: { type: 'force_interaction', templateIds: [604, 603, 601], probability: 0.55, cooldownGameMin: 60, onlyAiTarget: true },
+        lines: {
+          low_score: ['{B}终于动了真火：「你还要纠缠到什么时候？」', '{B}忍无可忍：「再说一句，我便真翻脸了。」'],
+          risk_fail: ['{B}气得发抖：「你欺人太甚！」', '{B}再不退让，径直顶了回去。'],
+        },
+      },
+    ],
   },
   interactionCategories: [
     { id: 'xujiu', name: '叙旧' },

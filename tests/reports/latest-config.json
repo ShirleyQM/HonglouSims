@@ -1,7 +1,7 @@
 {
   "name": "配置体检",
-  "startedAt": "2026-06-25T08:32:11.924Z",
-  "finishedAt": "2026-06-25T08:32:11.934Z",
+  "startedAt": "2026-06-26T08:08:30.218Z",
+  "finishedAt": "2026-06-26T08:08:30.225Z",
   "counts": {
     "PASS": 55,
     "WARN": 0,
@@ -78,7 +78,7 @@
       "status": "PASS",
       "message": "index.html 注册了前台脚本",
       "details": {
-        "count": 46
+        "count": 48
       }
     },
     {

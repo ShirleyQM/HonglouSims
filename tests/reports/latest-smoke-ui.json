@@ -1,9 +1,9 @@
 {
   "name": "前台页面冒烟",
-  "startedAt": "2026-06-25T08:32:12.137Z",
-  "finishedAt": "2026-06-25T08:32:16.813Z",
+  "startedAt": "2026-06-26T08:08:30.414Z",
+  "finishedAt": "2026-06-26T08:08:33.951Z",
   "counts": {
-    "PASS": 10,
+    "PASS": 11,
     "WARN": 0,
     "FAIL": 0
   },
@@ -59,6 +59,13 @@
       "message": "底栏人物入口存在",
       "details": {
         "text": "人物P"
+      }
+    },
+    {
+      "status": "PASS",
+      "message": "底栏存档入口存在",
+      "details": {
+        "text": "存档V"
       }
     },
     {

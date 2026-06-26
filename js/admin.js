@@ -17,19 +17,13 @@ let adminMode = 'v2';
 let adminTab = 'specialties', adminSelChar = 0, adminSelRelIdx = 0, adminSelState = 'drunk';
 let adminSelTpl = 101, adminSelInter = 101;
 let adminV2Section = 'furnitureTemplates', adminV2SelectedTpl = null, adminV2SelectedInst = null, adminV2Search = '', adminV2CharacterFamilyId = null, adminV2CharacterEditing = false, adminV2RelationLabelsEditing = false, adminV2RelationLabelsDraft = null;
-let adminV2TraitFocusId = null, adminV2TraitSavedMessage = '', adminV2SelectedNarrativeRule = null;
+let adminV2TraitFocusId = null, adminV2TraitSavedMessage = '', adminV2NeedSavedMessage = '', adminV2SelectedNarrativeRule = null;
 let adminV2DreamFocusId = null, adminV2DreamSavedMessage = '', adminV2DreamDiagCharId = '';
+let adminV2InteractionCategory = '';
 const ADMIN_V2_LEGACY_BRIDGES = {
-  specialties: 'specialties',
   lifePath: 'lifePath',
-  needs: 'needs',
-  states: 'states',
   relInit: 'relInit',
-  interactions: 'interTpl',
-  multiInteract: 'multiInteract',
   furnReact: 'furnReact',
-  scenes: 'scenes',
-  sceneAccess: 'sceneAccess',
   io: 'io',
 };
 const adminV2CharacterTraitCollapsed = {};
@@ -92,12 +86,13 @@ const ADMIN_V2_GROUPS = [
   ] },
   { id: 'people', label: '人物配置', items: [
     { id: 'characterEditor', label: '人物设定', status: '编辑' },
-    { id: 'specialties', label: '性格配置', status: '表格' },
     { id: 'personalityMeta', label: '性格系统', status: '表格' },
     { id: 'dreamSystem', label: '梦想系统', status: '表格' },
-    { id: 'lifePath', label: '职业/人生路径', status: '表格' },
+    { id: 'careerSystem', label: '职业系统', status: '表格' },
     { id: 'needs', label: '基础需求', status: '表格' },
-    { id: 'states', label: '状态标签', status: '表格' },
+  ] },
+  { id: 'story', label: '故事系统', items: [
+    { id: 'storySystem', label: '路径系统', status: '表格' },
   ] },
   { id: 'relations', label: '关系与身份', items: [
     { id: 'identitySystem', label: '身份/礼法', status: '表格' },
@@ -108,21 +103,17 @@ const ADMIN_V2_GROUPS = [
     { id: 'questTemplates', label: '任务模板/传令', status: '表格' },
   ] },
   { id: 'behavior', label: '行为规则', items: [
-    { id: 'interactions', label: '互动模板', status: '表格' },
-    { id: 'multiInteract', label: '多人互动', status: '表格' },
+    { id: 'interactions', label: '互动模板和多人互动', status: '表格' },
     { id: 'furnReact', label: '家具反应', status: '表格' },
     { id: 'narrativeRules', label: '叙事气泡', status: '表格' },
   ] },
   { id: 'world', label: '世界配置', items: [
     { id: 'furnitureTemplates', label: '家具模板', status: '表格' },
     { id: 'furnitureInstances', label: '家具摆放', status: '表格' },
-    { id: 'scenes', label: '场景配置', status: '表格' },
-    { id: 'sceneAccess', label: '场景权限', status: '表格' },
   ] },
   { id: 'debug', label: 'AI 与调试', items: [
     { id: 'ai', label: 'Utility AI', status: '高级' },
     { id: 'io', label: '导入导出', status: '工具' },
-    { id: 'legacy', label: '旧后台兜底', status: '高级' },
   ] },
 ];
 
@@ -137,11 +128,14 @@ function adminV2Item(sectionId) {
 function renderAdminV2() {
   const tabs = document.getElementById('admin-tabs');
   tabs.innerHTML = `
-    <div class="adm-tab active">后台 v2</div>
-    <div class="adm-tab" id="btn-admin-v2-legacy">旧后台</div>`;
+    <div class="adm-tab active">后台 v2</div>`;
 
   const body = document.getElementById('admin-body');
-  const item = adminV2Item(adminV2Section);
+  let item = adminV2Item(adminV2Section);
+  if (!item) {
+    adminV2Section = 'dashboard';
+    item = adminV2Item(adminV2Section);
+  }
   body.innerHTML = `
     <style>
       .admin-v2 { display:grid;grid-template-columns:180px minmax(0,1fr);gap:12px;min-height:64vh }
@@ -166,6 +160,9 @@ function renderAdminV2() {
       .admin-v2-table td { padding:6px 7px;border-bottom:1px solid var(--jn-border-3);color:var(--jn-text-soft);vertical-align:middle }
       .admin-v2-table tr.sel td { background:rgba(191,214,193,.22) }
       .admin-v2-table input,.admin-v2-table select,.admin-v2-drawer input,.admin-v2-drawer select,.admin-v2-drawer textarea { width:100%;background:rgba(250,248,244,.2);border:1px solid rgba(107,90,76,.5);border-radius:6px;color:var(--jn-title);font-family:inherit;font-size:11px;padding:5px 7px }
+      .admin-v2-table textarea { width:100%;min-height:46px;resize:vertical;background:rgba(250,248,244,.2);border:1px solid rgba(107,90,76,.5);border-radius:6px;color:var(--jn-title);font-family:monospace;font-size:10px;padding:5px 7px }
+      .admin-v2-interaction-page .admin-v2-table textarea { min-height:34px;max-height:120px }
+      .admin-v2-interaction-page .sys-btn.active { border-color:var(--jn-gold);background:linear-gradient(180deg,#f5edcf,#cfba7b);color:var(--jn-title) }
       .admin-v2-table .mini { width:54px }
       .admin-v2-drawer { border:1px solid var(--jn-border-2);border-radius:10px;background:rgba(250,248,244,.12);padding:10px;overflow:auto;max-height:58vh }
       .admin-v2-drawer h4 { color:var(--jn-heading);font-size:13px;font-weight:normal;margin-bottom:8px }
@@ -190,22 +187,31 @@ function renderAdminV2() {
       .character-avatar-btn.active { border-color:var(--jn-gold);background:rgba(250,248,244,.3);box-shadow:0 0 0 2px var(--jn-gold-glow) }
       .character-avatar-btn img,.character-avatar-fallback { width:42px;height:42px;border-radius:8px;display:block;margin:0 auto 3px;object-fit:cover;object-position:center 12%;background:var(--jn-surface-active) }
       .character-avatar-btn span { display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;text-align:center }
-      .character-editor-main { display:grid;grid-template-columns:minmax(220px,25%) minmax(0,1fr);gap:14px;min-height:58vh;overflow-x:hidden }
+      .character-editor-main { display:grid;grid-template-columns:minmax(150px,16%) minmax(0,1fr);gap:12px;min-height:0;overflow-x:hidden }
       .character-editor-portrait { border:1px solid var(--jn-border-2);border-radius:12px;background:rgba(250,248,244,.14);display:flex;flex-direction:column;min-height:0;overflow:hidden }
-      .character-editor-portrait-art { flex:1;min-height:420px;display:flex;align-items:flex-start;justify-content:center;padding:10px;background:linear-gradient(180deg,rgba(250,248,244,.22),rgba(184,202,174,.16)) }
+      .character-editor-portrait-art { height:220px;min-height:220px;max-height:260px;display:flex;align-items:flex-start;justify-content:center;padding:8px;background:linear-gradient(180deg,rgba(250,248,244,.22),rgba(184,202,174,.16)) }
       .character-editor-portrait-art img { width:100%;height:100%;object-fit:contain;object-position:center top;display:block }
       .character-editor-portrait-fallback { width:100%;height:100%;border-radius:10px;display:flex;align-items:center;justify-content:center;color:rgba(61,48,40,.45);font-size:42px }
-      .character-editor-summary { border-top:1px solid var(--jn-border-3);padding:9px 10px;color:var(--jn-text-soft);font-size:12px;line-height:1.55;background:rgba(250,248,244,.16) }
+      .character-editor-summary { border-top:1px solid var(--jn-border-3);padding:8px 9px;color:var(--jn-text-soft);font-size:11px;line-height:1.5;background:rgba(250,248,244,.16) }
       .character-editor-right { display:flex;flex-direction:column;gap:12px;min-width:0;overflow-x:hidden }
       .character-editor-actions { display:flex;justify-content:flex-end;gap:8px;align-items:center;white-space:nowrap }
       .character-editor-actions button { background:linear-gradient(180deg,var(--jn-btn-top),var(--jn-btn-bottom));border:1px solid var(--jn-border);border-radius:999px;color:var(--jn-title);padding:5px 14px;font-family:inherit;cursor:pointer }
       .character-editor-actions button.primary { border-color:var(--jn-gold);background:linear-gradient(180deg,#f5edcf,#cfba7b) }
-      .character-result-row { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px }
+      .character-result-row { display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px }
       .character-result-card { border:1px solid var(--jn-border-3);border-radius:10px;background:rgba(250,248,244,.16);padding:9px 10px;min-width:0;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.24) }
       .character-result-card label { display:block;color:var(--jn-text-dim);font-size:10px;margin-bottom:4px }
       .character-result-card b { color:var(--jn-title);font-size:13px;font-weight:normal }
       .character-result-card small { display:block;color:var(--jn-text-dim);font-size:9px;margin-top:4px }
       .character-result-card select,.character-result-card input { width:100%;background:rgba(250,248,244,.22);border:1px solid rgba(107,90,76,.55);border-radius:6px;color:var(--jn-title);font-family:inherit;font-size:12px;padding:4px 6px }
+      .character-overview-panel { border:1px solid var(--jn-border-3);border-radius:12px;background:rgba(250,248,244,.1);padding:10px;min-width:0;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.18) }
+      .character-overview-head { display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-bottom:8px }
+      .character-overview-head h4 { margin:0;color:var(--jn-heading);font-size:13px;font-weight:normal;letter-spacing:.12em }
+      .character-overview-head p { margin:0;color:var(--jn-text-dim);font-size:10px;text-align:right;line-height:1.4 }
+      .character-need-table-wrap { overflow:auto;max-width:100% }
+      .character-need-coeff-table { min-width:640px }
+      .character-need-coeff-table td { vertical-align:top }
+      .character-need-coeff-table textarea { width:100%;min-height:28px;resize:vertical;border:1px solid rgba(107,90,76,.5);border-radius:6px;background:rgba(250,248,244,.2);color:var(--jn-title);padding:4px 6px;font:10px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;box-sizing:border-box }
+      .character-need-coeff-table code { display:block;white-space:normal;word-break:break-word;color:var(--jn-text-soft);font-size:10px;line-height:1.3 }
       .character-trait-columns { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;min-height:0;overflow-x:hidden;padding-top:10px }
       .character-trait-column { position:relative;min-width:0;border:1px solid var(--jn-border-3);border-radius:12px;background:rgba(250,248,244,.1);padding:19px 8px 8px;box-shadow:inset 0 1px 0 rgba(255,255,255,.18);overflow:visible }
       .character-trait-column-head { position:absolute;left:12px;top:-11px;display:flex;align-items:center;justify-content:center;color:var(--jn-heading);z-index:2 }
@@ -243,6 +249,15 @@ function renderAdminV2() {
       .dream-meta-table .dream-id-cell { min-width:130px;font-family:monospace;font-size:10px }
       .dream-meta-table .dream-desc-cell { min-width:230px }
       .dream-meta-table .dream-json-cell { min-width:180px;font-family:monospace;font-size:10px }
+      .need-meta-table { min-width:1320px }
+      .need-meta-table th,.need-meta-table td { padding:4px;border-right:1px solid var(--jn-border-3) }
+      .need-meta-table input,.need-meta-table select { border-radius:2px;padding:4px 5px;min-width:86px }
+      .need-meta-table .need-id-cell { min-width:118px;font-family:monospace;font-size:10px }
+      .need-meta-table .need-name-cell { min-width:110px }
+      .need-meta-table .need-summary-cell { min-width:240px }
+      .need-meta-table .need-json-cell { min-width:260px;font-family:monospace;font-size:10px }
+      .need-meta-table .need-num-cell { min-width:72px }
+      .need-meta-table .need-color-cell { min-width:54px;padding:1px 2px }
       @media (max-width: 1180px) { .character-trait-columns { grid-template-columns:repeat(2,minmax(0,1fr)) } }
       .character-trait-name.editable { cursor:pointer }
       .character-editor-tooltip { position:relative }
@@ -393,6 +408,51 @@ function renderAdminV2Nav() {
     </div>`).join('');
 }
 
+function adminApplyCurrentConfig(opts = {}) {
+  saveConfigToStorage();
+  CONFIG = loadConfig();
+  initRuntime?.();
+  initEventSystem?.();
+  SceneAccessSystem?.init?.();
+  NarrativeBubbleSystem?.init?.();
+  LifePathSystem?.init?.();
+  FamilySystem?.init?.();
+  QuestSystem?.init?.();
+  reloadDreamP0Systems?.();
+  CharSpecialtySystem?.init?.();
+  MultiInteractSystem?.init?.();
+  FurnitureReactionSystem?.reload?.();
+  buildWorldGrid?.();
+  initFurnRuntime?.();
+  initGridBucket?.();
+  initAISystem?.();
+  loadGameFromStorage?.();
+  if (CHARS?.[selectedIdx]) pauseCharAI?.(CHARS[selectedIdx]);
+  updateCamera?.(true);
+  buildUI?.();
+  if (opts.close !== false) closeAdmin();
+  log('配置已保存并应用到当前浏览器。上线版本请将确认后的配置固化进代码配置。');
+  if (opts.alert) alert('配置已保存并应用到当前浏览器。给别人玩时，需要把这套配置随代码版本一起发布。');
+}
+
+async function adminWriteConfigToLocalFile() {
+  saveConfigToStorage();
+  try {
+    const res = await fetch('/api/config/write', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ config: CONFIG }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    globalThis.LOCAL_CONFIG_PATCH = JSON.parse(JSON.stringify(CONFIG));
+    log(`配置已写回本地文件：${data.file || 'js/config.local.js'}`);
+    alert(`已写回本地配置文件：${data.file || 'js/config.local.js'}\n下次启动服务也会读取这份配置。`);
+  } catch (e) {
+    alert(`写回本地失败：${e.message}\n请确认使用 npm run start 或 npm run start:local 启动本地服务，并从 127.0.0.1 访问。`);
+  }
+}
+
 function renderAdminV2Header(item) {
   const descriptions = {
     furnitureTemplates: '家具能做什么、恢复什么需求、是否基础生存、是否需要技能，都在这里配置。',
@@ -401,8 +461,9 @@ function renderAdminV2Header(item) {
     specialties: '性格配置表：维护人物性情、习惯、行为倾向和可被 AI 读取的性格标签。',
     personalityMeta: '性格系统表：维护性格分类、对偶关系、描述和运行效果。',
     dreamSystem: '梦想系统表：维护长期志向、达成条件、阶段目标和玩法方向。',
-    lifePath: '职业/人生路径表：维护职业身份、阶段、声望、日课和路径任务池。',
-    needs: '基础需求表：维护六需求显示、衰退、危机阈值和恢复规则。',
+    careerSystem: '职业系统表：维护职业阶段、位阶、声望门槛、每日任务和职业权限。',
+    storySystem: '故事系统表：维护人生路径定义、阶段叙事和故事节点。',
+    needs: '基础需求表：维护六需求显示、衰退、危机阈值、状态触发和恢复规则。',
     states: '状态标签表：维护状态效果、持续时间、阻断技能和展示标签。',
     identitySystem: '身份/礼法表：维护位阶、上下级关系、礼法限制、称呼和传令权限基础。',
     relInit: '关系初始化表：维护开局关系、关系轴和人物初始社交结构。',
@@ -413,11 +474,8 @@ function renderAdminV2Header(item) {
     furnReact: '家具反应表：维护家具使用后的旁观反应、状态变化和连锁效果。',
     narrativeRules: '叙事气泡表：维护触发条件、性格/需求/状态匹配、冷却和展示文案。',
     questTemplates: '任务与传令表：维护任务模板、点名传令、群体传令、权限、条件和奖励。',
-    scenes: '场景配置表：维护地图场景、名称、范围、归属和策划标签。',
-    sceneAccess: '场景权限表：维护身份、任务、邀请、跟随和越界通行规则。',
     io: '导入导出工具：用于保存、恢复、迁移、校验和热重载配置。',
     dashboard: '配置总览：集中展示配置完整度、引用错误、最近改动和重点风险。',
-    legacy: '旧后台兜底：只在某个表格入口暂时不够用时回退使用。',
   };
   return `
     <div class="admin-v2-head">
@@ -426,13 +484,14 @@ function renderAdminV2Header(item) {
         <p>${escapeHtml(descriptions[adminV2Section] || '该模块还未迁移到 v2，先保留占位。')}</p>
       </div>
       <div class="admin-v2-tools">
-        ${['furnitureTemplates', 'furnitureInstances', 'personalityMeta', 'dreamSystem', 'narrativeRules', 'questTemplates'].includes(adminV2Section)
+        <button class="primary" id="btn-admin-v2-apply-config" title="保存当前 CONFIG 到本浏览器，并重启运行时系统">保存并应用</button>
+        <button id="btn-admin-v2-write-local" title="写入 js/config.local.js，下次启动服务仍生效">写回本地</button>
+        ${['furnitureTemplates', 'furnitureInstances', 'personalityMeta', 'dreamSystem', 'careerSystem', 'storySystem', 'needs', 'narrativeRules', 'questTemplates'].includes(adminV2Section)
              ? `<input id="admin-v2-search" value="${adminAttr(adminV2Search)}" placeholder="搜索名称 / ID / 分类">
-               <button class="primary" id="btn-admin-v2-add">${adminV2Section === 'furnitureInstances' ? '新增摆放' : adminV2Section === 'personalityMeta' ? '新增性格' : adminV2Section === 'dreamSystem' ? '新增梦想' : adminV2Section === 'narrativeRules' ? '新增规则' : '新增模板'}</button>
+               <button class="primary" id="btn-admin-v2-add">${adminV2Section === 'furnitureInstances' ? '新增摆放' : adminV2Section === 'personalityMeta' ? '新增性格' : adminV2Section === 'dreamSystem' ? '新增梦想' : adminV2Section === 'careerSystem' ? '新增阶段' : adminV2Section === 'storySystem' ? '新增路径' : adminV2Section === 'needs' ? '新增需求' : adminV2Section === 'narrativeRules' ? '新增规则' : '新增模板'}</button>
                <button id="btn-admin-v2-validate">校验</button>
                ${adminV2Section.startsWith('furniture') ? '<button id="btn-admin-v2-export-furniture-ai">导出素材清单</button>' : ''}`
           : ''}
-        <button id="btn-admin-v2-open-legacy">旧后台</button>
       </div>
     </div>`;
 }
@@ -447,15 +506,16 @@ function renderAdminV2Section() {
   if (adminV2Section === 'furnitureInstances') return renderAdminV2FurnitureInstances();
   if (adminV2Section === 'personalityMeta') return renderAdminV2PersonalityMeta();
   if (adminV2Section === 'dreamSystem') return renderAdminV2DreamSystem();
+  if (adminV2Section === 'careerSystem') return renderAdminV2CareerSystem();
+  if (adminV2Section === 'storySystem') return renderAdminV2StorySystem();
+  if (adminV2Section === 'needs') return renderAdminV2Needs();
   if (adminV2Section === 'identitySystem') return renderAdminV2IdentitySystem();
   if (adminV2Section === 'relationLabels') return renderAdminV2RelationLabels();
-  if (adminV2Section === 'ai') return renderAdminV2AIUtility();
+  if (adminV2Section === 'ai') return renderAdminV2AIUtilityTable();
+  if (adminV2Section === 'interactions') return renderAdminV2InteractionTables();
   if (adminV2Section === 'narrativeRules') return renderAdminV2NarrativeRules();
   if (adminV2Section === 'questTemplates') return renderAdminV2QuestTemplates();
   if (adminV2Section === 'dashboard') return renderAdminV2Dashboard();
-  if (adminV2Section === 'legacy') {
-    return `<div class="admin-v2-empty">旧后台作为历史兜底入口保留。常用配置已接入后台 v2 左侧导航；若某个旧编辑器还没原生化，可暂时从这里回退。</div>`;
-  }
   return `<div class="admin-v2-empty">这个模块尚未登记到后台 v2。请先补导航映射，再接入对应配置编辑器。</div>`;
 }
 
@@ -3497,6 +3557,32 @@ function adminSaveCharacterEditor() {
   else delete c.age;
   const rankRaw = document.getElementById('admin-v2-char-rank')?.value;
   if (rankRaw !== undefined && rankRaw !== '') c.socialRank = +rankRaw;
+  const lifePathRaw = document.getElementById('admin-v2-char-life-path')?.value;
+  if (lifePathRaw !== undefined) {
+    if (lifePathRaw) c.lifePath = lifePathRaw;
+    else delete c.lifePath;
+  }
+  const stageRaw = document.getElementById('admin-v2-char-stage')?.value;
+  if (stageRaw !== undefined) {
+    if (stageRaw) c.currentStage = stageRaw;
+    else delete c.currentStage;
+  }
+  const needCoeffInputs = [...document.querySelectorAll('[data-admin-v2-need-coeff-field]')];
+  if (needCoeffInputs.length) {
+    const nextNeedCoeffs = {};
+    needCoeffInputs.forEach(input => {
+      const key = input.dataset.adminV2NeedCoeffField;
+      const field = input.dataset.field;
+      if (!key) return;
+      const raw = input.value.trim();
+      if (!raw) return;
+      nextNeedCoeffs[key] ||= {};
+      nextNeedCoeffs[key][field] = +raw || 0;
+    });
+    if (Object.keys(nextNeedCoeffs).length) c.baseNeedCoeffs = nextNeedCoeffs;
+    else delete c.baseNeedCoeffs;
+    delete c.needCoeffs;
+  }
 
   const selected = [...document.querySelectorAll('.character-trait-name.selected[data-admin-v2-editor-trait]')]
     .map(btn => btn.dataset.adminV2EditorTrait)
@@ -3607,6 +3693,63 @@ function renderAdminV2CharacterEditor() {
   const rankOptions = Object.entries(CONFIG.identityProtocolConfig?.rankLabels || {})
     .map(([id, label]) => `<option value="${adminAttr(id)}"${String(c?.socialRank ?? '') === String(id) ? ' selected' : ''}>${escapeHtml(label)} · ${escapeHtml(id)}</option>`)
     .join('');
+  const lifePathRows = CONFIG.lifePathConfig?.paths || {};
+  const lifePathEntries = Array.isArray(lifePathRows)
+    ? lifePathRows.map(row => [row.id, row]).filter(([id]) => id != null)
+    : Object.entries(lifePathRows);
+  const lifePathKey = c?.lifePath || '';
+  const lifePathDef = lifePathEntries.find(([id]) => String(id) === String(lifePathKey))?.[1] || null;
+  const stageRows = lifePathDef?.stages || {};
+  const stageEntries = Array.isArray(stageRows)
+    ? stageRows.map(row => [row.id, row]).filter(([id]) => id != null)
+    : Object.entries(stageRows);
+  const stageKey = c?.currentStage || '';
+  const stageDef = stageEntries.find(([id]) => String(id) === String(stageKey))?.[1] || null;
+  const lifePathOptions = `<option value="">未配置</option>` + lifePathEntries
+    .map(([id, row]) => `<option value="${adminAttr(id)}"${String(lifePathKey) === String(id) ? ' selected' : ''}>${escapeHtml(row?.name || row?.title || id)}</option>`)
+    .join('');
+  const stageOptions = `<option value="">自动/未配置</option>` + stageEntries
+    .map(([id, row]) => `<option value="${adminAttr(id)}"${String(stageKey) === String(id) ? ' selected' : ''}>${escapeHtml(row?.title || row?.name || id)}</option>`)
+    .join('');
+  const lifePathLabel = lifePathDef?.name || lifePathDef?.title || lifePathKey || '未配置';
+  const stageLabel = (typeof LifePathSystem !== 'undefined' && LifePathSystem?.getStageTitle?.(c))
+    || stageDef?.title
+    || stageDef?.name
+    || stageKey
+    || '未配置';
+  const sceneId = c?.currentScene || c?.scene || c?.sceneId || c?.homeScene || '';
+  const sceneDef = sceneId && typeof getScene === 'function' ? getScene(sceneId) : null;
+  const sceneLabel = sceneDef?.name || sceneDef?.title || sceneId || '未配置';
+  const needDefs = typeof getNeedDefs === 'function' ? getNeedDefs() : [];
+  const configuredNeedCoeffs = c?.baseNeedCoeffs || c?.needCoeffs || {};
+  const effectiveNeedCoeffs = typeof calcNeedCoeffs === 'function' ? calcNeedCoeffs(c) : configuredNeedCoeffs;
+  const coeffFields = [
+    ['min', 'min'],
+    ['max', 'max'],
+    ['grow', 'grow'],
+    ['decay', 'decay'],
+  ];
+  const coeffText = (row, field) => {
+    const value = row?.[field];
+    if (value == null || value === '') return '';
+    return typeof value === 'number' ? Number(value).toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1') : String(value);
+  };
+  const coeffInput = (key, row, field) => `<input class="need-num-cell" type="number" step="0.05" data-admin-v2-need-coeff-field="${adminAttr(key)}" data-field="${adminAttr(field)}" value="${adminAttr(coeffText(row, field))}" placeholder="默认">`;
+  const coeffCell = (row, field) => {
+    const text = coeffText(row, field);
+    return text ? `<code>${escapeHtml(text)}</code>` : '<span class="logic-muted">默认</span>';
+  };
+  const needCoeffRows = needDefs.map(nd => {
+    const key = nd.key || nd.id;
+    const configured = configuredNeedCoeffs[key] || {};
+    const effective = effectiveNeedCoeffs?.[key] || configured;
+    return `<tr>
+      <td>${escapeHtml(nd.name || nd.label || key)}</td>
+      ${coeffFields.map(([field]) => `<td>${editing ? coeffInput(key, configured, field) : coeffCell(configured, field)}</td>`).join('')}
+      ${coeffFields.map(([field]) => `<td>${coeffCell(effective, field)}</td>`).join('')}
+      <td>${escapeHtml(nd.summary || nd.description || '')}</td>
+    </tr>`;
+  }).join('');
   const traitColumns = TRAIT_CATEGORY_ASSETS.map(item => {
     const collapsed = !!adminV2CharacterTraitCollapsed[item.category];
     const categoryPairs = adminOrderedTraitPairs(item.category);
@@ -3649,7 +3792,6 @@ function renderAdminV2CharacterEditor() {
       <h4>人物专属性格</h4>
     </div>
     <div class="character-trait-list">${specialtyRows || '<span class="logic-muted">暂无专属性格</span>'}</div>
-    ${editing ? `<textarea id="admin-v2-char-specialties-json" style="margin-top:8px;min-height:150px">${escapeHtml(JSON.stringify(profile.specialties || [], null, 2))}</textarea>` : ''}
   </section>`;
   const dreamCards = Object.entries(dreamConfigForAdmin().dreamMetadata || {}).map(([id, row]) => {
     const selected = dreamProfile.type === id;
@@ -3711,7 +3853,29 @@ function renderAdminV2CharacterEditor() {
           <div class="character-result-card"><label>身份</label>${editing
             ? `<select id="admin-v2-char-rank">${rankOptions}</select>`
             : `<b>${escapeHtml(adminIdentityLabel(c))}</b><small>${escapeHtml(membership.family?.name || '未加入家庭')}${membership.member?.role ? ' · ' + escapeHtml(membership.member.role) : ''}</small>`}</div>
+          <div class="character-result-card"><label>家庭</label><b>${escapeHtml(membership.family?.name || '未加入家庭')}</b><small>${escapeHtml(membership.member?.role || '未配置家庭身份')}</small></div>
+          <div class="character-result-card"><label>职业</label>${editing
+            ? `<select id="admin-v2-char-life-path">${lifePathOptions}</select><small>阶段</small><select id="admin-v2-char-stage">${stageOptions}</select>`
+            : `<b>${escapeHtml(lifePathLabel)}</b><small>${escapeHtml(stageLabel)}</small>`}</div>
+          <div class="character-result-card"><label>当前场景</label><b>${escapeHtml(sceneLabel)}</b><small>${escapeHtml(sceneId || '无场景锚点')}</small></div>
         </div>
+        <section class="character-overview-panel">
+          <div class="character-overview-head">
+            <h4>基础需求</h4>
+            <p>人物配置系数是初始设定；实际生效系数会按当前性格、状态和系统快照实时计算。</p>
+          </div>
+          <div class="character-need-table-wrap">
+            <table class="admin-v2-table character-need-coeff-table">
+              <thead><tr>
+                <th>需求</th>
+                <th>配置 min</th><th>配置 max</th><th>配置 grow</th><th>配置 decay</th>
+                <th>生效 min</th><th>生效 max</th><th>生效 grow</th><th>生效 decay</th>
+                <th>说明</th>
+              </tr></thead>
+              <tbody>${needCoeffRows || '<tr><td colspan="10" class="logic-muted">暂无基础需求配置</td></tr>'}</tbody>
+            </table>
+          </div>
+        </section>
         <div class="character-trait-columns">${traitColumns}${specialtyPanel}</div>
         ${dreamPanel}
       </main>
@@ -3911,8 +4075,8 @@ function renderAdminV2PersonalityMeta() {
     lastPairKey = pairKey;
     return `${pairHeader}
     <tr data-admin-v2-trait-row="${adminAttr(id)}">
-      <td class="meta-id"><input class="trait-id-cell" data-admin-v2-trait-id="${adminAttr(id)}" value="${adminAttr(id)}"></td>
-      <td><input data-admin-v2-trait="${id}" data-field="label" value="${adminAttr(row.label || '')}"></td>
+      <td class="meta-id trait-sticky-id"><input class="trait-id-cell" data-admin-v2-trait-id="${adminAttr(id)}" value="${adminAttr(id)}"></td>
+      <td class="trait-sticky-label"><input data-admin-v2-trait="${id}" data-field="label" value="${adminAttr(row.label || '')}"></td>
       <td><select data-admin-v2-trait="${id}" data-field="category">${traitCategoryOptionsHtml(row.category || '性情')}</select></td>
       <td><select class="trait-opposite-cell" data-admin-v2-trait="${id}" data-field="oppositeTrait">${traitOppositeOptionsHtml(row.oppositeTrait || '', id)}</select></td>
       <td><input class="trait-desc-cell" data-admin-v2-trait="${id}" data-field="description" value="${adminAttr(row.description || '')}"></td>
@@ -3923,11 +4087,34 @@ function renderAdminV2PersonalityMeta() {
   }).join('');
   return `
     <div class="admin-v2-trait-page">
+      <style>
+        .personality-meta-table .trait-sticky-id,
+        .personality-meta-table .trait-sticky-label {
+          position: sticky;
+          z-index: 3;
+          background: linear-gradient(180deg, rgba(255,252,245,.98), rgba(239,231,210,.98));
+          box-shadow: 1px 0 0 var(--jn-border-3);
+        }
+        .personality-meta-table th.trait-sticky-id,
+        .personality-meta-table th.trait-sticky-label {
+          z-index: 4;
+        }
+        .personality-meta-table .trait-sticky-id {
+          left: 0;
+          min-width: 108px;
+          width: 108px;
+        }
+        .personality-meta-table .trait-sticky-label {
+          left: 108px;
+          min-width: 124px;
+          width: 124px;
+        }
+      </style>
       <div class="cfg-enums"><b>性格系统</b><p>表格改动会自动保存到本地配置，并立即同步到【人物设定】的性格选项。 <span class="meta-tag" id="admin-v2-trait-save-status">${escapeHtml(adminV2TraitSavedMessage || '等待改动')}</span></p></div>
       <div class="admin-v2-table-wrap" style="max-height:48vh">
-        <table class="admin-v2-table trait-meta-table">
+        <table class="admin-v2-table trait-meta-table personality-meta-table">
           <thead><tr>
-            <th>ID</th><th>标签</th><th>分类</th><th>对偶</th><th>描述</th><th>效果示例</th>
+            <th class="trait-sticky-id">ID</th><th class="trait-sticky-label">标签</th><th>分类</th><th>对偶</th><th>描述</th><th>效果示例</th>
             ${effectColumns.map(([, label]) => `<th>${escapeHtml(label)}</th>`).join('')}
             <th>操作</th>
           </tr></thead>
@@ -3935,7 +4122,7 @@ function renderAdminV2PersonalityMeta() {
         </table>
       </div>
       <div class="admin-v2-trait-json">
-        <details open>
+        <details>
           <summary>高级 JSON：性格叙事气泡 traitNarratives</summary>
           <textarea id="admin-v2-trait-narratives-json">${escapeHtml(JSON.stringify(CONFIG.charSpecialtyConfig?.traitNarratives || {}, null, 2))}</textarea>
         </details>
@@ -3947,13 +4134,577 @@ function renderAdminV2PersonalityMeta() {
           <summary>高级 JSON：人物专属性格 specialtyMetadata</summary>
           <textarea id="admin-v2-specialty-metadata-json">${escapeHtml(JSON.stringify(CONFIG.charSpecialtyConfig?.specialtyMetadata || {}, null, 2))}</textarea>
         </details>
-        <details>
-          <summary>高级 JSON：完整 traitMetadata</summary>
-          <textarea id="admin-v2-trait-metadata-json">${escapeHtml(JSON.stringify(CONFIG.charSpecialtyConfig?.traitMetadata || {}, null, 2))}</textarea>
-        </details>
         <div class="adm-actions">
           <button class="primary" id="btn-admin-v2-save-trait-json">保存下方 JSON</button>
         </div>
+      </div>
+    </div>`;
+}
+
+function adminNeedSaved(msg = '已自动保存') {
+  adminV2NeedSavedMessage = `${msg} · ${new Date().toLocaleTimeString('zh-CN', { hour12: false })}`;
+  const el = document.getElementById('admin-v2-need-save-status');
+  if (el) el.textContent = adminV2NeedSavedMessage;
+}
+
+function normalizeNeedKeyInput(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-zA-Z0-9_\-]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+function nextNeedKey() {
+  const used = new Set((CONFIG.needDefs || []).map(row => row.key));
+  let key = 'new_need';
+  let n = 1;
+  while (used.has(key)) key = `new_need_${++n}`;
+  return key;
+}
+
+function needStateBandsCellValue(row) {
+  try {
+    return JSON.stringify(row.stateBands || []);
+  } catch (err) {
+    return '[]';
+  }
+}
+
+function adminV2AddNeed() {
+  if (!Array.isArray(CONFIG.needDefs)) CONFIG.needDefs = [];
+  const key = nextNeedKey();
+  CONFIG.needDefs.push({
+    key,
+    name: '新需求',
+    label: '新',
+    summary: '',
+    color: '#6d8f72',
+    defaultGrow: 1,
+    defaultDecay: 1,
+    stateBands: [],
+  });
+  adminV2Search = key;
+  saveConfigToStorage();
+  adminNeedSaved(`已新增 ${key}`);
+  renderAdmin();
+}
+
+function adminV2ValidateNeeds() {
+  const lines = [];
+  const seen = new Set();
+  (CONFIG.needDefs || []).forEach((row, idx) => {
+    if (!row.key) lines.push(`第 ${idx + 1} 行缺 ID`);
+    if (row.key && seen.has(row.key)) lines.push(`需求 ID 重复：${row.key}`);
+    if (row.key) seen.add(row.key);
+    if (!row.name && !row.label) lines.push(`${row.key || idx + 1} 缺名称/标签`);
+    if (!Number.isFinite(+row.defaultGrow)) lines.push(`${row.key || idx + 1} defaultGrow 不是数字`);
+    if (!Number.isFinite(+row.defaultDecay)) lines.push(`${row.key || idx + 1} defaultDecay 不是数字`);
+    if (!Array.isArray(row.stateBands || [])) lines.push(`${row.key || idx + 1} stateBands 必须是数组`);
+  });
+  (CONFIG.needCombinationStates || []).forEach((rule, idx) => {
+    (rule.all || []).forEach(cond => {
+      if (cond.need && !seen.has(cond.need)) lines.push(`组合状态第 ${idx + 1} 行引用未知需求 ${cond.need}`);
+    });
+  });
+  alert(lines.length ? lines.join('\n') : '基础需求校验通过。');
+}
+
+function renderAdminV2Needs() {
+  const rows = (CONFIG.needDefs || [])
+    .map((row, idx) => [idx, row])
+    .filter(([, row]) => adminV2Matches([row.key, row.name, row.label, row.summary].join(' ')))
+    .map(([idx, row]) => {
+      const key = row.key || `need_${idx}`;
+      const stateNames = (row.stateBands || []).map(band => CONFIG.stateDefs?.[band.id]?.name || band.id).filter(Boolean).join(' / ');
+      return `<tr data-admin-v2-need-row="${idx}">
+        <td class="meta-id"><input class="need-id-cell" data-admin-v2-need-id="${idx}" value="${adminAttr(key)}"></td>
+        <td><input class="need-name-cell" data-admin-v2-need="${idx}" data-field="name" value="${adminAttr(row.name || '')}"></td>
+        <td><input data-admin-v2-need="${idx}" data-field="label" value="${adminAttr(row.label || '')}"></td>
+        <td><input class="need-summary-cell" data-admin-v2-need="${idx}" data-field="summary" value="${adminAttr(row.summary || '')}"></td>
+        <td><input class="need-color-cell" type="color" data-admin-v2-need="${idx}" data-field="color" value="${adminAttr(row.color || '#6d8f72')}"></td>
+        <td><input class="need-num-cell" type="number" step="0.05" data-admin-v2-need="${idx}" data-field="defaultGrow" value="${adminAttr(row.defaultGrow ?? 1)}"></td>
+        <td><input class="need-num-cell" type="number" step="0.05" data-admin-v2-need="${idx}" data-field="defaultDecay" value="${adminAttr(row.defaultDecay ?? 1)}"></td>
+        <td>${escapeHtml(stateNames || '未配置')}</td>
+        <td><input class="need-json-cell" data-admin-v2-need-band="${idx}" value="${adminAttr(needStateBandsCellValue(row))}" placeholder="[]"></td>
+        <td><button class="mini-btn danger" data-admin-v2-delete-need="${idx}">删</button></td>
+      </tr>`;
+    }).join('');
+  const stateRows = Object.entries(CONFIG.stateDefs || {})
+    .filter(([id, row]) => adminV2Matches([id, row.name, row.category, row.polarity, row.desc].join(' ')))
+    .sort((a, b) => (a[1].category || '').localeCompare(b[1].category || '', 'zh-Hans-CN') || (a[1].name || a[0]).localeCompare(b[1].name || b[0], 'zh-Hans-CN'))
+    .map(([id, row]) => `<tr data-admin-v2-state-row="${adminAttr(id)}">
+      <td class="meta-id"><input class="need-id-cell" data-admin-v2-state-id="${adminAttr(id)}" value="${adminAttr(id)}"></td>
+      <td><input class="need-name-cell" data-admin-v2-state="${adminAttr(id)}" data-field="name" value="${adminAttr(row.name || '')}"></td>
+      <td><input data-admin-v2-state="${adminAttr(id)}" data-field="category" value="${adminAttr(row.category || '')}"></td>
+      <td><select data-admin-v2-state="${adminAttr(id)}" data-field="polarity">
+        ${['positive', 'negative', 'mixed', 'neutral'].map(v => `<option value="${v}" ${v === (row.polarity || 'neutral') ? 'selected' : ''}>${v}</option>`).join('')}
+      </select></td>
+      <td><input class="need-num-cell" type="number" step="1" data-admin-v2-state="${adminAttr(id)}" data-field="duration" value="${adminAttr(row.duration ?? 30)}"></td>
+      <td><input class="need-summary-cell" data-admin-v2-state="${adminAttr(id)}" data-field="desc" value="${adminAttr(row.desc || '')}"></td>
+      <td><input class="need-summary-cell" data-admin-v2-state-list="${adminAttr(id)}" data-field="blockedSkills" value="${adminAttr((row.blockedSkills || []).join(','))}" placeholder="逗号分隔"></td>
+      <td><textarea data-admin-v2-state-json="${adminAttr(id)}" data-json-field="needMods">${escapeHtml(JSON.stringify(row.needMods || {}))}</textarea></td>
+      <td><textarea data-admin-v2-state-json="${adminAttr(id)}" data-json-field="trigger">${escapeHtml(JSON.stringify(row.trigger || null))}</textarea></td>
+      <td><button class="mini-btn danger" data-admin-v2-delete-state="${adminAttr(id)}">删</button></td>
+    </tr>`).join('');
+  return `
+    <div class="admin-v2-trait-page admin-v2-need-page">
+      <div class="cfg-enums"><b>基础需求</b><p>表格改动会自动保存到本地配置。上方维护六需求，下方维护由需求触发的状态标签；低频规则收进折叠 JSON。 <span class="meta-tag" id="admin-v2-need-save-status">${escapeHtml(adminV2NeedSavedMessage || '等待改动')}</span></p></div>
+      <div class="admin-v2-table-wrap" style="max-height:52vh">
+        <table class="admin-v2-table need-meta-table">
+          <thead><tr>
+            <th>ID</th><th>名称</th><th>短标签</th><th>说明</th><th>颜色</th><th>增长</th><th>衰退</th><th>分档预览</th><th>分档 JSON</th><th>操作</th>
+          </tr></thead>
+          <tbody>${rows || '<tr><td colspan="10" class="logic-muted">没有匹配的需求</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div class="admin-v2-trait-json">
+        <details open>
+          <summary>状态标签表 stateDefs</summary>
+          <div class="admin-v2-table-wrap" style="max-height:34vh">
+            <table class="admin-v2-table need-meta-table">
+              <thead><tr>
+                <th>ID</th><th>名称</th><th>分类</th><th>极性</th><th>时长</th><th>说明</th><th>阻断技能</th><th>需求效果 JSON</th><th>触发 JSON</th><th>操作</th>
+              </tr></thead>
+              <tbody>${stateRows || '<tr><td colspan="10" class="logic-muted">没有匹配的状态标签</td></tr>'}</tbody>
+            </table>
+          </div>
+        </details>
+        <details>
+          <summary>高级 JSON：组合满足状态 needCombinationStates</summary>
+          <textarea id="admin-v2-need-combos-json">${escapeHtml(JSON.stringify(CONFIG.needCombinationStates || [], null, 2))}</textarea>
+        </details>
+        <div class="adm-actions">
+          <button class="primary" id="btn-admin-v2-save-need-json">保存下方 JSON</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function lifePathConfigForAdmin() {
+  if (!CONFIG.lifePathConfig) CONFIG.lifePathConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG.lifePathConfig || {}));
+  CONFIG.lifePathConfig.paths ||= {};
+  CONFIG.lifePathConfig.stages ||= {};
+  CONFIG.lifePathConfig.storyNodes ||= {};
+  return CONFIG.lifePathConfig;
+}
+
+function nextLifePathKey(map, base) {
+  let id = base;
+  let n = 1;
+  while (map?.[id]) id = `${base}_${++n}`;
+  return id;
+}
+
+function adminV2AddCareerStage() {
+  const lp = lifePathConfigForAdmin();
+  const id = nextLifePathKey(lp.stages, 'new_stage');
+  const firstPathId = Object.keys(lp.paths || {})[0] || '';
+  lp.stages[id] = {
+    id,
+    pathId: firstPathId,
+    title: '新职业阶段',
+    rankOverride: 5,
+    requiredReputation: 0,
+    requiredSkills: {},
+    dailyTasks: [],
+    scenePermissions: [],
+    nextStages: [],
+  };
+  adminV2Search = id;
+  saveConfigToStorage();
+  renderAdmin();
+}
+
+function adminV2AddStoryPath() {
+  const lp = lifePathConfigForAdmin();
+  const id = nextLifePathKey(lp.paths, 'new_path');
+  lp.paths[id] = {
+    id,
+    name: '新路径',
+    description: '',
+    genderConstraint: 'any',
+    stages: [],
+    defaultSkills: [],
+    phaseNames: {},
+  };
+  adminV2Search = id;
+  saveConfigToStorage();
+  renderAdmin();
+}
+
+function adminV2AddStoryNode() {
+  const lp = lifePathConfigForAdmin();
+  const id = nextLifePathKey(lp.storyNodes, 'new_node');
+  const firstPathId = Object.keys(lp.paths || {})[0] || '';
+  lp.storyNodes[id] = {
+    id,
+    name: '新故事节点',
+    pathId: firstPathId,
+    phase: 1,
+    order: 1,
+    type: 'event',
+    prevNode: null,
+    conditions: {},
+    effects: [],
+  };
+  adminV2Search = id;
+  saveConfigToStorage();
+  renderAdmin();
+}
+
+function adminV2ValidateCareerSystem() {
+  const lp = lifePathConfigForAdmin();
+  const lines = [];
+  for (const [id, row] of Object.entries(lp.stages || {})) {
+    if (!row.title) lines.push(`${id} 缺阶段名称`);
+    if (row.pathId && !lp.paths?.[row.pathId]) lines.push(`${id} 引用未知路径 ${row.pathId}`);
+    if (!Number.isFinite(+row.rankOverride)) lines.push(`${id} 位阶不是数字`);
+    if (!Number.isFinite(+row.requiredReputation)) lines.push(`${id} 声望门槛不是数字`);
+    (row.nextStages || []).forEach(next => { if (!lp.stages?.[next]) lines.push(`${id} 下一阶段不存在：${next}`); });
+  }
+  alert(lines.length ? lines.join('\n') : '职业系统校验通过。');
+}
+
+function adminV2ValidateStorySystem() {
+  const lp = lifePathConfigForAdmin();
+  const lines = [];
+  for (const [id, row] of Object.entries(lp.paths || {})) {
+    if (!row.name) lines.push(`${id} 缺路径名称`);
+    (row.stages || []).forEach(stageId => { if (!lp.stages?.[stageId]) lines.push(`${id} 阶段列表引用未知阶段 ${stageId}`); });
+  }
+  for (const [id, row] of Object.entries(lp.storyNodes || {})) {
+    if (!row.name) lines.push(`${id} 缺节点名称`);
+    if (row.pathId && !lp.paths?.[row.pathId]) lines.push(`${id} 引用未知路径 ${row.pathId}`);
+    if (row.prevNode && !lp.storyNodes?.[row.prevNode]) lines.push(`${id} 前置节点不存在：${row.prevNode}`);
+  }
+  alert(lines.length ? lines.join('\n') : '故事系统校验通过。');
+}
+
+function renderAdminV2CareerSystem() {
+  const lp = lifePathConfigForAdmin();
+  const stageRows = Object.entries(lp.stages || {})
+    .filter(([id, row]) => adminV2Matches([id, row.title, row.pathId, row.rankOverride, row.requiredReputation, ...(row.dailyTasks || [])].join(' ')))
+    .sort((a, b) => (a[1].pathId || '').localeCompare(b[1].pathId || '', 'zh-Hans-CN') || (a[1].rankOverride ?? 99) - (b[1].rankOverride ?? 99))
+    .map(([id, row]) => `<tr data-admin-v2-career-stage-row="${adminAttr(id)}">
+      <td class="meta-id"><input class="trait-id-cell" data-admin-v2-career-stage-id="${adminAttr(id)}" value="${adminAttr(id)}"></td>
+      <td><input class="trait-desc-cell" data-admin-v2-career-stage="${adminAttr(id)}" data-field="title" value="${adminAttr(row.title || '')}"></td>
+      <td><input data-admin-v2-career-stage="${adminAttr(id)}" data-field="pathId" value="${adminAttr(row.pathId || '')}"></td>
+      <td><input class="mini" type="number" step="1" data-admin-v2-career-stage="${adminAttr(id)}" data-field="rankOverride" value="${adminAttr(row.rankOverride ?? '')}"></td>
+      <td><input class="mini" type="number" step="1" data-admin-v2-career-stage="${adminAttr(id)}" data-field="requiredReputation" value="${adminAttr(row.requiredReputation ?? 0)}"></td>
+      <td><input class="trait-json-cell" data-admin-v2-career-stage-json="${adminAttr(id)}" data-json-field="requiredSkills" value="${adminAttr(JSON.stringify(row.requiredSkills || {}))}" placeholder="{}"></td>
+      <td><input class="trait-example-cell" data-admin-v2-career-stage-list="${adminAttr(id)}" data-field="dailyTasks" value="${adminAttr((row.dailyTasks || []).join(','))}" placeholder="任务ID逗号分隔"></td>
+      <td><input class="trait-example-cell" data-admin-v2-career-stage-list="${adminAttr(id)}" data-field="scenePermissions" value="${adminAttr((row.scenePermissions || []).join(','))}" placeholder="权限逗号分隔"></td>
+      <td><input class="trait-example-cell" data-admin-v2-career-stage-list="${adminAttr(id)}" data-field="nextStages" value="${adminAttr((row.nextStages || []).join(','))}" placeholder="阶段ID逗号分隔"></td>
+      <td><button class="mini-btn danger" data-admin-v2-delete-career-stage="${adminAttr(id)}">删</button></td>
+    </tr>`).join('');
+  return `
+    <div class="admin-v2-trait-page admin-v2-career-page">
+      <div class="cfg-enums"><b>职业系统</b><p>维护职业阶段、位阶、声望门槛、每日任务和职业权限。路径定义已迁到【故事系统】。</p></div>
+      <div class="admin-v2-table-wrap" style="max-height:54vh">
+        <table class="admin-v2-table trait-meta-table">
+          <thead><tr>
+            <th>阶段ID</th><th>阶段名称</th><th>所属路径</th><th>位阶</th><th>声望门槛</th><th>技能要求 JSON</th><th>每日任务</th><th>场景权限</th><th>下一阶段</th><th>操作</th>
+          </tr></thead>
+          <tbody>${stageRows || '<tr><td colspan="10" class="logic-muted">没有匹配的职业阶段</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderAdminV2StorySystem() {
+  const lp = lifePathConfigForAdmin();
+  const pathRows = Object.entries(lp.paths || {})
+    .filter(([id, row]) => adminV2Matches([id, row.name, row.description, row.genderConstraint, ...(row.stages || [])].join(' ')))
+    .sort((a, b) => (a[1].name || a[0]).localeCompare(b[1].name || b[0], 'zh-Hans-CN'))
+    .map(([id, row]) => `<tr data-admin-v2-story-path-row="${adminAttr(id)}">
+      <td class="meta-id"><input class="trait-id-cell" data-admin-v2-story-path-id="${adminAttr(id)}" value="${adminAttr(id)}"></td>
+      <td><input data-admin-v2-story-path="${adminAttr(id)}" data-field="name" value="${adminAttr(row.name || '')}"></td>
+      <td><input class="trait-desc-cell" data-admin-v2-story-path="${adminAttr(id)}" data-field="description" value="${adminAttr(row.description || '')}"></td>
+      <td><input data-admin-v2-story-path="${adminAttr(id)}" data-field="genderConstraint" value="${adminAttr(row.genderConstraint || 'any')}"></td>
+      <td><input class="trait-example-cell" data-admin-v2-story-path-list="${adminAttr(id)}" data-field="stages" value="${adminAttr((row.stages || []).join(','))}"></td>
+      <td><input class="trait-example-cell" data-admin-v2-story-path-list="${adminAttr(id)}" data-field="defaultSkills" value="${adminAttr((row.defaultSkills || []).join(','))}"></td>
+      <td><input class="trait-json-cell" data-admin-v2-story-path-json="${adminAttr(id)}" data-json-field="phaseNames" value="${adminAttr(JSON.stringify(row.phaseNames || {}))}" placeholder="{}"></td>
+      <td><button class="mini-btn danger" data-admin-v2-delete-story-path="${adminAttr(id)}">删</button></td>
+    </tr>`).join('');
+  const nodeRows = Object.entries(lp.storyNodes || {})
+    .filter(([id, row]) => adminV2Matches([id, row.name, row.pathId, row.phase, row.type, row.prevNode].join(' ')))
+    .sort((a, b) => (a[1].pathId || '').localeCompare(b[1].pathId || '', 'zh-Hans-CN') || (a[1].phase || 0) - (b[1].phase || 0) || (a[1].order || 0) - (b[1].order || 0))
+    .map(([id, row]) => `<tr data-admin-v2-story-node-row="${adminAttr(id)}">
+      <td class="meta-id"><input class="trait-id-cell" data-admin-v2-story-node-id="${adminAttr(id)}" value="${adminAttr(id)}"></td>
+      <td><input data-admin-v2-story-node="${adminAttr(id)}" data-field="name" value="${adminAttr(row.name || '')}"></td>
+      <td><input data-admin-v2-story-node="${adminAttr(id)}" data-field="pathId" value="${adminAttr(row.pathId || '')}"></td>
+      <td><input class="mini" type="number" step="1" data-admin-v2-story-node="${adminAttr(id)}" data-field="phase" value="${adminAttr(row.phase ?? 1)}"></td>
+      <td><input class="mini" type="number" step="1" data-admin-v2-story-node="${adminAttr(id)}" data-field="order" value="${adminAttr(row.order ?? 1)}"></td>
+      <td><input data-admin-v2-story-node="${adminAttr(id)}" data-field="type" value="${adminAttr(row.type || 'event')}"></td>
+      <td><input data-admin-v2-story-node="${adminAttr(id)}" data-field="prevNode" value="${adminAttr(row.prevNode || '')}"></td>
+      <td><input class="mini" type="number" step="1" data-admin-v2-story-node="${adminAttr(id)}" data-field="minReputation" value="${adminAttr(row.minReputation ?? '')}"></td>
+      <td><textarea data-admin-v2-story-node-json="${adminAttr(id)}" data-json-field="conditions">${escapeHtml(JSON.stringify(row.conditions || {}, null, 2))}</textarea></td>
+      <td><textarea data-admin-v2-story-node-json="${adminAttr(id)}" data-json-field="effects">${escapeHtml(JSON.stringify(row.effects || [], null, 2))}</textarea></td>
+      <td><button class="mini-btn danger" data-admin-v2-delete-story-node="${adminAttr(id)}">删</button></td>
+    </tr>`).join('');
+  return `
+    <div class="admin-v2-trait-page admin-v2-story-page">
+      <div class="cfg-enums"><b>故事系统</b><p>维护人生路径定义、阶段叙事和故事节点。职业日课与阶段数值请回到【职业系统】维护。</p></div>
+      <div class="admin-v2-table-wrap" style="max-height:30vh;margin-bottom:10px">
+        <table class="admin-v2-table trait-meta-table">
+          <thead><tr><th>路径ID</th><th>名称</th><th>描述</th><th>性别限制</th><th>阶段列表</th><th>默认技能</th><th>阶段名 JSON</th><th>操作</th></tr></thead>
+          <tbody>${pathRows || '<tr><td colspan="8" class="logic-muted">没有匹配的路径</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div class="adm-actions" style="margin-bottom:8px"><button id="btn-admin-v2-add-story-node">新增故事节点</button></div>
+      <div class="admin-v2-table-wrap" style="max-height:36vh">
+        <table class="admin-v2-table trait-meta-table">
+          <thead><tr><th>节点ID</th><th>名称</th><th>路径</th><th>阶段</th><th>顺序</th><th>类型</th><th>前置节点</th><th>声望门槛</th><th>条件 JSON</th><th>效果 JSON</th><th>操作</th></tr></thead>
+          <tbody>${nodeRows || '<tr><td colspan="11" class="logic-muted">没有匹配的故事节点</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function adminV2JsonPathParts(path) {
+  return String(path || '').split('.').filter(Boolean);
+}
+
+function adminV2GetJsonPath(path) {
+  let cur = CONFIG;
+  for (const part of adminV2JsonPathParts(path)) {
+    if (cur == null) return undefined;
+    cur = Array.isArray(cur) && /^\d+$/.test(part) ? cur[+part] : cur[part];
+  }
+  return cur;
+}
+
+function adminV2SetJsonPath(path, value) {
+  const parts = adminV2JsonPathParts(path);
+  if (!parts.length) return false;
+  let cur = CONFIG;
+  for (let i = 0; i < parts.length - 1; i += 1) {
+    const part = parts[i];
+    cur = Array.isArray(cur) && /^\d+$/.test(part) ? cur[+part] : cur[part];
+    if (cur == null) return false;
+  }
+  const last = parts[parts.length - 1];
+  if (Array.isArray(cur) && /^\d+$/.test(last)) cur[+last] = value;
+  else cur[last] = value;
+  return true;
+}
+
+function adminV2JsonRowInfo(key, value) {
+  const row = value && typeof value === 'object' ? value : {};
+  const name = row.name || row.label || row.title || row.text || row.id || key;
+  const type = row.category || row.type || row.kind || row.role || (Array.isArray(value) ? 'array' : typeof value);
+  const tags = [];
+  const add = v => {
+    if (v === undefined || v === null || v === '' || typeof v === 'object') return;
+    const text = String(v);
+    if (!tags.includes(text)) tags.push(text);
+  };
+  add(row.category);
+  add(row.type);
+  add(row.kind);
+  (row.tags || row.needTags || row.socialTags || []).forEach(add);
+  const summary = row.desc || row.description || row.summary || row.hint || row.text || '';
+  return { name: String(name), type: String(type || 'object'), tags: tags.slice(0, 6), summary: String(summary || '—') };
+}
+
+function adminV2JsonTableRows(path, value) {
+  if (Array.isArray(value)) return value.map((row, idx) => ({ key: String(idx), path: `${path}.${idx}`, value: row }));
+  if (value && typeof value === 'object') return Object.entries(value).map(([key, row]) => ({ key, path: `${path}.${key}`, value: row }));
+  return [{ key: path, path, value }];
+}
+
+function renderAdminV2JsonConfigTable(title, path, value) {
+  const entries = adminV2JsonTableRows(path, value)
+    .filter(entry => {
+      const info = adminV2JsonRowInfo(entry.key, entry.value);
+      return adminV2Matches([title, entry.key, info.name, info.type, info.summary, ...info.tags].join(' '));
+    });
+  const rows = entries.map(entry => {
+    const info = adminV2JsonRowInfo(entry.key, entry.value);
+    return `<tr>
+      <td class="meta-id">${escapeHtml(entry.key)}</td>
+      <td>${escapeHtml(info.name)}</td>
+      <td>${escapeHtml(info.type)}</td>
+      <td><div class="meta-tags">${info.tags.map(tag => `<span class="meta-tag">${escapeHtml(tag)}</span>`).join('') || '<span class="logic-muted">无标签</span>'}</div></td>
+      <td>${escapeHtml(info.summary)}</td>
+      <td><textarea data-admin-v2-json-path="${adminAttr(entry.path)}">${escapeHtml(JSON.stringify(entry.value, null, 2))}</textarea></td>
+    </tr>`;
+  }).join('');
+  return `
+    <div class="admin-v2-table-wrap" style="max-height:34vh;margin-bottom:10px">
+      <table class="admin-v2-table">
+        <thead><tr><th colspan="6">${escapeHtml(title)}</th></tr><tr><th>ID / 索引</th><th>名称</th><th>类型</th><th>标签</th><th>摘要</th><th>配置 JSON</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="6" class="logic-muted">没有匹配的配置项</td></tr>'}</tbody>
+      </table>
+    </div>`;
+}
+
+function adminV2MarkGenericSaved(msg = '已自动保存') {
+  const el = document.getElementById('admin-v2-generic-save-status');
+  if (el) el.textContent = `${msg} · ${new Date().toLocaleTimeString('zh-CN', { hour12: false })}`;
+}
+
+function renderAdminV2AIUtilityTable() {
+  const cfg = aiConfigForAdmin();
+  const groups = [
+    ['需求基础权重 demandBaseWeights', 'aiConfig.demandBaseWeights', cfg.demandBaseWeights || {}],
+    ['起居网格行 routineGridConfig.rowDefs', 'aiConfig.routineGridConfig.rowDefs', cfg.routineGridConfig?.rowDefs || []],
+    ['起居模板 routineTemplates', 'aiConfig.routineTemplates', cfg.routineTemplates || []],
+    ['默认起居画像 routineProfiles.defaults', 'aiConfig.routineProfiles.defaults', cfg.routineProfiles?.defaults || []],
+    ['人物起居覆盖 routineProfiles.byCharacter', 'aiConfig.routineProfiles.byCharacter', cfg.routineProfiles?.byCharacter || {}],
+    ['完整 aiConfig', 'aiConfig', cfg],
+  ];
+  return `
+    <div class="admin-v2-trait-page admin-v2-ai-page">
+      <div class="cfg-enums"><b>Utility AI</b><p>按配置块拆成表格行；每行 JSON 保存后直接写回 aiConfig。 <span class="meta-tag" id="admin-v2-generic-save-status">等待改动</span></p></div>
+      ${groups.map(([title, path, value]) => renderAdminV2JsonConfigTable(title, path, value)).join('')}
+    </div>`;
+}
+
+function renderAdminV2InteractionTables() {
+  CONFIG.interactionCategories ||= [];
+  CONFIG.interactionTemplates ||= {};
+  CONFIG.interactionSocialConfig ||= {};
+  CONFIG.multiInteractConfig ||= {};
+  const categories = CONFIG.interactionCategories;
+  if (!adminV2InteractionCategory || !categories.some(c => c.id === adminV2InteractionCategory)) {
+    adminV2InteractionCategory = categories[0]?.id || '';
+  }
+  const selectedCategory = categories.find(c => c.id === adminV2InteractionCategory) || categories[0] || null;
+  const categoryRows = categories
+    .filter(cat => adminV2Matches([cat.id, cat.name, cat.desc, cat.description].join(' ')))
+    .map((cat, idx) => `<tr>
+      <td><input data-admin-v2-interaction-category-id="${idx}" value="${adminAttr(cat.id || '')}"></td>
+      <td><input data-admin-v2-interaction-category="${idx}" data-field="name" value="${adminAttr(cat.name || '')}"></td>
+      <td><input data-admin-v2-interaction-category="${idx}" data-field="description" value="${adminAttr(cat.description || cat.desc || '')}" placeholder="这个大类在菜单和 AI 中的语义"></td>
+      <td>${Object.values(CONFIG.interactionTemplates || {}).filter(t => t.category === cat.id).length}</td>
+    </tr>`).join('');
+  const nav = categories.map(cat => `<button type="button" class="sys-btn${cat.id === selectedCategory?.id ? ' active' : ''}" data-admin-v2-interaction-tab="${adminAttr(cat.id)}">${escapeHtml(cat.name || cat.id)}</button>`).join('');
+  const templateRows = Object.entries(CONFIG.interactionTemplates || {})
+    .filter(([, tpl]) => !selectedCategory || tpl.category === selectedCategory.id)
+    .filter(([id, tpl]) => adminV2Matches([id, tpl.id, tpl.name, tpl.type, tpl.llmPrompt, JSON.stringify(tpl.effects || [])].join(' ')))
+    .sort((a, b) => (+a[0] || 0) - (+b[0] || 0))
+    .map(([id, tpl]) => `<tr>
+      <td class="meta-id">${escapeHtml(String(tpl.id ?? id))}</td>
+      <td><input data-admin-v2-interaction-template="${adminAttr(id)}" data-field="name" value="${adminAttr(tpl.name || '')}"></td>
+      <td><select data-admin-v2-interaction-template="${adminAttr(id)}" data-field="type">
+        <option value="dialogue"${tpl.type === 'dialogue' ? ' selected' : ''}>对话</option>
+        <option value="action"${tpl.type === 'action' ? ' selected' : ''}>行动</option>
+      </select></td>
+      <td><input data-admin-v2-interaction-template="${adminAttr(id)}" data-field="relMin" data-type="number" type="number" value="${adminAttr(tpl.relMin ?? -100)}"></td>
+      <td><input data-admin-v2-interaction-template="${adminAttr(id)}" data-field="relMax" data-type="number" type="number" value="${adminAttr(tpl.relMax ?? 100)}"></td>
+      <td><input data-admin-v2-interaction-template="${adminAttr(id)}" data-field="duration" data-type="number" type="number" step="0.1" value="${adminAttr(tpl.duration ?? 5)}"></td>
+      <td><input data-admin-v2-interaction-template="${adminAttr(id)}" data-field="cooldown" data-type="number" type="number" value="${adminAttr(tpl.cooldown ?? 0)}"></td>
+      <td><input data-admin-v2-interaction-template="${adminAttr(id)}" data-field="llmPrompt" value="${adminAttr(tpl.llmPrompt || '')}"></td>
+      <td><input type="checkbox" data-admin-v2-interaction-template="${adminAttr(id)}" data-field="once" data-type="bool" ${tpl.once ? 'checked' : ''}></td>
+      <td><textarea data-admin-v2-interaction-template-json="${adminAttr(id)}" data-field="skillReq">${escapeHtml(JSON.stringify(tpl.skillReq || null, null, 2))}</textarea></td>
+      <td><textarea data-admin-v2-interaction-template-json="${adminAttr(id)}" data-field="lines">${escapeHtml(JSON.stringify(tpl.lines || [], null, 2))}</textarea></td>
+      <td><textarea data-admin-v2-interaction-template-json="${adminAttr(id)}" data-field="effects">${escapeHtml(JSON.stringify(tpl.effects || [], null, 2))}</textarea></td>
+      <td><textarea data-admin-v2-interaction-template-json="${adminAttr(id)}" data-field="axisEffects">${escapeHtml(JSON.stringify(tpl.axisEffects || null, null, 2))}</textarea></td>
+      <td><textarea data-admin-v2-interaction-template-json="${adminAttr(id)}" data-field="onLowScore">${escapeHtml(JSON.stringify(tpl.onLowScore || null, null, 2))}</textarea></td>
+      <td><textarea data-admin-v2-interaction-template-json="${adminAttr(id)}" data-field="unlock_conditions">${escapeHtml(JSON.stringify(tpl.unlock_conditions || null, null, 2))}</textarea></td>
+      <td><textarea data-admin-v2-interaction-template-json="${adminAttr(id)}" data-field="risky_details">${escapeHtml(JSON.stringify(tpl.risky_details || null, null, 2))}</textarea></td>
+    </tr>`).join('');
+  const social = CONFIG.interactionSocialConfig || {};
+  const multi = CONFIG.multiInteractConfig || {};
+  const reactionRows = (multi.observerReactions || []).map((row, idx) => `<tr>
+    <td class="meta-id">${escapeHtml(String(row.id ?? idx + 1))}</td>
+    <td><input data-admin-v2-multi-reaction="${idx}" data-field="name" value="${adminAttr(row.name || '')}"></td>
+    <td><input data-admin-v2-multi-reaction="${idx}" data-field="observerCharId" value="${adminAttr(row.observerCharId || '')}" placeholder="谁会旁观/反应"></td>
+    <td><input data-admin-v2-multi-reaction="${idx}" data-field="observedCharId" value="${adminAttr(row.observedCharId || '')}" placeholder="可空=任意被观察者"></td>
+    <td><input data-admin-v2-multi-reaction="${idx}" data-field="triggerSignal" value="${adminAttr(row.triggerSignal || '')}" placeholder="interaction/status_gained/action_tag"></td>
+    <td><input data-admin-v2-multi-reaction="${idx}" data-field="triggerInteractionCategory" value="${adminAttr(row.triggerInteractionCategory || '')}" placeholder="互动大类，可空"></td>
+    <td><input data-admin-v2-multi-reaction="${idx}" data-field="reactionType" value="${adminAttr(row.reactionType || '')}" placeholder="send_bubble/force_interaction/issue_quest"></td>
+    <td><input data-admin-v2-multi-reaction="${idx}" data-field="priority" data-type="number" type="number" value="${adminAttr(row.priority ?? 10)}"></td>
+    <td><input data-admin-v2-multi-reaction="${idx}" data-field="cooldownGameMin" data-type="number" type="number" value="${adminAttr(row.cooldownGameMin ?? 60)}"></td>
+    <td><textarea data-admin-v2-multi-reaction-json="${idx}" data-field="reactionParams">${escapeHtml(JSON.stringify(row.reactionParams || {}, null, 2))}</textarea></td>
+    <td><textarea data-admin-v2-multi-reaction-json="${idx}" data-field="bubbleTexts">${escapeHtml(JSON.stringify(row.bubbleTexts || [], null, 2))}</textarea></td>
+    <td><textarea data-admin-v2-multi-reaction-json="${idx}" data-field="llmConfig">${escapeHtml(JSON.stringify(row.llmConfig || null, null, 2))}</textarea></td>
+    <td><textarea data-admin-v2-multi-reaction-json="${idx}" data-field="additionalEffects">${escapeHtml(JSON.stringify(row.additionalEffects || null, null, 2))}</textarea></td>
+  </tr>`).join('');
+  const statusTagRows = Object.entries(multi.statusTags || {}).map(([label, stateId]) => `<tr>
+    <td>${escapeHtml(label)}</td>
+    <td><input data-admin-v2-multi-status-tag="${adminAttr(label)}" value="${adminAttr(stateId || '')}"></td>
+  </tr>`).join('');
+  const promptRows = Object.entries(multi.promptTemplates || {}).map(([key, text]) => `<tr>
+    <td class="meta-id">${escapeHtml(key)}</td>
+    <td><textarea data-admin-v2-multi-prompt-template="${adminAttr(key)}">${escapeHtml(text || '')}</textarea></td>
+  </tr>`).join('');
+  const contagionRows = (multi.emotionContagion || []).map((row, idx) => {
+    const cells = Object.entries(row || {}).map(([key, val]) => `<td><textarea data-admin-v2-multi-contagion="${idx}" data-field="${adminAttr(key)}">${escapeHtml(typeof val === 'object' ? JSON.stringify(val, null, 2) : String(val ?? ''))}</textarea></td>`).join('');
+    const heads = Object.keys(row || {}).map(key => `<th>${escapeHtml(key)}</th>`).join('');
+    return { heads, row: `<tr>${cells}</tr>` };
+  });
+  const contagionHead = contagionRows[0]?.heads || '<th>规则</th>';
+  const contagionBody = contagionRows.map(r => r.row).join('');
+  return `
+    <div class="admin-v2-trait-page admin-v2-interaction-page">
+      <div class="cfg-enums"><b>互动模板和多人互动</b><p>大类别只维护 id / 名称 / 描述；模板按大类导航管理，一级字段展开，复杂内容保留 JSON。 <span class="meta-tag" id="admin-v2-generic-save-status">等待改动</span></p></div>
+      <div class="admin-v2-table-wrap" style="max-height:24vh;margin-bottom:10px">
+        <table class="admin-v2-table">
+          <thead><tr><th colspan="4">互动分类 interactionCategories</th></tr><tr><th>ID</th><th>名称</th><th>描述</th><th>模板数</th></tr></thead>
+          <tbody>${categoryRows || '<tr><td colspan="4" class="logic-muted">暂无互动分类</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div class="cfg-enums"><b>互动模板</b><p>一个大类别对应菜单第一层；下方每一行是该大类下的子互动模板。子互动用 category 归属大类，type / relMin / relMax / duration / cooldown 等为一级字段；lines / effects / skillReq / onLowScore / unlock_conditions / risky_details 是复杂内容，继续用 JSON。</p></div>
+      <div class="adm-actions" style="justify-content:flex-start;flex-wrap:wrap;margin-bottom:8px">${nav || '<span class="logic-muted">暂无分类</span>'}</div>
+      <div class="admin-v2-table-wrap" style="max-height:45vh;margin-bottom:12px">
+        <table class="admin-v2-table" style="min-width:2200px">
+          <thead><tr><th colspan="16">${escapeHtml(selectedCategory?.name || selectedCategory?.id || '未分类')} · 子互动模板</th></tr>
+            <tr><th>ID</th><th>名称</th><th>类型</th><th>关系下限</th><th>关系上限</th><th>时长</th><th>冷却</th><th>LLM Prompt</th><th>一次性</th><th>技能要求 JSON</th><th>对白 JSON</th><th>效果 JSON</th><th>关系轴 JSON</th><th>低分收场 JSON</th><th>解锁条件 JSON</th><th>风险 JSON</th></tr></thead>
+          <tbody>${templateRows || '<tr><td colspan="16" class="logic-muted">此分类暂无模板</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div class="cfg-enums"><b>社交评分规则</b><p>这些规则不是互动内容，而是“互动能不能自然发生、低分如何收场”的解释参数。</p></div>
+      <div class="admin-v2-table-wrap" style="max-height:26vh;margin-bottom:12px">
+        <table class="admin-v2-table" style="min-width:980px">
+          <thead><tr><th>字段</th><th>用途</th><th>配置</th></tr></thead>
+          <tbody>
+            <tr><td>witnessRadius</td><td>见证者半径，影响逾矩风险。</td><td><input data-admin-v2-interaction-social="witnessRadius" data-type="number" type="number" value="${adminAttr(social.witnessRadius ?? 5)}"></td></tr>
+            <tr><td>showLockedInteractions</td><td>是否显示暂不可用互动，并说明原因。</td><td><input type="checkbox" data-admin-v2-interaction-social="showLockedInteractions" data-type="bool" ${social.showLockedInteractions !== false ? 'checked' : ''}></td></tr>
+            <tr><td>categoryMinScore</td><td>各互动大类的最低自然意愿分。</td><td><textarea data-admin-v2-interaction-social-json="categoryMinScore">${escapeHtml(JSON.stringify(social.categoryMinScore || {}, null, 2))}</textarea></td></tr>
+            <tr><td>categoryOnLowScore</td><td>大类低分时的状态/关系后果。</td><td><textarea data-admin-v2-interaction-social-json="categoryOnLowScore">${escapeHtml(JSON.stringify(social.categoryOnLowScore || {}, null, 2))}</textarea></td></tr>
+            <tr><td>hierarchyOnLowScore</td><td>身份关系 + 大类低分的特殊后果。</td><td><textarea data-admin-v2-interaction-social-json="hierarchyOnLowScore">${escapeHtml(JSON.stringify(social.hierarchyOnLowScore || {}, null, 2))}</textarea></td></tr>
+            <tr><td>riskyDefaults</td><td>风险互动失败默认状态等兜底。</td><td><textarea data-admin-v2-interaction-social-json="riskyDefaults">${escapeHtml(JSON.stringify(social.riskyDefaults || {}, null, 2))}</textarea></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="cfg-enums"><b>多人规则</b><p>多人规则监听互动、状态、行动标签等事件；命中后可冒气泡、强制互动、下发任务、加状态或提高 AI 权重。每条规则一行，复杂参数保留 JSON。多人规则保存后会热重载。</p></div>
+      <div class="admin-v2-table-wrap" style="max-height:18vh;margin-bottom:10px">
+        <table class="admin-v2-table">
+          <thead><tr><th>字段</th><th>说明</th><th>值</th></tr></thead>
+          <tbody>
+            <tr><td>masterEnabled</td><td>多人规则总开关。</td><td><input type="checkbox" data-admin-v2-multi-setting="masterEnabled" data-type="bool" ${multi.masterEnabled !== false ? 'checked' : ''}></td></tr>
+            <tr><td>maxObserverBubblesPerEvent</td><td>同一事件最多旁观气泡数。</td><td><input data-admin-v2-multi-setting="maxObserverBubblesPerEvent" data-type="number" type="number" value="${adminAttr(multi.maxObserverBubblesPerEvent ?? 1)}"></td></tr>
+            <tr><td>contagionCooldownGameMin</td><td>情绪传染冷却，单位游戏分钟。</td><td><input data-admin-v2-multi-setting="contagionCooldownGameMin" data-type="number" type="number" value="${adminAttr(multi.contagionCooldownGameMin ?? 5)}"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="admin-v2-table-wrap" style="max-height:24vh;margin-bottom:10px">
+        <table class="admin-v2-table" style="min-width:720px">
+          <thead><tr><th colspan="2">statusTags 状态标签映射</th></tr><tr><th>叙事标签</th><th>状态 ID</th></tr></thead>
+          <tbody>${statusTagRows || '<tr><td colspan="2" class="logic-muted">暂无状态标签映射</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div class="admin-v2-table-wrap" style="max-height:24vh;margin-bottom:10px">
+        <table class="admin-v2-table" style="min-width:860px">
+          <thead><tr><th colspan="2">promptTemplates 多人规则 LLM 提示</th></tr><tr><th>Prompt Key</th><th>模板文本</th></tr></thead>
+          <tbody>${promptRows || '<tr><td colspan="2" class="logic-muted">暂无 prompt 模板</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div class="admin-v2-table-wrap" style="max-height:42vh;margin-bottom:10px">
+        <table class="admin-v2-table" style="min-width:1800px">
+          <thead><tr><th colspan="13">observerReactions 旁观/连锁反应规则</th></tr><tr><th>ID</th><th>名称</th><th>观察者</th><th>被观察者</th><th>触发信号</th><th>互动大类</th><th>反应类型</th><th>优先级</th><th>冷却</th><th>反应参数 JSON</th><th>气泡 JSON</th><th>LLM JSON</th><th>追加效果 JSON</th></tr></thead>
+          <tbody>${reactionRows || '<tr><td colspan="13" class="logic-muted">暂无旁观反应规则</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div class="admin-v2-table-wrap" style="max-height:28vh;margin-bottom:10px">
+        <table class="admin-v2-table" style="min-width:900px">
+          <thead><tr><th colspan="8">emotionContagion 情绪传染规则</th></tr><tr>${contagionHead}</tr></thead>
+          <tbody>${contagionBody || '<tr><td class="logic-muted">暂无情绪传染规则</td></tr>'}</tbody>
+        </table>
       </div>
     </div>`;
 }
@@ -4196,11 +4947,7 @@ function renderAdminV2DreamSystem() {
   }).join('');
   return `
     <div class="admin-v2-trait-page admin-v2-dream-page">
-      <div class="cfg-enums"><b>梦想系统</b><p>古代版人生志向类型。人物设定页只分配“长期梦想”，追求已取消。 <span class="meta-tag" id="admin-v2-dream-save-status">${escapeHtml(adminV2DreamSavedMessage || '等待改动')}</span></p>
-        <p>分类：${enumTags(DREAM_CATEGORY_OPTIONS)}</p>
-        <p>字段：${enumTags(['label', 'category', 'description', 'examples', 'storyHooks', 'failureHooks', 'conditions', 'gameplay'])}</p>
-      </div>
-      ${renderDreamP0Diagnostics()}
+      <div class="cfg-enums"><b>梦想系统</b><p>表格改动会自动保存到本地配置。人物设定页只分配“长期梦想”，追求已取消。 <span class="meta-tag" id="admin-v2-dream-save-status">${escapeHtml(adminV2DreamSavedMessage || '等待改动')}</span></p></div>
       <div class="admin-v2-table-wrap" style="max-height:48vh">
         <table class="admin-v2-table dream-meta-table">
           <thead><tr>
@@ -4210,7 +4957,11 @@ function renderAdminV2DreamSystem() {
         </table>
       </div>
       <div class="admin-v2-trait-json">
-        <details open>
+        <details>
+          <summary>诊断工具：P0 条件、计数器、声望域</summary>
+          ${renderDreamP0Diagnostics()}
+        </details>
+        <details>
           <summary>高级 JSON：人物梦想 dreamProfiles</summary>
           <textarea id="admin-v2-dream-profiles-json">${escapeHtml(JSON.stringify(cfg.dreamProfiles || {}, null, 2))}</textarea>
         </details>
@@ -4387,6 +5138,7 @@ function renderIOAdmin() {
   const hasSave = !!localStorage.getItem(SAVE_KEY);
   return `
     <p style="color:var(--jn-text-soft)"><b>配置</b> localStorage 键 <code>dgy_config</code> · <b>进度</b> 键 <code>${SAVE_KEY}</code>${hasSave ? '（已有存档）' : '（无存档）'}</p>
+    <p style="color:var(--jn-text-soft);line-height:1.6;margin:6px 0 12px">说明：后台“保存并应用”写入当前浏览器；“写回本地”会写入 <code>js/config.local.js</code>，下次启动服务仍会读取。上线给别人玩时，提交这份本地配置文件即可成为版本配置。</p>
     <div class="section-title">游戏进度</div>
     <div class="adm-actions">
       <button class="primary" id="btn-save-game">保存进度</button>
@@ -5124,6 +5876,8 @@ function bindAdminV2Events() {
   bindAdminFloatingTooltips(document.getElementById('admin-body') || document);
   document.getElementById('btn-admin-v2-legacy')?.addEventListener('click', adminV2SwitchLegacy);
   document.getElementById('btn-admin-v2-open-legacy')?.addEventListener('click', adminV2SwitchLegacy);
+  document.getElementById('btn-admin-v2-apply-config')?.addEventListener('click', () => adminApplyCurrentConfig({ alert: true }));
+  document.getElementById('btn-admin-v2-write-local')?.addEventListener('click', adminWriteConfigToLocalFile);
   document.querySelectorAll('[data-admin-v2-section]').forEach(btn => btn.onclick = () => {
     const next = btn.dataset.adminV2Section;
     if (next === 'legacy') { adminV2SwitchLegacy(); return; }
@@ -5138,6 +5892,9 @@ function bindAdminV2Events() {
     if (adminV2Section === 'furnitureInstances') adminV2AddInstance();
     else if (adminV2Section === 'personalityMeta') adminV2AddTrait();
     else if (adminV2Section === 'dreamSystem') adminV2AddDream();
+    else if (adminV2Section === 'careerSystem') adminV2AddCareerStage();
+    else if (adminV2Section === 'storySystem') adminV2AddStoryPath();
+    else if (adminV2Section === 'needs') adminV2AddNeed();
     else if (adminV2Section === 'narrativeRules') adminV2AddNarrativeRule();
     else if (adminV2Section === 'questTemplates') adminV2AddQuestTemplate();
     else adminV2AddTemplate();
@@ -5146,6 +5903,9 @@ function bindAdminV2Events() {
   if (validate) validate.onclick = () => {
     if (adminV2Section === 'personalityMeta') adminV2ValidateTraits();
     else if (adminV2Section === 'dreamSystem') adminV2ValidateDreams();
+    else if (adminV2Section === 'careerSystem') adminV2ValidateCareerSystem();
+    else if (adminV2Section === 'storySystem') adminV2ValidateStorySystem();
+    else if (adminV2Section === 'needs') adminV2ValidateNeeds();
     else if (adminV2Section === 'ai') adminV2ValidateAI();
     else if (adminV2Section === 'narrativeRules') adminV2ValidateNarrativeRules();
     else if (adminV2Section === 'questTemplates') adminV2ValidateQuests();
@@ -5569,16 +6329,13 @@ function bindAdminV2Events() {
   });
   const saveTraitJson = document.getElementById('btn-admin-v2-save-trait-json');
   if (saveTraitJson) saveTraitJson.onclick = () => {
-    let metadata, specialtyMetadata, narratives, modifiers;
-    try { metadata = JSON.parse(document.getElementById('admin-v2-trait-metadata-json')?.value || '{}'); }
-    catch (e) { alert('traitMetadata JSON 无效'); return; }
+    let specialtyMetadata, narratives, modifiers;
     try { specialtyMetadata = JSON.parse(document.getElementById('admin-v2-specialty-metadata-json')?.value || '{}'); }
     catch (e) { alert('specialtyMetadata JSON 无效'); return; }
     try { narratives = JSON.parse(document.getElementById('admin-v2-trait-narratives-json')?.value || '{}'); }
     catch (e) { alert('traitNarratives JSON 无效'); return; }
     try { modifiers = JSON.parse(document.getElementById('admin-v2-trait-modifiers-json')?.value || '{}'); }
     catch (e) { alert('traitModifiers JSON 无效'); return; }
-    CONFIG.charSpecialtyConfig.traitMetadata = metadata;
     CONFIG.charSpecialtyConfig.specialtyMetadata = specialtyMetadata;
     CONFIG.charSpecialtyConfig.traitNarratives = narratives;
     CONFIG.charSpecialtyConfig.traitModifiers = modifiers;
@@ -5589,6 +6346,466 @@ function bindAdminV2Events() {
     alert('性格系统 JSON 已保存。');
     renderAdmin();
   };
+
+  document.querySelectorAll('[data-admin-v2-need]').forEach(el => el.onchange = () => {
+    const row = CONFIG.needDefs?.[+el.dataset.adminV2Need];
+    if (!row) return;
+    if (['defaultGrow', 'defaultDecay'].includes(el.dataset.field)) row[el.dataset.field] = +el.value || 0;
+    else row[el.dataset.field] = el.value;
+    saveConfigToStorage();
+    adminNeedSaved('已自动保存');
+  });
+  document.querySelectorAll('[data-admin-v2-need-id]').forEach(el => el.onchange = () => {
+    const row = CONFIG.needDefs?.[+el.dataset.adminV2NeedId];
+    if (!row) return;
+    const oldKey = row.key || '';
+    const newKey = normalizeNeedKeyInput(el.value);
+    if (!newKey) {
+      alert('需求 ID 不能为空，只支持英文/数字/下划线/短横线。');
+      el.value = oldKey;
+      return;
+    }
+    if (newKey !== oldKey && (CONFIG.needDefs || []).some((item, idx) => idx !== +el.dataset.adminV2NeedId && item.key === newKey)) {
+      alert(`需求 ID「${newKey}」已存在。`);
+      el.value = oldKey;
+      return;
+    }
+    row.key = newKey;
+    saveConfigToStorage();
+    adminNeedSaved(newKey === oldKey ? 'ID 未变化' : `ID 已改为 ${newKey}`);
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-need-band]').forEach(el => el.onchange = () => {
+    const row = CONFIG.needDefs?.[+el.dataset.adminV2NeedBand];
+    if (!row) return;
+    const raw = el.value.trim();
+    try {
+      row.stateBands = raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      alert(`${row.label || row.key || '需求'} 的分档 JSON 无效`);
+      return;
+    }
+    if (!Array.isArray(row.stateBands)) {
+      alert(`${row.label || row.key || '需求'} 的分档 JSON 必须是数组`);
+      return;
+    }
+    saveConfigToStorage();
+    adminNeedSaved('分档已保存');
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-delete-need]').forEach(btn => btn.onclick = () => {
+    const idx = +btn.dataset.adminV2DeleteNeed;
+    const row = CONFIG.needDefs?.[idx];
+    if (!row) return;
+    if (!confirm(`确认删除需求「${row.name || row.label || row.key}」？人物、家具、作息里引用的 key 不会自动移除。`)) return;
+    CONFIG.needDefs.splice(idx, 1);
+    saveConfigToStorage();
+    adminNeedSaved(`已删除 ${row.label || row.key}`);
+    renderAdmin();
+  });
+  const saveNeedJson = document.getElementById('btn-admin-v2-save-need-json');
+  if (saveNeedJson) saveNeedJson.onclick = () => {
+    let combos;
+    try { combos = JSON.parse(document.getElementById('admin-v2-need-combos-json')?.value || '[]'); }
+    catch (e) { alert('needCombinationStates JSON 无效'); return; }
+    if (!Array.isArray(combos)) { alert('needCombinationStates 必须是数组'); return; }
+    CONFIG.needCombinationStates = combos;
+    saveConfigToStorage();
+    adminNeedSaved('JSON 已保存');
+    alert('基础需求 JSON 已保存。');
+    renderAdmin();
+  };
+  document.querySelectorAll('[data-admin-v2-state]').forEach(el => el.onchange = () => {
+    const row = CONFIG.stateDefs?.[el.dataset.adminV2State];
+    if (!row) return;
+    if (el.dataset.field === 'duration') row.duration = +el.value || 0;
+    else row[el.dataset.field] = el.value;
+    saveConfigToStorage();
+    adminNeedSaved('状态已保存');
+  });
+  document.querySelectorAll('[data-admin-v2-state-list]').forEach(el => el.onchange = () => {
+    const row = CONFIG.stateDefs?.[el.dataset.adminV2StateList];
+    if (!row) return;
+    row[el.dataset.field] = el.value.split(',').map(s => s.trim()).filter(Boolean);
+    saveConfigToStorage();
+    adminNeedSaved('状态已保存');
+  });
+  document.querySelectorAll('[data-admin-v2-state-json]').forEach(el => el.onchange = () => {
+    const row = CONFIG.stateDefs?.[el.dataset.adminV2StateJson];
+    if (!row) return;
+    const field = el.dataset.jsonField;
+    const raw = el.value.trim();
+    try {
+      if (!raw || raw === 'null') delete row[field];
+      else row[field] = JSON.parse(raw);
+    } catch (e) {
+      alert(`${row.name || el.dataset.adminV2StateJson} 的 ${field} JSON 无效`);
+      return;
+    }
+    saveConfigToStorage();
+    adminNeedSaved('状态 JSON 已保存');
+  });
+  document.querySelectorAll('[data-admin-v2-state-id]').forEach(el => el.onchange = () => {
+    const oldId = el.dataset.adminV2StateId;
+    const row = CONFIG.stateDefs?.[oldId];
+    if (!row) return;
+    const newId = normalizeNeedKeyInput(el.value);
+    if (!newId) {
+      alert('状态 ID 不能为空，只支持英文/数字/下划线/短横线。');
+      el.value = oldId;
+      return;
+    }
+    if (newId !== oldId && CONFIG.stateDefs?.[newId]) {
+      alert(`状态 ID「${newId}」已存在。`);
+      el.value = oldId;
+      return;
+    }
+    if (newId !== oldId) {
+      CONFIG.stateDefs[newId] = row;
+      delete CONFIG.stateDefs[oldId];
+      (CONFIG.needDefs || []).forEach(need => (need.stateBands || []).forEach(band => {
+        if (band.id === oldId) band.id = newId;
+      }));
+      (CONFIG.needCombinationStates || []).forEach(rule => {
+        if (rule.stateId === oldId) rule.stateId = newId;
+      });
+    }
+    saveConfigToStorage();
+    adminNeedSaved(newId === oldId ? '状态 ID 未变化' : `状态 ID 已改为 ${newId}`);
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-delete-state]').forEach(btn => btn.onclick = () => {
+    const id = btn.dataset.adminV2DeleteState;
+    const row = CONFIG.stateDefs?.[id];
+    if (!row) return;
+    if (!confirm(`确认删除状态「${row.name || id}」？需求分档里的引用不会自动移除。`)) return;
+    delete CONFIG.stateDefs[id];
+    saveConfigToStorage();
+    adminNeedSaved(`已删除状态 ${row.name || id}`);
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-json-path]').forEach(el => el.onchange = () => {
+    const path = el.dataset.adminV2JsonPath;
+    let parsed;
+    try { parsed = JSON.parse(el.value || 'null'); }
+    catch (e) { alert(`${path} JSON 无效`); return; }
+    if (!adminV2SetJsonPath(path, parsed)) {
+      alert(`${path} 保存失败：找不到配置路径`);
+      return;
+    }
+    saveConfigToStorage();
+    adminV2MarkGenericSaved('已自动保存');
+  });
+  document.querySelectorAll('[data-admin-v2-interaction-tab]').forEach(btn => btn.onclick = () => {
+    adminV2InteractionCategory = btn.dataset.adminV2InteractionTab;
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-interaction-category-id]').forEach(el => el.onchange = () => {
+    const idx = +el.dataset.adminV2InteractionCategoryId;
+    const row = CONFIG.interactionCategories?.[idx];
+    if (!row) return;
+    const oldId = row.id;
+    const newId = String(el.value || '').trim();
+    if (!newId) {
+      alert('互动分类 ID 不能为空。');
+      el.value = oldId || '';
+      return;
+    }
+    if (newId !== oldId && (CONFIG.interactionCategories || []).some((cat, catIdx) => catIdx !== idx && cat.id === newId)) {
+      alert(`互动分类 ID「${newId}」已存在。`);
+      el.value = oldId || '';
+      return;
+    }
+    row.id = newId;
+    Object.values(CONFIG.interactionTemplates || {}).forEach(tpl => {
+      if (tpl.category === oldId) tpl.category = newId;
+    });
+    const social = CONFIG.interactionSocialConfig || {};
+    ['categoryMinScore', 'categoryOnLowScore'].forEach(key => {
+      if (social[key] && Object.prototype.hasOwnProperty.call(social[key], oldId)) {
+        social[key][newId] = social[key][oldId];
+        delete social[key][oldId];
+      }
+    });
+    adminV2InteractionCategory = newId;
+    saveConfigToStorage();
+    adminV2MarkGenericSaved(`分类 ID 已改为 ${newId}`);
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-interaction-category]').forEach(el => el.onchange = () => {
+    const row = CONFIG.interactionCategories?.[+el.dataset.adminV2InteractionCategory];
+    if (!row) return;
+    row[el.dataset.field] = el.value;
+    if (el.dataset.field === 'description') delete row.desc;
+    saveConfigToStorage();
+    adminV2MarkGenericSaved('互动分类已保存');
+  });
+  document.querySelectorAll('[data-admin-v2-interaction-template]').forEach(el => el.onchange = () => {
+    const tpl = CONFIG.interactionTemplates?.[el.dataset.adminV2InteractionTemplate];
+    if (!tpl) return;
+    const field = el.dataset.field;
+    const raw = el.type === 'checkbox' ? el.checked : el.value;
+    const value = parseAdminFieldValue(raw, el.dataset.type || 'string');
+    if (value === '' && ['llmPrompt'].includes(field)) delete tpl[field];
+    else tpl[field] = value;
+    saveConfigToStorage();
+    adminV2MarkGenericSaved('互动模板已保存');
+  });
+  document.querySelectorAll('[data-admin-v2-interaction-template-json]').forEach(el => el.onchange = () => {
+    const tpl = CONFIG.interactionTemplates?.[el.dataset.adminV2InteractionTemplateJson];
+    if (!tpl) return;
+    const field = el.dataset.field;
+    const raw = el.value.trim();
+    try {
+      if (!raw || raw === 'null') delete tpl[field];
+      else tpl[field] = JSON.parse(raw);
+    } catch (e) {
+      alert(`${tpl.name || tpl.id} 的 ${field} JSON 无效`);
+      return;
+    }
+    saveConfigToStorage();
+    adminV2MarkGenericSaved('互动模板 JSON 已保存');
+  });
+  document.querySelectorAll('[data-admin-v2-interaction-social]').forEach(el => el.onchange = () => {
+    CONFIG.interactionSocialConfig ||= {};
+    const raw = el.type === 'checkbox' ? el.checked : el.value;
+    CONFIG.interactionSocialConfig[el.dataset.adminV2InteractionSocial] = parseAdminFieldValue(raw, el.dataset.type || 'string');
+    saveConfigToStorage();
+    adminV2MarkGenericSaved('社交评分规则已保存');
+  });
+  document.querySelectorAll('[data-admin-v2-interaction-social-json]').forEach(el => el.onchange = () => {
+    CONFIG.interactionSocialConfig ||= {};
+    const field = el.dataset.adminV2InteractionSocialJson;
+    try {
+      CONFIG.interactionSocialConfig[field] = JSON.parse(el.value || '{}');
+    } catch (e) {
+      alert(`${field} JSON 无效`);
+      return;
+    }
+    saveConfigToStorage();
+    adminV2MarkGenericSaved('社交评分 JSON 已保存');
+  });
+  document.querySelectorAll('[data-admin-v2-multi-setting]').forEach(el => el.onchange = () => {
+    CONFIG.multiInteractConfig ||= {};
+    const raw = el.type === 'checkbox' ? el.checked : el.value;
+    CONFIG.multiInteractConfig[el.dataset.adminV2MultiSetting] = parseAdminFieldValue(raw, el.dataset.type || 'string');
+    saveConfigToStorage();
+    MultiInteractSystem?.init?.();
+    adminV2MarkGenericSaved('多人规则已保存');
+  });
+  document.querySelectorAll('[data-admin-v2-multi-status-tag]').forEach(el => el.onchange = () => {
+    CONFIG.multiInteractConfig ||= {};
+    CONFIG.multiInteractConfig.statusTags ||= {};
+    CONFIG.multiInteractConfig.statusTags[el.dataset.adminV2MultiStatusTag] = el.value.trim();
+    saveConfigToStorage();
+    MultiInteractSystem?.init?.();
+    adminV2MarkGenericSaved('状态标签映射已保存');
+  });
+  document.querySelectorAll('[data-admin-v2-multi-prompt-template]').forEach(el => el.onchange = () => {
+    CONFIG.multiInteractConfig ||= {};
+    CONFIG.multiInteractConfig.promptTemplates ||= {};
+    CONFIG.multiInteractConfig.promptTemplates[el.dataset.adminV2MultiPromptTemplate] = el.value;
+    saveConfigToStorage();
+    MultiInteractSystem?.init?.();
+    adminV2MarkGenericSaved('多人 Prompt 已保存');
+  });
+  document.querySelectorAll('[data-admin-v2-multi-reaction]').forEach(el => el.onchange = () => {
+    const row = CONFIG.multiInteractConfig?.observerReactions?.[+el.dataset.adminV2MultiReaction];
+    if (!row) return;
+    const raw = el.type === 'checkbox' ? el.checked : el.value;
+    const value = parseAdminFieldValue(raw, el.dataset.type || 'string');
+    if (value === '') delete row[el.dataset.field];
+    else row[el.dataset.field] = value;
+    saveConfigToStorage();
+    MultiInteractSystem?.init?.();
+    adminV2MarkGenericSaved('旁观规则已保存');
+  });
+  document.querySelectorAll('[data-admin-v2-multi-reaction-json]').forEach(el => el.onchange = () => {
+    const row = CONFIG.multiInteractConfig?.observerReactions?.[+el.dataset.adminV2MultiReactionJson];
+    if (!row) return;
+    const field = el.dataset.field;
+    const raw = el.value.trim();
+    try {
+      if (!raw || raw === 'null') delete row[field];
+      else row[field] = JSON.parse(raw);
+    } catch (e) {
+      alert(`${row.name || row.id || '旁观规则'} 的 ${field} JSON 无效`);
+      return;
+    }
+    saveConfigToStorage();
+    MultiInteractSystem?.init?.();
+    adminV2MarkGenericSaved('旁观规则 JSON 已保存');
+  });
+  document.querySelectorAll('[data-admin-v2-multi-contagion]').forEach(el => el.onchange = () => {
+    const row = CONFIG.multiInteractConfig?.emotionContagion?.[+el.dataset.adminV2MultiContagion];
+    if (!row) return;
+    const field = el.dataset.field;
+    const raw = el.value.trim();
+    try {
+      if (!raw) delete row[field];
+      else if (/^[\[{]/.test(raw)) row[field] = JSON.parse(raw);
+      else if (typeof row[field] === 'number') row[field] = +raw || 0;
+      else if (typeof row[field] === 'boolean') row[field] = raw === 'true' || raw === '1';
+      else row[field] = raw;
+    } catch (e) {
+      alert(`情绪传染 ${field} JSON 无效`);
+      return;
+    }
+    saveConfigToStorage();
+    MultiInteractSystem?.init?.();
+    adminV2MarkGenericSaved('情绪传染规则已保存');
+  });
+  document.getElementById('btn-admin-v2-add-story-node')?.addEventListener('click', adminV2AddStoryNode);
+  document.querySelectorAll('[data-admin-v2-career-stage]').forEach(el => el.onchange = () => {
+    const row = lifePathConfigForAdmin().stages?.[el.dataset.adminV2CareerStage];
+    if (!row) return;
+    if (['rankOverride', 'requiredReputation'].includes(el.dataset.field)) row[el.dataset.field] = +el.value || 0;
+    else row[el.dataset.field] = el.value;
+    saveConfigToStorage();
+  });
+  document.querySelectorAll('[data-admin-v2-career-stage-list]').forEach(el => el.onchange = () => {
+    const row = lifePathConfigForAdmin().stages?.[el.dataset.adminV2CareerStageList];
+    if (!row) return;
+    const values = el.value.split(',').map(s => s.trim()).filter(Boolean);
+    row[el.dataset.field] = el.dataset.field === 'dailyTasks'
+      ? values.map(v => /^\d+$/.test(v) ? +v : v)
+      : values;
+    saveConfigToStorage();
+  });
+  document.querySelectorAll('[data-admin-v2-career-stage-json]').forEach(el => el.onchange = () => {
+    const row = lifePathConfigForAdmin().stages?.[el.dataset.adminV2CareerStageJson];
+    if (!row) return;
+    try { row[el.dataset.jsonField] = el.value.trim() ? JSON.parse(el.value) : {}; }
+    catch (e) { alert(`${row.title || el.dataset.adminV2CareerStageJson} 的 ${el.dataset.jsonField} JSON 无效`); return; }
+    saveConfigToStorage();
+  });
+  document.querySelectorAll('[data-admin-v2-career-stage-id]').forEach(el => el.onchange = () => {
+    const lp = lifePathConfigForAdmin();
+    const oldId = el.dataset.adminV2CareerStageId;
+    const row = lp.stages?.[oldId];
+    const newId = normalizeNeedKeyInput(el.value);
+    if (!row || !newId) { alert('阶段 ID 不能为空'); el.value = oldId; return; }
+    if (newId !== oldId && lp.stages?.[newId]) { alert(`阶段 ID「${newId}」已存在`); el.value = oldId; return; }
+    if (newId !== oldId) {
+      row.id = newId;
+      lp.stages[newId] = row;
+      delete lp.stages[oldId];
+      Object.values(lp.paths || {}).forEach(path => {
+        path.stages = (path.stages || []).map(id => id === oldId ? newId : id);
+      });
+      Object.values(lp.stages || {}).forEach(stage => {
+        stage.nextStages = (stage.nextStages || []).map(id => id === oldId ? newId : id);
+      });
+      (CHARS || []).forEach(c => { if (c.currentStage === oldId) c.currentStage = newId; });
+    }
+    saveConfigToStorage();
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-delete-career-stage]').forEach(btn => btn.onclick = () => {
+    const lp = lifePathConfigForAdmin();
+    const id = btn.dataset.adminV2DeleteCareerStage;
+    const row = lp.stages?.[id];
+    if (!row || !confirm(`确认删除职业阶段「${row.title || id}」？`)) return;
+    delete lp.stages[id];
+    Object.values(lp.paths || {}).forEach(path => { path.stages = (path.stages || []).filter(x => x !== id); });
+    Object.values(lp.stages || {}).forEach(stage => { stage.nextStages = (stage.nextStages || []).filter(x => x !== id); });
+    saveConfigToStorage();
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-story-path]').forEach(el => el.onchange = () => {
+    const row = lifePathConfigForAdmin().paths?.[el.dataset.adminV2StoryPath];
+    if (!row) return;
+    row[el.dataset.field] = el.value;
+    saveConfigToStorage();
+  });
+  document.querySelectorAll('[data-admin-v2-story-path-list]').forEach(el => el.onchange = () => {
+    const row = lifePathConfigForAdmin().paths?.[el.dataset.adminV2StoryPathList];
+    if (!row) return;
+    row[el.dataset.field] = el.value.split(',').map(s => s.trim()).filter(Boolean);
+    saveConfigToStorage();
+  });
+  document.querySelectorAll('[data-admin-v2-story-path-json]').forEach(el => el.onchange = () => {
+    const row = lifePathConfigForAdmin().paths?.[el.dataset.adminV2StoryPathJson];
+    if (!row) return;
+    try { row[el.dataset.jsonField] = el.value.trim() ? JSON.parse(el.value) : {}; }
+    catch (e) { alert(`${row.name || el.dataset.adminV2StoryPathJson} 的 ${el.dataset.jsonField} JSON 无效`); return; }
+    saveConfigToStorage();
+  });
+  document.querySelectorAll('[data-admin-v2-story-path-id]').forEach(el => el.onchange = () => {
+    const lp = lifePathConfigForAdmin();
+    const oldId = el.dataset.adminV2StoryPathId;
+    const row = lp.paths?.[oldId];
+    const newId = normalizeNeedKeyInput(el.value);
+    if (!row || !newId) { alert('路径 ID 不能为空'); el.value = oldId; return; }
+    if (newId !== oldId && lp.paths?.[newId]) { alert(`路径 ID「${newId}」已存在`); el.value = oldId; return; }
+    if (newId !== oldId) {
+      row.id = newId;
+      lp.paths[newId] = row;
+      delete lp.paths[oldId];
+      Object.values(lp.stages || {}).forEach(stage => { if (stage.pathId === oldId) stage.pathId = newId; });
+      Object.values(lp.storyNodes || {}).forEach(node => { if (node.pathId === oldId) node.pathId = newId; });
+      (CHARS || []).forEach(c => { if (c.lifePath === oldId) c.lifePath = newId; });
+      if (CONFIG.reputationDomainConfig?.pathDomains?.[oldId]) {
+        CONFIG.reputationDomainConfig.pathDomains[newId] = CONFIG.reputationDomainConfig.pathDomains[oldId];
+        delete CONFIG.reputationDomainConfig.pathDomains[oldId];
+      }
+    }
+    saveConfigToStorage();
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-delete-story-path]').forEach(btn => btn.onclick = () => {
+    const lp = lifePathConfigForAdmin();
+    const id = btn.dataset.adminV2DeleteStoryPath;
+    const row = lp.paths?.[id];
+    if (!row || !confirm(`确认删除路径「${row.name || id}」？职业阶段和故事节点里的 pathId 不会自动删除。`)) return;
+    delete lp.paths[id];
+    saveConfigToStorage();
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-story-node]').forEach(el => el.onchange = () => {
+    const row = lifePathConfigForAdmin().storyNodes?.[el.dataset.adminV2StoryNode];
+    if (!row) return;
+    if (['phase', 'order', 'minReputation'].includes(el.dataset.field)) row[el.dataset.field] = el.value === '' ? null : (+el.value || 0);
+    else if (el.dataset.field === 'prevNode') row.prevNode = el.value || null;
+    else row[el.dataset.field] = el.value;
+    saveConfigToStorage();
+  });
+  document.querySelectorAll('[data-admin-v2-story-node-json]').forEach(el => el.onchange = () => {
+    const row = lifePathConfigForAdmin().storyNodes?.[el.dataset.adminV2StoryNodeJson];
+    if (!row) return;
+    const fallback = el.dataset.jsonField === 'effects' ? [] : {};
+    try { row[el.dataset.jsonField] = el.value.trim() ? JSON.parse(el.value) : fallback; }
+    catch (e) { alert(`${row.name || el.dataset.adminV2StoryNodeJson} 的 ${el.dataset.jsonField} JSON 无效`); return; }
+    saveConfigToStorage();
+  });
+  document.querySelectorAll('[data-admin-v2-story-node-id]').forEach(el => el.onchange = () => {
+    const lp = lifePathConfigForAdmin();
+    const oldId = el.dataset.adminV2StoryNodeId;
+    const row = lp.storyNodes?.[oldId];
+    const newId = normalizeNeedKeyInput(el.value);
+    if (!row || !newId) { alert('节点 ID 不能为空'); el.value = oldId; return; }
+    if (newId !== oldId && lp.storyNodes?.[newId]) { alert(`节点 ID「${newId}」已存在`); el.value = oldId; return; }
+    if (newId !== oldId) {
+      row.id = newId;
+      lp.storyNodes[newId] = row;
+      delete lp.storyNodes[oldId];
+      Object.values(lp.storyNodes || {}).forEach(node => {
+        if (node.prevNode === oldId) node.prevNode = newId;
+        if (node.triggerAfterNode === oldId) node.triggerAfterNode = newId;
+      });
+    }
+    saveConfigToStorage();
+    renderAdmin();
+  });
+  document.querySelectorAll('[data-admin-v2-delete-story-node]').forEach(btn => btn.onclick = () => {
+    const lp = lifePathConfigForAdmin();
+    const id = btn.dataset.adminV2DeleteStoryNode;
+    const row = lp.storyNodes?.[id];
+    if (!row || !confirm(`确认删除故事节点「${row.name || id}」？`)) return;
+    delete lp.storyNodes[id];
+    saveConfigToStorage();
+    renderAdmin();
+  });
 
   document.querySelectorAll('[data-admin-v2-dream]').forEach(el => el.onchange = () => {
     const row = dreamConfigForAdmin().dreamMetadata?.[el.dataset.adminV2Dream];
@@ -6649,15 +7866,18 @@ function bindAdminEvents() {
   };
 
   const btnSaveGame = document.getElementById('btn-save-game');
-  if (btnSaveGame) btnSaveGame.onclick = () => { saveGameToStorage(false); renderAdmin(); };
+  if (btnSaveGame) btnSaveGame.onclick = () => {
+    if (saveGameToStorage(false)) alert('进度已保存到当前浏览器。');
+    renderAdmin();
+  };
   const btnLoadGame = document.getElementById('btn-load-game');
   if (btnLoadGame) btnLoadGame.onclick = () => {
-    if (loadGameFromStorage()) { closeAdmin(); log('进度已读取。'); }
+    if (loadGameFromStorage()) { closeAdmin(); log('进度已读取。'); alert('进度已读取。'); }
     else alert('无存档或版本不兼容');
   };
   const btnClearSave = document.getElementById('btn-clear-save');
   if (btnClearSave) btnClearSave.onclick = () => {
-    if (confirm('清除游玩进度？（配置不受影响）')) { clearGameSave(); renderAdmin(); }
+    if (confirm('清除游玩进度？（配置不受影响）')) { clearGameSave(); alert('进度已清除。'); renderAdmin(); }
   };
 
   const btnExport = document.getElementById('btn-export');
@@ -6697,24 +7917,7 @@ function bindAdminEvents() {
   };
   const btnApply = document.getElementById('btn-apply-game');
   if (btnApply) btnApply.onclick = () => {
-    saveConfigToStorage();
-    CONFIG = loadConfig();
-    initRuntime();
-    initEventSystem();
-    SceneAccessSystem.init();
-    NarrativeBubbleSystem.init();
-    LifePathSystem?.init?.();
-    FamilySystem.init();
-    QuestSystem.init();
-    reloadDreamP0Systems();
-    CharSpecialtySystem.init();
-    MultiInteractSystem.init();
-    initAISystem();
-    loadGameFromStorage();
-    pauseCharAI(CHARS[selectedIdx]);
-    buildUI();
-    closeAdmin();
-    log('配置已应用，游戏重载。');
+    adminApplyCurrentConfig();
   };
 }
 
