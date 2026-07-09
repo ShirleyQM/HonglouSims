@@ -89,7 +89,10 @@ const ADMIN_V2_GROUPS = [
     { id: 'personalityMeta', label: '性格系统', status: '表格' },
     { id: 'dreamSystem', label: '梦想系统', status: '表格' },
     { id: 'careerSystem', label: '职业系统', status: '表格' },
-    { id: 'needs', label: '基础需求', status: '表格' },
+  ] },
+  { id: 'needState', label: '需求与状态', items: [
+    { id: 'needs', label: '基础6需求/状态标签', status: '表格' },
+    { id: 'interactions', label: '互动模板和多人互动', status: '表格' },
   ] },
   { id: 'story', label: '故事系统', items: [
     { id: 'storySystem', label: '路径系统', status: '表格' },
@@ -103,7 +106,6 @@ const ADMIN_V2_GROUPS = [
     { id: 'questTemplates', label: '任务模板/传令', status: '表格' },
   ] },
   { id: 'behavior', label: '行为规则', items: [
-    { id: 'interactions', label: '互动模板和多人互动', status: '表格' },
     { id: 'furnReact', label: '家具反应', status: '表格' },
     { id: 'narrativeRules', label: '叙事气泡', status: '表格' },
   ] },
@@ -146,13 +148,14 @@ function renderAdminV2() {
       .admin-v2-nav:hover,.admin-v2-nav.active { background:rgba(250,248,244,.25);border-color:var(--jn-gold-border);color:var(--jn-heading) }
       .admin-v2-badge { font-size:9px;color:var(--jn-text-dim);white-space:nowrap }
       .admin-v2-main { min-width:0;display:flex;flex-direction:column;gap:10px }
-      .admin-v2-head { display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border:1px solid var(--jn-border-2);border-radius:10px;background:rgba(250,248,244,.14);padding:10px }
+      .admin-v2-head { position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border:1px solid var(--jn-border-2);border-radius:10px;background:rgba(250,248,244,.25);backdrop-filter:blur(12px) saturate(1.1);-webkit-backdrop-filter:blur(12px) saturate(1.1);padding:10px 12px;box-shadow:0 8px 24px rgba(42,33,22,.12); }
       .admin-v2-title h3 { color:var(--jn-heading);font-size:16px;font-weight:normal;margin-bottom:4px }
       .admin-v2-title p { color:var(--jn-text-soft);font-size:11px;line-height:1.5 }
-      .admin-v2-tools { display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end }
-      .admin-v2-tools input { min-width:180px;background:rgba(250,248,244,.22);border:1px solid rgba(107,90,76,.62);border-radius:999px;color:var(--jn-title);font-family:inherit;font-size:11px;padding:6px 10px }
+      .admin-v2-tools { display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center }
+      .admin-v2-tools input,.admin-v2-tools select { min-width:180px;background:rgba(250,248,244,.22);border:1px solid rgba(107,90,76,.62);border-radius:999px;color:var(--jn-title);font-family:inherit;font-size:11px;padding:6px 10px }
+      .admin-v2-tools .admin-v2-mini-select { min-width:92px;max-width:132px }
       .admin-v2-tools button,.admin-v2-drawer button { background:linear-gradient(180deg,var(--jn-btn-top),var(--jn-btn-bottom));border:1px solid var(--jn-border);border-radius:999px;color:var(--jn-title);padding:6px 12px;font-family:inherit;cursor:pointer }
-      .admin-v2-tools button.primary { border-color:var(--jn-gold);background:linear-gradient(180deg,#f5edcf,#cfba7b) }
+      .admin-v2-tools button.primary,.admin-v2-tools button.admin-v2-edit-primary { border-color:var(--jn-gold);background:linear-gradient(180deg,#f5edcf,#cfba7b) }
       .admin-v2-content { display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:10px;min-height:0 }
       .admin-v2-table-wrap { border:1px solid var(--jn-border-2);border-radius:10px;background:rgba(250,248,244,.08);overflow:auto;max-height:58vh }
       .admin-v2-table { width:100%;min-width:980px;border-collapse:collapse;font-size:11px }
@@ -179,70 +182,92 @@ function renderAdminV2() {
       .character-builder-page { display:flex;flex-direction:column;gap:10px }
       .character-trait-tags { display:flex;gap:4px;flex-wrap:wrap;max-width:360px }
       .character-trait-tags .meta-tag { margin:0 }
-      .character-editor-page { display:flex;flex-direction:column;gap:10px;min-height:0;overflow-x:hidden }
-      .character-editor-top { display:grid;grid-template-columns:170px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--jn-border-2);border-radius:10px;background:rgba(250,248,244,.12);padding:8px }
-      .character-editor-top select { width:100%;background:rgba(250,248,244,.22);border:1px solid rgba(107,90,76,.55);border-radius:999px;color:var(--jn-title);font-family:inherit;font-size:11px;padding:6px 10px }
-      .character-avatar-strip { display:flex;gap:8px;overflow-x:auto;min-width:0;padding-bottom:2px }
-      .character-avatar-btn { flex:0 0 auto;width:58px;border:1px solid var(--jn-border-3);border-radius:10px;background:rgba(250,248,244,.14);padding:4px;cursor:pointer;color:var(--jn-text-soft);font-family:inherit }
-      .character-avatar-btn.active { border-color:var(--jn-gold);background:rgba(250,248,244,.3);box-shadow:0 0 0 2px var(--jn-gold-glow) }
-      .character-avatar-btn img,.character-avatar-fallback { width:42px;height:42px;border-radius:8px;display:block;margin:0 auto 3px;object-fit:cover;object-position:center 12%;background:var(--jn-surface-active) }
+      .character-editor-page { --char-glass:rgba(255,255,255,.38);--char-glass-strong:rgba(255,252,244,.68);--char-glass-line:rgba(255,255,255,.56);--char-glass-shadow:rgba(50,45,39,.12);display:flex;flex-direction:column;gap:12px;min-height:0;overflow:visible;padding:12px;border:1px solid rgba(255,255,255,.46);border-radius:16px;background:radial-gradient(900px 420px at 18% -10%,rgba(255,255,255,.72),transparent 64%),linear-gradient(115deg,rgba(82,116,108,.15),transparent 36%,rgba(190,150,76,.14)),rgba(238,234,220,.2);backdrop-filter:blur(18px) saturate(1.12);-webkit-backdrop-filter:blur(18px) saturate(1.12);box-shadow:0 22px 48px rgba(50,45,39,.1),inset 0 1px 0 rgba(255,255,255,.7) }
+      .character-editor-top { display:grid;grid-template-columns:78px minmax(0,1fr);gap:8px;align-items:center;border:1px solid var(--char-glass-line);border-radius:14px;background:rgba(255,255,255,.34);padding:8px 9px;backdrop-filter:blur(22px) saturate(1.18);-webkit-backdrop-filter:blur(22px) saturate(1.18);box-shadow:0 14px 30px rgba(50,45,39,.08),inset 0 1px 0 rgba(255,255,255,.78) }
+      .character-editor-top select { width:100%;background:rgba(255,255,255,.44);border:1px solid rgba(255,255,255,.62);border-radius:999px;color:var(--jn-title);font-family:inherit;font-size:11px;padding:6px 10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.72) }
+      .character-avatar-strip { display:flex;gap:7px;overflow-x:auto;min-width:0;padding:2px 2px 4px;scrollbar-width:thin }
+      .character-avatar-btn { flex:0 0 auto;width:50px;border:1px solid rgba(255,255,255,.44);border-radius:10px;background:rgba(255,255,255,.28);padding:4px;cursor:pointer;color:var(--jn-text-soft);font-family:inherit;box-shadow:inset 0 1px 0 rgba(255,255,255,.58);transition:background .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease }
+      .character-avatar-btn:hover { background:rgba(255,255,255,.46);border-color:rgba(164,125,53,.34) }
+      .character-avatar-btn.active { border-color:rgba(255,255,255,.78);background:rgba(255,252,244,.72);box-shadow:0 0 0 1px rgba(255,255,255,.86),0 0 0 5px rgba(126,174,151,.12),0 0 24px rgba(104,156,132,.3),inset 0 1px 0 rgba(255,255,255,.82);transform:translateY(-1px) }
+      .character-avatar-btn img,.character-avatar-fallback { width:36px;height:36px;border-radius:8px;display:block;margin:0 auto 4px;object-fit:cover;object-position:center 12%;background:rgba(255,255,255,.38);box-shadow:inset 0 1px 0 rgba(255,255,255,.48) }
       .character-avatar-btn span { display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;text-align:center }
-      .character-editor-main { display:grid;grid-template-columns:minmax(150px,16%) minmax(0,1fr);gap:12px;min-height:0;overflow-x:hidden }
-      .character-editor-portrait { border:1px solid var(--jn-border-2);border-radius:12px;background:rgba(250,248,244,.14);display:flex;flex-direction:column;min-height:0;overflow:hidden }
-      .character-editor-portrait-art { height:220px;min-height:220px;max-height:260px;display:flex;align-items:flex-start;justify-content:center;padding:8px;background:linear-gradient(180deg,rgba(250,248,244,.22),rgba(184,202,174,.16)) }
+      .character-editor-main { display:grid;grid-template-columns:minmax(230px,280px) minmax(0,1fr);gap:13px;min-height:0;overflow:visible;align-items:start }
+      .character-editor-portrait { position:sticky;top:82px;align-self:start;border:1px solid var(--char-glass-line);border-radius:16px;background:var(--char-glass);display:flex;flex-direction:column;min-height:0;overflow:hidden;backdrop-filter:blur(24px) saturate(1.18);-webkit-backdrop-filter:blur(24px) saturate(1.18);box-shadow:0 18px 38px var(--char-glass-shadow),inset 0 1px 0 rgba(255,255,255,.74) }
+      .character-editor-portrait-art { height:430px;min-height:380px;max-height:56vh;display:flex;align-items:flex-start;justify-content:center;padding:10px;background:radial-gradient(circle at 50% 2%,rgba(255,255,255,.64),transparent 56%),linear-gradient(180deg,rgba(255,255,255,.26),rgba(154,185,164,.16)) }
       .character-editor-portrait-art img { width:100%;height:100%;object-fit:contain;object-position:center top;display:block }
       .character-editor-portrait-fallback { width:100%;height:100%;border-radius:10px;display:flex;align-items:center;justify-content:center;color:rgba(61,48,40,.45);font-size:42px }
-      .character-editor-summary { border-top:1px solid var(--jn-border-3);padding:8px 9px;color:var(--jn-text-soft);font-size:11px;line-height:1.5;background:rgba(250,248,244,.16) }
-      .character-editor-right { display:flex;flex-direction:column;gap:12px;min-width:0;overflow-x:hidden }
-      .character-editor-actions { display:flex;justify-content:flex-end;gap:8px;align-items:center;white-space:nowrap }
-      .character-editor-actions button { background:linear-gradient(180deg,var(--jn-btn-top),var(--jn-btn-bottom));border:1px solid var(--jn-border);border-radius:999px;color:var(--jn-title);padding:5px 14px;font-family:inherit;cursor:pointer }
-      .character-editor-actions button.primary { border-color:var(--jn-gold);background:linear-gradient(180deg,#f5edcf,#cfba7b) }
-      .character-result-row { display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px }
-      .character-result-card { border:1px solid var(--jn-border-3);border-radius:10px;background:rgba(250,248,244,.16);padding:9px 10px;min-width:0;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.24) }
-      .character-result-card label { display:block;color:var(--jn-text-dim);font-size:10px;margin-bottom:4px }
-      .character-result-card b { color:var(--jn-title);font-size:13px;font-weight:normal }
-      .character-result-card small { display:block;color:var(--jn-text-dim);font-size:9px;margin-top:4px }
-      .character-result-card select,.character-result-card input { width:100%;background:rgba(250,248,244,.22);border:1px solid rgba(107,90,76,.55);border-radius:6px;color:var(--jn-title);font-family:inherit;font-size:12px;padding:4px 6px }
-      .character-overview-panel { border:1px solid var(--jn-border-3);border-radius:12px;background:rgba(250,248,244,.1);padding:10px;min-width:0;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.18) }
+      .character-editor-summary { border-top:1px solid rgba(255,255,255,.42);padding:11px;color:var(--jn-text-soft);font-size:11px;line-height:1.55;background:rgba(255,255,255,.24) }
+      .character-editor-summary b { display:block;color:var(--jn-title);font-size:16px;font-weight:650;margin-bottom:7px }
+      .character-editor-summary .character-summary-desc { margin-top:4px;line-height:1.5 }
+      .character-editor-desc-field { margin-top:5px }
+      .character-editor-desc-field input { width:100%;background:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.58);border-radius:10px;color:var(--jn-title);font-family:inherit;font-size:11px;padding:7px 9px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5) }
+      .character-editor-desc-field div { padding:7px 4px;color:var(--jn-text-soft);word-break:break-word;line-height:1.55 }
+      .character-editor-right { display:flex;flex-direction:column;gap:12px;min-width:0;overflow:visible }
+      .character-editor-actions { display:none }
+      .character-result-row { display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:9px;align-items:stretch }
+      .character-result-card { border:1px solid rgba(255,255,255,.5);border-radius:12px;background:rgba(255,255,255,.34);padding:10px 11px;min-width:0;cursor:pointer;box-shadow:0 12px 26px rgba(50,45,39,.08),inset 0 1px 0 rgba(255,255,255,.68);backdrop-filter:blur(18px) saturate(1.12);-webkit-backdrop-filter:blur(18px) saturate(1.12) }
+      .character-result-card label { display:block;color:var(--jn-text-dim);font-size:10px;margin-bottom:5px }
+      .character-result-card b { display:block;color:var(--jn-title);font-size:14px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+      .character-result-card small { display:block;color:var(--jn-text-dim);font-size:10px;margin-top:4px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+      .character-result-card select,.character-result-card input { width:100%;background:rgba(255,255,255,.42);border:1px solid rgba(255,255,255,.58);border-radius:8px;color:var(--jn-title);font-family:inherit;font-size:12px;padding:5px 7px;box-shadow:inset 0 1px 0 rgba(255,255,255,.62) }
+      .character-result-card.placeholder { opacity:.72 }
+      .character-wide-row { display:grid;grid-template-columns:minmax(150px,.8fr) minmax(280px,1.4fr) minmax(190px,1fr);gap:9px;margin-top:9px;align-items:stretch }
+      .character-wide-card { border:1px solid rgba(255,255,255,.5);border-radius:12px;background:rgba(255,255,255,.3);padding:10px 11px;min-width:0;box-shadow:0 12px 26px rgba(50,45,39,.07),inset 0 1px 0 rgba(255,255,255,.66) }
+      .character-wide-card label { display:block;color:var(--jn-text-dim);font-size:10px;margin-bottom:5px }
+      .character-wide-card b { display:block;color:var(--jn-title);font-size:14px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+      .character-wide-card small { display:block;color:var(--jn-text-dim);font-size:10px;margin-top:4px;line-height:1.35 }
+      .character-wide-card select,.character-wide-card input { width:100%;background:rgba(255,255,255,.42);border:1px solid rgba(255,255,255,.58);border-radius:8px;color:var(--jn-title);font-family:inherit;font-size:12px;padding:5px 7px;box-shadow:inset 0 1px 0 rgba(255,255,255,.62) }
+      .character-rep-grid { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px }
+      .character-rep-chip { min-width:0;border:1px solid rgba(255,255,255,.42);border-radius:9px;background:rgba(255,255,255,.22);padding:6px;text-align:center }
+      .character-rep-chip span { display:block;color:var(--jn-text-dim);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+      .character-rep-chip b { display:block;font-size:13px;margin-top:2px }
+      .character-health-row { display:flex;align-items:center;gap:8px }
+      .character-health-row input[type="range"] { flex:1;min-width:120px;padding:0;background:transparent;box-shadow:none }
+      .character-overview-panel { border:1px solid rgba(255,255,255,.52);border-radius:14px;background:rgba(255,255,255,.32);padding:11px;min-width:0;overflow:hidden;box-shadow:0 16px 34px rgba(50,45,39,.08),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(22px) saturate(1.14);-webkit-backdrop-filter:blur(22px) saturate(1.14) }
       .character-overview-head { display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-bottom:8px }
       .character-overview-head h4 { margin:0;color:var(--jn-heading);font-size:13px;font-weight:normal;letter-spacing:.12em }
       .character-overview-head p { margin:0;color:var(--jn-text-dim);font-size:10px;text-align:right;line-height:1.4 }
       .character-need-table-wrap { overflow:auto;max-width:100% }
-      .character-need-coeff-table { min-width:640px }
-      .character-need-coeff-table td { vertical-align:top }
+      .character-need-layout { display:grid;grid-template-columns:minmax(0,1fr) 168px;gap:10px;align-items:start }
+      .character-need-note { color:var(--jn-text-soft);font-size:11px;line-height:1.55;margin:0 0 8px }
+      .need-pyramid { display:flex;flex-direction:column;gap:6px;align-items:center;border:1px solid rgba(255,255,255,.42);border-radius:12px;background:rgba(255,252,245,.2);padding:10px 8px }
+      .need-pyramid-tier { display:flex;justify-content:center;gap:5px;width:100% }
+      .need-pyramid-chip { border:1px solid rgba(183,139,57,.38);background:rgba(246,235,197,.42);color:var(--jn-title);font-size:10px;border-radius:999px;padding:4px 7px;white-space:nowrap }
+      .need-pyramid-tier.top .need-pyramid-chip { background:rgba(212,192,230,.45) }
+      .need-pyramid-tier.mid .need-pyramid-chip { background:rgba(190,221,205,.4) }
+      .character-need-coeff-table { min-width:760px }
+      .character-need-coeff-table th,.character-need-coeff-table td { padding:5px 6px;vertical-align:middle }
+      .character-need-coeff-table input.need-num-cell { width:64px;min-width:0;height:24px;box-sizing:border-box;padding:2px 5px;border-radius:5px;font-size:11px;line-height:1.2;text-align:right;background:rgba(255,255,255,.4) }
+      .character-need-coeff-pair { display:flex;align-items:center;gap:5px;white-space:nowrap }
+      .character-need-coeff-pair .need-effective { color:var(--jn-title);font-size:11px;font-variant-numeric:tabular-nums }
+      .character-need-coeff-pair .need-config { color:var(--jn-text-dim);font-size:10px;font-variant-numeric:tabular-nums }
+      .character-need-coeff-pair .need-arrow { color:var(--jn-text-dim);font-size:10px }
       .character-need-coeff-table textarea { width:100%;min-height:28px;resize:vertical;border:1px solid rgba(107,90,76,.5);border-radius:6px;background:rgba(250,248,244,.2);color:var(--jn-title);padding:4px 6px;font:10px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;box-sizing:border-box }
       .character-need-coeff-table code { display:block;white-space:normal;word-break:break-word;color:var(--jn-text-soft);font-size:10px;line-height:1.3 }
       .character-trait-columns { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;min-height:0;overflow-x:hidden;padding-top:10px }
-      .character-trait-column { position:relative;min-width:0;border:1px solid var(--jn-border-3);border-radius:12px;background:rgba(250,248,244,.1);padding:19px 8px 8px;box-shadow:inset 0 1px 0 rgba(255,255,255,.18);overflow:visible }
+      .character-trait-column { position:relative;min-width:0;border:1px solid rgba(255,255,255,.5);border-radius:14px;background:rgba(255,255,255,.3);padding:20px 9px 9px;box-shadow:0 14px 30px rgba(50,45,39,.08),inset 0 1px 0 rgba(255,255,255,.68);overflow:visible;backdrop-filter:blur(20px) saturate(1.12);-webkit-backdrop-filter:blur(20px) saturate(1.12) }
       .character-trait-column-head { position:absolute;left:12px;top:-11px;display:flex;align-items:center;justify-content:center;color:var(--jn-heading);z-index:2 }
-      .character-trait-column-head h4 { font-size:13px;font-weight:normal;letter-spacing:.14em;cursor:help;border:1px solid rgba(168,128,46,.48);border-radius:999px;background:linear-gradient(180deg,#edf4e4,#dbe8cf);box-shadow:0 2px 8px rgba(78,61,43,.12);padding:3px 10px }
-      .character-trait-collapse { position:absolute;right:8px;top:7px;z-index:2;width:24px;height:22px;border:1px solid rgba(107,90,76,.36);border-radius:999px;background:rgba(250,248,244,.42);color:var(--jn-title);font-family:inherit;font-size:12px;line-height:1;cursor:pointer }
-      .character-trait-collapse:hover { border-color:rgba(168,128,46,.65);background:rgba(246,235,197,.65) }
-      .character-trait-list { display:flex;flex-direction:column;gap:8px;max-height:42vh;overflow-y:auto;overflow-x:hidden;padding-right:2px }
+      .character-trait-column-head h4 { font-size:12px;font-weight:650;letter-spacing:.08em;border:1px solid rgba(255,255,255,.62);border-radius:999px;background:rgba(235,244,228,.72);box-shadow:0 8px 18px rgba(78,61,43,.1),inset 0 1px 0 rgba(255,255,255,.78);padding:3px 10px }
+      .character-trait-collapse { display:none }
+      .character-trait-list { display:flex;flex-direction:column;gap:7px;max-height:36vh;overflow-y:auto;overflow-x:hidden;padding-right:2px;scrollbar-width:thin }
       .character-trait-selected-summary { display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;min-height:38px;padding:4px 2px 2px }
       .character-trait-selected-summary .meta-tag { margin:0;background:rgba(246,235,197,.55);border-color:rgba(168,128,46,.42);color:var(--jn-title) }
       .character-trait-selected-summary .logic-muted { font-size:11px }
-      .character-trait-pair { display:grid;grid-template-columns:16px minmax(2.4em,1fr) 16px minmax(2.4em,1fr);gap:4px;align-items:center;min-height:30px;padding:4px;border:1px solid rgba(107,90,76,.22);border-radius:10px;background:rgba(255,252,245,.18);min-width:0 }
-      .character-trait-pair.single { grid-template-columns:16px minmax(2.4em,1fr) 16px minmax(2.4em,1fr) }
-      .character-trait-icon { width:16px;height:16px;border:1px dashed rgba(107,90,76,.42);border-radius:5px;background:linear-gradient(180deg,rgba(250,248,244,.34),rgba(220,205,166,.2));box-shadow:inset 0 1px 0 rgba(255,255,255,.4) }
-      .character-trait-icon.empty { opacity:.22 }
-      .character-trait-name { position:relative;border:1px solid transparent;background:transparent;color:var(--jn-text-soft);font-family:inherit;font-size:12px;text-align:center;padding:5px 4px;border-radius:7px;cursor:help;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:clip }
+      .character-trait-pair { display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:center;min-height:32px;padding:2px;border-radius:10px;background:rgba(255,252,245,.1) }
+      .character-trait-pair.single { grid-template-columns:1fr 1fr }
+      .character-trait-name { position:relative;border:1px solid transparent;background:transparent;color:var(--jn-text-soft);font-family:inherit;font-size:10px;text-align:center;padding:4px 3px;border-radius:7px;cursor:help;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2 }
+      .character-trait-empty { min-height:28px;border:1px dashed rgba(180,165,138,.48);border-radius:7px;background:rgba(255,255,255,.18) }
       .character-trait-name:hover { color:var(--jn-title);background:rgba(250,248,244,.28);border-color:rgba(168,128,46,.28) }
-      .character-trait-name.selected { color:var(--jn-title);background:linear-gradient(180deg,rgba(246,235,197,.72),rgba(213,190,128,.36));border-color:rgba(168,128,46,.58);font-weight:600;box-shadow:0 0 0 1px rgba(201,162,39,.1),inset 0 1px 0 rgba(255,255,255,.4) }
-      .character-specialty-column textarea { width:100%;resize:vertical;background:rgba(250,248,244,.2);border:1px solid rgba(107,90,76,.5);border-radius:6px;color:var(--jn-title);font-family:monospace;font-size:10px;padding:7px;box-sizing:border-box }
-      .character-dream-panel { border:1px solid var(--jn-border-3);border-radius:12px;background:rgba(250,248,244,.1);padding:12px;min-width:0 }
-      .character-dream-head { display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:9px }
-      .character-dream-head h4 { color:var(--jn-heading);font-size:14px;font-weight:normal;letter-spacing:.12em }
-      .character-dream-head p { color:var(--jn-text-soft);font-size:11px;line-height:1.5 }
-      .character-dream-grid { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px }
-      .character-dream-card { border:1px solid rgba(107,90,76,.24);border-radius:10px;background:rgba(255,252,245,.14);padding:8px;min-height:92px;color:var(--jn-text-soft);font-family:inherit;text-align:left }
-      .character-dream-card b { display:block;color:var(--jn-title);font-size:13px;font-weight:normal;margin-bottom:4px }
-      .character-dream-card span { display:inline-block;color:var(--jn-text-dim);font-size:10px;margin-bottom:5px }
-      .character-dream-card p { font-size:10px;line-height:1.45 }
-      .character-dream-card.selected { border-color:rgba(168,128,46,.64);background:linear-gradient(180deg,rgba(246,235,197,.55),rgba(213,190,128,.18));box-shadow:inset 0 1px 0 rgba(255,255,255,.35) }
-      .character-dream-card.editable { cursor:pointer }
-      .character-dream-form { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px }
-      .character-dream-form .cfg-field:last-child { grid-column:1 / -1 }
+      .character-trait-name.selected { color:var(--jn-title);background:rgba(209,181,115,.44);border-color:rgba(255,255,255,.7);font-weight:650;box-shadow:0 0 0 1px rgba(255,255,255,.72),0 0 18px rgba(164,125,53,.14),inset 0 1px 0 rgba(255,255,255,.62) }
+      .character-specialty-list { display:flex;flex-direction:column;gap:7px }
+      .character-dream-panel { border:1px solid rgba(255,255,255,.52);border-radius:14px;background:rgba(255,255,255,.32);padding:11px;min-width:0;overflow:hidden;box-shadow:0 16px 34px rgba(50,45,39,.08),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(22px) saturate(1.14);-webkit-backdrop-filter:blur(22px) saturate(1.14) }
+      .character-dream-readonly { display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr) minmax(0,1fr);gap:8px }
+      .character-dream-readonly div { border:1px solid rgba(255,255,255,.42);border-radius:10px;background:rgba(255,255,255,.24);padding:8px 9px;min-width:0 }
+      .character-dream-readonly label { display:block;color:var(--jn-text-dim);font-size:10px;margin-bottom:4px }
+      .character-dream-readonly b { display:block;color:var(--jn-title);font-size:13px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+      .character-dream-readonly p { margin:0;color:var(--jn-text-soft);font-size:11px;line-height:1.45 }
+      .character-dream-readonly select { width:100%;background:rgba(255,255,255,.42);border:1px solid rgba(255,255,255,.58);border-radius:8px;color:var(--jn-title);font-family:inherit;font-size:12px;padding:5px 7px }
+      .character-basic-module { padding-bottom:10px }
       .dream-meta-table { min-width:1680px }
       .dream-meta-table th,.dream-meta-table td { padding:4px;border-right:1px solid var(--jn-border-3) }
       .dream-meta-table input,.dream-meta-table select { border-radius:2px;padding:4px 5px;min-width:92px }
@@ -250,14 +275,22 @@ function renderAdminV2() {
       .dream-meta-table .dream-desc-cell { min-width:230px }
       .dream-meta-table .dream-json-cell { min-width:180px;font-family:monospace;font-size:10px }
       .need-meta-table { min-width:1320px }
+      .need-state-config-table { min-width:1780px }
       .need-meta-table th,.need-meta-table td { padding:4px;border-right:1px solid var(--jn-border-3) }
       .need-meta-table input,.need-meta-table select { border-radius:2px;padding:4px 5px;min-width:86px }
       .need-meta-table .need-id-cell { min-width:118px;font-family:monospace;font-size:10px }
       .need-meta-table .need-name-cell { min-width:110px }
-      .need-meta-table .need-summary-cell { min-width:240px }
+      .need-meta-table .need-summary-cell { min-width:220px }
       .need-meta-table .need-json-cell { min-width:260px;font-family:monospace;font-size:10px }
-      .need-meta-table .need-num-cell { min-width:72px }
+      .need-meta-table .need-num-cell { min-width:62px }
       .need-meta-table .need-color-cell { min-width:54px;padding:1px 2px }
+      .need-state-config-table .need-band-head { min-width:54px;text-align:center }
+      .need-state-config-table .need-band-num-cell { min-width:50px;max-width:58px }
+      .need-state-config-table .need-band-state-cell { min-width:92px;max-width:110px }
+      .need-state-config-table .need-band-input { min-width:46px;text-align:center }
+      .need-state-config-table .need-band-state-input { min-width:84px;font-size:11px }
+      .need-state-config-table .need-ext-cell { min-width:220px;max-width:320px;white-space:normal;line-height:1.35;color:var(--jn-text-soft) }
+      .state-ext-table { min-width:1280px }
       @media (max-width: 1180px) { .character-trait-columns { grid-template-columns:repeat(2,minmax(0,1fr)) } }
       .character-trait-name.editable { cursor:pointer }
       .character-editor-tooltip { position:relative }
@@ -384,7 +417,9 @@ function renderAdminV2() {
       .ai-v2-candidate { border:1px solid var(--jn-border-3);border-radius:8px;background:rgba(255,252,245,.1);padding:7px }
       .ai-v2-candidate b { display:block;color:var(--jn-title);font-size:11px;font-weight:normal;margin-bottom:3px }
       .ai-v2-candidate span { color:var(--jn-text-soft);font-size:10px;line-height:1.45 }
-      @media (max-width:900px) { .admin-v2 { grid-template-columns:1fr } .admin-v2-content,.furniture-admin-content,.quest-v2-content,.quest-v2-controls,.quest-v2-test,.identity-v2-content,.ai-v2-content { grid-template-columns:1fr } .furniture-admin-summary,.identity-v2-summary,.ai-v2-summary { grid-template-columns:repeat(2,minmax(0,1fr)) } .quest-v2-small-grid,.quest-v2-test-grid,.narrative-settings-grid,.ai-v2-grid { grid-template-columns:1fr 1fr } }
+      @media (max-width:1100px) { .character-wide-row,.character-need-layout { grid-template-columns:1fr } .character-rep-grid { grid-template-columns:repeat(auto-fit,minmax(72px,1fr)) } .need-pyramid { max-width:260px } }
+      @media (max-width:900px) { .admin-v2 { grid-template-columns:1fr } .admin-v2-content,.furniture-admin-content,.quest-v2-content,.quest-v2-controls,.quest-v2-test,.identity-v2-content,.ai-v2-content,.character-editor-top,.character-editor-main { grid-template-columns:1fr } .furniture-admin-summary,.identity-v2-summary,.ai-v2-summary { grid-template-columns:repeat(2,minmax(0,1fr)) } .quest-v2-small-grid,.quest-v2-test-grid,.narrative-settings-grid,.ai-v2-grid { grid-template-columns:1fr 1fr } .character-editor-actions { justify-content:flex-start } .character-editor-portrait { position:relative } .character-editor-portrait-art { height:340px;min-height:300px;max-height:420px } }
+      @media (min-width:761px) and (max-width:900px) { .admin-v2 { grid-template-columns:170px minmax(0,1fr) } .admin-v2-side { max-height:calc(100vh - 120px) } }
     </style>
     <div class="admin-v2">
       <aside class="admin-v2-side">${renderAdminV2Nav()}</aside>
@@ -454,22 +489,30 @@ async function adminWriteConfigToLocalFile() {
 }
 
 function renderAdminV2Header(item) {
+  const isCharEditor = adminV2Section === 'characterEditor' || adminV2Section === 'characters';
+  const isEditingChar = isCharEditor && adminV2CharacterEditing;
+  const charSelectorBar = isCharEditor ? renderAdminV2CharacterHeaderSelectors() : '';
+  const charTitleBar = isCharEditor
+    ? (isEditingChar
+      ? `<button id="btn-admin-v2-char-cancel">取消</button><button class="primary" id="btn-admin-v2-char-save">保存</button>`
+      : `<button class="admin-v2-edit-primary" id="btn-admin-v2-char-edit">编辑</button>`)
+    : '';
   const descriptions = {
     furnitureTemplates: '家具能做什么、恢复什么需求、是否基础生存、是否需要技能，都在这里配置。',
     furnitureInstances: '家具摆在哪里、属于哪个场景、坐标是多少，在这里维护。',
-    characterEditor: '人物设定页：像捏人表一样维护头像、立绘、家庭、身份、性格和人物摘要。',
+    characterEditor: '编辑人物基础信息、性情、梦想、职业、起居。',
     specialties: '性格配置表：维护人物性情、习惯、行为倾向和可被 AI 读取的性格标签。',
     personalityMeta: '性格系统表：维护性格分类、对偶关系、描述和运行效果。',
     dreamSystem: '梦想系统表：维护长期志向、达成条件、阶段目标和玩法方向。',
     careerSystem: '职业系统表：维护职业阶段、位阶、声望门槛、每日任务和职业权限。',
     storySystem: '故事系统表：维护人生路径定义、阶段叙事和故事节点。',
-    needs: '基础需求表：维护六需求显示、衰退、危机阈值、状态触发和恢复规则。',
+    needs: '需求与状态表：维护六基础需求、极端分档状态、状态触发因素和状态对其他系统的影响。',
     states: '状态标签表：维护状态效果、持续时间、阻断技能和展示标签。',
     identitySystem: '身份/礼法表：维护位阶、上下级关系、礼法限制、称呼和传令权限基础。',
     relInit: '关系初始化表：维护开局关系、关系轴和人物初始社交结构。',
     relationLabels: '关系标签表：维护友谊、姻缘、信任、服从/体恤等关系轴阶段和综合标签。',
     ai: 'Utility AI 高级页：维护候选评分、作息锚点、日程权重和调试状态。',
-    interactions: '互动模板表：维护社交互动、使用条件、关系变化、状态效果和文案。',
+    interactions: '互动模板表：维护社交互动、使用条件、关系变化、状态效果和文案；后续会和状态配置继续合并维护体验。',
     multiInteract: '多人互动表：维护旁观、多人反应、传播和连锁互动规则。',
     furnReact: '家具反应表：维护家具使用后的旁观反应、状态变化和连锁效果。',
     narrativeRules: '叙事气泡表：维护触发条件、性格/需求/状态匹配、冷却和展示文案。',
@@ -484,6 +527,8 @@ function renderAdminV2Header(item) {
         <p>${escapeHtml(descriptions[adminV2Section] || '该模块还未迁移到 v2，先保留占位。')}</p>
       </div>
       <div class="admin-v2-tools">
+        ${charSelectorBar}
+        ${charTitleBar}
         <button class="primary" id="btn-admin-v2-apply-config" title="保存当前 CONFIG 到本浏览器，并重启运行时系统">保存并应用</button>
         <button id="btn-admin-v2-write-local" title="写入 js/config.local.js，下次启动服务仍生效">写回本地</button>
         ${['furnitureTemplates', 'furnitureInstances', 'personalityMeta', 'dreamSystem', 'careerSystem', 'storySystem', 'needs', 'narrativeRules', 'questTemplates'].includes(adminV2Section)
@@ -511,7 +556,7 @@ function renderAdminV2Section() {
   if (adminV2Section === 'needs') return renderAdminV2Needs();
   if (adminV2Section === 'identitySystem') return renderAdminV2IdentitySystem();
   if (adminV2Section === 'relationLabels') return renderAdminV2RelationLabels();
-  if (adminV2Section === 'ai') return renderAdminV2AIUtilityTable();
+  if (adminV2Section === 'ai') return renderAdminV2AIUtility();
   if (adminV2Section === 'interactions') return renderAdminV2InteractionTables();
   if (adminV2Section === 'narrativeRules') return renderAdminV2NarrativeRules();
   if (adminV2Section === 'questTemplates') return renderAdminV2QuestTemplates();
@@ -814,7 +859,7 @@ function renderIdentityPreview() {
   const other = CHARS.find(x => x.id !== c?.id);
   if (!c || !other || typeof IdentityProtocolSystem === 'undefined') return '需要至少两名角色。';
   const snapshot = typeof SocialContextSystem === 'object' && SocialContextSystem?.resolve
-    ? SocialContextSystem.resolve(c, other, { actionType: 'interaction', category: '叙旧' })
+    ? SocialContextSystem.resolve(c, other, { actionType: 'interaction', category: '闲谈' })
     : null;
   const rel = snapshot?.rankRelation || IdentityProtocolSystem.getHierarchyRelation(c.id, other.id);
   return [
@@ -1460,7 +1505,7 @@ function configCrudSpec(tab) {
         addresses: { label: '关系称呼', type: 'object', get: () => CONFIG.identityProtocolConfig.addressByInitType, itemLabel: (v, k) => k },
       },
       newValue: group => group === 'protocolRules'
-        ? { rel: 'peer', cat: '叙旧', behavior: 'allowed' }
+        ? { rel: 'peer', cat: '闲谈', behavior: 'allowed' }
         : group === 'scenePrivileges'
           ? { role: '新身份', roleRank: 5, sceneTypesAllowed: ['public'], canEnterAnyPrivate: false, mustBeInvitedFor: [], additionalRules: [] }
           : group === 'rankLabels' ? '新位阶' : { hint: '称呼规则' },
@@ -3372,11 +3417,12 @@ function renderAdminV2FurnitureInstanceDrawer() {
   </aside>`;
 }
 
-const TRAIT_CATEGORY_OPTIONS = ['性情', '处世', '习惯'];
+const TRAIT_CATEGORY_OPTIONS = ['性情', '习惯', '处世', '特殊'];
 const TRAIT_CATEGORY_ASSETS = [
   { category: '性情', src: 'assets/UI/Personality/1_Personality.png', desc: '人物底层情绪与反应倾向。' },
   { category: '习惯', src: 'assets/UI/Personality/2_Habits.png', desc: '日常生活偏好与身体习惯。' },
   { category: '处世', src: 'assets/UI/Personality/3_Social.png', desc: '对人、对局面、对关系的处理方式。' },
+  { category: '特殊', src: 'assets/UI/Personality/4_Specialty.png', srcset: 'assets/UI/Personality/4_Specialty.png', desc: '少数个体化取向，非通用对偶性格。' },
 ];
 const DREAM_CATEGORY_OPTIONS = ['家业', '才名', '情缘', '功名', '权柄', '清净', '护佑', '安身', '翻案', '秘闻', '匠作', '逍遥', '修福'];
 
@@ -3414,9 +3460,44 @@ function dreamCategoryOptionsHtml(selected) {
 }
 
 function dreamTypeOptionsHtml(selected) {
-  return Object.entries(dreamConfigForAdmin().dreamMetadata || {})
+  const entries = Object.entries(dreamConfigForAdmin().dreamMetadata || {});
+  if (!entries.length) return '<option value="">未配置梦想类型</option>';
+  return entries
     .map(([id, row]) => `<option value="${adminAttr(id)}"${id === selected ? ' selected' : ''}>${escapeHtml(row.label || id)} · ${escapeHtml(id)}</option>`)
     .join('');
+}
+
+function adminFamilyRoleOptionsHtml(selected) {
+  const roles = ['家主', '配偶', '长辈', '手足', '晚辈', '子女', '仆从', '体面仆从', '普通仆从', '成员'];
+  const all = [...new Set([...roles, selected].filter(Boolean))];
+  return all.map(role => `<option value="${adminAttr(role)}"${role === selected ? ' selected' : ''}>${escapeHtml(role)}</option>`).join('');
+}
+
+function adminNeedDefsInCharacterOrder(needDefs) {
+  const order = ['hunger', 'energy', 'hygiene', 'social', 'fun', 'mood'];
+  const rank = key => {
+    const idx = order.indexOf(key);
+    return idx >= 0 ? idx : 99;
+  };
+  return [...(needDefs || [])].sort((a, b) => rank(a.key || a.id) - rank(b.key || b.id));
+}
+
+function adminCharacterReputationSummary(c) {
+  const runtime = c?.id && typeof getChar === 'function' ? getChar(c.id) : c;
+  const explain = globalThis.ReputationDomainSystem?.explain?.(runtime || c);
+  const get = id => Math.round(explain?.domains?.find(row => row.id === id)?.value ?? runtime?.reputationDomains?.[id] ?? c?.reputationDomains?.[id] ?? 0);
+  const face = get('family');
+  const word = Math.round((get('outside') + get('servant')) / 2);
+  const talent = get('scholarly');
+  const official = get('official');
+  const overall = Math.round(face * 0.25 + word * 0.2 + talent * 0.15 + official * 0.4);
+  return [
+    { label: '声望', value: overall, note: '总体' },
+    { label: '面子', value: face, note: '0.25' },
+    { label: '口碑', value: word, note: '0.20' },
+    { label: '才名', value: talent, note: '0.15' },
+    { label: '功名', value: official, note: '0.40' },
+  ];
 }
 
 function dreamJsonCellValue(row, key) {
@@ -3440,7 +3521,7 @@ function adminCharAvatarUrl(c) {
 }
 
 function adminCharPortraitUrl(c) {
-  return (typeof AssetSystem !== 'undefined' && (AssetSystem.fullPortraitUrlForChar?.(c) || AssetSystem.portraitUrlForChar?.(c) || AssetSystem.avatarUrlForChar?.(c))) || '';
+  return (typeof AssetSystem !== 'undefined' && (AssetSystem.fullBodyPortraitUrlForChar?.(c) || AssetSystem.fullPortraitUrlForChar?.(c) || AssetSystem.portraitUrlForChar?.(c) || AssetSystem.avatarUrlForChar?.(c))) || '';
 }
 
 function adminIdentityLabel(c) {
@@ -3462,6 +3543,29 @@ function adminCurrentEditorFamilyId() {
 function adminSelectCharById(charId) {
   const idx = CONFIG.characters.findIndex(c => c.id === charId);
   if (idx >= 0) adminSelChar = idx;
+}
+
+function renderAdminV2CharacterHeaderSelectors() {
+  const families = CONFIG.familyConfig?.families || [];
+  const familyId = adminCurrentEditorFamilyId();
+  const family = families.find(f => String(f.id) === String(familyId)) || families[0];
+  const roleOrder = typeof FAMILY_ROLE_ORDER !== 'undefined' ? FAMILY_ROLE_ORDER : {};
+  const memberIds = (family?.members || [])
+    .slice()
+    .sort((a, b) => (roleOrder[a.role] || 99) - (roleOrder[b.role] || 99))
+    .map(m => m.charId)
+    .filter(id => CONFIG.characters.some(c => c.id === id));
+  if (memberIds.length && !memberIds.includes(CONFIG.characters[adminSelChar]?.id)) adminSelectCharById(memberIds[0]);
+  const currentId = CONFIG.characters[adminSelChar]?.id || '';
+  const familyOptions = families.map(f =>
+    `<option value="${adminAttr(f.id)}"${String(f.id) === String(family?.id) ? ' selected' : ''}>${escapeHtml(f.name)}</option>`
+  ).join('');
+  const charIds = memberIds.length ? memberIds : CONFIG.characters.map(c => c.id);
+  const charOptions = charIds.map(id => {
+    const ch = CONFIG.characters.find(row => row.id === id);
+    return `<option value="${adminAttr(id)}"${id === currentId ? ' selected' : ''}>${escapeHtml(ch?.short || ch?.name || id)}</option>`;
+  }).join('');
+  return `<select class="admin-v2-mini-select" id="admin-v2-editor-family" title="选择家庭">${familyOptions}</select><select class="admin-v2-mini-select" id="admin-v2-editor-char" title="选择人物">${charOptions}</select>`;
 }
 
 function adminTraitDetailTitle(id, row) {
@@ -3550,6 +3654,8 @@ function adminOrderedTraitPairs(category) {
 function adminSaveCharacterEditor() {
   const c = CONFIG.characters[adminSelChar];
   if (!c) return;
+  const shortComment = document.getElementById('admin-v2-char-desc')?.value;
+  if (shortComment != null) c.shortComment = shortComment.trim();
   const gender = document.getElementById('admin-v2-char-gender')?.value;
   if (gender) c.gender = gender;
   const ageRaw = document.getElementById('admin-v2-char-age')?.value?.trim();
@@ -3566,6 +3672,36 @@ function adminSaveCharacterEditor() {
   if (stageRaw !== undefined) {
     if (stageRaw) c.currentStage = stageRaw;
     else delete c.currentStage;
+  }
+  const familyRaw = document.getElementById('admin-v2-char-family')?.value;
+  if (familyRaw !== undefined) {
+    const familyRole = document.getElementById('admin-v2-char-family-role')?.value || '成员';
+    (CONFIG.familyConfig?.families || []).forEach(family => {
+      family.members = (family.members || []).filter(member => member.charId !== c.id);
+    });
+    if (familyRaw) {
+      const family = (CONFIG.familyConfig?.families || []).find(item => String(item.id) === String(familyRaw));
+      if (family) {
+        family.members ||= [];
+        family.members.push({ charId: c.id, role: familyRole });
+        adminV2CharacterFamilyId = family.id;
+      }
+    }
+  }
+  const healthRaw = document.getElementById('admin-v2-char-health')?.value;
+  if (healthRaw !== undefined) {
+    const health = Math.max(0, Math.min(100, +healthRaw || 0));
+    c.health = health;
+    const runtimeChar = typeof getChar === 'function' ? getChar(c.id) : null;
+    if (runtimeChar) runtimeChar.health = health;
+    HealthSystem?.initChar?.(runtimeChar || c);
+  }
+  const dreamTypeRaw = document.getElementById('admin-v2-char-dream-type')?.value;
+  if (dreamTypeRaw !== undefined) {
+    const cfg = dreamConfigForAdmin();
+    const dreamProfile = cfg.dreamProfiles[c.id] ||= {};
+    if (dreamTypeRaw) dreamProfile.type = dreamTypeRaw;
+    else delete dreamProfile.type;
   }
   const needCoeffInputs = [...document.querySelectorAll('[data-admin-v2-need-coeff-field]')];
   if (needCoeffInputs.length) {
@@ -3592,29 +3728,14 @@ function adminSaveCharacterEditor() {
   const profile = CONFIG.charSpecialtyConfig.profiles[c.id] ||= { aiTraits: [], displayTraits: [], specialties: [], checks: {} };
   profile.aiTraits = selected;
   profile.displayTraits = selected.map(id => CONFIG.charSpecialtyConfig?.traitMetadata?.[id]?.label || CONFIG.charSpecialtyConfig?.traitLabels?.[id] || id);
-  const specialtiesRaw = document.getElementById('admin-v2-char-specialties-json')?.value;
-  if (specialtiesRaw != null) {
-    try { profile.specialties = JSON.parse(specialtiesRaw || '[]'); }
-    catch (e) { alert('人物专属性格 JSON 无效'); return; }
-  } else {
-    profile.specialties ||= [];
-  }
   profile.checks ||= {};
 
-  const dreamType = document.getElementById('admin-v2-char-dream-type')?.value
-    || document.querySelector('.character-dream-card.selected[data-admin-v2-editor-dream]')?.dataset.adminV2EditorDream;
-  if (dreamType != null) {
-    const cfg = dreamConfigForAdmin();
-    cfg.dreamProfiles[c.id] = {
-      type: dreamType,
-      title: document.getElementById('admin-v2-char-dream-title')?.value.trim() || '',
-      description: document.getElementById('admin-v2-char-dream-desc')?.value.trim() || '',
-      condition: document.getElementById('admin-v2-char-dream-condition')?.value.trim() || '',
-    };
-  }
-
   saveConfigToStorage();
+  FamilySystem?.init?.();
+  ReputationDomainSystem?.init?.();
+  HealthSystem?.init?.();
   CharSpecialtySystem?.init?.();
+  reloadDreamP0Systems?.();
   syncTraitLabelsFromMetadata();
   adminV2CharacterEditing = false;
   renderAdmin();
@@ -3674,22 +3795,20 @@ function renderAdminV2CharacterEditor() {
   const c = CONFIG.characters[adminSelChar] || CONFIG.characters[0];
   const membership = c ? characterFamilyMembership(c.id) : { family: null, member: null };
   const profile = CONFIG.charSpecialtyConfig?.profiles?.[c?.id] || {};
-  const dreamProfile = c ? dreamProfileForChar(c.id) : {};
   const selectedTraits = new Set([...(profile.aiTraits || []), ...(profile.displayTraits || [])]);
+  const profileSpecialties = profile.specialties || [];
+  const displaySpecialties = profileSpecialties.map(s => (typeof s === 'string' ? s : s?.id)).filter(Boolean);
   const editing = adminV2CharacterEditing;
-  const familyOptions = families.map(f =>
-    `<option value="${adminAttr(f.id)}"${String(f.id) === String(family?.id) ? ' selected' : ''}>${escapeHtml(f.name)}</option>`
-  ).join('');
-  const avatars = memberIds.map(id => {
-    const ch = CONFIG.characters.find(row => row.id === id);
-    const url = adminCharAvatarUrl(ch);
-    return `<button type="button" class="character-avatar-btn${ch?.id === c?.id ? ' active' : ''}" data-admin-v2-pick-char="${adminAttr(id)}" title="${adminAttr(ch?.name || id)}">
-      ${url ? `<img src="${adminAttr(url)}" alt="${adminAttr(ch?.short || ch?.name || id)}">` : `<span class="character-avatar-fallback" style="background:${adminAttr(ch?.color || '#c8d8c0')}"></span>`}
-      <span>${escapeHtml(ch?.short || ch?.name || id)}</span>
-    </button>`;
-  }).join('');
   const portrait = adminCharPortraitUrl(c);
   const meta = CONFIG.charSpecialtyConfig?.traitMetadata || {};
+  const familyEditOptions = `<option value="">未加入家庭</option>` + families.map(f =>
+    `<option value="${adminAttr(f.id)}"${String(f.id) === String(membership.family?.id ?? '') ? ' selected' : ''}>${escapeHtml(f.name)}</option>`
+  ).join('');
+  const familyRoleOptions = adminFamilyRoleOptionsHtml(membership.member?.role || '成员');
+  const repSummary = adminCharacterReputationSummary(c);
+  const repCards = repSummary.map(row => `<div class="character-rep-chip" title="${adminAttr(row.label)} · ${adminAttr(row.note)}"><span>${escapeHtml(row.label)}</span><b>${escapeHtml(row.value)}</b></div>`).join('');
+  const runtimeChar = c?.id && typeof getChar === 'function' ? getChar(c.id) : null;
+  const healthValue = Math.round(globalThis.HealthSystem?.getHealth?.(c?.id) ?? runtimeChar?.health ?? c?.health ?? 100);
   const rankOptions = Object.entries(CONFIG.identityProtocolConfig?.rankLabels || {})
     .map(([id, label]) => `<option value="${adminAttr(id)}"${String(c?.socialRank ?? '') === String(id) ? ' selected' : ''}>${escapeHtml(label)} · ${escapeHtml(id)}</option>`)
     .join('');
@@ -3717,41 +3836,70 @@ function renderAdminV2CharacterEditor() {
     || stageDef?.name
     || stageKey
     || '未配置';
-  const sceneId = c?.currentScene || c?.scene || c?.sceneId || c?.homeScene || '';
-  const sceneDef = sceneId && typeof getScene === 'function' ? getScene(sceneId) : null;
-  const sceneLabel = sceneDef?.name || sceneDef?.title || sceneId || '未配置';
-  const needDefs = typeof getNeedDefs === 'function' ? getNeedDefs() : [];
+  const dreamProfile = c?.id ? dreamProfileForChar(c.id) : null;
+  const dreamMeta = dreamProfile?.type ? dreamTypeForAdmin(dreamProfile.type) : null;
+  const dreamResult = c?.id && dreamProfile?.type && globalThis.DreamConditionRegistry?.evaluateDream
+    ? globalThis.DreamConditionRegistry.evaluateDream(c.id, dreamProfile.type)
+    : null;
+  const needDefs = adminNeedDefsInCharacterOrder(typeof getNeedDefs === 'function' ? getNeedDefs() : []);
   const configuredNeedCoeffs = c?.baseNeedCoeffs || c?.needCoeffs || {};
-  const effectiveNeedCoeffs = typeof calcNeedCoeffs === 'function' ? calcNeedCoeffs(c) : configuredNeedCoeffs;
+  const effectiveNeedCoeffs = (typeof calcNeedCoeffs === 'function' && (runtimeChar || c)) ? calcNeedCoeffs(runtimeChar || c) : {};
   const coeffFields = [
     ['min', 'min'],
     ['max', 'max'],
     ['grow', 'grow'],
     ['decay', 'decay'],
   ];
+  const formatCoeffValue = value => {
+    if (value == null || value === '') return '';
+    const num = Number(value);
+    return Number.isFinite(num) ? num.toFixed(2) : String(value);
+  };
   const coeffText = (row, field) => {
     const value = row?.[field];
     if (value == null || value === '') return '';
-    return typeof value === 'number' ? Number(value).toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1') : String(value);
+    return formatCoeffValue(value);
   };
   const coeffInput = (key, row, field) => `<input class="need-num-cell" type="number" step="0.05" data-admin-v2-need-coeff-field="${adminAttr(key)}" data-field="${adminAttr(field)}" value="${adminAttr(coeffText(row, field))}" placeholder="默认">`;
-  const coeffCell = (row, field) => {
-    const text = coeffText(row, field);
-    return text ? `<code>${escapeHtml(text)}</code>` : '<span class="logic-muted">默认</span>';
+  const coeffCell = (key, configured, effective, field) => {
+    const configuredText = coeffText(configured, field) || '默认';
+    const effectiveText = formatCoeffValue(effective?.[field]);
+    const configNode = editing ? coeffInput(key, configured, field) : `<span class="need-config">${escapeHtml(configuredText)}</span>`;
+    return `<div class="character-need-coeff-pair">${configNode}<span class="need-arrow">→</span><span class="need-effective">${escapeHtml(effectiveText || '—')}</span></div>`;
   };
   const needCoeffRows = needDefs.map(nd => {
     const key = nd.key || nd.id;
     const configured = configuredNeedCoeffs[key] || {};
-    const effective = effectiveNeedCoeffs?.[key] || configured;
+    const effective = effectiveNeedCoeffs[key] || {};
     return `<tr>
       <td>${escapeHtml(nd.name || nd.label || key)}</td>
-      ${coeffFields.map(([field]) => `<td>${editing ? coeffInput(key, configured, field) : coeffCell(configured, field)}</td>`).join('')}
-      ${coeffFields.map(([field]) => `<td>${coeffCell(effective, field)}</td>`).join('')}
+      ${coeffFields.map(([field]) => `<td>${coeffCell(key, configured, effective, field)}</td>`).join('')}
       <td>${escapeHtml(nd.summary || nd.description || '')}</td>
     </tr>`;
   }).join('');
   const traitColumns = TRAIT_CATEGORY_ASSETS.map(item => {
     const collapsed = !!adminV2CharacterTraitCollapsed[item.category];
+    if (item.category === '特殊') {
+      const specialtyRows = profileSpecialties.map(spec => {
+        const specId = typeof spec === 'string' ? spec : spec?.id;
+        const row = adminSpecialtyMeta(c.id, typeof spec === 'string' ? { id: spec } : spec);
+        return `<button type="button" class="character-trait-name selected character-editor-tooltip" data-tooltip="${adminAttr(adminSpecialtyDetailTitle(c.id, row))}">${escapeHtml(row.label || row.name || spec?.name || specId)}</button>`;
+      }).join('');
+      const specialtySummary = profileSpecialties.map(spec => {
+        const specId = typeof spec === 'string' ? spec : spec?.id;
+        const row = adminSpecialtyMeta(c.id, typeof spec === 'string' ? { id: spec } : spec);
+        return `<span class="meta-tag character-editor-tooltip" data-tooltip="${adminAttr(adminSpecialtyDetailTitle(c.id, row))}">${escapeHtml(row.label || row.name || spec?.name || specId)}</span>`;
+      }).join('');
+      return `<section class="character-trait-column">
+        <div class="character-trait-column-head character-editor-tooltip" data-tooltip="${adminAttr(item.desc)}">
+          <h4>特殊</h4>
+        </div>
+        <button type="button" class="character-trait-collapse" data-admin-v2-trait-collapse="${adminAttr(item.category)}" title="${collapsed ? '展开' : '收起'}">${collapsed ? '▾' : '▴'}</button>
+        ${collapsed
+          ? `<div class="character-trait-selected-summary">${specialtySummary || '<span class="logic-muted">未配置</span>'}</div>`
+          : `<div class="character-specialty-list">${specialtyRows || '<span class="logic-muted">未配置人物专属性格</span>'}</div>`}
+      </section>`;
+    }
     const categoryPairs = adminOrderedTraitPairs(item.category);
     const selectedInCategory = categoryPairs
       .flat()
@@ -3760,13 +3908,19 @@ function renderAdminV2CharacterEditor() {
       const row = meta[id] || {};
       return `<span class="meta-tag character-editor-tooltip" data-tooltip="${adminAttr(adminTraitDetailTitle(id, row))}">${escapeHtml(row.label || id)}</span>`;
     }).join('');
+    const specialtySummary = item.category === '特殊'
+      ? displaySpecialties.map(spec => {
+        const row = adminSpecialtyMeta(c.id, spec);
+        return `<span class="meta-tag character-editor-tooltip" data-tooltip="${adminAttr(adminSpecialtyDetailTitle(c.id, row))}">${escapeHtml(row.label || spec.name || spec.id || spec)}</span>`;
+      }).join('')
+      : '';
     const rows = categoryPairs.map(pair => {
       const slots = [pair[0], pair[1] || null].map(id => {
-        if (!id) return `<span class="character-trait-icon empty"></span><span></span>`;
+        if (!id) return `<span class="character-trait-empty"></span>`;
         const row = meta[id] || {};
         const selected = selectedTraits.has(id);
         const attrs = editing ? ` data-admin-v2-editor-trait="${adminAttr(id)}"` : '';
-        return `<span class="character-trait-icon"></span><button type="button" class="character-trait-name character-editor-tooltip${selected ? ' selected' : ''}${editing ? ' editable' : ''}"${attrs} data-tooltip="${adminAttr(adminTraitDetailTitle(id, row))}">${escapeHtml(row.label || id)}</button>`;
+        return `<button type="button" class="character-trait-name character-editor-tooltip${selected ? ' selected' : ''}${editing ? ' editable' : ''}"${attrs} data-tooltip="${adminAttr(adminTraitDetailTitle(id, row))}">${escapeHtml(row.label || id)}</button>`;
       }).join('');
       return `<div class="character-trait-pair${pair.length === 1 ? ' single' : ''}" data-admin-v2-trait-pair="${adminAttr(pair.join('|'))}">${slots}</div>`;
     }).join('');
@@ -3776,108 +3930,94 @@ function renderAdminV2CharacterEditor() {
       </div>
       <button type="button" class="character-trait-collapse" data-admin-v2-trait-collapse="${adminAttr(item.category)}" title="${collapsed ? '展开' : '收起'}">${collapsed ? '▾' : '▴'}</button>
       ${collapsed
-        ? `<div class="character-trait-selected-summary">${selectedSummary || '<span class="logic-muted">未选</span>'}</div>`
+        ? `<div class="character-trait-selected-summary">${(selectedSummary + specialtySummary) || '<span class="logic-muted">未选</span>'}</div>`
         : `<div class="character-trait-list">${rows || '<span class="logic-muted">暂无配置</span>'}</div>`}
     </section>`;
   }).join('');
-  const specialtyRows = (profile.specialties || []).map(spec => {
-    const row = adminSpecialtyMeta(c.id, spec);
-    return `<div class="character-trait-pair single">
-      <span class="character-trait-icon"></span>
-      <button type="button" class="character-trait-name character-editor-tooltip selected" data-tooltip="${adminAttr(adminSpecialtyDetailTitle(c.id, spec))}">${escapeHtml(row.label || spec.name || spec.id)}</button>
-    </div>`;
-  }).join('');
-  const specialtyPanel = `<section class="character-trait-column character-specialty-column">
-    <div class="character-trait-column-head character-editor-tooltip" data-tooltip="${adminAttr('角色专属梗、人物执念和个体化行为，不与通用性格互斥。')}">
-      <h4>人物专属性格</h4>
-    </div>
-    <div class="character-trait-list">${specialtyRows || '<span class="logic-muted">暂无专属性格</span>'}</div>
-  </section>`;
-  const dreamCards = Object.entries(dreamConfigForAdmin().dreamMetadata || {}).map(([id, row]) => {
-    const selected = dreamProfile.type === id;
-    return `<button type="button" class="character-dream-card character-editor-tooltip${selected ? ' selected' : ''}${editing ? ' editable' : ''}" ${editing ? `data-admin-v2-editor-dream="${adminAttr(id)}"` : ''} data-tooltip="${adminAttr(adminDreamDetailTitle(id, row))}">
-      <b>${escapeHtml(row.label || id)}</b>
-      <span>${escapeHtml(row.category || '未分类')}</span>
-      <p>${escapeHtml((row.storyHooks || row.examples || []).slice(0, 2).join(' / ') || row.description || '')}</p>
-    </button>`;
-  }).join('');
-  const dreamType = dreamTypeForAdmin(dreamProfile.type);
-  const dreamPanel = `<section class="character-dream-panel">
-    <div class="character-dream-head">
-      <div>
-        <h4>梦想</h4>
-        <p>${escapeHtml('长期目标。追求已取消，人物只保留一个人生志向类型，可用标题和达成条件做个体化。')}</p>
-      </div>
-      <span class="meta-tag">${escapeHtml(dreamType?.label || dreamProfile.type || '未配置')}</span>
-    </div>
-    <div class="character-dream-grid">${dreamCards || '<span class="logic-muted">暂无梦想类型</span>'}</div>
-    ${editing ? `<div class="character-dream-form">
-      <div class="cfg-field"><label>梦想标题</label><input id="admin-v2-char-dream-title" value="${adminAttr(dreamProfile.title || '')}" placeholder="如：风雨不惊"></div>
-      <div class="cfg-field"><label>梦想类型</label><select id="admin-v2-char-dream-type">${dreamTypeOptionsHtml(dreamProfile.type || '')}</select></div>
-      <div class="cfg-field"><label>梦想说明</label><input id="admin-v2-char-dream-desc" value="${adminAttr(dreamProfile.description || '')}" placeholder="一句人物化描述"></div>
-      <div class="cfg-field"><label>达成条件</label><textarea id="admin-v2-char-dream-condition" style="min-height:72px">${escapeHtml(dreamProfile.condition || '')}</textarea></div>
-    </div>` : `<div class="character-dream-form">
-      <div class="character-result-card"><label>个人梦想</label><b>${escapeHtml(dreamProfile.title || dreamType?.label || '未配置')}</b><small>${escapeHtml(dreamProfile.description || dreamType?.description || '')}</small></div>
-      <div class="character-result-card"><label>达成条件</label><b>${escapeHtml(dreamProfile.condition || '未配置')}</b></div>
-      <div class="character-result-card"><label>故事钩子</label><b>${escapeHtml((dreamType?.storyHooks || []).join(' / ') || '未配置')}</b></div>
-      <div class="character-result-card"><label>破梦钩子</label><b>${escapeHtml((dreamType?.failureHooks || []).join(' / ') || '未配置')}</b></div>
-    </div>`}
-  </section>`;
-  const editorActions = editing
-    ? `<button id="btn-admin-v2-char-cancel">取消</button><button class="primary" id="btn-admin-v2-char-save">保存</button>`
-    : `<button class="primary" id="btn-admin-v2-char-edit">编辑</button>`;
   return `<div class="character-editor-page">
-    <div class="character-editor-top">
-      <select id="admin-v2-editor-family">${familyOptions}</select>
-      <div class="character-avatar-strip">${avatars || '<span class="logic-muted">当前家庭暂无人物</span>'}</div>
-      <div class="character-editor-actions">${editorActions}</div>
-    </div>
     <div class="character-editor-main">
       <aside class="character-editor-portrait">
         <div class="character-editor-portrait-art">
           ${portrait ? `<img src="${adminAttr(portrait)}" alt="${adminAttr(c?.name || '')}" loading="lazy" decoding="async">` : `<div class="character-editor-portrait-fallback" style="background:${adminAttr(c?.color || '#c8d8c0')}">${escapeHtml(c?.short || '人')}</div>`}
         </div>
         <div class="character-editor-summary">
-          <b style="color:var(--jn-title);font-weight:normal">${escapeHtml(c?.name || '未选人物')}</b>
-          <div>${escapeHtml(c?.shortComment || c?.personality || '暂无摘要')}</div>
+          <b>${escapeHtml(c?.name || '未选人物')}</b>
+          ${editing
+            ? `<div class="character-editor-desc-field"><input id="admin-v2-char-desc" value="${adminAttr(c?.shortComment || '')}" placeholder="如：富贵闲人，痴情公子"></div>`
+            : `<div class="character-editor-desc-field">${escapeHtml(c?.shortComment || '未填写自定义描述')}</div>`}
         </div>
       </aside>
       <main class="character-editor-right">
-        <div class="character-result-row">
-          <div class="character-result-card"><label>性别</label>${editing
-            ? `<select id="admin-v2-char-gender"><option value="女"${c?.gender === '女' ? ' selected' : ''}>女</option><option value="男"${c?.gender === '男' ? ' selected' : ''}>男</option></select>`
-            : `<b>${escapeHtml(c?.gender || '未设')}</b><small>编辑后可改</small>`}</div>
-          <div class="character-result-card"><label>年龄</label>${editing
-            ? `<input id="admin-v2-char-age" type="number" min="0" value="${adminAttr(c?.age ?? '')}" placeholder="未设">`
-            : `<b>${escapeHtml(c?.age || '未设')}</b><small>配置位预留</small>`}</div>
-          <div class="character-result-card"><label>身份</label>${editing
-            ? `<select id="admin-v2-char-rank">${rankOptions}</select>`
-            : `<b>${escapeHtml(adminIdentityLabel(c))}</b><small>${escapeHtml(membership.family?.name || '未加入家庭')}${membership.member?.role ? ' · ' + escapeHtml(membership.member.role) : ''}</small>`}</div>
-          <div class="character-result-card"><label>家庭</label><b>${escapeHtml(membership.family?.name || '未加入家庭')}</b><small>${escapeHtml(membership.member?.role || '未配置家庭身份')}</small></div>
-          <div class="character-result-card"><label>职业</label>${editing
-            ? `<select id="admin-v2-char-life-path">${lifePathOptions}</select><small>阶段</small><select id="admin-v2-char-stage">${stageOptions}</select>`
-            : `<b>${escapeHtml(lifePathLabel)}</b><small>${escapeHtml(stageLabel)}</small>`}</div>
-          <div class="character-result-card"><label>当前场景</label><b>${escapeHtml(sceneLabel)}</b><small>${escapeHtml(sceneId || '无场景锚点')}</small></div>
-        </div>
+        <section class="character-overview-panel character-basic-module">
+          <div class="character-overview-head">
+            <h4>基础信息</h4>
+          </div>
+          <div class="character-result-row">
+            <div class="character-result-card"><label>性别</label>${editing
+              ? `<select id="admin-v2-char-gender"><option value="女"${c?.gender === '女' ? ' selected' : ''}>女</option><option value="男"${c?.gender === '男' ? ' selected' : ''}>男</option></select>`
+              : `<b>${escapeHtml(c?.gender || '未设')}</b><small>性别</small>`}</div>
+            <div class="character-result-card"><label>年龄</label>${editing
+              ? `<input id="admin-v2-char-age" type="number" min="0" value="${adminAttr(c?.age ?? '')}" placeholder="未设">`
+              : `<b>${escapeHtml(c?.age === undefined ? '未设' : c.age)}</b><small>岁</small>`}</div>
+            <div class="character-result-card"><label>家庭</label>${editing
+              ? `<select id="admin-v2-char-family">${familyEditOptions}</select>`
+              : `<b>${escapeHtml(membership.family?.name || '未加入家庭')}</b><small>所属家庭</small>`}</div>
+            <div class="character-result-card"><label>家庭身份</label>${editing
+              ? `<select id="admin-v2-char-family-role">${familyRoleOptions}</select>`
+              : `<b>${escapeHtml(membership.member?.role || '未配置')}</b><small>家庭角色</small>`}</div>
+            <div class="character-result-card placeholder"><label>血缘</label><b>暂未开放</b><small>后续接亲缘系统</small></div>
+          </div>
+          <div class="character-wide-row">
+            <div class="character-wide-card"><label>身份</label>${editing
+              ? `<select id="admin-v2-char-rank">${rankOptions}</select>`
+              : `<b>${escapeHtml(adminIdentityLabel(c))}</b><small>身份位阶</small>`}</div>
+            <div class="character-wide-card"><label>声望</label><div class="character-rep-grid">${repCards}</div><small>总体 = 面子0.25 + 口碑0.20 + 才名0.15 + 功名0.40</small></div>
+            <div class="character-wide-card"><label>职业</label>${editing
+              ? `<select id="admin-v2-char-life-path">${lifePathOptions}</select><small>阶段</small><select id="admin-v2-char-stage">${stageOptions}</select>`
+              : `<b>${escapeHtml(lifePathLabel)}</b><small>${escapeHtml(stageLabel)}</small>`}</div>
+          </div>
+          <div class="character-wide-row" style="grid-template-columns:minmax(0,1fr)">
+            <div class="character-wide-card"><label>健康</label>${editing
+              ? `<div class="character-health-row"><input id="admin-v2-char-health" type="range" min="0" max="100" value="${adminAttr(healthValue)}" oninput="this.nextElementSibling.textContent=this.value"><b>${escapeHtml(healthValue)}</b></div>`
+              : `<b>${escapeHtml(healthValue)}</b><small>0-100，日结会受饥饿、精力、心绪、生病和照顾事件影响</small>`}</div>
+          </div>
+        </section>
+        <div class="character-trait-columns">${traitColumns}</div>
+        <section class="character-dream-panel">
+          <div class="character-overview-head">
+            <h4>梦想</h4>
+          </div>
+          <div class="character-dream-readonly">
+            <div><label>长期梦想</label>${editing
+              ? `<select id="admin-v2-char-dream-type">${dreamTypeOptionsHtml(dreamProfile?.type || '')}</select>`
+              : `<b>${escapeHtml(dreamProfile?.title || dreamMeta?.label || dreamProfile?.type || '未配置')}</b>`}</div>
+            <div><label>描述</label><p>${escapeHtml(dreamProfile?.description || dreamMeta?.description || '未填写')}</p></div>
+            <div><label>条件</label><p>${escapeHtml(dreamProfile?.condition || (dreamResult ? `进度 ${dreamResult.progressScore ?? 0}` : '未配置'))}</p></div>
+          </div>
+        </section>
         <section class="character-overview-panel">
           <div class="character-overview-head">
             <h4>基础需求</h4>
-            <p>人物配置系数是初始设定；实际生效系数会按当前性格、状态和系统快照实时计算。</p>
           </div>
-          <div class="character-need-table-wrap">
-            <table class="admin-v2-table character-need-coeff-table">
-              <thead><tr>
-                <th>需求</th>
-                <th>配置 min</th><th>配置 max</th><th>配置 grow</th><th>配置 decay</th>
-                <th>生效 min</th><th>生效 max</th><th>生效 grow</th><th>生效 decay</th>
-                <th>说明</th>
-              </tr></thead>
-              <tbody>${needCoeffRows || '<tr><td colspan="10" class="logic-muted">暂无基础需求配置</td></tr>'}</tbody>
-            </table>
+          <p class="character-need-note">基础需求会受人物配置值、性格、人物专属性格、当前状态、临时效果和长期适应影响；游戏过程中当前需求值还会随时间、行动、家具、任务和事件继续变化。右侧按需求层次展示：底层生存，中层生活与社交，顶层心绪。</p>
+          <div class="character-need-layout">
+            <div class="character-need-table-wrap">
+              <table class="admin-v2-table character-need-coeff-table">
+                <thead><tr>
+                  <th>需求</th>
+                  <th>min 配置/实际</th><th>max 配置/实际</th><th>grow 配置/实际</th><th>decay 配置/实际</th>
+                  <th>说明</th>
+                </tr></thead>
+                <tbody>${needCoeffRows || '<tr><td colspan="6" class="logic-muted">暂无基础需求配置</td></tr>'}</tbody>
+              </table>
+            </div>
+            <div class="need-pyramid" aria-label="基础需求层次">
+              <div class="need-pyramid-tier top"><span class="need-pyramid-chip">心绪</span></div>
+              <div class="need-pyramid-tier mid"><span class="need-pyramid-chip">社交</span><span class="need-pyramid-chip">意趣</span></div>
+              <div class="need-pyramid-tier base"><span class="need-pyramid-chip">饥饿</span><span class="need-pyramid-chip">精力</span><span class="need-pyramid-chip">清洁</span></div>
+            </div>
           </div>
         </section>
-        <div class="character-trait-columns">${traitColumns}${specialtyPanel}</div>
-        ${dreamPanel}
       </main>
     </div>
   </div>`;
@@ -4211,63 +4351,175 @@ function adminV2ValidateNeeds() {
   alert(lines.length ? lines.join('\n') : '基础需求校验通过。');
 }
 
+function adminNaturalizeValue(value) {
+  if (value == null || value === '') return '未配置';
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value)) return value.length ? value.map(v => adminNaturalizeValue(v)).join('；') : '未配置';
+  if (typeof value !== 'object') return String(value);
+  const dict = {
+    needMods: '需求修正',
+    blockedSkills: '阻断技能',
+    skillMods: '技能修正',
+    aiWeight: 'AI权重',
+    aiMods: 'AI修正',
+    relation: '关系影响',
+    relationMods: '关系修正',
+    interaction: '互动影响',
+    interactionMods: '互动修正',
+    task: '任务影响',
+    quest: '任务影响',
+    scene: '场景影响',
+    narrative: '叙事影响',
+    health: '健康影响',
+    money: '金钱影响',
+    conflictGroup: '互斥组',
+  };
+  return Object.entries(value).map(([k, v]) => {
+    const label = dict[k] || k;
+    if (v && typeof v === 'object') {
+      const inner = Array.isArray(v)
+        ? v.map(item => adminNaturalizeValue(item)).join('、')
+        : Object.entries(v).map(([ik, iv]) => `${ik}${typeof iv === 'number' ? `×${iv}` : `=${adminNaturalizeValue(iv)}`}`).join('，');
+      return `${label}：${inner}`;
+    }
+    return `${label}：${v}`;
+  }).join('；') || '未配置';
+}
+
+function adminNeedBandThresholdText(band = {}) {
+  if (band.maxExclusive != null && band.minInclusive == null) return `<${band.maxExclusive}`;
+  if (band.minInclusive != null && band.maxExclusive == null) return `>${band.minInclusive}`;
+  if (band.minInclusive != null && band.maxExclusive != null) return `${band.minInclusive}-${band.maxExclusive}`;
+  return '';
+}
+
+function adminParseNeedBandThreshold(raw) {
+  const text = String(raw || '').trim();
+  if (!text) return null;
+  let m = text.match(/^<\s*(-?\d+(?:\.\d+)?)$/);
+  if (m) return { maxExclusive: +m[1] };
+  m = text.match(/^>\s*(-?\d+(?:\.\d+)?)$/);
+  if (m) return { minInclusive: +m[1] };
+  m = text.match(/^>=\s*(-?\d+(?:\.\d+)?)$/);
+  if (m) return { minInclusive: +m[1] };
+  m = text.match(/^(-?\d+(?:\.\d+)?)\s*-\s*(-?\d+(?:\.\d+)?)$/);
+  if (m) return { minInclusive: +m[1], maxExclusive: +m[2] };
+  m = text.match(/^-?\d+(?:\.\d+)?$/);
+  if (m) return { maxExclusive: +text };
+  return null;
+}
+
+function adminNeedBandSlots(row) {
+  const bands = Array.isArray(row?.stateBands) ? row.stateBands : [];
+  const slots = bands.slice(0, 5).map(band => ({ ...band }));
+  while (slots.length < 5) slots.push({});
+  return slots;
+}
+
+function adminStateLabelForId(id) {
+  if (!id) return '';
+  return CONFIG.stateDefs?.[id]?.name || id;
+}
+
+function adminResolveStateId(labelOrId) {
+  const value = String(labelOrId || '').trim();
+  if (!value) return '';
+  if (CONFIG.stateDefs?.[value]) return value;
+  const found = Object.entries(CONFIG.stateDefs || {}).find(([, row]) => String(row?.name || '').trim() === value);
+  return found?.[0] || value;
+}
+
+function adminCollectNeedBandSlots(idx) {
+  const thresholds = [...document.querySelectorAll(`[data-admin-v2-need-band-threshold="${idx}"]`)];
+  const states = [...document.querySelectorAll(`[data-admin-v2-need-band-state="${idx}"]`)];
+  const next = [];
+  for (let i = 0; i < 5; i++) {
+    const stateId = adminResolveStateId(states[i]?.value || '');
+    const threshold = adminParseNeedBandThreshold(thresholds[i]?.value || '');
+    if (!stateId && !threshold) continue;
+    next.push({ ...(threshold || {}), ...(stateId ? { id: stateId } : {}) });
+  }
+  return next;
+}
+
+function adminStateTriggerText(row) {
+  if (row.trigger_ext) return row.trigger_ext;
+  if (row.trigger) return adminNaturalizeValue(row.trigger);
+  if (row.category === 'needBand') return '由基础需求分档触发，例如低于阈值或突破上限。';
+  if (row.category === 'needCombo') return '由多个基础需求同时满足组合条件触发。';
+  if (/社交|互动|失败/.test(row.category || row.desc || '')) return '可由互动结果、低分收场、逾矩风险或多人旁观触发。';
+  return '可由家具、互动、任务、剧情、场景、需求分档或系统脚本调用状态。';
+}
+
+function adminStateEffectText(row) {
+  if (row.effect_ext) return row.effect_ext;
+  const parts = [];
+  if (row.needMods && Object.keys(row.needMods).length) parts.push(`需求影响：${adminNaturalizeValue(row.needMods)}`);
+  if (row.blockedSkills?.length) parts.push(`阻断技能：${row.blockedSkills.join('、')}`);
+  if (row.aiMods || row.aiWeight) parts.push(`AI影响：${adminNaturalizeValue(row.aiMods || row.aiWeight)}`);
+  if (row.relationMods || row.relation) parts.push(`关系影响：${adminNaturalizeValue(row.relationMods || row.relation)}`);
+  if (row.ext) parts.push(`扩展影响：${adminNaturalizeValue(row.ext)}`);
+  return parts.join('；') || '仅作为展示/叙事标签，暂无数值效果。';
+}
+
 function renderAdminV2Needs() {
   const rows = (CONFIG.needDefs || [])
     .map((row, idx) => [idx, row])
     .filter(([, row]) => adminV2Matches([row.key, row.name, row.label, row.summary].join(' ')))
     .map(([idx, row]) => {
       const key = row.key || `need_${idx}`;
-      const stateNames = (row.stateBands || []).map(band => CONFIG.stateDefs?.[band.id]?.name || band.id).filter(Boolean).join(' / ');
+      const slots = adminNeedBandSlots(row);
+      const bandCells = slots.map((band, slotIdx) => {
+        const stateName = adminStateLabelForId(band.id);
+        const stateTitle = [band.id, stateName].filter(Boolean).join(' · ');
+        return `<td class="need-band-num-cell"><input class="need-band-input" data-admin-v2-need-band-threshold="${idx}" data-slot="${slotIdx}" value="${adminAttr(adminNeedBandThresholdText(band))}" placeholder="${slotIdx < 2 ? '<20' : slotIdx > 2 ? '>100' : ''}"></td>
+          <td class="need-band-state-cell"><input class="need-band-state-input" data-admin-v2-need-band-state="${idx}" data-slot="${slotIdx}" value="${adminAttr(stateName)}" placeholder="状态名" title="${adminAttr(stateTitle)}"></td>`;
+      }).join('');
+      const extText = adminNaturalizeValue(row.ext || row.effect_ext || row.effects || row.mods || null);
       return `<tr data-admin-v2-need-row="${idx}">
         <td class="meta-id"><input class="need-id-cell" data-admin-v2-need-id="${idx}" value="${adminAttr(key)}"></td>
         <td><input class="need-name-cell" data-admin-v2-need="${idx}" data-field="name" value="${adminAttr(row.name || '')}"></td>
         <td><input data-admin-v2-need="${idx}" data-field="label" value="${adminAttr(row.label || '')}"></td>
         <td><input class="need-summary-cell" data-admin-v2-need="${idx}" data-field="summary" value="${adminAttr(row.summary || '')}"></td>
         <td><input class="need-color-cell" type="color" data-admin-v2-need="${idx}" data-field="color" value="${adminAttr(row.color || '#6d8f72')}"></td>
-        <td><input class="need-num-cell" type="number" step="0.05" data-admin-v2-need="${idx}" data-field="defaultGrow" value="${adminAttr(row.defaultGrow ?? 1)}"></td>
-        <td><input class="need-num-cell" type="number" step="0.05" data-admin-v2-need="${idx}" data-field="defaultDecay" value="${adminAttr(row.defaultDecay ?? 1)}"></td>
-        <td>${escapeHtml(stateNames || '未配置')}</td>
-        <td><input class="need-json-cell" data-admin-v2-need-band="${idx}" value="${adminAttr(needStateBandsCellValue(row))}" placeholder="[]"></td>
-        <td><button class="mini-btn danger" data-admin-v2-delete-need="${idx}">删</button></td>
+        ${bandCells}
+        <td class="need-ext-cell" title="${adminAttr(JSON.stringify(row.ext || row.effect_ext || row.effects || row.mods || {}))}">${escapeHtml(extText)}</td>
       </tr>`;
     }).join('');
   const stateRows = Object.entries(CONFIG.stateDefs || {})
-    .filter(([id, row]) => adminV2Matches([id, row.name, row.category, row.polarity, row.desc].join(' ')))
+    .filter(([id, row]) => adminV2Matches([id, row.name, row.category, row.polarity, row.desc, row.trigger_ext, row.effect_ext].join(' ')))
     .sort((a, b) => (a[1].category || '').localeCompare(b[1].category || '', 'zh-Hans-CN') || (a[1].name || a[0]).localeCompare(b[1].name || b[0], 'zh-Hans-CN'))
     .map(([id, row]) => `<tr data-admin-v2-state-row="${adminAttr(id)}">
       <td class="meta-id"><input class="need-id-cell" data-admin-v2-state-id="${adminAttr(id)}" value="${adminAttr(id)}"></td>
       <td><input class="need-name-cell" data-admin-v2-state="${adminAttr(id)}" data-field="name" value="${adminAttr(row.name || '')}"></td>
       <td><input data-admin-v2-state="${adminAttr(id)}" data-field="category" value="${adminAttr(row.category || '')}"></td>
-      <td><select data-admin-v2-state="${adminAttr(id)}" data-field="polarity">
-        ${['positive', 'negative', 'mixed', 'neutral'].map(v => `<option value="${v}" ${v === (row.polarity || 'neutral') ? 'selected' : ''}>${v}</option>`).join('')}
-      </select></td>
       <td><input class="need-num-cell" type="number" step="1" data-admin-v2-state="${adminAttr(id)}" data-field="duration" value="${adminAttr(row.duration ?? 30)}"></td>
       <td><input class="need-summary-cell" data-admin-v2-state="${adminAttr(id)}" data-field="desc" value="${adminAttr(row.desc || '')}"></td>
-      <td><input class="need-summary-cell" data-admin-v2-state-list="${adminAttr(id)}" data-field="blockedSkills" value="${adminAttr((row.blockedSkills || []).join(','))}" placeholder="逗号分隔"></td>
-      <td><textarea data-admin-v2-state-json="${adminAttr(id)}" data-json-field="needMods">${escapeHtml(JSON.stringify(row.needMods || {}))}</textarea></td>
-      <td><textarea data-admin-v2-state-json="${adminAttr(id)}" data-json-field="trigger">${escapeHtml(JSON.stringify(row.trigger || null))}</textarea></td>
-      <td><button class="mini-btn danger" data-admin-v2-delete-state="${adminAttr(id)}">删</button></td>
+      <td class="need-ext-cell" title="${adminAttr(JSON.stringify(row.trigger || null))}">${escapeHtml(adminStateTriggerText(row))}</td>
+      <td class="need-ext-cell" title="${adminAttr(JSON.stringify({ needMods: row.needMods || {}, blockedSkills: row.blockedSkills || [], ext: row.ext || null }))}">${escapeHtml(adminStateEffectText(row))}</td>
     </tr>`).join('');
+  const bandHeads = Array.from({ length: 5 }, (_, i) => `<th class="need-band-head">档位${i + 1}<br><small>数字</small></th><th class="need-band-head">档位${i + 1}<br><small>状态标签</small></th>`).join('');
   return `
     <div class="admin-v2-trait-page admin-v2-need-page">
-      <div class="cfg-enums"><b>基础需求</b><p>表格改动会自动保存到本地配置。上方维护六需求，下方维护由需求触发的状态标签；低频规则收进折叠 JSON。 <span class="meta-tag" id="admin-v2-need-save-status">${escapeHtml(adminV2NeedSavedMessage || '等待改动')}</span></p></div>
-      <div class="admin-v2-table-wrap" style="max-height:52vh">
-        <table class="admin-v2-table need-meta-table">
+      <div class="cfg-enums"><b>需求与状态</b><p>基础需求参数包括：当前值、默认值、增长、衰退、上下限、人物/性格/状态修正、分档触发状态。增长/衰退目前作为统一底层逻辑，不在策划表逐项维护。分档建议只展示极端状态：最低两档 <10、<20；最高两档 >100、>110；正常区间不展示状态。ext 是 JSON 结构，表示状态对其他系统的影响，这里用自然语言摘要展示。 <span class="meta-tag" id="admin-v2-need-save-status">${escapeHtml(adminV2NeedSavedMessage || '等待改动')}</span></p></div>
+      <div class="admin-v2-table-wrap" style="max-height:42vh">
+        <table class="admin-v2-table need-meta-table need-state-config-table">
           <thead><tr>
-            <th>ID</th><th>名称</th><th>短标签</th><th>说明</th><th>颜色</th><th>增长</th><th>衰退</th><th>分档预览</th><th>分档 JSON</th><th>操作</th>
+            <th>ID</th><th>名称</th><th>短标签</th><th>说明</th><th>颜色</th>${bandHeads}<th>ext</th>
           </tr></thead>
-          <tbody>${rows || '<tr><td colspan="10" class="logic-muted">没有匹配的需求</td></tr>'}</tbody>
+          <tbody>${rows || '<tr><td colspan="16" class="logic-muted">没有匹配的需求</td></tr>'}</tbody>
         </table>
       </div>
       <div class="admin-v2-trait-json">
         <details open>
           <summary>状态标签表 stateDefs</summary>
+          <p class="logic-muted">trigger_ext 是自然语言的引起因素，可包含：需求分档、互动结果、家具/行动、任务、故事节点、关系变化、场景时间、旁观者、重复失败等。effect_ext 是自然语言的结果因素，可包含：需求修正、AI 权重、关系轴变化、技能阻断、互动可用性、叙事气泡、任务资格、场景权限、健康/经济影响等。</p>
           <div class="admin-v2-table-wrap" style="max-height:34vh">
-            <table class="admin-v2-table need-meta-table">
+            <table class="admin-v2-table need-meta-table need-state-config-table state-ext-table">
               <thead><tr>
-                <th>ID</th><th>名称</th><th>分类</th><th>极性</th><th>时长</th><th>说明</th><th>阻断技能</th><th>需求效果 JSON</th><th>触发 JSON</th><th>操作</th>
+                <th>ID</th><th>名称</th><th>分类</th><th>时长</th><th>说明</th><th>trigger_ext</th><th>effect_ext</th>
               </tr></thead>
-              <tbody>${stateRows || '<tr><td colspan="10" class="logic-muted">没有匹配的状态标签</td></tr>'}</tbody>
+              <tbody>${stateRows || '<tr><td colspan="7" class="logic-muted">没有匹配的状态标签</td></tr>'}</tbody>
             </table>
           </div>
         </details>
@@ -4282,7 +4534,8 @@ function renderAdminV2Needs() {
     </div>`;
 }
 
-function lifePathConfigForAdmin() {
+function adminV2CareerStoryConfig() {
+  if (typeof lifePathConfigForAdmin === 'function') return lifePathConfigForAdmin();
   if (!CONFIG.lifePathConfig) CONFIG.lifePathConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG.lifePathConfig || {}));
   CONFIG.lifePathConfig.paths ||= {};
   CONFIG.lifePathConfig.stages ||= {};
@@ -4290,20 +4543,130 @@ function lifePathConfigForAdmin() {
   return CONFIG.lifePathConfig;
 }
 
-function nextLifePathKey(map, base) {
-  let id = base;
-  let n = 1;
-  while (map?.[id]) id = `${base}_${++n}`;
+function adminV2ListText(value) {
+  if (Array.isArray(value)) return value.join(', ');
+  if (value == null) return '';
+  return String(value);
+}
+
+function adminV2JsonText(value, fallback) {
+  return adminAttr(JSON.stringify(value ?? fallback));
+}
+
+function adminV2UniqueConfigId(rows, prefix) {
+  let i = 1;
+  let id = `${prefix}_${i}`;
+  while (rows?.[id]) {
+    i += 1;
+    id = `${prefix}_${i}`;
+  }
   return id;
 }
 
+function adminV2PathOptionsHtml(value = '') {
+  const lp = adminV2CareerStoryConfig();
+  const options = Object.entries(lp.paths || {}).map(([id, row]) =>
+    `<option value="${adminAttr(id)}"${String(value) === String(id) ? ' selected' : ''}>${escapeHtml(row.name || id)}</option>`
+  ).join('');
+  return `<option value="">未指定</option>${options}`;
+}
+
+function renderAdminV2CareerSystem() {
+  const lp = adminV2CareerStoryConfig();
+  const entries = Object.entries(lp.stages || {})
+    .filter(([id, row]) => adminV2Matches([id, row.title, row.pathId, row.rankOverride, row.requiredReputation, adminV2ListText(row.dailyTasks), adminV2ListText(row.scenePermissions)].join(' ')))
+    .sort((a, b) => String(a[1].pathId || '').localeCompare(String(b[1].pathId || ''), 'zh-Hans-CN') || (a[1].requiredReputation || 0) - (b[1].requiredReputation || 0));
+  const rows = entries.map(([id, row]) => `<tr data-admin-v2-career-stage-row="${adminAttr(id)}">
+    <td class="meta-id"><input class="need-id-cell" data-admin-v2-career-stage-id="${adminAttr(id)}" value="${adminAttr(id)}"></td>
+    <td><input class="need-name-cell" data-admin-v2-career-stage="${adminAttr(id)}" data-field="title" value="${adminAttr(row.title || '')}"></td>
+    <td><select data-admin-v2-career-stage="${adminAttr(id)}" data-field="pathId">${adminV2PathOptionsHtml(row.pathId || '')}</select></td>
+    <td><input class="need-num-cell" type="number" step="1" data-admin-v2-career-stage="${adminAttr(id)}" data-field="rankOverride" value="${adminAttr(row.rankOverride ?? '')}"></td>
+    <td><input class="need-num-cell" type="number" step="1" data-admin-v2-career-stage="${adminAttr(id)}" data-field="requiredReputation" value="${adminAttr(row.requiredReputation ?? 0)}"></td>
+    <td><input class="dream-json-cell" data-admin-v2-career-stage-json="${adminAttr(id)}" data-json-field="requiredSkills" value="${adminV2JsonText(row.requiredSkills, {})}" placeholder="{}"></td>
+    <td><input class="dream-desc-cell" data-admin-v2-career-stage-list="${adminAttr(id)}" data-field="dailyTasks" value="${adminAttr(adminV2ListText(row.dailyTasks))}" placeholder="taskA, taskB"></td>
+    <td><input class="dream-desc-cell" data-admin-v2-career-stage-list="${adminAttr(id)}" data-field="scenePermissions" value="${adminAttr(adminV2ListText(row.scenePermissions))}" placeholder="private, ritual"></td>
+    <td><input class="dream-desc-cell" data-admin-v2-career-stage-list="${adminAttr(id)}" data-field="nextStages" value="${adminAttr(adminV2ListText(row.nextStages))}" placeholder="stage_id"></td>
+    <td><button class="mini-btn danger" data-admin-v2-delete-career-stage="${adminAttr(id)}">删</button></td>
+  </tr>`).join('');
+  return `
+    <div class="admin-v2-trait-page admin-v2-career-page">
+      <div class="cfg-enums"><b>职业系统</b><p>这里维护职业阶段：归属路径、位阶覆盖、声望门槛、技能门槛、每日任务、场景权限和下一阶段。职业身份仍接入同一套路径配置，不另开业务数据。</p></div>
+      <div class="admin-v2-table-wrap" style="max-height:58vh">
+        <table class="admin-v2-table dream-meta-table">
+          <thead><tr>
+            <th>ID</th><th>阶段名称</th><th>所属路径</th><th>位阶</th><th>声望门槛</th><th>技能门槛 JSON</th><th>每日任务</th><th>场景权限</th><th>下一阶段</th><th>操作</th>
+          </tr></thead>
+          <tbody>${rows || '<tr><td colspan="10" class="logic-muted">没有匹配的职业阶段</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderAdminV2StorySystem() {
+  const lp = adminV2CareerStoryConfig();
+  const pathRows = Object.entries(lp.paths || {})
+    .filter(([id, row]) => adminV2Matches([id, row.name, row.description, row.genderConstraint, adminV2ListText(row.stages), adminV2ListText(row.defaultSkills)].join(' ')))
+    .map(([id, row]) => `<tr data-admin-v2-story-path-row="${adminAttr(id)}">
+      <td class="meta-id"><input class="need-id-cell" data-admin-v2-story-path-id="${adminAttr(id)}" value="${adminAttr(id)}"></td>
+      <td><input class="need-name-cell" data-admin-v2-story-path="${adminAttr(id)}" data-field="name" value="${adminAttr(row.name || '')}"></td>
+      <td><input class="need-summary-cell" data-admin-v2-story-path="${adminAttr(id)}" data-field="description" value="${adminAttr(row.description || '')}"></td>
+      <td><input data-admin-v2-story-path="${adminAttr(id)}" data-field="genderConstraint" value="${adminAttr(row.genderConstraint || '')}"></td>
+      <td><input class="dream-desc-cell" data-admin-v2-story-path-list="${adminAttr(id)}" data-field="requiredInitialRank" value="${adminAttr(adminV2ListText(row.requiredInitialRank))}" placeholder="4, 5"></td>
+      <td><input class="dream-desc-cell" data-admin-v2-story-path-list="${adminAttr(id)}" data-field="stages" value="${adminAttr(adminV2ListText(row.stages))}" placeholder="stage_id"></td>
+      <td><input class="dream-desc-cell" data-admin-v2-story-path-list="${adminAttr(id)}" data-field="defaultSkills" value="${adminAttr(adminV2ListText(row.defaultSkills))}" placeholder="serve, talk"></td>
+      <td><button class="mini-btn danger" data-admin-v2-delete-story-path="${adminAttr(id)}">删</button></td>
+    </tr>`).join('');
+  const nodeRows = Object.entries(lp.storyNodes || {})
+    .filter(([id, row]) => adminV2Matches([id, row.name, row.pathId, row.description, row.phase, row.order, row.prevNode].join(' ')))
+    .sort((a, b) => String(a[1].pathId || '').localeCompare(String(b[1].pathId || ''), 'zh-Hans-CN') || (a[1].phase || 0) - (b[1].phase || 0) || (a[1].order || 0) - (b[1].order || 0))
+    .map(([id, row]) => `<tr data-admin-v2-story-node-row="${adminAttr(id)}">
+      <td class="meta-id"><input class="need-id-cell" data-admin-v2-story-node-id="${adminAttr(id)}" value="${adminAttr(id)}"></td>
+      <td><input class="need-name-cell" data-admin-v2-story-node="${adminAttr(id)}" data-field="name" value="${adminAttr(row.name || '')}"></td>
+      <td><select data-admin-v2-story-node="${adminAttr(id)}" data-field="pathId">${adminV2PathOptionsHtml(row.pathId || '')}</select></td>
+      <td><input class="need-num-cell" type="number" step="1" data-admin-v2-story-node="${adminAttr(id)}" data-field="phase" value="${adminAttr(row.phase ?? '')}"></td>
+      <td><input class="need-num-cell" type="number" step="1" data-admin-v2-story-node="${adminAttr(id)}" data-field="order" value="${adminAttr(row.order ?? '')}"></td>
+      <td><input class="need-num-cell" type="number" step="1" data-admin-v2-story-node="${adminAttr(id)}" data-field="minReputation" value="${adminAttr(row.minReputation ?? '')}"></td>
+      <td><input data-admin-v2-story-node="${adminAttr(id)}" data-field="prevNode" value="${adminAttr(row.prevNode || '')}"></td>
+      <td><input class="dream-json-cell" data-admin-v2-story-node-json="${adminAttr(id)}" data-json-field="conditions" value="${adminV2JsonText(row.conditions, {})}" placeholder="{}"></td>
+      <td><input class="dream-json-cell" data-admin-v2-story-node-json="${adminAttr(id)}" data-json-field="effects" value="${adminV2JsonText(row.effects, [])}" placeholder="[]"></td>
+      <td><button class="mini-btn danger" data-admin-v2-delete-story-node="${adminAttr(id)}">删</button></td>
+    </tr>`).join('');
+  return `
+    <div class="admin-v2-trait-page admin-v2-story-page">
+      <div class="cfg-enums"><b>故事系统</b><p>这里维护路径定义与路径下的故事节点。路径用于人物长期人生线，故事节点用于阶段事件；临时任务仍留在任务系统，不写入起居。</p></div>
+      <div class="admin-v2-table-wrap" style="max-height:30vh">
+        <table class="admin-v2-table dream-meta-table">
+          <thead><tr>
+            <th>ID</th><th>路径名称</th><th>描述</th><th>性别限制</th><th>初始位阶</th><th>阶段列表</th><th>默认技能</th><th>操作</th>
+          </tr></thead>
+          <tbody>${pathRows || '<tr><td colspan="8" class="logic-muted">没有匹配的路径</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div class="admin-v2-trait-json">
+        <details open>
+          <summary>故事节点 storyNodes</summary>
+          <div class="adm-actions" style="margin:8px 0"><button id="btn-admin-v2-add-story-node">新增故事节点</button></div>
+          <div class="admin-v2-table-wrap" style="max-height:34vh">
+            <table class="admin-v2-table dream-meta-table">
+              <thead><tr>
+                <th>ID</th><th>节点名称</th><th>路径</th><th>阶段</th><th>顺序</th><th>声望门槛</th><th>前置节点</th><th>条件 JSON</th><th>效果 JSON</th><th>操作</th>
+              </tr></thead>
+              <tbody>${nodeRows || '<tr><td colspan="10" class="logic-muted">没有匹配的故事节点</td></tr>'}</tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </div>`;
+}
+
 function adminV2AddCareerStage() {
-  const lp = lifePathConfigForAdmin();
-  const id = nextLifePathKey(lp.stages, 'new_stage');
-  const firstPathId = Object.keys(lp.paths || {})[0] || '';
+  const lp = adminV2CareerStoryConfig();
+  const firstPath = Object.keys(lp.paths || {})[0] || '';
+  const id = adminV2UniqueConfigId(lp.stages || {}, 'career_stage');
+  lp.stages ||= {};
   lp.stages[id] = {
     id,
-    pathId: firstPathId,
+    pathId: firstPath,
     title: '新职业阶段',
     rankOverride: 5,
     requiredReputation: 0,
@@ -4312,255 +4675,77 @@ function adminV2AddCareerStage() {
     scenePermissions: [],
     nextStages: [],
   };
-  adminV2Search = id;
-  saveConfigToStorage();
-  renderAdmin();
-}
-
-function adminV2AddStoryPath() {
-  const lp = lifePathConfigForAdmin();
-  const id = nextLifePathKey(lp.paths, 'new_path');
-  lp.paths[id] = {
-    id,
-    name: '新路径',
-    description: '',
-    genderConstraint: 'any',
-    stages: [],
-    defaultSkills: [],
-    phaseNames: {},
-  };
-  adminV2Search = id;
-  saveConfigToStorage();
-  renderAdmin();
-}
-
-function adminV2AddStoryNode() {
-  const lp = lifePathConfigForAdmin();
-  const id = nextLifePathKey(lp.storyNodes, 'new_node');
-  const firstPathId = Object.keys(lp.paths || {})[0] || '';
-  lp.storyNodes[id] = {
-    id,
-    name: '新故事节点',
-    pathId: firstPathId,
-    phase: 1,
-    order: 1,
-    type: 'event',
-    prevNode: null,
-    conditions: {},
-    effects: [],
-  };
-  adminV2Search = id;
   saveConfigToStorage();
   renderAdmin();
 }
 
 function adminV2ValidateCareerSystem() {
-  const lp = lifePathConfigForAdmin();
+  const lp = adminV2CareerStoryConfig();
   const lines = [];
   for (const [id, row] of Object.entries(lp.stages || {})) {
     if (!row.title) lines.push(`${id} 缺阶段名称`);
-    if (row.pathId && !lp.paths?.[row.pathId]) lines.push(`${id} 引用未知路径 ${row.pathId}`);
-    if (!Number.isFinite(+row.rankOverride)) lines.push(`${id} 位阶不是数字`);
-    if (!Number.isFinite(+row.requiredReputation)) lines.push(`${id} 声望门槛不是数字`);
-    (row.nextStages || []).forEach(next => { if (!lp.stages?.[next]) lines.push(`${id} 下一阶段不存在：${next}`); });
+    if (row.pathId && !lp.paths?.[row.pathId]) lines.push(`${id} 引用了不存在的路径 ${row.pathId}`);
+    for (const next of row.nextStages || []) {
+      if (!lp.stages?.[next]) lines.push(`${id} 的下一阶段 ${next} 不存在`);
+    }
   }
   alert(lines.length ? lines.join('\n') : '职业系统校验通过。');
 }
 
+function adminV2AddStoryPath() {
+  const lp = adminV2CareerStoryConfig();
+  lp.paths ||= {};
+  const id = adminV2UniqueConfigId(lp.paths, 'story_path');
+  lp.paths[id] = {
+    id,
+    name: '新路径',
+    description: '',
+    requiredInitialRank: [],
+    genderConstraint: 'any',
+    stages: [],
+    defaultSkills: [],
+    endingScenes: [],
+    quittingPenalty: -30,
+  };
+  saveConfigToStorage();
+  renderAdmin();
+}
+
+function adminV2AddStoryNode() {
+  const lp = adminV2CareerStoryConfig();
+  lp.storyNodes ||= {};
+  const firstPath = Object.keys(lp.paths || {})[0] || '';
+  const id = adminV2UniqueConfigId(lp.storyNodes, 'story_node');
+  lp.storyNodes[id] = {
+    id,
+    pathId: firstPath,
+    name: '新故事节点',
+    phase: 1,
+    order: Object.keys(lp.storyNodes || {}).length + 1,
+    minReputation: 0,
+    prevNode: null,
+    conditions: {},
+    effects: [],
+  };
+  saveConfigToStorage();
+  renderAdmin();
+}
+
 function adminV2ValidateStorySystem() {
-  const lp = lifePathConfigForAdmin();
+  const lp = adminV2CareerStoryConfig();
   const lines = [];
   for (const [id, row] of Object.entries(lp.paths || {})) {
     if (!row.name) lines.push(`${id} 缺路径名称`);
-    (row.stages || []).forEach(stageId => { if (!lp.stages?.[stageId]) lines.push(`${id} 阶段列表引用未知阶段 ${stageId}`); });
+    for (const stageId of row.stages || []) {
+      if (!lp.stages?.[stageId]) lines.push(`${id} 的阶段 ${stageId} 不存在`);
+    }
   }
   for (const [id, row] of Object.entries(lp.storyNodes || {})) {
     if (!row.name) lines.push(`${id} 缺节点名称`);
-    if (row.pathId && !lp.paths?.[row.pathId]) lines.push(`${id} 引用未知路径 ${row.pathId}`);
-    if (row.prevNode && !lp.storyNodes?.[row.prevNode]) lines.push(`${id} 前置节点不存在：${row.prevNode}`);
+    if (row.pathId && !lp.paths?.[row.pathId]) lines.push(`${id} 引用了不存在的路径 ${row.pathId}`);
+    if (row.prevNode && !lp.storyNodes?.[row.prevNode]) lines.push(`${id} 的前置节点 ${row.prevNode} 不存在`);
   }
   alert(lines.length ? lines.join('\n') : '故事系统校验通过。');
-}
-
-function renderAdminV2CareerSystem() {
-  const lp = lifePathConfigForAdmin();
-  const stageRows = Object.entries(lp.stages || {})
-    .filter(([id, row]) => adminV2Matches([id, row.title, row.pathId, row.rankOverride, row.requiredReputation, ...(row.dailyTasks || [])].join(' ')))
-    .sort((a, b) => (a[1].pathId || '').localeCompare(b[1].pathId || '', 'zh-Hans-CN') || (a[1].rankOverride ?? 99) - (b[1].rankOverride ?? 99))
-    .map(([id, row]) => `<tr data-admin-v2-career-stage-row="${adminAttr(id)}">
-      <td class="meta-id"><input class="trait-id-cell" data-admin-v2-career-stage-id="${adminAttr(id)}" value="${adminAttr(id)}"></td>
-      <td><input class="trait-desc-cell" data-admin-v2-career-stage="${adminAttr(id)}" data-field="title" value="${adminAttr(row.title || '')}"></td>
-      <td><input data-admin-v2-career-stage="${adminAttr(id)}" data-field="pathId" value="${adminAttr(row.pathId || '')}"></td>
-      <td><input class="mini" type="number" step="1" data-admin-v2-career-stage="${adminAttr(id)}" data-field="rankOverride" value="${adminAttr(row.rankOverride ?? '')}"></td>
-      <td><input class="mini" type="number" step="1" data-admin-v2-career-stage="${adminAttr(id)}" data-field="requiredReputation" value="${adminAttr(row.requiredReputation ?? 0)}"></td>
-      <td><input class="trait-json-cell" data-admin-v2-career-stage-json="${adminAttr(id)}" data-json-field="requiredSkills" value="${adminAttr(JSON.stringify(row.requiredSkills || {}))}" placeholder="{}"></td>
-      <td><input class="trait-example-cell" data-admin-v2-career-stage-list="${adminAttr(id)}" data-field="dailyTasks" value="${adminAttr((row.dailyTasks || []).join(','))}" placeholder="任务ID逗号分隔"></td>
-      <td><input class="trait-example-cell" data-admin-v2-career-stage-list="${adminAttr(id)}" data-field="scenePermissions" value="${adminAttr((row.scenePermissions || []).join(','))}" placeholder="权限逗号分隔"></td>
-      <td><input class="trait-example-cell" data-admin-v2-career-stage-list="${adminAttr(id)}" data-field="nextStages" value="${adminAttr((row.nextStages || []).join(','))}" placeholder="阶段ID逗号分隔"></td>
-      <td><button class="mini-btn danger" data-admin-v2-delete-career-stage="${adminAttr(id)}">删</button></td>
-    </tr>`).join('');
-  return `
-    <div class="admin-v2-trait-page admin-v2-career-page">
-      <div class="cfg-enums"><b>职业系统</b><p>维护职业阶段、位阶、声望门槛、每日任务和职业权限。路径定义已迁到【故事系统】。</p></div>
-      <div class="admin-v2-table-wrap" style="max-height:54vh">
-        <table class="admin-v2-table trait-meta-table">
-          <thead><tr>
-            <th>阶段ID</th><th>阶段名称</th><th>所属路径</th><th>位阶</th><th>声望门槛</th><th>技能要求 JSON</th><th>每日任务</th><th>场景权限</th><th>下一阶段</th><th>操作</th>
-          </tr></thead>
-          <tbody>${stageRows || '<tr><td colspan="10" class="logic-muted">没有匹配的职业阶段</td></tr>'}</tbody>
-        </table>
-      </div>
-    </div>`;
-}
-
-function renderAdminV2StorySystem() {
-  const lp = lifePathConfigForAdmin();
-  const pathRows = Object.entries(lp.paths || {})
-    .filter(([id, row]) => adminV2Matches([id, row.name, row.description, row.genderConstraint, ...(row.stages || [])].join(' ')))
-    .sort((a, b) => (a[1].name || a[0]).localeCompare(b[1].name || b[0], 'zh-Hans-CN'))
-    .map(([id, row]) => `<tr data-admin-v2-story-path-row="${adminAttr(id)}">
-      <td class="meta-id"><input class="trait-id-cell" data-admin-v2-story-path-id="${adminAttr(id)}" value="${adminAttr(id)}"></td>
-      <td><input data-admin-v2-story-path="${adminAttr(id)}" data-field="name" value="${adminAttr(row.name || '')}"></td>
-      <td><input class="trait-desc-cell" data-admin-v2-story-path="${adminAttr(id)}" data-field="description" value="${adminAttr(row.description || '')}"></td>
-      <td><input data-admin-v2-story-path="${adminAttr(id)}" data-field="genderConstraint" value="${adminAttr(row.genderConstraint || 'any')}"></td>
-      <td><input class="trait-example-cell" data-admin-v2-story-path-list="${adminAttr(id)}" data-field="stages" value="${adminAttr((row.stages || []).join(','))}"></td>
-      <td><input class="trait-example-cell" data-admin-v2-story-path-list="${adminAttr(id)}" data-field="defaultSkills" value="${adminAttr((row.defaultSkills || []).join(','))}"></td>
-      <td><input class="trait-json-cell" data-admin-v2-story-path-json="${adminAttr(id)}" data-json-field="phaseNames" value="${adminAttr(JSON.stringify(row.phaseNames || {}))}" placeholder="{}"></td>
-      <td><button class="mini-btn danger" data-admin-v2-delete-story-path="${adminAttr(id)}">删</button></td>
-    </tr>`).join('');
-  const nodeRows = Object.entries(lp.storyNodes || {})
-    .filter(([id, row]) => adminV2Matches([id, row.name, row.pathId, row.phase, row.type, row.prevNode].join(' ')))
-    .sort((a, b) => (a[1].pathId || '').localeCompare(b[1].pathId || '', 'zh-Hans-CN') || (a[1].phase || 0) - (b[1].phase || 0) || (a[1].order || 0) - (b[1].order || 0))
-    .map(([id, row]) => `<tr data-admin-v2-story-node-row="${adminAttr(id)}">
-      <td class="meta-id"><input class="trait-id-cell" data-admin-v2-story-node-id="${adminAttr(id)}" value="${adminAttr(id)}"></td>
-      <td><input data-admin-v2-story-node="${adminAttr(id)}" data-field="name" value="${adminAttr(row.name || '')}"></td>
-      <td><input data-admin-v2-story-node="${adminAttr(id)}" data-field="pathId" value="${adminAttr(row.pathId || '')}"></td>
-      <td><input class="mini" type="number" step="1" data-admin-v2-story-node="${adminAttr(id)}" data-field="phase" value="${adminAttr(row.phase ?? 1)}"></td>
-      <td><input class="mini" type="number" step="1" data-admin-v2-story-node="${adminAttr(id)}" data-field="order" value="${adminAttr(row.order ?? 1)}"></td>
-      <td><input data-admin-v2-story-node="${adminAttr(id)}" data-field="type" value="${adminAttr(row.type || 'event')}"></td>
-      <td><input data-admin-v2-story-node="${adminAttr(id)}" data-field="prevNode" value="${adminAttr(row.prevNode || '')}"></td>
-      <td><input class="mini" type="number" step="1" data-admin-v2-story-node="${adminAttr(id)}" data-field="minReputation" value="${adminAttr(row.minReputation ?? '')}"></td>
-      <td><textarea data-admin-v2-story-node-json="${adminAttr(id)}" data-json-field="conditions">${escapeHtml(JSON.stringify(row.conditions || {}, null, 2))}</textarea></td>
-      <td><textarea data-admin-v2-story-node-json="${adminAttr(id)}" data-json-field="effects">${escapeHtml(JSON.stringify(row.effects || [], null, 2))}</textarea></td>
-      <td><button class="mini-btn danger" data-admin-v2-delete-story-node="${adminAttr(id)}">删</button></td>
-    </tr>`).join('');
-  return `
-    <div class="admin-v2-trait-page admin-v2-story-page">
-      <div class="cfg-enums"><b>故事系统</b><p>维护人生路径定义、阶段叙事和故事节点。职业日课与阶段数值请回到【职业系统】维护。</p></div>
-      <div class="admin-v2-table-wrap" style="max-height:30vh;margin-bottom:10px">
-        <table class="admin-v2-table trait-meta-table">
-          <thead><tr><th>路径ID</th><th>名称</th><th>描述</th><th>性别限制</th><th>阶段列表</th><th>默认技能</th><th>阶段名 JSON</th><th>操作</th></tr></thead>
-          <tbody>${pathRows || '<tr><td colspan="8" class="logic-muted">没有匹配的路径</td></tr>'}</tbody>
-        </table>
-      </div>
-      <div class="adm-actions" style="margin-bottom:8px"><button id="btn-admin-v2-add-story-node">新增故事节点</button></div>
-      <div class="admin-v2-table-wrap" style="max-height:36vh">
-        <table class="admin-v2-table trait-meta-table">
-          <thead><tr><th>节点ID</th><th>名称</th><th>路径</th><th>阶段</th><th>顺序</th><th>类型</th><th>前置节点</th><th>声望门槛</th><th>条件 JSON</th><th>效果 JSON</th><th>操作</th></tr></thead>
-          <tbody>${nodeRows || '<tr><td colspan="11" class="logic-muted">没有匹配的故事节点</td></tr>'}</tbody>
-        </table>
-      </div>
-    </div>`;
-}
-
-function adminV2JsonPathParts(path) {
-  return String(path || '').split('.').filter(Boolean);
-}
-
-function adminV2GetJsonPath(path) {
-  let cur = CONFIG;
-  for (const part of adminV2JsonPathParts(path)) {
-    if (cur == null) return undefined;
-    cur = Array.isArray(cur) && /^\d+$/.test(part) ? cur[+part] : cur[part];
-  }
-  return cur;
-}
-
-function adminV2SetJsonPath(path, value) {
-  const parts = adminV2JsonPathParts(path);
-  if (!parts.length) return false;
-  let cur = CONFIG;
-  for (let i = 0; i < parts.length - 1; i += 1) {
-    const part = parts[i];
-    cur = Array.isArray(cur) && /^\d+$/.test(part) ? cur[+part] : cur[part];
-    if (cur == null) return false;
-  }
-  const last = parts[parts.length - 1];
-  if (Array.isArray(cur) && /^\d+$/.test(last)) cur[+last] = value;
-  else cur[last] = value;
-  return true;
-}
-
-function adminV2JsonRowInfo(key, value) {
-  const row = value && typeof value === 'object' ? value : {};
-  const name = row.name || row.label || row.title || row.text || row.id || key;
-  const type = row.category || row.type || row.kind || row.role || (Array.isArray(value) ? 'array' : typeof value);
-  const tags = [];
-  const add = v => {
-    if (v === undefined || v === null || v === '' || typeof v === 'object') return;
-    const text = String(v);
-    if (!tags.includes(text)) tags.push(text);
-  };
-  add(row.category);
-  add(row.type);
-  add(row.kind);
-  (row.tags || row.needTags || row.socialTags || []).forEach(add);
-  const summary = row.desc || row.description || row.summary || row.hint || row.text || '';
-  return { name: String(name), type: String(type || 'object'), tags: tags.slice(0, 6), summary: String(summary || '—') };
-}
-
-function adminV2JsonTableRows(path, value) {
-  if (Array.isArray(value)) return value.map((row, idx) => ({ key: String(idx), path: `${path}.${idx}`, value: row }));
-  if (value && typeof value === 'object') return Object.entries(value).map(([key, row]) => ({ key, path: `${path}.${key}`, value: row }));
-  return [{ key: path, path, value }];
-}
-
-function renderAdminV2JsonConfigTable(title, path, value) {
-  const entries = adminV2JsonTableRows(path, value)
-    .filter(entry => {
-      const info = adminV2JsonRowInfo(entry.key, entry.value);
-      return adminV2Matches([title, entry.key, info.name, info.type, info.summary, ...info.tags].join(' '));
-    });
-  const rows = entries.map(entry => {
-    const info = adminV2JsonRowInfo(entry.key, entry.value);
-    return `<tr>
-      <td class="meta-id">${escapeHtml(entry.key)}</td>
-      <td>${escapeHtml(info.name)}</td>
-      <td>${escapeHtml(info.type)}</td>
-      <td><div class="meta-tags">${info.tags.map(tag => `<span class="meta-tag">${escapeHtml(tag)}</span>`).join('') || '<span class="logic-muted">无标签</span>'}</div></td>
-      <td>${escapeHtml(info.summary)}</td>
-      <td><textarea data-admin-v2-json-path="${adminAttr(entry.path)}">${escapeHtml(JSON.stringify(entry.value, null, 2))}</textarea></td>
-    </tr>`;
-  }).join('');
-  return `
-    <div class="admin-v2-table-wrap" style="max-height:34vh;margin-bottom:10px">
-      <table class="admin-v2-table">
-        <thead><tr><th colspan="6">${escapeHtml(title)}</th></tr><tr><th>ID / 索引</th><th>名称</th><th>类型</th><th>标签</th><th>摘要</th><th>配置 JSON</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="6" class="logic-muted">没有匹配的配置项</td></tr>'}</tbody>
-      </table>
-    </div>`;
-}
-
-function adminV2MarkGenericSaved(msg = '已自动保存') {
-  const el = document.getElementById('admin-v2-generic-save-status');
-  if (el) el.textContent = `${msg} · ${new Date().toLocaleTimeString('zh-CN', { hour12: false })}`;
-}
-
-function renderAdminV2AIUtilityTable() {
-  const cfg = aiConfigForAdmin();
-  const groups = [
-    ['需求基础权重 demandBaseWeights', 'aiConfig.demandBaseWeights', cfg.demandBaseWeights || {}],
-    ['起居网格行 routineGridConfig.rowDefs', 'aiConfig.routineGridConfig.rowDefs', cfg.routineGridConfig?.rowDefs || []],
-    ['起居模板 routineTemplates', 'aiConfig.routineTemplates', cfg.routineTemplates || []],
-    ['默认起居画像 routineProfiles.defaults', 'aiConfig.routineProfiles.defaults', cfg.routineProfiles?.defaults || []],
-    ['人物起居覆盖 routineProfiles.byCharacter', 'aiConfig.routineProfiles.byCharacter', cfg.routineProfiles?.byCharacter || {}],
-    ['完整 aiConfig', 'aiConfig', cfg],
-  ];
-  return `
-    <div class="admin-v2-trait-page admin-v2-ai-page">
-      <div class="cfg-enums"><b>Utility AI</b><p>按配置块拆成表格行；每行 JSON 保存后直接写回 aiConfig。 <span class="meta-tag" id="admin-v2-generic-save-status">等待改动</span></p></div>
-      ${groups.map(([title, path, value]) => renderAdminV2JsonConfigTable(title, path, value)).join('')}
-    </div>`;
 }
 
 function renderAdminV2InteractionTables() {
@@ -4568,356 +4753,216 @@ function renderAdminV2InteractionTables() {
   CONFIG.interactionTemplates ||= {};
   CONFIG.interactionSocialConfig ||= {};
   CONFIG.multiInteractConfig ||= {};
-  const categories = CONFIG.interactionCategories;
-  if (!adminV2InteractionCategory || !categories.some(c => c.id === adminV2InteractionCategory)) {
-    adminV2InteractionCategory = categories[0]?.id || '';
+  const categories = CONFIG.interactionCategories || [];
+  const firstCategory = categories[0]?.id || '';
+  if (!adminV2InteractionCategory || !categories.some(cat => cat.id === adminV2InteractionCategory)) {
+    adminV2InteractionCategory = firstCategory;
   }
-  const selectedCategory = categories.find(c => c.id === adminV2InteractionCategory) || categories[0] || null;
-  const categoryRows = categories
-    .filter(cat => adminV2Matches([cat.id, cat.name, cat.desc, cat.description].join(' ')))
-    .map((cat, idx) => `<tr>
-      <td><input data-admin-v2-interaction-category-id="${idx}" value="${adminAttr(cat.id || '')}"></td>
-      <td><input data-admin-v2-interaction-category="${idx}" data-field="name" value="${adminAttr(cat.name || '')}"></td>
-      <td><input data-admin-v2-interaction-category="${idx}" data-field="description" value="${adminAttr(cat.description || cat.desc || '')}" placeholder="这个大类在菜单和 AI 中的语义"></td>
-      <td>${Object.values(CONFIG.interactionTemplates || {}).filter(t => t.category === cat.id).length}</td>
-    </tr>`).join('');
-  const nav = categories.map(cat => `<button type="button" class="sys-btn${cat.id === selectedCategory?.id ? ' active' : ''}" data-admin-v2-interaction-tab="${adminAttr(cat.id)}">${escapeHtml(cat.name || cat.id)}</button>`).join('');
-  const templateRows = Object.entries(CONFIG.interactionTemplates || {})
-    .filter(([, tpl]) => !selectedCategory || tpl.category === selectedCategory.id)
-    .filter(([id, tpl]) => adminV2Matches([id, tpl.id, tpl.name, tpl.type, tpl.llmPrompt, JSON.stringify(tpl.effects || [])].join(' ')))
-    .sort((a, b) => (+a[0] || 0) - (+b[0] || 0))
-    .map(([id, tpl]) => `<tr>
-      <td class="meta-id">${escapeHtml(String(tpl.id ?? id))}</td>
-      <td><input data-admin-v2-interaction-template="${adminAttr(id)}" data-field="name" value="${adminAttr(tpl.name || '')}"></td>
-      <td><select data-admin-v2-interaction-template="${adminAttr(id)}" data-field="type">
-        <option value="dialogue"${tpl.type === 'dialogue' ? ' selected' : ''}>对话</option>
-        <option value="action"${tpl.type === 'action' ? ' selected' : ''}>行动</option>
-      </select></td>
-      <td><input data-admin-v2-interaction-template="${adminAttr(id)}" data-field="relMin" data-type="number" type="number" value="${adminAttr(tpl.relMin ?? -100)}"></td>
-      <td><input data-admin-v2-interaction-template="${adminAttr(id)}" data-field="relMax" data-type="number" type="number" value="${adminAttr(tpl.relMax ?? 100)}"></td>
-      <td><input data-admin-v2-interaction-template="${adminAttr(id)}" data-field="duration" data-type="number" type="number" step="0.1" value="${adminAttr(tpl.duration ?? 5)}"></td>
-      <td><input data-admin-v2-interaction-template="${adminAttr(id)}" data-field="cooldown" data-type="number" type="number" value="${adminAttr(tpl.cooldown ?? 0)}"></td>
-      <td><input data-admin-v2-interaction-template="${adminAttr(id)}" data-field="llmPrompt" value="${adminAttr(tpl.llmPrompt || '')}"></td>
-      <td><input type="checkbox" data-admin-v2-interaction-template="${adminAttr(id)}" data-field="once" data-type="bool" ${tpl.once ? 'checked' : ''}></td>
-      <td><textarea data-admin-v2-interaction-template-json="${adminAttr(id)}" data-field="skillReq">${escapeHtml(JSON.stringify(tpl.skillReq || null, null, 2))}</textarea></td>
-      <td><textarea data-admin-v2-interaction-template-json="${adminAttr(id)}" data-field="lines">${escapeHtml(JSON.stringify(tpl.lines || [], null, 2))}</textarea></td>
-      <td><textarea data-admin-v2-interaction-template-json="${adminAttr(id)}" data-field="effects">${escapeHtml(JSON.stringify(tpl.effects || [], null, 2))}</textarea></td>
-      <td><textarea data-admin-v2-interaction-template-json="${adminAttr(id)}" data-field="axisEffects">${escapeHtml(JSON.stringify(tpl.axisEffects || null, null, 2))}</textarea></td>
-      <td><textarea data-admin-v2-interaction-template-json="${adminAttr(id)}" data-field="onLowScore">${escapeHtml(JSON.stringify(tpl.onLowScore || null, null, 2))}</textarea></td>
-      <td><textarea data-admin-v2-interaction-template-json="${adminAttr(id)}" data-field="unlock_conditions">${escapeHtml(JSON.stringify(tpl.unlock_conditions || null, null, 2))}</textarea></td>
-      <td><textarea data-admin-v2-interaction-template-json="${adminAttr(id)}" data-field="risky_details">${escapeHtml(JSON.stringify(tpl.risky_details || null, null, 2))}</textarea></td>
-    </tr>`).join('');
   const social = CONFIG.interactionSocialConfig || {};
   const multi = CONFIG.multiInteractConfig || {};
+  const categoryTabs = categories.map(cat => {
+    const count = Object.values(CONFIG.interactionTemplates || {}).filter(tpl => tpl.category === cat.id).length;
+    return `<button type="button" class="${cat.id === adminV2InteractionCategory ? 'active' : ''}" data-admin-v2-interaction-tab="${adminAttr(cat.id)}">
+      ${escapeHtml(cat.name || cat.id)} <span>${count}</span>
+    </button>`;
+  }).join('');
+  const categoryRows = categories.map((cat, idx) => `<tr>
+    <td class="meta-id"><input class="need-id-cell" data-admin-v2-interaction-category-id="${idx}" value="${adminAttr(cat.id || '')}"></td>
+    <td><input class="need-name-cell" data-admin-v2-interaction-category="${idx}" data-field="name" value="${adminAttr(cat.name || '')}"></td>
+    <td><input class="need-summary-cell" data-admin-v2-interaction-category="${idx}" data-field="description" value="${adminAttr(cat.description || cat.desc || '')}"></td>
+  </tr>`).join('');
+  const templateRows = Object.values(CONFIG.interactionTemplates || {})
+    .filter(tpl => !adminV2InteractionCategory || tpl.category === adminV2InteractionCategory)
+    .filter(tpl => adminV2Matches([
+      tpl.id, tpl.name, tpl.category, tpl.type, tpl.llmPrompt, ...(tpl.lines || []),
+    ].join(' ')))
+    .sort((a, b) => (+a.id || 0) - (+b.id || 0))
+    .map(tpl => `<tr>
+      <td class="meta-id">${escapeHtml(tpl.id)}</td>
+      <td><input class="need-name-cell" data-admin-v2-interaction-template="${adminAttr(tpl.id)}" data-field="name" value="${adminAttr(tpl.name || '')}"></td>
+      <td><input data-admin-v2-interaction-template="${adminAttr(tpl.id)}" data-field="category" value="${adminAttr(tpl.category || '')}"></td>
+      <td><input data-admin-v2-interaction-template="${adminAttr(tpl.id)}" data-field="type" value="${adminAttr(tpl.type || 'dialogue')}"></td>
+      <td><input class="need-num-cell" type="number" data-admin-v2-interaction-template="${adminAttr(tpl.id)}" data-field="relMin" data-type="number" value="${tpl.relMin ?? -100}"></td>
+      <td><input class="need-num-cell" type="number" data-admin-v2-interaction-template="${adminAttr(tpl.id)}" data-field="relMax" data-type="number" value="${tpl.relMax ?? 100}"></td>
+      <td><input class="need-num-cell" type="number" data-admin-v2-interaction-template="${adminAttr(tpl.id)}" data-field="duration" data-type="number" value="${tpl.duration ?? 5}"></td>
+      <td><label><input type="checkbox" data-admin-v2-interaction-template="${adminAttr(tpl.id)}" data-field="once" data-type="bool" ${tpl.once ? 'checked' : ''}>一次</label></td>
+      <td><input class="dream-json-cell" data-admin-v2-interaction-template-json="${adminAttr(tpl.id)}" data-field="effects" value="${adminAttr(JSON.stringify(tpl.effects || []))}" placeholder="[]"></td>
+      <td><input class="dream-json-cell" data-admin-v2-interaction-template-json="${adminAttr(tpl.id)}" data-field="axisEffects" value="${adminAttr(JSON.stringify(tpl.axisEffects || []))}" placeholder="[]"></td>
+      <td><input class="need-summary-cell" data-admin-v2-interaction-template="${adminAttr(tpl.id)}" data-field="llmPrompt" value="${adminAttr(tpl.llmPrompt || '')}"></td>
+    </tr>`).join('');
   const reactionRows = (multi.observerReactions || []).map((row, idx) => `<tr>
-    <td class="meta-id">${escapeHtml(String(row.id ?? idx + 1))}</td>
+    <td class="meta-id">${idx + 1}</td>
     <td><input data-admin-v2-multi-reaction="${idx}" data-field="name" value="${adminAttr(row.name || '')}"></td>
-    <td><input data-admin-v2-multi-reaction="${idx}" data-field="observerCharId" value="${adminAttr(row.observerCharId || '')}" placeholder="谁会旁观/反应"></td>
-    <td><input data-admin-v2-multi-reaction="${idx}" data-field="observedCharId" value="${adminAttr(row.observedCharId || '')}" placeholder="可空=任意被观察者"></td>
-    <td><input data-admin-v2-multi-reaction="${idx}" data-field="triggerSignal" value="${adminAttr(row.triggerSignal || '')}" placeholder="interaction/status_gained/action_tag"></td>
-    <td><input data-admin-v2-multi-reaction="${idx}" data-field="triggerInteractionCategory" value="${adminAttr(row.triggerInteractionCategory || '')}" placeholder="互动大类，可空"></td>
-    <td><input data-admin-v2-multi-reaction="${idx}" data-field="reactionType" value="${adminAttr(row.reactionType || '')}" placeholder="send_bubble/force_interaction/issue_quest"></td>
-    <td><input data-admin-v2-multi-reaction="${idx}" data-field="priority" data-type="number" type="number" value="${adminAttr(row.priority ?? 10)}"></td>
-    <td><input data-admin-v2-multi-reaction="${idx}" data-field="cooldownGameMin" data-type="number" type="number" value="${adminAttr(row.cooldownGameMin ?? 60)}"></td>
-    <td><textarea data-admin-v2-multi-reaction-json="${idx}" data-field="reactionParams">${escapeHtml(JSON.stringify(row.reactionParams || {}, null, 2))}</textarea></td>
-    <td><textarea data-admin-v2-multi-reaction-json="${idx}" data-field="bubbleTexts">${escapeHtml(JSON.stringify(row.bubbleTexts || [], null, 2))}</textarea></td>
-    <td><textarea data-admin-v2-multi-reaction-json="${idx}" data-field="llmConfig">${escapeHtml(JSON.stringify(row.llmConfig || null, null, 2))}</textarea></td>
-    <td><textarea data-admin-v2-multi-reaction-json="${idx}" data-field="additionalEffects">${escapeHtml(JSON.stringify(row.additionalEffects || null, null, 2))}</textarea></td>
+    <td><input data-admin-v2-multi-reaction="${idx}" data-field="trigger" value="${adminAttr(row.trigger || row.eventType || '')}"></td>
+    <td><input class="dream-json-cell" data-admin-v2-multi-reaction-json="${idx}" data-field="conditions" value="${adminAttr(JSON.stringify(row.conditions || {}))}" placeholder="{}"></td>
+    <td><input class="dream-json-cell" data-admin-v2-multi-reaction-json="${idx}" data-field="effects" value="${adminAttr(JSON.stringify(row.effects || []))}" placeholder="[]"></td>
   </tr>`).join('');
-  const statusTagRows = Object.entries(multi.statusTags || {}).map(([label, stateId]) => `<tr>
-    <td>${escapeHtml(label)}</td>
-    <td><input data-admin-v2-multi-status-tag="${adminAttr(label)}" value="${adminAttr(stateId || '')}"></td>
+  const contagionRows = (multi.emotionContagion || []).map((row, idx) => `<tr>
+    <td class="meta-id">${idx + 1}</td>
+    <td><input data-admin-v2-multi-contagion="${idx}" data-field="sourceState" value="${adminAttr(row.sourceState || '')}"></td>
+    <td><input data-admin-v2-multi-contagion="${idx}" data-field="targetState" value="${adminAttr(row.targetState || '')}"></td>
+    <td><input data-admin-v2-multi-contagion="${idx}" data-field="prob" value="${adminAttr(row.prob ?? row.chance ?? '')}"></td>
+    <td><input data-admin-v2-multi-contagion="${idx}" data-field="radius" value="${adminAttr(row.radius ?? '')}"></td>
   </tr>`).join('');
-  const promptRows = Object.entries(multi.promptTemplates || {}).map(([key, text]) => `<tr>
-    <td class="meta-id">${escapeHtml(key)}</td>
-    <td><textarea data-admin-v2-multi-prompt-template="${adminAttr(key)}">${escapeHtml(text || '')}</textarea></td>
-  </tr>`).join('');
-  const contagionRows = (multi.emotionContagion || []).map((row, idx) => {
-    const cells = Object.entries(row || {}).map(([key, val]) => `<td><textarea data-admin-v2-multi-contagion="${idx}" data-field="${adminAttr(key)}">${escapeHtml(typeof val === 'object' ? JSON.stringify(val, null, 2) : String(val ?? ''))}</textarea></td>`).join('');
-    const heads = Object.keys(row || {}).map(key => `<th>${escapeHtml(key)}</th>`).join('');
-    return { heads, row: `<tr>${cells}</tr>` };
-  });
-  const contagionHead = contagionRows[0]?.heads || '<th>规则</th>';
-  const contagionBody = contagionRows.map(r => r.row).join('');
+  const statusTagRows = Object.entries(multi.statusTags || {}).map(([key, value]) => `<div class="cfg-field">
+    <label>${escapeHtml(key)}</label><input data-admin-v2-multi-status-tag="${adminAttr(key)}" value="${adminAttr(value || '')}">
+  </div>`).join('');
+  const promptRows = Object.entries(multi.promptTemplates || {}).map(([key, value]) => `<div class="cfg-field">
+    <label>${escapeHtml(key)}</label><textarea data-admin-v2-multi-prompt-template="${adminAttr(key)}">${escapeHtml(value || '')}</textarea>
+  </div>`).join('');
   return `
-    <div class="admin-v2-trait-page admin-v2-interaction-page">
-      <div class="cfg-enums"><b>互动模板和多人互动</b><p>大类别只维护 id / 名称 / 描述；模板按大类导航管理，一级字段展开，复杂内容保留 JSON。 <span class="meta-tag" id="admin-v2-generic-save-status">等待改动</span></p></div>
-      <div class="admin-v2-table-wrap" style="max-height:24vh;margin-bottom:10px">
-        <table class="admin-v2-table">
-          <thead><tr><th colspan="4">互动分类 interactionCategories</th></tr><tr><th>ID</th><th>名称</th><th>描述</th><th>模板数</th></tr></thead>
-          <tbody>${categoryRows || '<tr><td colspan="4" class="logic-muted">暂无互动分类</td></tr>'}</tbody>
+    <div class="admin-v2-trait-page admin-v2-interactions-page">
+      <div class="cfg-enums"><b>互动模板和多人互动</b><p>维护互动分类、互动模板、社交评分、旁观反应和情绪传染。表格修改会自动保存到本地配置。</p></div>
+      <div class="meta-tabs">${categoryTabs || '<span class="logic-muted">暂无互动分类</span>'}</div>
+      <div class="admin-v2-table-wrap" style="max-height:18vh">
+        <table class="admin-v2-table dream-meta-table">
+          <thead><tr><th>ID</th><th>分类名</th><th>说明</th></tr></thead>
+          <tbody>${categoryRows || '<tr><td colspan="3" class="logic-muted">暂无互动分类</td></tr>'}</tbody>
         </table>
       </div>
-      <div class="cfg-enums"><b>互动模板</b><p>一个大类别对应菜单第一层；下方每一行是该大类下的子互动模板。子互动用 category 归属大类，type / relMin / relMax / duration / cooldown 等为一级字段；lines / effects / skillReq / onLowScore / unlock_conditions / risky_details 是复杂内容，继续用 JSON。</p></div>
-      <div class="adm-actions" style="justify-content:flex-start;flex-wrap:wrap;margin-bottom:8px">${nav || '<span class="logic-muted">暂无分类</span>'}</div>
-      <div class="admin-v2-table-wrap" style="max-height:45vh;margin-bottom:12px">
-        <table class="admin-v2-table" style="min-width:2200px">
-          <thead><tr><th colspan="16">${escapeHtml(selectedCategory?.name || selectedCategory?.id || '未分类')} · 子互动模板</th></tr>
-            <tr><th>ID</th><th>名称</th><th>类型</th><th>关系下限</th><th>关系上限</th><th>时长</th><th>冷却</th><th>LLM Prompt</th><th>一次性</th><th>技能要求 JSON</th><th>对白 JSON</th><th>效果 JSON</th><th>关系轴 JSON</th><th>低分收场 JSON</th><th>解锁条件 JSON</th><th>风险 JSON</th></tr></thead>
-          <tbody>${templateRows || '<tr><td colspan="16" class="logic-muted">此分类暂无模板</td></tr>'}</tbody>
+      <div class="admin-v2-table-wrap" style="max-height:34vh">
+        <table class="admin-v2-table dream-meta-table">
+          <thead><tr><th>ID</th><th>名称</th><th>分类</th><th>类型</th><th>最低关系</th><th>最高关系</th><th>时长</th><th>限制</th><th>效果 JSON</th><th>关系轴 JSON</th><th>LLM Prompt</th></tr></thead>
+          <tbody>${templateRows || '<tr><td colspan="11" class="logic-muted">当前分类没有匹配的互动模板</td></tr>'}</tbody>
         </table>
       </div>
-      <div class="cfg-enums"><b>社交评分规则</b><p>这些规则不是互动内容，而是“互动能不能自然发生、低分如何收场”的解释参数。</p></div>
-      <div class="admin-v2-table-wrap" style="max-height:26vh;margin-bottom:12px">
-        <table class="admin-v2-table" style="min-width:980px">
-          <thead><tr><th>字段</th><th>用途</th><th>配置</th></tr></thead>
-          <tbody>
-            <tr><td>witnessRadius</td><td>见证者半径，影响逾矩风险。</td><td><input data-admin-v2-interaction-social="witnessRadius" data-type="number" type="number" value="${adminAttr(social.witnessRadius ?? 5)}"></td></tr>
-            <tr><td>showLockedInteractions</td><td>是否显示暂不可用互动，并说明原因。</td><td><input type="checkbox" data-admin-v2-interaction-social="showLockedInteractions" data-type="bool" ${social.showLockedInteractions !== false ? 'checked' : ''}></td></tr>
-            <tr><td>categoryMinScore</td><td>各互动大类的最低自然意愿分。</td><td><textarea data-admin-v2-interaction-social-json="categoryMinScore">${escapeHtml(JSON.stringify(social.categoryMinScore || {}, null, 2))}</textarea></td></tr>
-            <tr><td>categoryOnLowScore</td><td>大类低分时的状态/关系后果。</td><td><textarea data-admin-v2-interaction-social-json="categoryOnLowScore">${escapeHtml(JSON.stringify(social.categoryOnLowScore || {}, null, 2))}</textarea></td></tr>
-            <tr><td>hierarchyOnLowScore</td><td>身份关系 + 大类低分的特殊后果。</td><td><textarea data-admin-v2-interaction-social-json="hierarchyOnLowScore">${escapeHtml(JSON.stringify(social.hierarchyOnLowScore || {}, null, 2))}</textarea></td></tr>
-            <tr><td>riskyDefaults</td><td>风险互动失败默认状态等兜底。</td><td><textarea data-admin-v2-interaction-social-json="riskyDefaults">${escapeHtml(JSON.stringify(social.riskyDefaults || {}, null, 2))}</textarea></td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="cfg-enums"><b>多人规则</b><p>多人规则监听互动、状态、行动标签等事件；命中后可冒气泡、强制互动、下发任务、加状态或提高 AI 权重。每条规则一行，复杂参数保留 JSON。多人规则保存后会热重载。</p></div>
-      <div class="admin-v2-table-wrap" style="max-height:18vh;margin-bottom:10px">
-        <table class="admin-v2-table">
-          <thead><tr><th>字段</th><th>说明</th><th>值</th></tr></thead>
-          <tbody>
-            <tr><td>masterEnabled</td><td>多人规则总开关。</td><td><input type="checkbox" data-admin-v2-multi-setting="masterEnabled" data-type="bool" ${multi.masterEnabled !== false ? 'checked' : ''}></td></tr>
-            <tr><td>maxObserverBubblesPerEvent</td><td>同一事件最多旁观气泡数。</td><td><input data-admin-v2-multi-setting="maxObserverBubblesPerEvent" data-type="number" type="number" value="${adminAttr(multi.maxObserverBubblesPerEvent ?? 1)}"></td></tr>
-            <tr><td>contagionCooldownGameMin</td><td>情绪传染冷却，单位游戏分钟。</td><td><input data-admin-v2-multi-setting="contagionCooldownGameMin" data-type="number" type="number" value="${adminAttr(multi.contagionCooldownGameMin ?? 5)}"></td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="admin-v2-table-wrap" style="max-height:24vh;margin-bottom:10px">
-        <table class="admin-v2-table" style="min-width:720px">
-          <thead><tr><th colspan="2">statusTags 状态标签映射</th></tr><tr><th>叙事标签</th><th>状态 ID</th></tr></thead>
-          <tbody>${statusTagRows || '<tr><td colspan="2" class="logic-muted">暂无状态标签映射</td></tr>'}</tbody>
-        </table>
-      </div>
-      <div class="admin-v2-table-wrap" style="max-height:24vh;margin-bottom:10px">
-        <table class="admin-v2-table" style="min-width:860px">
-          <thead><tr><th colspan="2">promptTemplates 多人规则 LLM 提示</th></tr><tr><th>Prompt Key</th><th>模板文本</th></tr></thead>
-          <tbody>${promptRows || '<tr><td colspan="2" class="logic-muted">暂无 prompt 模板</td></tr>'}</tbody>
-        </table>
-      </div>
-      <div class="admin-v2-table-wrap" style="max-height:42vh;margin-bottom:10px">
-        <table class="admin-v2-table" style="min-width:1800px">
-          <thead><tr><th colspan="13">observerReactions 旁观/连锁反应规则</th></tr><tr><th>ID</th><th>名称</th><th>观察者</th><th>被观察者</th><th>触发信号</th><th>互动大类</th><th>反应类型</th><th>优先级</th><th>冷却</th><th>反应参数 JSON</th><th>气泡 JSON</th><th>LLM JSON</th><th>追加效果 JSON</th></tr></thead>
-          <tbody>${reactionRows || '<tr><td colspan="13" class="logic-muted">暂无旁观反应规则</td></tr>'}</tbody>
-        </table>
-      </div>
-      <div class="admin-v2-table-wrap" style="max-height:28vh;margin-bottom:10px">
-        <table class="admin-v2-table" style="min-width:900px">
-          <thead><tr><th colspan="8">emotionContagion 情绪传染规则</th></tr><tr>${contagionHead}</tr></thead>
-          <tbody>${contagionBody || '<tr><td class="logic-muted">暂无情绪传染规则</td></tr>'}</tbody>
-        </table>
+      <div class="admin-v2-trait-json">
+        <details>
+          <summary>社交评分规则</summary>
+          <div class="ai-v2-grid">
+            <div class="cfg-field"><label>显示锁定互动</label><input type="checkbox" data-admin-v2-interaction-social="showLockedInteractions" data-type="bool" ${social.showLockedInteractions ? 'checked' : ''}></div>
+            <div class="cfg-field"><label>低分阈值 JSON</label><textarea data-admin-v2-interaction-social-json="categoryMinScore">${escapeHtml(JSON.stringify(social.categoryMinScore || {}, null, 2))}</textarea></div>
+            <div class="cfg-field"><label>低分收场 JSON</label><textarea data-admin-v2-interaction-social-json="categoryOnLowScore">${escapeHtml(JSON.stringify(social.categoryOnLowScore || {}, null, 2))}</textarea></div>
+          </div>
+        </details>
+        <details>
+          <summary>多人互动规则</summary>
+          <div class="ai-v2-grid">
+            <div class="cfg-field"><label>启用多人反应</label><input type="checkbox" data-admin-v2-multi-setting="enabled" data-type="bool" ${multi.enabled !== false ? 'checked' : ''}></div>
+            <div class="cfg-field"><label>最大反应距离</label><input type="number" data-admin-v2-multi-setting="maxDistance" data-type="number" value="${multi.maxDistance ?? 6}"></div>
+            ${statusTagRows}
+            ${promptRows}
+          </div>
+          <div class="admin-v2-table-wrap" style="max-height:22vh">
+            <table class="admin-v2-table dream-meta-table">
+              <thead><tr><th>#</th><th>旁观规则</th><th>触发</th><th>条件 JSON</th><th>效果 JSON</th></tr></thead>
+              <tbody>${reactionRows || '<tr><td colspan="5" class="logic-muted">暂无旁观反应规则</td></tr>'}</tbody>
+            </table>
+          </div>
+          <div class="admin-v2-table-wrap" style="max-height:18vh">
+            <table class="admin-v2-table dream-meta-table">
+              <thead><tr><th>#</th><th>源状态</th><th>目标状态</th><th>概率</th><th>半径</th></tr></thead>
+              <tbody>${contagionRows || '<tr><td colspan="5" class="logic-muted">暂无情绪传染规则</td></tr>'}</tbody>
+            </table>
+          </div>
+        </details>
       </div>
     </div>`;
 }
 
-function nextDreamId() {
-  const rows = dreamConfigForAdmin().dreamMetadata || {};
-  let id = 'new_dream';
-  let n = 1;
-  while (rows[id]) id = `new_dream_${++n}`;
-  return id;
-}
-
-function normalizeDreamIdInput(value) {
-  return String(value || '')
-    .trim()
-    .replace(/\s+/g, '_')
-    .replace(/[^a-zA-Z0-9_\-]/g, '_')
-    .replace(/_+/g, '_')
-    .replace(/^_+|_+$/g, '');
-}
-
-function adminDreamSaved(msg = '已自动保存') {
-  adminV2DreamSavedMessage = `${msg} · ${new Date().toLocaleTimeString('zh-CN', { hour12: false })}`;
-  const el = document.getElementById('admin-v2-dream-save-status');
-  if (el) el.textContent = adminV2DreamSavedMessage;
-}
-
-function reloadDreamP0Systems() {
-  BehaviorDailyStats?.init?.();
-  HealthSystem?.init?.();
-  DreamProgressStore?.init?.();
-  ReputationDomainSystem?.init?.();
-}
-
-function adminRenameDreamId(oldId, rawNewId) {
-  const newId = normalizeDreamIdInput(rawNewId);
-  const cfg = dreamConfigForAdmin();
-  const meta = cfg.dreamMetadata || {};
-  if (!oldId || !meta[oldId]) return { ok: false, message: '原梦想不存在' };
-  if (!newId) return { ok: false, message: 'ID 不能为空，只支持英文/数字/下划线/短横线' };
-  if (newId === oldId) return { ok: true, id: oldId, message: 'ID 未变化' };
-  if (meta[newId]) return { ok: false, message: `ID「${newId}」已存在` };
-
-  meta[newId] = meta[oldId];
-  delete meta[oldId];
-  for (const profile of Object.values(cfg.dreamProfiles || {})) {
-    if (profile?.type === oldId) profile.type = newId;
-  }
-  saveConfigToStorage();
-  adminV2DreamFocusId = newId;
-  if (adminV2Search === oldId) adminV2Search = newId;
-  adminDreamSaved(`ID 已改为 ${newId}`);
-  return { ok: true, id: newId };
-}
-
-function adminV2AddDream() {
-  const cfg = dreamConfigForAdmin();
-  const id = nextDreamId();
-  cfg.dreamMetadata[id] = {
-    label: '新梦想',
-    category: '家业',
-    description: '',
-    examples: [],
-    conditions: {},
-    gameplay: {},
-  };
-  adminV2Search = id;
-  adminV2DreamFocusId = id;
-  adminDreamSaved(`已新增 ${id}`);
-  saveConfigToStorage();
-  renderAdmin();
-}
-
-function adminV2ValidateDreams() {
-  const cfg = dreamConfigForAdmin();
-  const lines = [];
-  for (const [id, row] of Object.entries(cfg.dreamMetadata || {})) {
-    if (!row.label) lines.push(`${id} 缺标签`);
-    if (!DREAM_CATEGORY_OPTIONS.includes(row.category)) lines.push(`${id} 分类应为 ${DREAM_CATEGORY_OPTIONS.join('/')}`);
-    if (!row.description) lines.push(`${id} 缺描述`);
-    if (row.conditions && typeof row.conditions !== 'object') lines.push(`${id} conditions 不是对象`);
-    if (row.gameplay && typeof row.gameplay !== 'object') lines.push(`${id} gameplay 不是对象`);
-  }
-  for (const [charId, profile] of Object.entries(cfg.dreamProfiles || {})) {
-    if (profile?.type && !cfg.dreamMetadata?.[profile.type]) lines.push(`${charId} 引用了不存在的梦想类型 ${profile.type}`);
-  }
-  alert(lines.length ? lines.join('\n') : '梦想系统校验通过。');
-}
-
-const DREAM_P0_COUNTER_KEYS = [
-  'works', 'praise', 'contestWin', 'studyTasks', 'managedTasks', 'protectedEvents',
-  'clearedNegativeSecrets', 'discoveredSecrets', 'successfulBargains',
-  'craftedWorks', 'praisedWorks', 'workAsClue', 'helpedEvents', 'conflictResolved',
-  'misunderstanding', 'rumor', 'secretLeak', 'falseEvidence', 'harmfulLeaks',
-];
-
 function adminDreamDiagChar() {
-  const fallback = CHARS[selectedIdx]?.id || CHARS[0]?.id || '';
-  if (!adminV2DreamDiagCharId || !getChar(adminV2DreamDiagCharId)) adminV2DreamDiagCharId = fallback;
-  return getChar(adminV2DreamDiagCharId) || CHARS[0] || null;
+  const fallback = CHARS[selectedIdx] || CHARS[0] || null;
+  if (!adminV2DreamDiagCharId && fallback) adminV2DreamDiagCharId = fallback.id;
+  return getChar(adminV2DreamDiagCharId) || fallback;
 }
 
 function renderDreamP0Diagnostics() {
   const c = adminDreamDiagChar();
-  if (!c) return '<div class="cfg-enums"><b>P0 条件诊断</b><p>暂无人物。</p></div>';
-  const profile = dreamConfigForAdmin().dreamProfiles?.[c.id] || {};
-  const dreamType = profile.type || '';
-  const meta = dreamType ? dreamConfigForAdmin().dreamMetadata?.[dreamType] : null;
-  const evalResult = DreamConditionRegistry?.evaluateDream?.(c.id, dreamType);
-  const family = FamilySystem?.findFamilyOfChar?.(c.id);
-  const dayStats = BehaviorDailyStats?.getWindow?.(c.id, 7) || [];
-  const latest = dayStats[dayStats.length - 1] || {};
-  const progress = c.dreamProgress?.[dreamType] || {};
-  const counters = progress.counters || {};
-  const repExplain = ReputationDomainSystem?.explain?.(c.id);
-  const repRows = (repExplain?.domains || []).map(row => {
-    const isCareer = (repExplain.careerDomains || []).includes(row.id);
-    const isIdentity = (repExplain.identity?.domains || []).some(d => d.domain === row.id);
-    return `
-      <tr>
-        <td>${escapeHtml(row.label)}</td>
-        <td class="meta-id">${escapeHtml(row.id)}</td>
-        <td>${escapeHtml(String(row.value || 0))}</td>
-        <td>${isCareer ? '职业域' : ''}${isCareer && isIdentity ? ' / ' : ''}${isIdentity ? '身份参考' : ''}</td>
-        <td>
-          <button class="mini-btn" data-dream-rep-domain="${adminAttr(row.id)}" data-delta="10">+10</button>
-          <button class="mini-btn" data-dream-rep-domain="${adminAttr(row.id)}" data-delta="-10">-10</button>
-          <button class="mini-btn" data-dream-rep-domain="${adminAttr(row.id)}" data-set="0">清零</button>
-        </td>
-      </tr>`;
-  }).join('');
-  const repLogRows = (repExplain?.log || []).map(row => `
-    <tr>
-      <td>第${escapeHtml(row.day ?? '?')}日</td>
-      <td>${escapeHtml(ReputationDomainSystem?.domainLabel?.(row.domain) || row.domain)}</td>
-      <td>${row.delta > 0 ? '+' : ''}${escapeHtml(row.delta || 0)}</td>
-      <td>${escapeHtml(row.reason || row.source || '—')}</td>
-      <td>${escapeHtml(row.pathId || '—')}</td>
-    </tr>`).join('');
-  const charOptions = (CHARS || []).map(row =>
-    `<option value="${adminAttr(row.id)}" ${row.id === c.id ? 'selected' : ''}>${escapeHtml(row.short || row.name || row.id)}</option>`).join('');
-  const conditionRows = (evalResult?.results || []).map(row => `
-    <tr>
-      <td>${row.ok ? '已满足' : row.source === 'unknown' ? '未知' : '未满足'}</td>
-      <td class="meta-id">${escapeHtml(row.key)}</td>
-      <td>${escapeHtml(row.label || row.key)}</td>
-      <td>${escapeHtml(String(row.value ?? '—'))}</td>
-      <td>${escapeHtml(String(row.target ?? '—'))}</td>
-      <td>${Math.round((row.progress || 0) * 100)}%</td>
-      <td>${escapeHtml(row.source || '')}</td>
-      <td>${escapeHtml(row.reason || '')}</td>
-    </tr>`).join('');
-  const counterRows = DREAM_P0_COUNTER_KEYS.map(key => `
-    <tr>
-      <td class="meta-id">${escapeHtml(key)}</td>
-      <td>${escapeHtml(String(counters[key] || 0))}</td>
+  const cfg = dreamConfigForAdmin();
+  const profile = c ? (cfg.dreamProfiles?.[c.id] || {}) : {};
+  const dreamType = profile.type || Object.keys(cfg.dreamMetadata || {})[0] || '';
+  const meta = cfg.dreamMetadata?.[dreamType] || {};
+  const registry = globalThis.DreamConditionRegistry;
+  const progress = globalThis.DreamProgressStore;
+  const stats = globalThis.BehaviorDailyStats;
+  const health = globalThis.HealthSystem;
+  const result = c && registry?.evaluateDream ? registry.evaluateDream(c.id, dreamType) : null;
+  const conditionRows = (result?.results || []).map(row => `<tr>
+    <td>${escapeHtml(row.ok ? '满足' : row.source === 'unknown' ? '未知' : '未满足')}</td>
+    <td>${escapeHtml(row.key)}</td>
+    <td>${escapeHtml(row.label || '')}</td>
+    <td>${escapeHtml(row.value ?? '—')}</td>
+    <td>${escapeHtml(row.target ?? '—')}</td>
+    <td>${escapeHtml(row.source || '')}</td>
+    <td>${escapeHtml(row.reason || '')}</td>
+  </tr>`).join('');
+  const counterKeys = [
+    'works', 'praise', 'contestWin', 'studyTasks', 'managedTasks', 'protectedEvents',
+    'discoveredSecrets', 'craftedWorks', 'conflictResolved', 'rumor', 'secretLeak',
+  ];
+  const counterRows = counterKeys.map(key => {
+    const value = c && progress?.getCounter ? progress.getCounter(c.id, key) : 0;
+    return `<tr>
+      <td>${escapeHtml(key)}</td><td>${escapeHtml(value)}</td>
       <td>
-        <button class="mini-btn" data-dream-p0-counter="${adminAttr(key)}" data-delta="1">+1</button>
-        <button class="mini-btn" data-dream-p0-counter="${adminAttr(key)}" data-delta="-1">-1</button>
-        <button class="mini-btn" data-dream-p0-counter="${adminAttr(key)}" data-set="0">清零</button>
+        <button class="mini-btn" data-dream-p0-counter="${escapeHtml(key)}" data-delta="1">+1</button>
+        <button class="mini-btn" data-dream-p0-counter="${escapeHtml(key)}" data-delta="-1">-1</button>
+        <button class="mini-btn" data-dream-p0-counter="${escapeHtml(key)}" data-set="0">清零</button>
       </td>
-    </tr>`).join('');
-  const statsRows = dayStats.map(row => `
-    <tr>
-      <td>第${row.day}日</td>
-      <td>${escapeHtml(JSON.stringify(row.needMin || {}))}</td>
-      <td>${escapeHtml(Object.entries(row.actionTagMinutes || {}).map(([k, v]) => `${k}:${v}`).join(' / ') || '—')}</td>
-      <td>${escapeHtml((row.visitedSceneIds || []).join(' / ') || '—')}</td>
-      <td>${escapeHtml(Object.entries(row.flags || {}).filter(([, v]) => v).map(([k]) => k).join(' / ') || '—')}</td>
-    </tr>`).join('');
-  return `
+    </tr>`;
+  }).join('');
+  const recentStats = c && stats?.getWindow ? stats.getWindow(c.id, 7) : [];
+  const statRows = recentStats.map(row => `<tr>
+    <td>第${escapeHtml(row.day)}日</td>
+    <td>${escapeHtml(JSON.stringify(row.needMin || {}))}</td>
+    <td>${escapeHtml((row.visitedSceneIds || []).length)}</td>
+    <td>${escapeHtml(Object.keys(row.flags || {}).filter(k => row.flags[k]).join('、') || '—')}</td>
+  </tr>`).join('');
+  const domains = globalThis.ReputationDomainSystem?.domains?.() || ['general', 'family', 'scholarly', 'official', 'servant'];
+  const repRows = domains.map(domain => {
+    const value = c && globalThis.ReputationDomainSystem?.get ? globalThis.ReputationDomainSystem.get(c.id, domain) : 0;
+    const label = globalThis.ReputationDomainSystem?.domainLabel?.(domain) || domain;
+    return `<tr>
+      <td>${escapeHtml(label)}</td><td>${escapeHtml(value)}</td>
+      <td>
+        <button class="mini-btn" data-dream-rep-domain="${escapeHtml(domain)}" data-delta="10">+10</button>
+        <button class="mini-btn" data-dream-rep-domain="${escapeHtml(domain)}" data-delta="-10">-10</button>
+        <button class="mini-btn" data-dream-rep-domain="${escapeHtml(domain)}" data-set="0">清零</button>
+      </td>
+    </tr>`;
+  }).join('');
+  const charOptions = (CHARS || []).map(ch =>
+    `<option value="${adminAttr(ch.id)}"${c?.id === ch.id ? ' selected' : ''}>${escapeHtml(ch.name || ch.id)}</option>`
+  ).join('');
+  return `<div class="dream-p0-diagnostics">
     <div class="cfg-enums">
       <b>P0 条件诊断</b>
-      <p>只读现有底座：健康、每日统计、梦想计数、关系/公账。背包和秘密类条件在 P0 先用计数器承接。</p>
-      <div class="cfg-grid" style="margin-top:8px">
-        <div class="cfg-field"><label>人物</label><select id="admin-v2-dream-diag-char">${charOptions}</select></div>
-        <div class="cfg-field"><label>梦想</label><input readonly value="${adminAttr(meta?.label || dreamType || '未配置')}"></div>
-        <div class="cfg-field"><label>健康</label><input readonly value="${adminAttr(HealthSystem?.getHealth?.(c.id) ?? c.health ?? 100)} / ${adminAttr(HealthSystem?.getIllnessLevel?.(c.id) || 'none')}"></div>
-        <div class="cfg-field"><label>家庭公账</label><input readonly value="${adminAttr(family ? FamilySystem.getFund(family.id) : '无家庭')}"></div>
-        <div class="cfg-field"><label>职业声望域</label><input readonly value="${adminAttr((repExplain?.careerDomains || []).map(d => ReputationDomainSystem?.domainLabel?.(d) || d).join(' / ') || '总体名声')}"></div>
-        <div class="cfg-field"><label>身份参考声望</label><input readonly value="${adminAttr(repExplain?.identity?.value ?? c.reputation ?? 0)}"></div>
+      <p>当前人物：<select id="admin-v2-dream-diag-char">${charOptions}</select></p>
+      <p>梦想：${escapeHtml(meta.label || dreamType || '未配置')} · 进度 ${escapeHtml(result?.progressScore ?? '—')} · 健康 ${escapeHtml(c && health?.getHealth ? Math.round(health.getHealth(c.id)) : '—')}</p>
+    </div>
+    <div class="admin-v2-table-wrap" style="max-height:24vh">
+      <table class="admin-v2-table dream-meta-table">
+        <thead><tr><th>状态</th><th>Key</th><th>条件</th><th>当前</th><th>目标</th><th>来源</th><th>说明</th></tr></thead>
+        <tbody>${conditionRows || '<tr><td colspan="7" class="logic-muted">当前人物未配置可诊断梦想</td></tr>'}</tbody>
+      </table>
+    </div>
+    <div class="profile-two-col">
+      <div class="admin-v2-table-wrap" style="max-height:22vh">
+        <table class="admin-v2-table dream-meta-table">
+          <thead><tr><th>计数器</th><th>值</th><th>调试</th></tr></thead>
+          <tbody>${counterRows}</tbody>
+        </table>
+      </div>
+      <div class="admin-v2-table-wrap" style="max-height:22vh">
+        <table class="admin-v2-table dream-meta-table">
+          <thead><tr><th>声望域</th><th>值</th><th>调试</th></tr></thead>
+          <tbody>${repRows}</tbody>
+        </table>
       </div>
     </div>
-    <div class="admin-v2-table-wrap" style="max-height:24vh;margin-bottom:10px">
-      <table class="admin-v2-table">
-        <thead><tr><th>状态</th><th>Key</th><th>条件</th><th>当前</th><th>目标</th><th>进度</th><th>来源</th><th>说明</th></tr></thead>
-        <tbody>${conditionRows || '<tr><td colspan="8" class="logic-muted">当前人物没有可判定的梦想条件</td></tr>'}</tbody>
+    <div class="admin-v2-table-wrap" style="max-height:18vh">
+      <table class="admin-v2-table dream-meta-table">
+        <thead><tr><th>日期</th><th>最低需求</th><th>访问场景</th><th>标记</th></tr></thead>
+        <tbody>${statRows || '<tr><td colspan="4" class="logic-muted">暂无最近 7 日统计</td></tr>'}</tbody>
       </table>
     </div>
-    <div class="admin-v2-table-wrap" style="max-height:22vh;margin-bottom:10px">
-      <table class="admin-v2-table">
-        <thead><tr><th>计数器</th><th>当前值</th><th>调试推进</th></tr></thead>
-        <tbody>${counterRows}</tbody>
-      </table>
-    </div>
-    <div class="admin-v2-table-wrap" style="max-height:22vh;margin-bottom:10px">
-      <table class="admin-v2-table">
-        <thead><tr><th>声望域</th><th>ID</th><th>当前值</th><th>绑定来源</th><th>调试</th></tr></thead>
-        <tbody>${repRows || '<tr><td colspan="5" class="logic-muted">分域声望系统未初始化</td></tr>'}</tbody>
-      </table>
-    </div>
-    <div class="admin-v2-table-wrap" style="max-height:16vh;margin-bottom:10px">
-      <table class="admin-v2-table">
-        <thead><tr><th>日期</th><th>声望域</th><th>变化</th><th>原因</th><th>路径</th></tr></thead>
-        <tbody>${repLogRows || '<tr><td colspan="5" class="logic-muted">暂无声望变更记录</td></tr>'}</tbody>
-      </table>
-    </div>
-    <div class="admin-v2-table-wrap" style="max-height:22vh;margin-bottom:10px">
-      <table class="admin-v2-table">
-        <thead><tr><th>日期</th><th>最低需求</th><th>行为标签分钟</th><th>访问场景</th><th>Flags</th></tr></thead>
-        <tbody>${statsRows || '<tr><td colspan="5" class="logic-muted">暂无每日统计，运行一会儿游戏后会自动生成</td></tr>'}</tbody>
-      </table>
-    </div>`;
+  </div>`;
+}
+
+function reloadDreamP0Systems() {
+  HealthSystem?.init?.();
+  BehaviorDailyStats?.init?.();
+  DreamProgressStore?.init?.();
 }
 
 function renderAdminV2DreamSystem() {
@@ -5681,7 +5726,7 @@ function adminV2SaveIdentitySystem(shouldRender = true) {
 
 function adminV2AddIdentityRule() {
   const cfg = identityConfigForAdmin();
-  cfg.rules.push({ rel: 'peer', cat: '叙旧', behavior: 'allowed' });
+  cfg.rules.push({ rel: 'peer', cat: '闲谈', behavior: 'allowed' });
   saveConfigToStorage();
   renderAdmin();
 }
@@ -6004,6 +6049,14 @@ function bindAdminV2Events() {
     const family = (CONFIG.familyConfig?.families || []).find(f => String(f.id) === String(adminV2CharacterFamilyId));
     const first = family?.members?.find(m => CONFIG.characters.some(c => c.id === m.charId));
     if (first) adminSelectCharById(first.charId);
+    adminV2CharacterEditing = false;
+    renderAdmin();
+  });
+  document.getElementById('admin-v2-editor-char')?.addEventListener('change', evt => {
+    adminSelectCharById(evt.target.value);
+    const membership = characterFamilyMembership(evt.target.value);
+    if (membership.family) adminV2CharacterFamilyId = membership.family.id;
+    adminV2CharacterEditing = false;
     renderAdmin();
   });
   document.querySelectorAll('[data-admin-v2-pick-char]').forEach(btn => btn.onclick = () => {
@@ -6039,17 +6092,6 @@ function bindAdminV2Events() {
       if (peer !== btn) peer.classList.remove('selected');
     });
     btn.classList.toggle('selected', !wasSelected);
-  });
-  document.querySelectorAll('[data-admin-v2-editor-dream]').forEach(btn => btn.onclick = () => {
-    if (!adminV2CharacterEditing) return;
-    document.querySelectorAll('[data-admin-v2-editor-dream]').forEach(peer => peer.classList.toggle('selected', peer === btn));
-    const select = document.getElementById('admin-v2-char-dream-type');
-    if (select) select.value = btn.dataset.adminV2EditorDream;
-  });
-  document.getElementById('admin-v2-char-dream-type')?.addEventListener('change', evt => {
-    document.querySelectorAll('[data-admin-v2-editor-dream]').forEach(btn => {
-      btn.classList.toggle('selected', btn.dataset.adminV2EditorDream === evt.target.value);
-    });
   });
 
   document.querySelectorAll('[data-admin-v2-select-template]').forEach(row => row.onclick = evt => {
@@ -6375,20 +6417,17 @@ function bindAdminV2Events() {
     adminNeedSaved(newKey === oldKey ? 'ID 未变化' : `ID 已改为 ${newKey}`);
     renderAdmin();
   });
-  document.querySelectorAll('[data-admin-v2-need-band]').forEach(el => el.onchange = () => {
-    const row = CONFIG.needDefs?.[+el.dataset.adminV2NeedBand];
+  document.querySelectorAll('[data-admin-v2-need-band-threshold],[data-admin-v2-need-band-state]').forEach(el => el.onchange = () => {
+    const idx = +(el.dataset.adminV2NeedBandThreshold ?? el.dataset.adminV2NeedBandState);
+    const row = CONFIG.needDefs?.[idx];
     if (!row) return;
-    const raw = el.value.trim();
-    try {
-      row.stateBands = raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      alert(`${row.label || row.key || '需求'} 的分档 JSON 无效`);
+    const next = adminCollectNeedBandSlots(idx);
+    const bad = next.find(band => band.id && !adminParseNeedBandThreshold(adminNeedBandThresholdText(band)) && Object.keys(band).length === 1);
+    if (bad) {
+      alert(`${row.label || row.key || '需求'} 的分档数字无法识别，请使用 <10、<20、>100、>110 或 20-40。`);
       return;
     }
-    if (!Array.isArray(row.stateBands)) {
-      alert(`${row.label || row.key || '需求'} 的分档 JSON 必须是数组`);
-      return;
-    }
+    row.stateBands = next;
     saveConfigToStorage();
     adminNeedSaved('分档已保存');
     renderAdmin();

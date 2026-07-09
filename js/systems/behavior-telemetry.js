@@ -2,7 +2,7 @@
 const BehaviorTelemetry = (() => {
   const STORAGE_KEY = 'dgy_behavior_telemetry_v1';
   const SETTINGS_KEY = 'dgy_behavior_telemetry_settings_v1';
-  const MAX_RECORDS = 1200;
+  const MAX_RECORDS = 5000;
   const FLUSH_EVERY = 20;
   let records = [];
   let dirtyCount = 0;
@@ -51,12 +51,13 @@ const BehaviorTelemetry = (() => {
     }
   }
 
-  function append(event, charId, data = {}) {
-    if (!watchedCharIds.has(charId)) return;
+  function append(event, charId, data = {}, options = {}) {
+    const rowCharId = charId || data.assigneeId || data.issuerId || data.targetCharId || '__global__';
+    if (!options.force && !watchedCharIds.has(rowCharId)) return;
     records.push({
       v: 1,
       event,
-      charId,
+      charId: rowCharId,
       ts: getGameTimestamp(),
       day: gameDay,
       hour: gameHour,
@@ -144,11 +145,13 @@ const BehaviorTelemetry = (() => {
     });
   }
 
-  function bind(type, charIdFromEvent, project) {
+  function bind(type, charIdFromEvent, project, options = {}) {
     unsubs.push(EventBus.on(type, evt => {
       const charId = charIdFromEvent(evt);
       if (!charId) return;
-      append(type, charId, project ? project(evt) : {});
+      const data = project ? project(evt) : {};
+      const force = typeof options.force === 'function' ? !!options.force(evt, data) : !!options.force;
+      append(type, charId, data, { force });
     }));
   }
 
@@ -297,6 +300,29 @@ const BehaviorTelemetry = (() => {
       questTemplateId: evt.questTemplateId,
       eventId: evt.eventId,
     }));
+    bind('character:effect', evt => evt.result?.charId || evt.effect?.charId || evt.effect?.target || evt.result?.actor || evt.result?.idA || evt.effect?.idA || evt.effect?.from, evt => ({
+      effectId: evt.id,
+      effectType: evt.effect?.type,
+      source: evt.source,
+      reason: evt.reason,
+      targetCharId: evt.result?.charId || evt.effect?.charId || evt.effect?.target || '',
+      otherCharId: evt.result?.idB || evt.effect?.idB || evt.effect?.to || '',
+      actor: evt.result?.actor || evt.effect?.actor || '',
+      recipient: evt.result?.recipient || evt.effect?.recipient || '',
+      skill: evt.result?.skill || evt.effect?.skill || '',
+      needKey: evt.result?.key || evt.effect?.key || '',
+      stateId: evt.result?.stateId || evt.effect?.stateId || '',
+      axis: evt.result?.axis || evt.effect?.axis || '',
+      oldValue: round(evt.result?.old),
+      newValue: round(evt.result?.value),
+      delta: round(evt.result?.changed ?? evt.effect?.delta),
+      skipped: !!evt.result?.skipped,
+      skipReason: evt.result?.reason || '',
+      effect: evt.effect,
+      result: evt.result,
+    }), {
+      force: evt => String(evt.source || '').startsWith('quest:'),
+    });
     bind('action:blocked', evt => evt.charId, evt => ({
       actionType: evt.actionType,
       reason: evt.reason,
@@ -321,12 +347,15 @@ const BehaviorTelemetry = (() => {
     for (const type of [
       'quest:issued', 'quest:accepted', 'quest:completed', 'quest:failed',
       'quest:declined', 'quest:expired', 'quest:started', 'quest:blocked',
-      'quest:acceptance_checked',
+      'quest:acceptance_checked', 'quest:progress', 'quest:revoked',
     ]) {
       bind(type, evt => evt.assigneeId, evt => ({
         templateId: evt.templateId,
         quest: QuestSystem?.tpl?.(evt.templateId)?.name || '',
         issuerId: evt.issuerId,
+        batchId: evt.batchId,
+        category: evt.category,
+        questType: evt.questType,
         reason: evt.reason,
         hierarchyRelation: evt.hierarchyRelation,
         relation: evt.relation,
@@ -357,8 +386,53 @@ const BehaviorTelemetry = (() => {
         servantLoyalty: evt.servantLoyalty,
         servantGrievance: evt.servantGrievance,
         servantLaborPressure: evt.servantLaborPressure,
-      }));
+        progress: evt.progress,
+        target: evt.target,
+        orderAffairId: evt.orderAffairId,
+        orderAffairLabel: evt.orderAffairLabel,
+        orderOwnerId: evt.orderOwnerId,
+        orderOwnerName: evt.orderOwnerName,
+        orderIssuerOwnsAffair: evt.orderIssuerOwnsAffair,
+        orderIsManagementTask: evt.orderIsManagementTask,
+        orderHierarchy: evt.orderHierarchy,
+        orderTargetFitScore: evt.orderTargetFitScore,
+        orderTargetFitReasons: evt.orderTargetFitReasons,
+        orderNote: evt.orderNote,
+        orderMetrics: evt.orderMetrics,
+        orderDelta: evt.orderDelta,
+        issuerTraits: evt.issuerTraits,
+        assigneeTraits: evt.assigneeTraits,
+      }), {
+        force: evt => !!evt.orderIsManagementTask,
+      });
     }
+    bind('order:impact', evt => evt.assigneeId || evt.issuerId, evt => ({
+      instanceId: evt.instanceId,
+      templateId: evt.templateId,
+      quest: QuestSystem?.tpl?.(evt.templateId)?.name || '',
+      issuerId: evt.issuerId,
+      assigneeId: evt.assigneeId,
+      status: evt.status,
+      qualityScore: evt.qualityScore,
+      qualityLabel: evt.qualityLabel,
+      onTime: evt.onTime,
+      category: evt.category,
+      questType: evt.questType,
+      orderAffairId: evt.orderAffairId,
+      orderAffairLabel: evt.orderAffairLabel,
+      orderOwnerId: evt.orderOwnerId,
+      orderOwnerName: evt.orderOwnerName,
+      orderIssuerOwnsAffair: evt.orderIssuerOwnsAffair,
+      orderIsManagementTask: evt.orderIsManagementTask,
+      orderHierarchy: evt.orderHierarchy,
+      orderTargetFitScore: evt.orderTargetFitScore,
+      orderTargetFitReasons: evt.orderTargetFitReasons,
+      orderNote: evt.orderNote,
+      orderMetrics: evt.orderMetrics,
+      orderDelta: evt.orderDelta,
+      issuerTraits: evt.issuerTraits,
+      assigneeTraits: evt.assigneeTraits,
+    }), { force: true });
     bind('servant:relation_changed', evt => evt.servantId, evt => ({
       masterId: evt.masterId,
       contractId: evt.contractId,
@@ -417,7 +491,10 @@ const BehaviorTelemetry = (() => {
       filter: evt.filter,
       label: evt.label,
     }));
-    for (const type of ['economy:shift_started', 'economy:shift_ended', 'economy:food_paid', 'economy:allowance_paid']) {
+    for (const type of [
+      'economy:shift_started', 'economy:shift_ended', 'economy:food_paid', 'economy:allowance_paid',
+      'economy:quest_cost', 'economy:quest_reward', 'economy:quest_fine',
+    ]) {
       bind(type, evt => evt.charId, evt => ({
         familyId: evt.familyId,
         fromFamilyId: evt.fromFamilyId,
@@ -427,6 +504,32 @@ const BehaviorTelemetry = (() => {
         category: evt.category,
         workName: evt.workName,
         note: evt.note,
+        templateId: evt.templateId,
+        quest: evt.quest,
+        issuerId: evt.issuerId,
+        assigneeId: evt.assigneeId,
+        targetCount: evt.targetCount,
+        adjustmentId: evt.adjustmentId,
+      }));
+    }
+    for (const type of ['punishment:applied', 'punishment:skipped', 'punishment:money_pending']) {
+      bind(type, evt => evt.charId || evt.assigneeId, evt => ({
+        instanceId: evt.instanceId,
+        templateId: evt.templateId,
+        quest: QuestSystem?.tpl?.(evt.templateId)?.name || '',
+        issuerId: evt.issuerId,
+        assigneeId: evt.assigneeId,
+        punishmentId: evt.punishmentId,
+        punishmentLabel: evt.punishmentLabel,
+        triggerType: evt.triggerType,
+        amount: evt.amount,
+        source: evt.source,
+        requiresApproval: evt.requiresApproval,
+        executorId: evt.executorId,
+        orderFit: evt.orderFit,
+        reason: evt.reason,
+        note: evt.note,
+        moneyPenalty: evt.moneyPenalty,
       }));
     }
     unsubs.push(EventBus.on('time:day', flush));
@@ -463,6 +566,9 @@ const BehaviorTelemetry = (() => {
       rejectedCandidates: {},
       providerAccepted: {},
       quests: {},
+      managementQuests: {},
+      characterEffects: {},
+      orderImpacts: {},
     };
     for (const row of rows) {
       if (row.event === 'evaluation') {
@@ -494,6 +600,16 @@ const BehaviorTelemetry = (() => {
         result.rejectedCandidates[key] = (result.rejectedCandidates[key] || 0) + 1;
       } else if (row.event.startsWith('quest:')) {
         result.quests[row.event] = (result.quests[row.event] || 0) + 1;
+        if (row.orderIsManagementTask) {
+          const key = `${row.event}:${row.orderAffairId || 'unknown'}`;
+          result.managementQuests[key] = (result.managementQuests[key] || 0) + 1;
+        }
+      } else if (row.event === 'character:effect') {
+        const key = row.effectType || 'unknown';
+        result.characterEffects[key] = (result.characterEffects[key] || 0) + 1;
+      } else if (row.event === 'order:impact') {
+        const key = `${row.status || 'unknown'}:${row.orderAffairId || 'unknown'}`;
+        result.orderImpacts[key] = (result.orderImpacts[key] || 0) + 1;
       }
     }
     return result;

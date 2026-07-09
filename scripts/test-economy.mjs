@@ -99,6 +99,17 @@ context.EventBus.emit('furniture:complete', {
 });
 assert.equal(funds[4], 127);
 
+context.CONFIG.moneyConfig.economy.foodChargesEnabled = false;
+funds[4] = 0;
+assert.equal(economy.canUseFurniture(chars.jiazheng, { category: 'meal' }), true);
+const foodPaidCount = events.filter(row => row.type === 'economy:food_paid').length;
+context.EventBus.emit('furniture:complete', {
+  charId: 'jiazheng', category: 'meal', templateId: 301,
+});
+assert.equal(funds[4], 0);
+assert.equal(events.filter(row => row.type === 'economy:food_paid').length, foodPaidCount);
+funds[4] = 127;
+
 assert.equal(economy.runMonthlyAllowances(1), 1);
 assert.equal(funds[4], 107);
 assert.equal(funds[1], 30);

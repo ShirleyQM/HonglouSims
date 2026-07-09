@@ -283,14 +283,21 @@ const QuestIssueSystem = (() => {
     groupCooldowns[groupCooldownKey(issuerId, templateId)] = getGameTimestamp() + mins;
   }
 
-  function issueTo(issuer, target, templateId) {
+  function issueTo(issuer, target, templateId, opts = {}) {
     const tpl = qc().templates?.[templateId];
     const chk = checkQuestIssueable(issuer, target, tpl);
     if (!chk.ok) {
       log(`⚠ ${chk.reason}`);
       return null;
     }
-    const inst = QuestSystem?.issueOne?.(templateId, issuer.id, target.id);
+    if (typeof EconomySystem !== 'undefined') {
+      const econ = EconomySystem?.canIssueQuestEconomy?.(issuer.id, tpl, 1, opts.economyAdjustment || 'none');
+      if (econ && !econ.ok) {
+        log(`⚠ ${econ.reason}`);
+        return null;
+      }
+    }
+    const inst = QuestSystem?.issueOne?.(templateId, issuer.id, target.id, 0, 0, opts);
     if (inst) {
       log(`${issuer.short}传令${target.short}：「${tpl.name}」`);
       if (NarrativeBubbleSystem?.showBubble) {
@@ -309,7 +316,7 @@ const QuestIssueSystem = (() => {
     return inst;
   }
 
-  function issueGroupTo(issuer, templateId, silent) {
+  function issueGroupTo(issuer, templateId, silent, opts = {}) {
     const tpl = qc().templates?.[templateId];
     const chk = checkGroupQuestIssueable(issuer, tpl);
     if (!chk.ok) {
@@ -317,7 +324,14 @@ const QuestIssueSystem = (() => {
       return null;
     }
     const ids = chk.targets.map(c => c.id);
-    const batch = QuestSystem?.issueBatch?.(templateId, issuer.id, ids);
+    if (typeof EconomySystem !== 'undefined') {
+      const econ = EconomySystem?.canIssueQuestEconomy?.(issuer.id, tpl, ids.length, opts.economyAdjustment || 'none');
+      if (econ && !econ.ok) {
+        if (!silent) log(`⚠ ${econ.reason}`);
+        return null;
+      }
+    }
+    const batch = QuestSystem?.issueBatch?.(templateId, issuer.id, ids, opts);
     if (batch?.count > 0) {
       setGroupCooldown(issuer.id, templateId, tpl);
       const names = formatTargetPreview(chk.targets);

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古风扇面意愿轮</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "STKaiti", "KaiTi", "SimKaiti", serif;
+            overflow: hidden;
+            user-select: none;
+        }
+        .bg-decoration {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            background-image:
+                radial-gradient(circle at 20% 30%, #d4af37 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, #8b4513 0%, transparent 50%);
+        }
+        .menu-container {
+            position: relative;
+            width: 800px;
+            height: 700px;
+        }
+        /* 中心角色 */
+        .character-center {
+            position: absolute;
+            top: 50%;
+            left: 120px;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #f5f5dc, #d4af37);
+            border: 4px solid #8b4513;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.5), inset 0 0 20px rgba(139, 69, 19, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+        .character-center:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.8), inset 0 0 20px rgba(139, 69, 19, 0.3);
+        }
+        .character-center::before {
+            content: "👤";
+            font-size: 60px;
+        }
+        /* 意愿气泡 */
+        .desire-bubble {
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(145deg, #fff8dc, #f5deb3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #8b4513;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .desire-bubble::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid #f5deb3;
+        }
+        /* 扇面容器 */
+        .fan-area {
+            position: absolute;
+            top: 50%;
+            left: 120px;
+            transform: translateY(-50%);
+            width: 600px;
+            height: 600px;
+            pointer-events: none;
+        }
+        /* 一级菜单项 */
+        .menu-item {
+            position: absolute;
+            width: 90px;
+            height: 38px;
+            pointer-events: auto;
+            cursor: pointer;
+            transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        opacity 0.35s ease,
+                        left 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        top 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .menu-item.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .menu-item-inner {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #2c1810, #1a0f08);
+            border: 2px solid #8b4513;
+            border-radius: 19px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d4af37;
+            font-size: 16px;
+            letter-spacing: 3px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        .menu-item[data-desire="3"] .menu-item-inner {
+            background: linear-gradient(145deg, #4a3728, #2c1810);
+            border-color: #d4af37;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5), 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .menu-item[data-desire="2"] .menu-item-inner {
+            border-color: #cd853f;
+        }
+        .menu-item[data-desire="1"] .menu-item-inner {
+            opacity: 0.75;
+            border-color: #654321;
+            color: #8b7355;
+        }
+        .menu-item.active .menu-item-inner {
+            background: linear-gradient(145deg, #6b3a1f, #4a2810);
+            border-color: #ffd700;
+            color: #fff;
+            transform: scale(1.2);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.7), 0 6px 20px rgba(0,0,0,0.6);
+        }
+        .desire-indicator {
+            position: absolute;
+            top: -12px;
+            right: 6px;
+            font-size: 10px;
+            color: #ffd700;
+            text-shadow: 0 0 4px rgba(255, 215, 0, 0.6);
+        }
+        /* 二级菜单（扇形排列，多层） */
+        .sub-menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+        .sub-menu-item {
+            position: absolute;
+            width: 70px;
+            height: 32px;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, #3d2817, #2c1810);
+            border: 1px solid #8b4513;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #deb887;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .menu-item.active .sub-menu-item {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .sub-menu-item:hover {
+            background: linear-gradient(145deg, #8b4513, #654321);
+            color: #fff;
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+        /* 滚动箭头 */
+        .scroll-arrows {
+            position: absolute;
+            left: 120px;
+            top: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 300px;
+            pointer-events: none;
+        }
+        .scroll-arrow {
+            color: #8b7355;
+            font-size: 20px;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+        .scroll-arrow.visible {
+            opacity: 0.8;
+        }
+        .page-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #8b7355;
+            font-size: 13px;
+            opacity: 0.6;
+        }
+        .feedback-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: linear-gradient(145deg, #4a3728, #2c1810);
+            border: 2px solid #d4af37;
+            border-radius: 20px;
+            padding: 20px 40px;
+            color: #d4af37;
+            font-size: 22px;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        .feedback-toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-decoration"></div>
+    <div class="menu-container" id="menuContainer">
+        <div class="character-center" id="characterCenter">
+            <div class="desire-bubble" id="desireBubble">想与你闲谈片刻</div>
+        </div>
+        <div class="fan-area" id="fanArea"></div>
+        <div class="scroll-arrows">
+            <div class="scroll-arrow" id="arrowUp">▲</div>
+            <div class="scroll-arrow" id="arrowDown">▼</div>
+        </div>
+        <div class="page-indicator" id="pageIndicator"></div>
+    </div>
+    <div class="feedback-toast" id="feedbackToast"></div>
+    <script>
+        // ==================== 一级菜单数据（可扩展） ====================
+        const menuData = [
+            { id: 1, name: "宽慰", desire: 3, reason: "看你心事重重，想宽慰你几句", sub: ["倾听", "开解", "陪伴"] },
+            { id: 2, name: "闲谈", desire: 3, reason: "天气正好，不如闲谈片刻", sub: ["家常", "趣闻", "琐事"] },
+            { id: 3, name: "论艺", desire: 2, reason: "近来有所悟，想与你论艺", sub: ["琴", "棋", "书", "画"] },
+            { id: 4, name: "传情", desire: 2, reason: "有些话，想当面说与你听", sub: ["暗示", "表白", "赠诗", "邀约"] },
+            { id: 5, name: "玩笑", desire: 2, reason: "心情甚好，想与你玩笑几句", sub: ["调侃", "打趣", "恶作剧", "猜谜"] },
+            { id: 6, name: "争执", desire: 1, reason: "此事我绝不退让", sub: ["辩论", "争论", "置气"] },
+            // 预留更多扩展项...
+            { id: 7, name: "邀游", desire: 2, reason: "城中有一处想去", sub: ["游湖", "赏花", "登山", "逛集"] },
+            { id: 8, name: "赠礼", desire: 1, reason: "略备薄礼", sub: ["首饰", "书画", "香茗", "点心"] },
+        ];
+        menuData.sort((a, b) => b.desire - a.desire);
+        // ==================== 扇形布局参数 ====================
+        // 弧心位置（相对于 fan-area）
+        const ARC_CENTER_X = 0;
+        const ARC_CENTER_Y = 300;
+        // 一级选项扇形参数
+        const L1_ANGLE_START = -45;     // 起始角度
+        const L1_ANGLE_END = 45;        // 结束角度
+        const L1_RADIUS = 140;          // 一级半径（更紧凑）
+        const L1_VISIBLE = 5;           // 同时显示5个
+        // 二级选项扇形参数
+        const L2_ANGLE_SPAN = 120;      // 二级总跨度（更广的扇面）
+        const L2_RADIUS_STEP = 75;      // 每层半径增量
+        const L2_BASE_RADIUS = 220;     // 第一层二级半径
+        // 预计算一级槽位
+        const L1_SLOTS = [];
+        for (let i = 0; i < L1_VISIBLE; i++) {
+            const t = i / (L1_VISIBLE - 1);
+            const angle = L1_ANGLE_START + t * (L1_ANGLE_END - L1_ANGLE_START);
+            const rad = angle * Math.PI / 180;
+            L1_SLOTS.push({
+                x: ARC_CENTER_X + Math.cos(rad) * L1_RADIUS,
+                y: ARC_CENTER_Y + Math.sin(rad) * L1_RADIUS,
+                angle: angle,
+                scale: 1 - Math.abs(t - 0.5) * 0.15
+            });
+        }
+        // ==================== 状态 ====================
+        let scrollIndex = 0;
+        let isScrolling = false;
+        let scrollCooldown = null;
+        // ==================== DOM ====================
+        const fanArea = document.getElementById('fanArea');
+        const desireBubble = document.getElementById('desireBubble');
+        const arrowUp = document.getElementById('arrowUp');
+        const arrowDown = document.getElementById('arrowDown');
+        const pageIndicator = document.getElementById('pageIndicator');
+        const feedbackToast = document.getElementById('feedbackToast');
+        // ==================== 计算二级选项的扇形位置 ====================
+        function calcSubMenuPositions(subCount) {
+            const positions = [];
+            // 平均分布在 L2_ANGLE_SPAN 范围内
+            const itemSpan = subCount > 1 ? L2_ANGLE_SPAN / (subCount - 1) : 0;
+            const startAngle = -L2_ANGLE_SPAN / 2;
+            for (let i = 0; i < subCount; i++) {
+                // 计算在第几层（每层最多4个，超出就往外扩）
+                const layer = Math.floor(i / 4);
+                const idxInLayer = i % 4;
+                const layerCount = Math.min(4, subCount - layer * 4);
+                const radius = L2_BASE_RADIUS + layer * L2_RADIUS_STEP;
+                const layerSpan = L2_ANGLE_SPAN * (0.6 + layer * 0.1); // 外层更宽
+                const layerStart = -layerSpan / 2;
+                const layerStep = layerCount > 1 ? layerSpan / (layerCount - 1) : 0;
+                const angle = layerStart + idxInLayer * layerStep;
+                const rad = angle * Math.PI / 180;
+                positions.push({
+                    x: Math.cos(rad) * radius,
+                    y: Math.sin(rad) * radius
+                });
+            }
+            return positions;
+        }
+        // ==================== 创建菜单 ====================
+        const itemElements = [];
+        menuData.forEach((item, idx) => {
+            const el = document.createElement('div');
+            el.className = 'menu-item hidden';
+            el.dataset.desire = item.desire;
+            el.dataset.idx = idx;
+            const stars = '★'.repeat(item.desire) + '☆'.repeat(3 - item.desire);
+            // 创建二级子菜单
+            const subPositions = calcSubMenuPositions(item.sub.length);
+            const subItemsHTML = item.sub.map((subName, subIdx) => {
+                const pos = subPositions[subIdx];
+                return `<div class="sub-menu-item" style="left:${pos.x}px;top:${pos.y}px" data-subidx="${subIdx}">${subName}</div>`;
+            }).join('');
+            el.innerHTML = `
+                <div class="desire-indicator">${stars}</div>
+                <div class="menu-item-inner">
+                    <span class="item-name">${item.name}</span>
+                </div>
+                <div class="sub-menu">${subItemsHTML}</div>
+            `;
+            // 点击一级
+            el.addEventListener('click', (e) => {
+                if (e.target.closest('.sub-menu-item')) return;
+                const slotIdx = idx - scrollIndex;
+                const centerSlot = Math.floor(L1_VISIBLE / 2);
+                if (slotIdx !== centerSlot) {
+                    scrollTo(idx - centerSlot);
+                }
+            });
+            // 点击二级
+            el.querySelectorAll('.sub-menu-item').forEach(sub => {
+                sub.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showFeedback(`${item.name} · ${sub.textContent}`);
+                });
+            });
+            fanArea.appendChild(el);
+            itemElements.push(el);
+        });
+        // ==================== 渲染 ====================
+        function render() {
+            const centerSlot = Math.floor(L1_VISIBLE / 2);
+            itemElements.forEach((el, idx) => {
+                const slotIdx = idx - scrollIndex;
+                if (slotIdx >= 0 && slotIdx < L1_VISIBLE) {
+                    const slot = L1_SLOTS[slotIdx];
+                    el.classList.remove('hidden');
+                    el.style.left = `${slot.x}px`;
+                    el.style.top = `${slot.y}px`;
+                    el.style.transform = `translate(-50%, -50%) scale(${slot.scale})`;
+                    el.style.opacity = slot.scale;
+                    if (slotIdx === centerSlot) {
+                        el.classList.add('active');
+                        desireBubble.textContent = menuData[idx].reason;
+                    } else {
+                        el.classList.remove('active');
+                    }
+                } else {
+                    el.classList.add('hidden');
+                    el.classList.remove('active');
+                }
+            });
+            arrowUp.classList.toggle('visible', scrollIndex > 0);
+            arrowDown.classList.toggle('visible', scrollIndex < menuData.length - L1_VISIBLE);
+            const currentCenter = scrollIndex + centerSlot;
+            pageIndicator.textContent = `${Math.min(currentCenter + 1, menuData.length)} / ${menuData.length}`;
+        }
+        // ==================== 滚动控制 ====================
+        function scrollTo(newIndex) {
+            const maxScroll = menuData.length - L1_VISIBLE;
+            newIndex = Math.max(0, Math.min(newIndex, maxScroll));
+            if (newIndex === scrollIndex) return;
+            scrollIndex = newIndex;
+            render();
+        }
+        function scrollByStep(step) {
+            scrollTo(scrollIndex + step);
+        }
+        document.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (isScrolling) return;
+            isScrolling = true;
+            const step = e.deltaY > 0 ? 1 : -1;
+            scrollByStep(step);
+            clearTimeout(scrollCooldown);
+            scrollCooldown = setTimeout(() => {
+                isScrolling = false;
+            }, 180);
+        }, { passive: false });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                scrollByStep(1);
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                scrollByStep(-1);
+            }
+        });
+        // ==================== 反馈 ====================
+        let feedbackTimer = null;
+        function showFeedback(text) {
+            feedbackToast.textContent = `✓ ${text}`;
+            feedbackToast.classList.add('show');
+            clearTimeout(feedbackTimer);
+            feedbackTimer = setTimeout(() => {
+                feedbackToast.classList.remove('show');
+            }, 1500);
+        }
+        // ==================== 初始化 ====================
+        render();
+    </script>
+</body>
+</html>

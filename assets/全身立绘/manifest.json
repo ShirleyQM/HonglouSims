@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "generatedBy": "scripts/process_full_body_portraits.py",
+  "sourceDir": "assets/全身立绘",
+  "skippedDirs": [
+    "其他"
+  ],
+  "avatars": {
+    "qingwen": {
+      "src": "assets/全身立绘/processed/qingwen_avatar.webp"
+    },
+    "zijuan": {
+      "src": "assets/全身立绘/processed/zijuan_avatar.webp"
+    },
+    "xiren": {
+      "src": "assets/全身立绘/processed/xiren_avatar.webp"
+    },
+    "yingchun": {
+      "src": "assets/全身立绘/processed/yingchun_avatar.webp"
+    },
+    "xueyan": {
+      "src": "assets/全身立绘/processed/xueyan_avatar.webp"
+    },
+    "sheyue": {
+      "src": "assets/全身立绘/processed/sheyue_avatar.webp"
+    },
+    "daiyu": {
+      "src": "assets/全身立绘/processed/daiyu_avatar.webp"
+    }
+  },
+  "portraits": {
+    "qingwen": {
+      "portrait": "assets/全身立绘/processed/qingwen_portrait.webp",
+      "hud": "assets/全身立绘/processed/qingwen_hud.webp",
+      "fullBody": "assets/全身立绘/processed/qingwen_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/qingwen_fullbody_hud.webp"
+    },
+    "zijuan": {
+      "portrait": "assets/全身立绘/processed/zijuan_portrait.webp",
+      "hud": "assets/全身立绘/processed/zijuan_hud.webp",
+      "fullBody": "assets/全身立绘/processed/zijuan_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/zijuan_fullbody_hud.webp"
+    },
+    "xiren": {
+      "portrait": "assets/全身立绘/processed/xiren_portrait.webp",
+      "hud": "assets/全身立绘/processed/xiren_hud.webp",
+      "fullBody": "assets/全身立绘/processed/xiren_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/xiren_fullbody_hud.webp"
+    },
+    "yingchun": {
+      "portrait": "assets/全身立绘/processed/yingchun_portrait.webp",
+      "hud": "assets/全身立绘/processed/yingchun_hud.webp",
+      "fullBody": "assets/全身立绘/processed/yingchun_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/yingchun_fullbody_hud.webp"
+    },
+    "xueyan": {
+      "portrait": "assets/全身立绘/processed/xueyan_portrait.webp",
+      "hud": "assets/全身立绘/processed/xueyan_hud.webp",
+      "fullBody": "assets/全身立绘/processed/xueyan_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/xueyan_fullbody_hud.webp"
+    },
+    "sheyue": {
+      "portrait": "assets/全身立绘/processed/sheyue_portrait.webp",
+      "hud": "assets/全身立绘/processed/sheyue_hud.webp",
+      "fullBody": "assets/全身立绘/processed/sheyue_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/sheyue_fullbody_hud.webp"
+    },
+    "daiyu": {
+      "portrait": "assets/全身立绘/processed/daiyu_portrait.webp",
+      "hud": "assets/全身立绘/processed/daiyu_hud.webp",
+      "fullBody": "assets/全身立绘/processed/daiyu_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/daiyu_fullbody_hud.webp"
+    }
+  }
+}

@@ -17,9 +17,123 @@ const EconomySystem = (() => {
     return FamilySystem?.findFamilyOfChar?.(charId) || null;
   }
 
+  function foodChargesEnabled() {
+    return cfg().foodChargesEnabled !== false;
+  }
+
+  function foodPersonalSpendingEnabled() {
+    return cfg().foodPersonalSpendingEnabled !== false;
+  }
+
   function foodCost(category) {
+    if (!foodChargesEnabled()) return 0;
     if (!FOOD_CATEGORIES.has(category)) return 0;
     return Math.max(0, Math.round(cfg().foodCosts?.[category] || 0));
+  }
+
+  function questEconomyCfg() {
+    return cfg().questEconomy || {};
+  }
+
+  function questCategoryCost(tpl) {
+    const costs = questEconomyCfg().categoryIssueCosts || {};
+    return Math.max(0, Math.round(tpl?.issueCost ?? costs[tpl?.category] ?? 0));
+  }
+
+  function questAdjustmentOptions() {
+    const defaults = [
+      { id: 'none', label: '不赏不罚', issueDelta: 0, reward: 0, fine: 0, desc: '只按任务本身结算关系和状态。' },
+      { id: 'reward_small', label: '小赏', issueDelta: 0, reward: 5, fine: 0, desc: '完成后从下发者公账赏给执行者家庭。' },
+      { id: 'reward_large', label: '重赏', issueDelta: 0, reward: 15, fine: 0, desc: '完成后重赏，适合紧急或体面差事。' },
+      { id: 'fine_on_fail', label: '失败扣罚', issueDelta: 0, reward: 0, fine: 6, desc: '失败/超时时从执行者家庭扣给下发者家庭。' },
+    ];
+    const byId = new Map(defaults.map(row => [row.id, row]));
+    for (const row of questEconomyCfg().adjustmentOptions || []) {
+      if (!row?.id) continue;
+      byId.set(row.id, { ...(byId.get(row.id) || {}), ...row });
+    }
+    return [...byId.values()];
+  }
+
+  function normalizeAdjustment(adjustment) {
+    if (!adjustment) return questAdjustmentOptions()[0];
+    if (typeof adjustment === 'string') return questAdjustmentOptions().find(o => o.id === adjustment) || questAdjustmentOptions()[0];
+    return questAdjustmentOptions().find(o => o.id === adjustment.id) || { ...questAdjustmentOptions()[0], ...adjustment };
+  }
+
+  function questIssueCost(tpl, targetCount = 1, adjustment = 'none') {
+    const base = questCategoryCost(tpl) * Math.max(1, targetCount || 1);
+    const adj = normalizeAdjustment(adjustment);
+    return Math.max(0, Math.round(base + (adj.issueDelta || 0) * Math.max(1, targetCount || 1)));
+  }
+
+  function canIssueQuestEconomy(issuerId, tpl, targetCount = 1, adjustment = 'none') {
+    const cost = questIssueCost(tpl, targetCount, adjustment);
+    if (!cost) return { ok: true, cost: 0 };
+    const family = familyOf(issuerId);
+    if (!family) return { ok: false, cost, reason: '下发者未归入家庭，无法支取公账' };
+    const balance = FamilySystem.getFund(family.id);
+    if (balance < cost) return { ok: false, cost, familyId: family.id, balance, reason: `公账不足（需${cost}两，现有${balance}两）` };
+    return { ok: true, cost, familyId: family.id, balance };
+  }
+
+  function applyQuestIssueCost({ issuerId, templateId, targetCount = 1, adjustment = 'none' } = {}) {
+    const tpl = (CONFIG.questConfig || DEFAULT_CONFIG.questConfig)?.templates?.[templateId];
+    const check = canIssueQuestEconomy(issuerId, tpl, targetCount, adjustment);
+    if (!check.ok || !check.cost) return check.ok ? { ok: true, cost: 0 } : check;
+    const issuer = getChar(issuerId);
+    const paid = FamilySystem.withdrawFund(check.familyId, check.cost, `${issuer?.short || '某人'}下发「${tpl?.name || templateId}」`);
+    EventBus.emit('economy:quest_cost', {
+      charId: issuerId, issuerId, familyId: check.familyId,
+      templateId, quest: tpl?.name || '', category: tpl?.category || '',
+      targetCount, adjustmentId: normalizeAdjustment(adjustment).id,
+      amount: paid,
+    });
+    return { ok: !!paid || !check.cost, cost: paid, familyId: check.familyId };
+  }
+
+  function transferBetweenFamilies(fromFamilyId, toFamilyId, amount, reason) {
+    amount = Math.max(0, Math.round(amount || 0));
+    if (!amount || !fromFamilyId || !toFamilyId || fromFamilyId === toFamilyId) return 0;
+    if (FamilySystem.transferFund(fromFamilyId, toFamilyId, amount, reason)) return amount;
+    const actual = FamilySystem.withdrawFund(fromFamilyId, amount, reason);
+    if (actual) FamilySystem.depositFund(toFamilyId, actual, reason);
+    return actual;
+  }
+
+  function applyQuestCompletionEconomy(inst, tpl, outcome = {}) {
+    const adj = normalizeAdjustment(inst?.economyAdjustment || 'none');
+    const issuerFamily = familyOf(inst?.issuerId);
+    const assigneeFamily = familyOf(inst?.assigneeId);
+    if (!issuerFamily || !assigneeFamily) return null;
+    const status = outcome.status || inst?.status || '';
+    const completed = status === 'completed';
+    const failed = ['failed', 'expired'].includes(status);
+    if (completed && adj.reward > 0) {
+      const amount = transferBetweenFamilies(issuerFamily.id, assigneeFamily.id, adj.reward, `${tpl?.name || '任务'}赏钱`);
+      if (amount) {
+        EventBus.emit('economy:quest_reward', {
+          charId: inst.assigneeId, issuerId: inst.issuerId, assigneeId: inst.assigneeId,
+          fromFamilyId: issuerFamily.id, targetFamilyId: assigneeFamily.id,
+          templateId: inst.templateId, quest: tpl?.name || '', adjustmentId: adj.id,
+          amount,
+        });
+      }
+      return amount;
+    }
+    if (failed && adj.fine > 0) {
+      const amount = transferBetweenFamilies(assigneeFamily.id, issuerFamily.id, adj.fine, `${tpl?.name || '任务'}扣罚`);
+      if (amount) {
+        EventBus.emit('economy:quest_fine', {
+          charId: inst.assigneeId, issuerId: inst.issuerId, assigneeId: inst.assigneeId,
+          fromFamilyId: assigneeFamily.id, targetFamilyId: issuerFamily.id,
+          templateId: inst.templateId, quest: tpl?.name || '', adjustmentId: adj.id,
+          amount,
+        });
+      }
+      return amount;
+    }
+    return null;
   }
 
   function canUseFurniture(c, tpl) {
@@ -133,6 +247,19 @@ const EconomySystem = (() => {
     return true;
   }
 
+  function allowancePlansForIssuer(issuerId) {
+    return (cfg().monthlyAllowances || []).filter(row => row.issuerId === issuerId);
+  }
+
+  function runAllowanceForIssuer(issuerId) {
+    let paid = 0;
+    for (const row of allowancePlansForIssuer(issuerId)) {
+      if (distributeAllowance(row.issuerId, row.targetFamilyId, row.amount, row.note)) paid++;
+    }
+    if (paid) log(`${getChar(issuerId)?.short || '管账人'}发放月银，共${paid}笔。`);
+    return paid;
+  }
+
   function runMonthlyAllowances(day = gameDay) {
     const month = Math.floor((day - 1) / 30) + 1;
     const dayOfMonth = ((day - 1) % 30) + 1;
@@ -182,8 +309,12 @@ const EconomySystem = (() => {
   }
 
   return {
-    init, cfg, foodCost, canUseFurniture, extraCandidates,
+    init, cfg, foodCost, foodChargesEnabled, foodPersonalSpendingEnabled,
+    canUseFurniture, extraCandidates,
+    questAdjustmentOptions, questIssueCost, canIssueQuestEconomy,
+    applyQuestIssueCost, applyQuestCompletionEconomy,
     startShift, endShift, distributeAllowance, runMonthlyAllowances,
+    allowancePlansForIssuer, runAllowanceForIssuer,
     serialize, apply,
   };
 })();

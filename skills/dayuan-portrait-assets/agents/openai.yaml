@@ -1,0 +1,4 @@
+interface:
+  display_name: "大观园人物立绘入库"
+  short_description: "处理人物立绘、头像入库与质量检查"
+  default_prompt: "Use $dayuan-portrait-assets to process and register new character portrait assets for the 大观园 game."

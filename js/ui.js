@@ -66,6 +66,14 @@ function getNeedHudName(def) {
   return def.shortLabel || def.shortName || def.short || def.abbr || def.hudLabel || def.oneChar || getNeedDisplayName(def);
 }
 
+function getNeedHudLongName(def) {
+  return def.longLabel || def.hudLongLabel || def.twoCharLabel || def.twoChar || def.name || def.label || getNeedDisplayName(def);
+}
+
+function getNeedHudShortName(def) {
+  return def.shortLabel || def.oneChar || def.shortName || def.short || def.abbr || def.hudShortLabel || getNeedDisplayName(def).slice(0, 1);
+}
+
 function getHudNeedDefs() {
   const defs = getNeedDefs();
   const byKey = Object.fromEntries(defs.map(def => [def.key, def]));
@@ -93,9 +101,12 @@ function needLiquidDotHtml(c, def, opts = {}) {
   const risk = needRiskClass(value);
   const valueHtml = opts.value ? `<span class="need-dot-value">${value}</span>` : '';
   const label = opts.short ? getNeedHudName(def) : getNeedDisplayName(def);
+  const labelHtml = opts.responsive
+    ? `<span class="need-dot-label need-dot-label-long">${escapeHtml(getNeedHudLongName(def))}</span><span class="need-dot-label need-dot-label-short">${escapeHtml(getNeedHudShortName(def))}</span>`
+    : `<span class="need-dot-label">${escapeHtml(label)}</span>`;
   return `<span class="need-dot-item" title="${escapeHtml(title)}">
     <span class="need-liquid-dot ${risk}" style="--fill:${pct}%;--need-color:${escapeHtml(color)}"></span>
-    <span class="need-dot-label">${escapeHtml(label)}</span>${valueHtml}
+    ${labelHtml}${valueHtml}
   </span>`;
 }
 
@@ -228,7 +239,7 @@ function buildColCurrentChar() {
   }
   const oldDetail = container.querySelector('.current-char-details');
   if (oldDetail) charDetailScrollById[c.id] = oldDetail.scrollTop;
-  const needHtml = getHudNeedDefs().map(n => needLiquidDotHtml(c, n, { short: true })).join('');
+  const needHtml = getHudNeedDefs().map(n => needLiquidDotHtml(c, n, { responsive: true })).join('');
   const activeStates = Array.isArray(c.activeStates) ? c.activeStates : [];
   const states = activeStates.map(s => {
     const cls = getStateTagClass(s.id);
@@ -268,16 +279,35 @@ function buildColCurrentChar() {
         </div>
         ${shortComment}
         <div class="need-dots hud-need-dots">${needHtml}</div>
-        <div class="state-tags hud-state-tags${hudStateTagsExpanded ? ' expanded' : ''}" id="hud-state-tags" title="点击展开/收起状态标签">${states || '<span class="tag state neutral">无状态</span>'}</div>
+        <div class="hud-state-row${hudStateTagsExpanded ? ' expanded' : ''}" id="hud-state-row" title="点击展开/收起状态标签">
+          <div class="state-tags hud-state-tags" id="hud-state-tags">${states || '<span class="tag state neutral">无状态</span>'}</div>
+          <button type="button" class="hud-state-more" id="hud-state-more" aria-label="展开状态标签">${hudStateTagsExpanded ? '⌃' : '⌄'}</button>
+        </div>
       </div>
     </div>`;
   const newDetail = container.querySelector('.current-char-details');
   if (newDetail) newDetail.scrollTop = charDetailScrollById[c.id] || 0;
   const stateTags = container.querySelector('#hud-state-tags');
-  if (stateTags) stateTags.onclick = () => {
-    hudStateTagsExpanded = !hudStateTagsExpanded;
-    buildUI();
-  };
+  const stateRow = container.querySelector('#hud-state-row');
+  const stateMore = container.querySelector('#hud-state-more');
+  if (stateTags && stateRow) {
+    const updateStateOverflow = () => {
+      const overflow = stateTags.scrollHeight > stateTags.clientHeight + 1;
+      stateRow.classList.toggle('overflowing', overflow || hudStateTagsExpanded);
+    };
+    updateStateOverflow();
+    requestAnimationFrame(updateStateOverflow);
+    stateRow.onclick = () => {
+      if (!stateRow.classList.contains('overflowing') && !hudStateTagsExpanded) return;
+      hudStateTagsExpanded = !hudStateTagsExpanded;
+      buildUI();
+    };
+    if (stateMore) stateMore.onclick = (e) => {
+      e.stopPropagation();
+      hudStateTagsExpanded = !hudStateTagsExpanded;
+      buildUI();
+    };
+  }
 }
 
 function buildColFamily() {
@@ -414,7 +444,14 @@ function buildColQuests() {
   });
 }
 
-let commandPanelState = { targetIds: [], singleTemplateId: 0, groupTemplateId: 0 };
+let commandPanelState = {
+  targetIds: [],
+  singleTemplateId: 0,
+  groupTemplateId: 0,
+  economyAdjustment: 'none',
+  failurePunishment: '',
+  failureTrigger: '',
+};
 
 function commandPanelSourceLabels(issuer, target) {
   const labels = [];
@@ -487,6 +524,110 @@ function commandPanelCommonQuests(issuer, targetIds) {
   return [...(common || [])].map(id => byId.get(id)).filter(Boolean);
 }
 
+function commandPanelEconomyAdjustments() {
+  if (typeof EconomySystem === 'undefined') return [];
+  return EconomySystem?.questAdjustmentOptions?.() || [];
+}
+
+function commandPanelSelectedAdjustment() {
+  const opts = commandPanelEconomyAdjustments();
+  if (!opts.some(o => o.id === commandPanelState.economyAdjustment)) commandPanelState.economyAdjustment = opts[0]?.id || 'none';
+  return commandPanelState.economyAdjustment || 'none';
+}
+
+function commandPanelFailurePolicy(issuer, tpl, targetIds = []) {
+  if (!QuestSystem?.buildFailurePolicy || !tpl) return null;
+  return QuestSystem.buildFailurePolicy(tpl, issuer?.id, targetIds, {
+    selectedPunishmentId: commandPanelState.failurePunishment || undefined,
+    trigger: commandPanelState.failureTrigger ? { type: commandPanelState.failureTrigger } : undefined,
+  });
+}
+
+function commandPanelFailureBox(issuer, tpl, targetIds = [], controlPrefix = 'cmd-failure') {
+  if (!QuestSystem?.buildFailurePolicy || !tpl) return '';
+  const ids = (targetIds || []).filter(Boolean);
+  const policy = commandPanelFailurePolicy(issuer, tpl, ids);
+  if (!policy) return '';
+  const punishments = QuestSystem.punishmentOptionsFor?.(tpl, issuer?.id, ids) || [];
+  const triggerOptions = [
+    { id: 'onFirstFailure', label: '首次失败' },
+    { id: 'onRepeatedFailure', label: '连续2次' },
+    { id: 'onMonthlyCount', label: '本月3次' },
+    { id: 'onSevereFailure', label: '严重失败' },
+    { id: 'manualReview', label: '手动复核' },
+  ];
+  const punishmentHtml = punishments.map(row => {
+    const suffix = row.id === 'fine_allowance' && row.requiresApproval ? ' · 需背书' : '';
+    return `<option value="${escapeAttr(row.id)}" ${row.id === policy.selectedPunishmentId ? 'selected' : ''}>${escapeHtml(row.label + suffix)}</option>`;
+  }).join('');
+  const triggerHtml = triggerOptions.map(row => `<option value="${escapeAttr(row.id)}" ${row.id === policy.trigger?.type ? 'selected' : ''}>${escapeHtml(row.label)}</option>`).join('');
+  const selectedPunishment = punishments.find(row => row.id === policy.selectedPunishmentId);
+  const moneyHint = policy.selectedPunishmentId === 'fine_allowance'
+    ? policy.moneyPenalty?.requiresApproval
+      ? `扣月银需背书：${policy.moneyPenalty.reason || '等待管账人处理。'}`
+      : `扣月银可执行：预计 ${policy.moneyPenalty.amount || 0} 两。`
+    : selectedPunishment?.hint || selectedPunishment?.desc || '失败后按所选处置处理。';
+  const conds = (policy.failureConditionsPreview || []).slice(0, 3)
+    .map(s => `<span>${escapeHtml(s)}</span>`).join('');
+  return `<div class="command-failure-box ${policy.selectedPunishmentId === 'fine_allowance' && policy.moneyPenalty?.requiresApproval ? 'warn' : ''}">
+    <div class="command-money-line">
+      <b>失败条件</b>
+      <span>${conds || '<span>超时 / 质量过低</span>'}</span>
+    </div>
+    <div class="command-failure-controls">
+      <label>失败处置
+        <select id="${escapeAttr(controlPrefix)}-punishment" data-command-failure-punishment>${punishmentHtml}</select>
+      </label>
+      <label>触发
+        <select id="${escapeAttr(controlPrefix)}-trigger" data-command-failure-trigger>${triggerHtml}</select>
+      </label>
+    </div>
+    <small>${escapeHtml(moneyHint)}</small>
+  </div>`;
+}
+
+function commandPanelEconomyBox(issuer, tpl, targetCount = 1, controlId = 'cmd-economy-adjustment') {
+  if (typeof EconomySystem === 'undefined' || !issuer || !tpl) return '';
+  const adjustment = commandPanelSelectedAdjustment();
+  const opts = commandPanelEconomyAdjustments();
+  const cost = EconomySystem.questIssueCost?.(tpl, targetCount, adjustment) || 0;
+  const check = EconomySystem.canIssueQuestEconomy?.(issuer.id, tpl, targetCount, adjustment);
+  const family = FamilySystem?.findFamilyOfChar?.(issuer.id);
+  const balance = family ? Math.round(FamilySystem.getFund(family.id)) : 0;
+  const optHtml = opts.map(o => `<option value="${escapeAttr(o.id)}" ${o.id === adjustment ? 'selected' : ''}>${escapeHtml(o.label)}</option>`).join('');
+  const adj = opts.find(o => o.id === adjustment);
+  return `<div class="command-money-box ${check && !check.ok ? 'warn' : ''}">
+    <div class="command-money-line">
+      <b>钱项</b>
+      <span>${escapeHtml(family?.name || '无家庭')}公账 ${balance} 两 · 本次预估支出 ${cost} 两${targetCount > 1 ? `（${targetCount}人）` : ''}</span>
+    </div>
+    <select id="${escapeAttr(controlId)}" data-command-economy-adjustment>${optHtml}</select>
+    <small>${escapeHtml(check && !check.ok ? check.reason : (adj?.desc || '按默认任务结算。'))}</small>
+  </div>`;
+}
+
+function commandPanelAllowanceBox(issuer) {
+  if (typeof EconomySystem === 'undefined' || !issuer) return '';
+  const plans = EconomySystem.allowancePlansForIssuer?.(issuer.id) || [];
+  if (!plans.length) return '';
+  const rows = plans.map(row => {
+    const fam = FamilySystem?.getFamily?.(row.targetFamilyId);
+    return `<div class="command-allowance-row">
+      <span>${escapeHtml(fam?.name || '家庭' + row.targetFamilyId)}</span>
+      <b>${Math.round(row.amount || 0)} 两</b>
+      <small>${escapeHtml(row.note || '月银')}</small>
+    </div>`;
+  }).join('');
+  const sourceFamily = FamilySystem?.findFamilyOfChar?.(issuer.id);
+  const balance = sourceFamily ? Math.round(FamilySystem.getFund(sourceFamily.id)) : 0;
+  return `<section class="command-account-pane">
+    <h4>管账职责 · 月银</h4>
+    <p>${escapeHtml(issuer.short)}可发放月银；${escapeHtml(sourceFamily?.name || '本家')}公账 ${balance} 两。</p>
+    <div class="command-allowance-list">${rows}</div>
+    <button class="sys-btn" id="cmd-pay-allowance">立即发放这些月银</button>
+  </section>`;
+}
+
 function commandPanelSelectedIds(rows) {
   const valid = new Set(rows.map(row => row.char.id));
   return (commandPanelState.targetIds || []).filter(id => valid.has(id));
@@ -526,6 +667,7 @@ function buildCommandPanel() {
     <option value="${tpl.id}" ${String(tpl.id) === String(commandPanelState.singleTemplateId) ? 'selected' : ''}>
       ${escapeHtml(tpl.name)}${selectedIds.length > 1 ? ' · 已选均可用' : reason ? ' · ' + escapeHtml(reason) : ''}
     </option>`).join('') : '';
+  const selectedSingleTpl = singleItems.find(item => String(item.tpl.id) === String(commandPanelState.singleTemplateId))?.tpl;
 
   const groupRows = items.length ? items.map(({ tpl, preview, count, deadline }, i) => `
     <label class="command-group-row">
@@ -534,9 +676,11 @@ function buildCommandPanel() {
       <span style="color:var(--jn-text-soft);font-size:10px">（${escapeHtml(tpl.category)}${deadline ? ' · ' + deadline : ''}）</span>
       <div style="color:var(--jn-text-muted);font-size:10px;margin-top:4px;margin-left:18px">目标：${escapeHtml(preview)}（${count}人）</div>
     </label>`).join('') : `<div class="command-empty">当前身份无可群体传令任务，或暂无符合条件者。</div>`;
+  const selectedGroup = items.find(item => String(item.tpl.id) === String(commandPanelState.groupTemplateId || items[0]?.tpl.id));
 
   return `<h3>${issuer.short} · 传令</h3>
     <p style="color:var(--jn-text-soft);font-size:11px;margin-bottom:10px">左边点名传令给明确对象；右边群体传令给符合条件的一组人。当值只是状态，传令仍走身份和任务权限。</p>
+    ${commandPanelAllowanceBox(issuer)}
     <div class="command-panel">
       <section class="command-pane">
         <h4>点名传令</h4>
@@ -546,12 +690,16 @@ function buildCommandPanel() {
           ${singleItems.length
             ? `<select id="cmd-single-template">${singleOptions}</select>`
             : `<div class="command-empty">请先选择有共同可用任务的人物。</div>`}
+          ${selectedSingleTpl ? commandPanelEconomyBox(issuer, selectedSingleTpl, Math.max(1, selectedIds.length), 'cmd-single-economy-adjustment') : ''}
+          ${selectedSingleTpl ? commandPanelFailureBox(issuer, selectedSingleTpl, selectedIds, 'cmd-single-failure') : ''}
           <button class="sys-btn primary" id="cmd-single-confirm" ${singleItems.length ? '' : 'disabled'}>发布点名传令</button>
         </div>
       </section>
       <section class="command-pane">
         <h4>群体传令</h4>
         <div class="command-groups">${groupRows}</div>
+        ${selectedGroup?.tpl ? commandPanelEconomyBox(issuer, selectedGroup.tpl, selectedGroup.count || 1, 'cmd-group-economy-adjustment') : ''}
+        ${selectedGroup?.tpl ? commandPanelFailureBox(issuer, selectedGroup.tpl, selectedGroup.targets?.map(c => c.id) || [], 'cmd-group-failure') : ''}
         <button class="sys-btn primary" id="gi-confirm" ${items.length ? '' : 'disabled'}>发布群体传令</button>
       </section>
     </div>
@@ -564,6 +712,7 @@ function bindCommandPanelEvents() {
   const cancel = document.getElementById('gi-cancel');
   const singleConfirm = document.getElementById('cmd-single-confirm');
   const groupConfirm = document.getElementById('gi-confirm');
+  const payAllowance = document.getElementById('cmd-pay-allowance');
   if (cancel) cancel.onclick = () => document.getElementById('panel-overlay').classList.remove('open');
   document.querySelectorAll('[data-command-target]').forEach(input => {
     input.onchange = () => {
@@ -574,10 +723,51 @@ function bindCommandPanelEvents() {
     };
   });
   const singleSelect = document.getElementById('cmd-single-template');
-  if (singleSelect) singleSelect.onchange = () => { commandPanelState.singleTemplateId = +singleSelect.value; };
+  if (singleSelect) singleSelect.onchange = () => {
+    commandPanelState.singleTemplateId = +singleSelect.value;
+    commandPanelState.failurePunishment = '';
+    commandPanelState.failureTrigger = '';
+    openPanel(buildCommandPanel());
+    bindCommandPanelEvents();
+  };
   document.querySelectorAll('input[name="gi-tpl"]').forEach(input => {
-    input.onchange = () => { commandPanelState.groupTemplateId = +input.value; };
+    input.onchange = () => {
+      commandPanelState.groupTemplateId = +input.value;
+      commandPanelState.failurePunishment = '';
+      commandPanelState.failureTrigger = '';
+      openPanel(buildCommandPanel());
+      bindCommandPanelEvents();
+    };
   });
+  document.querySelectorAll('[data-command-economy-adjustment]').forEach(econSelect => {
+    econSelect.onchange = () => {
+      commandPanelState.economyAdjustment = econSelect.value;
+      openPanel(buildCommandPanel());
+      bindCommandPanelEvents();
+    };
+  });
+  document.querySelectorAll('[data-command-failure-punishment]').forEach(select => {
+    select.onchange = () => {
+      commandPanelState.failurePunishment = select.value;
+      openPanel(buildCommandPanel());
+      bindCommandPanelEvents();
+    };
+  });
+  document.querySelectorAll('[data-command-failure-trigger]').forEach(select => {
+    select.onchange = () => {
+      commandPanelState.failureTrigger = select.value;
+      openPanel(buildCommandPanel());
+      bindCommandPanelEvents();
+    };
+  });
+  if (payAllowance) payAllowance.onclick = () => {
+    const issuer = CHARS[selectedIdx];
+    const paid = EconomySystem?.runAllowanceForIssuer?.(issuer?.id) || 0;
+    log(paid ? `${issuer.short}发放月银 ${paid} 笔。` : '月银未能发放，可能公账不足。');
+    openPanel(buildCommandPanel());
+    bindCommandPanelEvents();
+    buildUI();
+  };
   if (singleConfirm) singleConfirm.onclick = () => {
     const issuer = CHARS[selectedIdx];
     const tid = +(document.getElementById('cmd-single-template')?.value || 0);
@@ -585,7 +775,10 @@ function bindCommandPanelEvents() {
     if (!issuer || !tid || !targetIds.length) return;
     targetIds.forEach(id => {
       const target = getChar(id);
-      if (target) QuestIssueSystem.issueTo(issuer, target, tid);
+      if (target) QuestIssueSystem.issueTo(issuer, target, tid, {
+        economyAdjustment: commandPanelSelectedAdjustment(),
+        failurePolicy: commandPanelFailurePolicy(issuer, QuestSystem.tpl?.(tid), [target.id]),
+      });
     });
     document.getElementById('panel-overlay').classList.remove('open');
     buildUI();
@@ -594,7 +787,12 @@ function bindCommandPanelEvents() {
     const issuer = CHARS[selectedIdx];
     const picked = document.querySelector('input[name="gi-tpl"]:checked');
     const tid = picked ? +picked.value : 0;
-    if (issuer && tid) QuestIssueSystem.issueGroupTo(issuer, tid);
+    const groupItem = (QuestIssueSystem?.getAvailableGroupQuests?.(issuer) || [])
+      .find(item => String(item.tpl?.id) === String(tid));
+    if (issuer && tid) QuestIssueSystem.issueGroupTo(issuer, tid, false, {
+      economyAdjustment: commandPanelSelectedAdjustment(),
+      failurePolicy: commandPanelFailurePolicy(issuer, QuestSystem.tpl?.(tid), groupItem?.targets?.map(c => c.id) || []),
+    });
     document.getElementById('panel-overlay').classList.remove('open');
     buildUI();
   };
@@ -604,6 +802,8 @@ function openCommandPanel(opts = {}) {
   const target = opts.targetIdx != null ? CHARS[opts.targetIdx] : opts.targetId ? getChar(opts.targetId) : null;
   commandPanelState.targetIds = target ? [target.id] : commandPanelState.targetIds || [];
   commandPanelState.singleTemplateId = 0;
+  commandPanelState.failurePunishment = '';
+  commandPanelState.failureTrigger = '';
   openPanel(buildCommandPanel());
   bindCommandPanelEvents();
 }
@@ -629,7 +829,7 @@ function buildHelpPanel() {
   return `<h3>帮助</h3>
     <div style="font-size:11px;color:var(--jn-text-muted);line-height:1.6">
       <p><b>操作</b>：点击地面/家具行走或使用；点击其他人物打开互动菜单（含「传令」）；头像上的「令」表示今日当值传令快捷入口，点击会打开传令并预选此人；底栏「传令」可点名或群体下发；Shift+点击可插队行动。</p>
-      <p><b>快捷键</b>：F 切换家庭；1–9 选择家庭成员；J 任务；P 人物；Q 起居；R 关系；K 技能；M 日志；B 背包；S 设置；H 帮助。</p>
+      <p><b>快捷键</b>：F 切换家庭；1–9 选择家庭成员；J 任务；P 人物；Q 起居；R 关系；K 技能；M 日志；Y 秩序；B 背包；S 设置；H 帮助。</p>
       <p><b>界面</b>：顶栏为地点、时令和全局入口；左侧任务 J 可收起；行动队列竖向排列；底部为当前人物 HUD、快捷入口和家庭成员头像。</p>
       <p>若地图空荡，请在设置→导入导出→恢复默认配置并应用重载。</p>
     </div>
@@ -661,6 +861,14 @@ function profilePortraitUrl(c) {
   return AssetSystem.fullPortraitUrlForChar?.(c)
     || AssetSystem.portraitUrlForChar?.(c)
     || AssetSystem.avatarUrlForChar?.(c)
+    || '';
+}
+
+function profileFullBodyPortraitUrl(c) {
+  if (typeof AssetSystem === 'undefined') return '';
+  return AssetSystem.fullBodyPortraitUrlForChar?.(c)
+    || AssetSystem.fullPortraitUrlForChar?.(c)
+    || AssetSystem.portraitUrlForChar?.(c)
     || '';
 }
 
@@ -697,8 +905,52 @@ function profileTraitGroups(c) {
   return groups;
 }
 
+function profileNeedDefsInDisplayOrder() {
+  const order = ['hunger', 'energy', 'hygiene', 'social', 'fun', 'mood'];
+  const defs = typeof getNeedDefs === 'function' ? getNeedDefs() : [];
+  return [...defs].sort((a, b) => {
+    const ia = order.indexOf(a.key || a.id);
+    const ib = order.indexOf(b.key || b.id);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+}
+
+function profileReputationSummary(c, repExplain) {
+  const get = id => Math.round(repExplain?.domains?.find(row => row.id === id)?.value ?? c?.reputationDomains?.[id] ?? 0);
+  const face = get('family');
+  const word = Math.round((get('outside') + get('servant')) / 2);
+  const talent = get('scholarly');
+  const official = get('official');
+  const overall = Math.round(face * 0.25 + word * 0.2 + talent * 0.15 + official * 0.4);
+  return [
+    { label: '声望', value: overall, sub: '总体' },
+    { label: '面子', value: face, sub: '熟人圈评价' },
+    { label: '口碑', value: word, sub: '外界与流言' },
+    { label: '才名', value: talent, sub: '技能与作品' },
+    { label: '功名', value: official, sub: '仕途与科第' },
+  ];
+}
+
+function profileDreamInfo(c) {
+  const cfg = CONFIG.charSpecialtyConfig || {};
+  const profile = cfg.dreamProfiles?.[c.id] || {};
+  const type = profile.type || '';
+  const meta = type ? cfg.dreamMetadata?.[type] : null;
+  const result = type && globalThis.DreamConditionRegistry?.evaluateDream
+    ? globalThis.DreamConditionRegistry.evaluateDream(c.id, type)
+    : null;
+  return {
+    type,
+    title: profile.title || meta?.label || type || '未设定',
+    desc: profile.description || meta?.description || '暂无长期梦想。',
+    condition: profile.condition || (result ? `当前进度 ${Math.round(result.progressScore ?? 0)}` : '暂无明确条件'),
+    progress: result?.progressScore,
+  };
+}
+
 function buildProfileOverviewBlock(c, repExplain) {
   const portrait = profilePortraitUrl(c);
+  const fullBody = profileFullBodyPortraitUrl(c);
   const baseRank = c._baseSocialRank ?? getCharDef(c.id)?.socialRank ?? c.socialRank ?? 2;
   const effectiveRank = IdentityProtocolSystem?.getCharRank?.(c.id) ?? baseRank;
   const rankLabel = IdentityProtocolSystem?.rankLabel?.(effectiveRank) || `等级${effectiveRank}`;
@@ -706,9 +958,6 @@ function buildProfileOverviewBlock(c, repExplain) {
   const role = family ? FamilySystem.getCharRole(c.id, family.id) : '';
   const path = c.lifePath ? LifePathSystem?.getPath?.(c.lifePath) : null;
   const stage = c.currentStage ? LifePathSystem?.getStage?.(c.currentStage) : null;
-  const sceneId = c.currentScene || c.scene || c.sceneId || c.homeScene || '';
-  const scene = sceneId && typeof getScene === 'function' ? getScene(sceneId) : null;
-  const sceneLabel = scene?.name || scene?.title || sceneId || '未定场景';
   const groups = profileTraitGroups(c);
   const traitRows = Object.entries(groups).map(([cat, vals]) => {
     const tagsHtml = vals.slice(0, 4).map(v => `<i>${escapeHtml(v)}</i>`).join('') || '<em>未配置</em>';
@@ -721,9 +970,10 @@ function buildProfileOverviewBlock(c, repExplain) {
     repExplain?.best ? `${repExplain.best.label}${repExplain.best.value}` : '',
   ].filter(Boolean).map(t => `<span>${escapeHtml(t)}</span>`).join('');
   return `<section class="profile-cover">
-    <div class="profile-cover-art">
+    <button type="button" class="profile-cover-art${fullBody ? ' clickable' : ''}" ${fullBody ? `data-profile-full-body="${escapeHtml(c.id)}" title="查看全身图"` : ''}>
       ${portrait ? `<img src="${escapeHtml(portrait)}" alt="${escapeHtml(c.name || '')}" loading="lazy" decoding="async">` : `<div class="profile-cover-fallback" style="background:${escapeHtml(c.color || '#c8d8c0')}">${escapeHtml(c.short || c.name?.slice(0, 1) || '人')}</div>`}
-    </div>
+      ${fullBody ? '<span class="profile-cover-art-hint">全身</span>' : ''}
+    </button>
     <div class="profile-cover-main">
       <div class="profile-cover-kicker">人物档案</div>
       <div class="profile-cover-name">${escapeHtml(c.name || '未名')}</div>
@@ -735,6 +985,27 @@ function buildProfileOverviewBlock(c, repExplain) {
       <div class="profile-trait-list">${traitRows}</div>
     </div>
   </section>`;
+}
+
+function buildFullBodyPortraitPanel(c) {
+  const fullBody = profileFullBodyPortraitUrl(c);
+  const portrait = profilePortraitUrl(c);
+  const src = fullBody || portrait;
+  return `<div class="profile-fullbody-panel">
+    <div class="profile-fullbody-head">
+      <div>
+        <h3>${escapeHtml(c?.name || '人物')}</h3>
+        <p>${escapeHtml(c?.shortComment || c?.personality || '全身立绘')}</p>
+      </div>
+      <div class="profile-fullbody-actions">
+        <button class="sys-btn" id="profile-back-to-dossier">返回档案</button>
+        <button class="sys-btn" onclick="document.getElementById('panel-overlay').classList.remove('open')">关闭</button>
+      </div>
+    </div>
+    <div class="profile-fullbody-stage">
+      ${src ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(c?.name || '')}全身图" loading="lazy" decoding="async">` : `<div class="profile-cover-fallback" style="background:${escapeHtml(c?.color || '#c8d8c0')}">${escapeHtml(c?.short || '人')}</div>`}
+    </div>
+  </div>`;
 }
 
 function buildProfileIdentityBlock(c, repExplain) {
@@ -777,7 +1048,7 @@ function buildProfileIdentityBlock(c, repExplain) {
 
 function buildProfileStatusBlock(c) {
   const needPalette = ['#b99a58', '#cb7f82', '#67b8b2', '#d486a7', '#8f74b3', '#80a96e'];
-  const needs = getHudNeedDefs().map((def, i) => {
+  const needs = profileNeedDefsInDisplayOrder().map((def, i) => {
     const key = def.key || def.id;
     const value = c.needs?.[key];
     const color = def.color || needPalette[i % needPalette.length];
@@ -822,18 +1093,51 @@ function buildProfileStatusBlock(c) {
   </section>`;
 }
 
-function buildProfileMoneyBlock(c) {
+function buildProfileBasicsBlock(c, repExplain) {
   const family = FamilySystem?.findFamilyOfChar?.(c.id);
-  const fund = family ? Math.round(FamilySystem.getFund(family.id)) : 0;
+  const role = family ? FamilySystem.getCharRole(c.id, family.id) : '';
+  const baseRank = c._baseSocialRank ?? getCharDef(c.id)?.socialRank ?? c.socialRank ?? 2;
+  const effectiveRank = IdentityProtocolSystem?.getCharRank?.(c.id) ?? baseRank;
+  const rankLabel = IdentityProtocolSystem?.rankLabel?.(effectiveRank) || `等级${effectiveRank}`;
+  const path = c.lifePath ? LifePathSystem?.getPath?.(c.lifePath) : null;
+  const stage = c.currentStage ? LifePathSystem?.getStage?.(c.currentStage) : null;
   const personal = Math.round(MoneySystem?.getBalance?.(c) ?? 0);
+  const basics = [
+    profileMetricCard('性别', c.gender || '未设', '人物基础信息'),
+    profileMetricCard('年龄', c.age == null ? '未设' : `${c.age}岁`, '人物基础信息'),
+    profileMetricCard('家庭', family?.name || '未入家庭', '归属'),
+    profileMetricCard('家庭身份', role || '未配置', '家中位置'),
+    profileMetricCard('血缘', '暂未开放', '亲缘系统后续接入'),
+  ].join('');
   const rows = [
-    profileMetricCard('公库', `${fund} 两`, family?.name || '无家庭归属'),
-    profileMetricCard('私库', `${personal} 两`, '人物个人银两'),
-    profileMetricCard('资源读取', '任务 / 梦想 / 职业', '背包完成后接物品与信物'),
+    profileMetricCard('身份', rankLabel, effectiveRank !== baseRank ? `原位阶：${IdentityProtocolSystem?.rankLabel?.(baseRank) || baseRank}` : '当前礼法位置'),
+    profileMetricCard('职业', stage?.title || path?.name || '暂无', path?.name ? `路径：${path.name}` : '未进入职业路径'),
+    profileMetricCard('私库', `${personal} 两`, '人物当前银两'),
   ].join('');
   return `<section class="profile-section">
-    <h4>财产与资源</h4>
-    <div class="profile-metrics">${rows}</div>
+    <h4>基础信息</h4>
+    <div class="profile-basic-grid">${basics}</div>
+    <div class="profile-metrics profile-current-row">${rows}</div>
+  </section>`;
+}
+
+function buildProfileDreamBlock(c) {
+  const dream = profileDreamInfo(c);
+  const pct = dream.progress == null ? null : Math.max(0, Math.min(100, Number(dream.progress) || 0));
+  return `<section class="profile-section">
+    <h4>梦想</h4>
+    <div class="profile-dream-card">
+      <div>
+        <div class="profile-card-label">长期梦想</div>
+        <div class="profile-path-title">${escapeHtml(dream.title)}</div>
+        <p class="profile-path-desc">${escapeHtml(dream.desc)}</p>
+      </div>
+      <div>
+        <div class="profile-card-label">当前条件</div>
+        <div class="profile-card-sub">${escapeHtml(dream.condition)}</div>
+        ${pct == null ? '' : `<div class="profile-dream-progress"><span style="width:${pct}%"></span></div>`}
+      </div>
+    </div>
   </section>`;
 }
 
@@ -881,13 +1185,16 @@ function buildProfileCareerBlock(c) {
 }
 
 function buildProfileReputationBlock(c, repExplain) {
-  const colors = ['var(--jn-gold)', 'var(--jn-green-bright)', 'var(--jn-blue-deep)', 'var(--jn-red-deep)', 'var(--jn-purple-deep)', 'var(--jn-brown)'];
-  const domainRows = (repExplain?.domains || []).map((row, i) => {
-    const tags = [
-      (repExplain?.careerDomains || []).includes(row.id) ? '职业' : '',
-      (repExplain?.identity?.domains || []).some(d => d.domain === row.id) ? '身份' : '',
-    ].filter(Boolean).join(' / ');
-    return `<div title="${escapeHtml(tags || '普通声望域')}">${profileBar(`${row.label}${tags ? ' · ' + tags : ''}`, row.value, 1000, colors[i % colors.length])}</div>`;
+  const colors = ['#caa04f', '#83ad72', '#67aeb0', '#8d78ad', '#c97d83'];
+  const rows = profileReputationSummary(c, repExplain).map((row, i) => {
+    const max = 1000;
+    const pct = Math.max(0, Math.min(100, row.value / max * 100));
+    return `<div class="profile-rep-tile">
+      <div class="profile-card-label">${escapeHtml(row.label)}</div>
+      <div class="profile-card-value">${escapeHtml(row.value)}</div>
+      <div class="profile-rep-track"><span style="width:${pct}%;background:${colors[i % colors.length]}"></span></div>
+      <div class="profile-card-sub">${escapeHtml(row.sub)}</div>
+    </div>`;
   }).join('');
   const logRows = (repExplain?.log || []).map(row => `
     <tr>
@@ -897,11 +1204,9 @@ function buildProfileReputationBlock(c, repExplain) {
       <td>${escapeHtml(row.reason || row.source || '—')}</td>
     </tr>`).join('');
   return `<section class="profile-section">
-    <h4>分域声望</h4>
-    <div class="profile-two-col">
-      <div class="profile-rep-box">
-        ${domainRows || '<p class="profile-empty">暂无声望域数据</p>'}
-      </div>
+    <h4>声望</h4>
+    <div class="profile-two-col profile-reputation-layout">
+      <div class="profile-reputation-grid">${rows}</div>
       <div class="profile-table-wrap" style="max-height:190px">
         <table class="profile-table">
           <thead><tr><th>日期</th><th>领域</th><th>变化</th><th>原因</th></tr></thead>
@@ -950,8 +1255,9 @@ function buildCharacterProfilePanel() {
   return `<div class="profile-panel">
     ${buildProfileOverviewBlock(c, repExplain)}
     ${buildProfileStatusBlock(c)}
-    ${buildProfileQuickFactsBlock(c, repExplain)}
-    ${buildProfileIdentityBlock(c, repExplain)}
+    ${buildProfileBasicsBlock(c, repExplain)}
+    ${buildProfileReputationBlock(c, repExplain)}
+    ${buildProfileDreamBlock(c)}
     ${buildProfileCareerBlock(c)}
     <div class="profile-actions">
       <button class="sys-btn" id="profile-open-relations">关系网络</button>
@@ -967,6 +1273,13 @@ function openCharacterProfilePanel() {
   if (btn) btn.onclick = () => LifePathSystem?.openPathPanel?.();
   const relBtn = document.getElementById('profile-open-relations');
   if (relBtn) relBtn.onclick = () => openPanel(buildRelationsPanel());
+  const fullBodyBtn = document.querySelector('[data-profile-full-body]');
+  if (fullBodyBtn) fullBodyBtn.onclick = () => {
+    const c = CHARS[selectedIdx];
+    openPanel(buildFullBodyPortraitPanel(c));
+    const back = document.getElementById('profile-back-to-dossier');
+    if (back) back.onclick = () => openCharacterProfilePanel();
+  };
 }
 
 function initLogSidebar() {
@@ -1288,11 +1601,12 @@ function relationArcChart(ri, c, t) {
           : a.start + (a.end - a.start) * ((value - range.min) / (range.max - range.min || 1));
         const clockwise = !range.signed || value >= range.zero;
         const progress = a.active ? relRingArcPath(cx, cy, progressR, zeroAngle, target, clockwise) : '';
+        const progressColor = range.signed && value < range.zero ? 'rgba(107,90,76,.58)' : a.color;
         return `
           <path d="${relSectorPath(cx, cy, innerR, outerR, a.start, a.end)}" fill="${a.active ? 'rgba(255,252,242,.55)' : 'rgba(107,90,76,.06)'}" stroke="rgba(107,90,76,.2)" stroke-width="1"/>
           ${a.active ? `<path d="${relRingArcPath(cx, cy, progressR, a.start, a.end, true)}" fill="none" stroke="rgba(107,90,76,.18)" stroke-width="7" stroke-linecap="round"/>
           <path d="${relRingArcPath(cx, cy, progressR, zeroAngle, zeroAngle + 0.1, true)}" fill="none" stroke="rgba(107,90,76,.45)" stroke-width="9" stroke-linecap="round"/>` : ''}
-          ${progress ? `<path d="${progress}" fill="none" stroke="${a.color}" stroke-width="7" stroke-linecap="round"/>` : ''}
+          ${progress ? `<path d="${progress}" fill="none" stroke="${progressColor}" stroke-width="7" stroke-linecap="round"/>` : ''}
           <text x="${labelPoint.x.toFixed(1)}" y="${(labelPoint.y - 4).toFixed(1)}" text-anchor="middle" fill="${a.active ? 'var(--jn-title)' : 'var(--jn-text-dim)'}" font-size="10" font-weight="700">${escapeHtml(a.label)}</text>
           <text x="${labelPoint.x.toFixed(1)}" y="${(labelPoint.y + 10).toFixed(1)}" text-anchor="middle" fill="var(--jn-text-muted)" font-size="9">${escapeHtml(relationStageDisplay(a.stage))}</text>
         `;
@@ -1759,7 +2073,7 @@ function buildRoutinePanel() {
 
 function openPanel(html) {
   const panel = document.getElementById('panel-content');
-  panel.classList.remove('routine-panel-box');
+  panel.classList.remove('routine-panel-box', 'order-book-panel-box');
   panel.innerHTML = html;
   document.getElementById('panel-overlay').classList.add('open');
 }
@@ -2576,8 +2890,8 @@ canvas.addEventListener('mousemove', e => {
 
 const IM_CAT_ICONS = {
   _quest: '📋',
-  xujiu: '🍵', lundao: '📜', tiaoxiao: '😄',
-  weijie: '🤝', chuanqing: '💗', zhengchi: '⚡',
+  weijie: '🤲', xujiu: '💬', lundao: '📜',
+  chuanqing: '💗', tiaoxiao: '😄', zhengchi: '⚡',
 };
 let imMenuShiftKey = false;
 let imMenuMode = 'interaction';
@@ -2635,6 +2949,246 @@ function setImRingSize(ringSize) {
   }
 }
 
+function setImMenuSize(width, height) {
+  const ringWrap = document.getElementById('im-ring-wrap');
+  if (ringWrap) {
+    ringWrap.style.width = `${width}px`;
+    ringWrap.style.height = `${height}px`;
+  }
+}
+
+const IM_CYCLE_VISIBLE_SLOTS = 6;
+const IM_CYCLE_SUB_VISIBLE_SLOTS = 6;
+const IM_CYCLE_CENTER_SLOT = 2;
+const IM_CYCLE_INDEX_MARKS = ['①', '②', '③', '④', '⑤', '⑥', ''];
+const IM_CYCLE_CONTAINER = { width: 460, height: 360 };
+const IM_CYCLE_ARC_CENTER_X = 230;
+const IM_CYCLE_ARC_CENTER_Y = 180;
+const IM_CYCLE_L1_RADIUS = 118;
+const IM_CYCLE_L2_RADIUS = 112;
+const IM_CYCLE_ARC_ANGLE_START = -58;
+const IM_CYCLE_ARC_ANGLE_END = 58;
+let imMenuCurrentIndex = 1;
+let imMenuSubIndex = 0;
+let imMenuIsScrolling = false;
+
+const IM_CYCLE_SLOTS = Array.from({ length: IM_CYCLE_VISIBLE_SLOTS }, (_, i) => {
+  const t = i / (IM_CYCLE_VISIBLE_SLOTS - 1);
+  const angle = IM_CYCLE_ARC_ANGLE_START + t * (IM_CYCLE_ARC_ANGLE_END - IM_CYCLE_ARC_ANGLE_START);
+  const rad = angle * Math.PI / 180;
+  return {
+    x: IM_CYCLE_ARC_CENTER_X + Math.cos(rad) * IM_CYCLE_L1_RADIUS,
+    y: IM_CYCLE_ARC_CENTER_Y + Math.sin(rad) * IM_CYCLE_L1_RADIUS,
+    angle,
+    scale: 1 - Math.abs(t - 0.5) * 0.12,
+  };
+});
+
+function imWrapIndex(idx, total) {
+  if (!total) return 0;
+  return (idx + total) % total;
+}
+
+function calcImSubPositions(count) {
+  const visible = Math.max(1, Math.min(IM_CYCLE_SUB_VISIBLE_SLOTS, count));
+  const positions = [];
+  const angleStep = 16;
+  const startAngle = -angleStep * (visible - 1) / 2;
+  for (let i = 0; i < visible; i++) {
+    const t = visible <= 1 ? 0.5 : i / (visible - 1);
+    const angle = startAngle + angleStep * i;
+    const rad = angle * Math.PI / 180;
+    positions.push({
+      x: Math.cos(rad) * IM_CYCLE_L2_RADIUS,
+      y: Math.sin(rad) * IM_CYCLE_L2_RADIUS,
+      scale: 1 - Math.abs(t - 0.5) * 0.04,
+    });
+  }
+  return positions;
+}
+
+function imSpriteStyle(row, side = 'left', rowHeight = 42) {
+  const idx = imWrapIndex(row, 7);
+  return `--sprite-x:${side};--sprite-y:${-(idx * rowHeight)}px`;
+}
+
+function imSummaryDesire(summary) {
+  const score = summary?.score ?? 0.45;
+  if (score >= 0.68) return { cls: 'high', text: '急' };
+  if (summary?.risky || score < 0.34) return { cls: 'low', text: '可' };
+  return { cls: 'medium', text: '愿' };
+}
+
+function imDefaultCategoryReason(catId, catName) {
+  const map = {
+    weijie: '看你心事重重，想宽慰你几句',
+    xujiu: '天气正好，不如闲谈片刻',
+    lundao: '近来有所悟，想与你论艺',
+    chuanqing: '有些话，想当面说与你听',
+    tiaoxiao: '心情甚好，想与你玩笑几句',
+    zhengchi: '此事我绝不退让',
+  };
+  return map[catId] || `想与你${catName || '互动'}片刻`;
+}
+
+function resolveImAvatarSrc(c) {
+  const direct = c?.avatar || c?.avatarUrl || c?.portrait || c?.portraitUrl || c?.headIcon || c?.headImage
+    || c?.image || c?.img || c?.sprite || c?.spriteUrl || c?.spriteSrc || c?.avatarPath || c?.portraitPath
+    || c?.profile?.avatar || c?.profile?.portrait || c?.profile?.avatarUrl || c?.profile?.portraitUrl || '';
+  if (direct) return direct;
+  if (typeof document === 'undefined' || !c) return '';
+  const extractUrl = (value = '') => {
+    const m = String(value).match(/url\(["']?([^"')]+)["']?\)/);
+    return m?.[1] || '';
+  };
+  const cssEscape = (v) => (window.CSS?.escape ? CSS.escape(String(v)) : String(v).replace(/"/g, '\\"'));
+  const idSel = c.id ? `[data-char-id="${cssEscape(c.id)}"],[data-cid="${cssEscape(c.id)}"],[data-id="${cssEscape(c.id)}"]` : '';
+  const roots = idSel ? [...document.querySelectorAll(idSel)] : [];
+  const label = c.short || c.name || '';
+  if (!roots.length && label) {
+    roots.push(...[...document.querySelectorAll('.char-token,.char-card,.portrait-card,.profile-card,.party-slot,.avatar-wrap')]
+      .filter(el => el.textContent?.includes(label)));
+  }
+  for (const root of roots) {
+    const img = root.matches?.('img') ? root : root.querySelector?.('img');
+    if (img?.src) return img.src;
+    const bg = extractUrl(getComputedStyle(root).backgroundImage);
+    if (bg) return bg;
+    const childBg = [...root.querySelectorAll?.('*') || []]
+      .map(el => extractUrl(getComputedStyle(el).backgroundImage))
+      .find(Boolean);
+    if (childBg) return childBg;
+  }
+  return '';
+}
+
+function setInteractionMenuAvatar(c) {
+  const img = document.getElementById('im-avatar-img');
+  const fallback = document.getElementById('im-avatar-fallback');
+  if (!img || !fallback) return;
+  const src = resolveImAvatarSrc(c);
+  const label = c?.short || c?.name || c?.id || '人';
+  fallback.textContent = String(label).slice(0, 2);
+  if (src) {
+    img.hidden = false;
+    fallback.hidden = true;
+    img.onerror = () => {
+      img.hidden = true;
+      fallback.hidden = false;
+    };
+    img.src = src;
+  } else {
+    img.removeAttribute('src');
+    img.hidden = true;
+    fallback.hidden = false;
+  }
+}
+
+const IM_NEGATIVE_STATE_IDS = ['ganshang', 'heartbroken', 'awkward', 'sullenAnger', 'angry', 'offended', 'chikuang'];
+const IM_WARM_STATE_IDS = ['joyful', 'elated', 'teaHeart', 'tipsySocial', 'secretCrush'];
+
+function imHasAnyState(c, ids) {
+  if (!Array.isArray(c?.activeStates)) return false;
+  return c.activeStates.some(s => ids.includes(s.id));
+}
+
+function imRelationScore(a, b) {
+  return (a && b && typeof getRelationValue === 'function') ? getRelationValue(a.id, b.id) : 0;
+}
+
+function imCategoryContextBoost(catId, initiator, target) {
+  const rel = imRelationScore(initiator, target);
+  const targetNeedsCare = imHasAnyState(target, IM_NEGATIVE_STATE_IDS);
+  const targetWarm = imHasAnyState(target, IM_WARM_STATE_IDS);
+  const initiatorWarm = imHasAnyState(initiator, IM_WARM_STATE_IDS);
+  let score = 0;
+  const reasons = [];
+
+  if (catId === 'weijie') {
+    if (targetNeedsCare) { score += 0.42; reasons.push('对方状态需要宽慰'); }
+    if (rel >= 35) score += 0.12;
+    if (targetWarm) score -= 0.08;
+  } else if (catId === 'xujiu') {
+    score += 0.12;
+    if (rel < 20) score += 0.08;
+  } else if (catId === 'lundao') {
+    if (rel >= 0) score += 0.10;
+    if (typeof getSkillLevel === 'function' && getSkillLevel(initiator, 'poetry') >= 2) score += 0.10;
+  } else if (catId === 'chuanqing') {
+    if (rel >= 70) { score += 0.38; reasons.push('关系亲近'); }
+    else if (rel >= 45) score += 0.18;
+    if (targetWarm || initiatorWarm || imHasAnyState(target, ['heartbroken', 'secretCrush'])) score += 0.16;
+  } else if (catId === 'tiaoxiao') {
+    if (rel >= 45) score += 0.26;
+    else if (rel >= 20) score += 0.12;
+    if (targetNeedsCare) score -= 0.18;
+  } else if (catId === 'zhengchi') {
+    if (rel < -15) { score += 0.22; reasons.push('关系紧张'); }
+    if (imHasAnyState(target, ['angry', 'offended', 'sullenAnger'])) { score += 0.32; reasons.push('对方已有火气'); }
+  }
+  return { score, reasons };
+}
+
+function imCategoryProtocol(cat, initiator, target) {
+  if (!cat || !initiator || !target || cat.id === '_quest') return null;
+  if (!IdentityProtocolSystem?.evaluateProtocolBehavior) return null;
+  return IdentityProtocolSystem.evaluateProtocolBehavior(initiator, target, {
+    actionType: 'interaction', category: cat.name, contactType: 'none',
+  });
+}
+
+function imItemUsable(item) {
+  return item && item.ok !== false && item.ok !== 0;
+}
+
+function summarizeImCategoryGroup(group, initiator, target, index = 0) {
+  const items = group.items || [];
+  const usable = items.filter(imItemUsable);
+  const dominant = usable.length
+    ? [...usable].sort((a, b) => ((b.willingness?.strength ?? 0) - (a.willingness?.strength ?? 0)))[0]
+    : null;
+  const dominantLow = dominant?.ok === 'low';
+  const dominantRisky = !!dominant?.risky;
+  const maxWill = items.reduce((best, item) => {
+    const w = item.willingness?.strength;
+    return Math.max(best, Number.isFinite(w) ? w : 0);
+  }, 0.28);
+  const context = imCategoryContextBoost(group.cat.id, initiator, target);
+  const protocol = imCategoryProtocol(group.cat, initiator, target);
+  const behavior = protocol?.behavior || 'allowed';
+  const protocolRisk = ['conditional', 'risky', 'forbidden'].includes(behavior);
+  let score = (usable.length ? 0.16 : -0.12) + maxWill * 0.62 + context.score;
+  if (behavior === 'allowed') score += 0.04;
+  if (behavior === 'conditional') score -= 0.04;
+  if (behavior === 'risky') score -= 0.10;
+  if (behavior === 'forbidden') score -= 0.22;
+  score = Math.max(0, Math.min(1.25, score));
+
+  const severeProtocolRisk = ['risky', 'forbidden'].includes(behavior);
+  const risky = dominantLow || dominantRisky || severeProtocolRisk || !usable.length;
+  const hot = usable.length > 0 && score >= 0.68;
+  const reasonParts = [...context.reasons];
+  if (severeProtocolRisk && protocol?.reason) reasonParts.push(protocol.reason);
+  else if (dominantRisky) reasonParts.push('主选项有逾矩风险');
+  else if (dominantLow) reasonParts.push('主选项意愿偏低');
+  else if (!usable.length) reasonParts.push('当前不太合适');
+  return {
+    index,
+    score,
+    risky,
+    hot,
+    muted: !usable.length,
+    badge: hot && risky ? '荐·险' : hot ? '荐' : risky ? '险' : '',
+    reason: reasonParts.join('；'),
+  };
+}
+
+function sortImCategoryGroups(groups, initiator, target) {
+  return groups
+    .map((group, index) => ({ ...group, summary: summarizeImCategoryGroup(group, initiator, target, index) }))
+    .sort((a, b) => (b.summary.score - a.summary.score) || (a.summary.index - b.summary.index));
+}
+
 function positionInteractionMenu() {
   const menu = document.getElementById('interaction-menu');
   const ring = document.getElementById('im-ring-wrap');
@@ -2657,33 +3211,95 @@ function renderImCategories() {
   imMenuMode = 'interaction';
   imFurnitureInstanceId = 0;
   menu.classList.remove('im-options', 'im-quest', 'im-furniture');
-  document.getElementById('im-hint').textContent = '选一类互动';
   imMenuCatAngles = {};
-  resetImRingSize();
+  setImMenuSize(IM_CYCLE_CONTAINER.width, IM_CYCLE_CONTAINER.height);
 
   const initiator = CHARS[selectedIdx];
   const target = CHARS[menuTargetIdx];
-  const displayGroups = imMenuGroups.slice();
-  if (QuestIssueSystem?.canIssueAny?.(initiator, target)) {
-    displayGroups.unshift({ cat: { id: '_quest', name: '传令' }, items: [] });
+  setInteractionMenuAvatar(target);
+  const rows = imMenuGroups
+    .map((group, index) => ({ ...group, summary: summarizeImCategoryGroup(group, initiator, target, index) }));
+  const total = rows.length;
+  if (!total) {
+    document.getElementById('im-hint').textContent = '暂无可互动';
+    sectors.innerHTML = '';
+    requestAnimationFrame(() => positionInteractionMenu());
+    return;
   }
+  imMenuCurrentIndex = imWrapIndex(imMenuCurrentIndex, total);
 
-  const n = displayGroups.length;
-  sectors.innerHTML = displayGroups.map(({ cat }, i) => {
-    const angle = n ? (360 / n) * i - 90 : 0;
-    imMenuCatAngles[cat.id] = angle;
-    const icon = IM_CAT_ICONS[cat.id] || '◆';
-    return `<button type="button" class="im-sector" data-cat="${cat.id}"
+  let activeReason = '选一类互动';
+  sectors.innerHTML = IM_CYCLE_SLOTS.map((slot, slotIdx) => {
+    const offset = slotIdx - IM_CYCLE_CENTER_SLOT;
+    const dataIdx = imWrapIndex(imMenuCurrentIndex + offset, total);
+    const group = rows[dataIdx];
+    const { cat } = group;
+    const summary = group.summary;
+    const active = offset === 0;
+    const desire = imSummaryDesire(summary);
+    imMenuCatAngles[cat.id] = slot.angle;
+    if (active) {
+      activeReason = summary?.reason || imDefaultCategoryReason(cat.id, cat.name);
+    }
+    const cls = `${active ? ' active' : ''}${summary?.muted ? ' im-cat-muted' : ''}`;
+    const title = summary?.reason ? `${cat.name} · ${summary.reason}` : cat.name;
+    const subTotal = group.items.length;
+    const subVisibleCount = Math.min(IM_CYCLE_SUB_VISIBLE_SLOTS, subTotal);
+    imMenuSubIndex = imWrapIndex(imMenuSubIndex, Math.max(1, subTotal));
+    const subPositions = active ? calcImSubPositions(subVisibleCount) : [];
+    const subCenterSlot = Math.floor(subVisibleCount / 2);
+    const subMenu = active ? Array.from({ length: subVisibleCount }, (_, slotIdx) => {
+      const itemIdx = imWrapIndex(imMenuSubIndex + slotIdx - subCenterSlot, subTotal);
+      const { tpl, ok, reason, risky, riskHint } = group.items[itemIdx];
+      const disabled = ok === false || ok === 0;
+      const hasLlm = !disabled && initiator && target
+        && InteractionLlmSystem?.shouldUse?.(initiator, target, tpl);
+      const isRisky = !disabled && !!risky;
+      const pos = subPositions[slotIdx] || { x: IM_CYCLE_L2_RADIUS, y: 0, scale: 1 };
+      const isSubActive = slotIdx === subCenterSlot;
+      const optCls = `${isSubActive ? ' sub-active' : ''}${disabled ? ' disabled' : ''}${hasLlm ? ' im-llm-opt' : ''}`;
+      let hint = disabled ? reason : tpl.name;
+      if (!disabled && hasLlm) hint += ' · 模型生成对白';
+      if (isRisky && riskHint) hint = `${tpl.name} · ⚠ ${riskHint}`;
+      return `<button type="button" class="sub-menu-item${optCls}"
+        onpointerdown="handleInteractionMenuSectorClick(event)"
+        data-iid="${tpl.id}" data-sub-index="${itemIdx}" data-sub-active="${isSubActive ? '1' : '0'}"
+        style="left:${pos.x}px;top:${pos.y}px;transform:translate(-50%, -50%) scale(${pos.scale});${imSpriteStyle(itemIdx, 'right', 36)}" title="${escapeAttr(hint)}">
+        ${escapeHtml(tpl.name)}
+        ${disabled ? `<span class="im-reason">${escapeHtml(reason || '不可用')}</span>` : ''}
+      </button>`;
+    }).join('') : '';
+    return `<div class="im-sector menu-item${cls}" role="button" tabindex="0" data-cat="${cat.id}" data-cycle-index="${dataIdx}" data-active="${active ? '1' : '0'}"
       onpointerdown="handleInteractionMenuSectorClick(event)"
-      style="--angle:${angle}deg;--radius:-78px" title="${cat.name}">
-      <span class="im-sector-inner">
-        <span class="im-sector-icon">${icon}</span>
-        <span class="im-sector-label">${cat.name}</span>
-      </span>
-    </button>`;
+      style="left:${slot.x}px;top:${slot.y}px;transform:translate(-50%, -50%) scale(${slot.scale});${imSpriteStyle(dataIdx, 'left')};--will:${(summary?.score ?? 0.5).toFixed(2)}" title="${escapeAttr(title)}">
+      <div class="im-sector-inner menu-item-inner">
+        <span class="item-index">${IM_CYCLE_INDEX_MARKS[dataIdx] || ''}</span>
+        <span class="item-name">${escapeHtml(cat.name)}</span>
+        <div class="desire-seal ${desire.cls}">${desire.text}</div>
+        <div class="sub-menu">${subMenu}</div>
+      </div>
+    </div>`;
   }).join('');
+  document.getElementById('im-hint').textContent = activeReason;
 
   requestAnimationFrame(() => positionInteractionMenu());
+}
+
+function handleImCycleWheel(e) {
+  if (imMenuMode !== 'interaction' || !imMenuGroups.length) return;
+  e.preventDefault();
+  if (imMenuIsScrolling) return;
+  imMenuIsScrolling = true;
+  const dir = e.deltaY > 0 ? 1 : -1;
+  const activeGroup = imMenuGroups[imWrapIndex(imMenuCurrentIndex, imMenuGroups.length)];
+  if (e.target?.closest?.('.sub-menu, .sub-menu-item') && (activeGroup?.items?.length || 0) > IM_CYCLE_SUB_VISIBLE_SLOTS) {
+    imMenuSubIndex = imWrapIndex(imMenuSubIndex + dir, activeGroup.items.length);
+  } else {
+    imMenuCurrentIndex = imWrapIndex(imMenuCurrentIndex + dir, imMenuGroups.length);
+    imMenuSubIndex = 0;
+  }
+  renderImCategories();
+  setTimeout(() => { imMenuIsScrolling = false; }, 150);
 }
 
 function setFurnitureMenuHint(text) {
@@ -2725,7 +3341,7 @@ function renderFurnitureActions(inst) {
       data-furn="${inst.instanceId}"
       data-furn-action="${escapeAttr(action.id || 'default_use')}"
       data-detail="${escapeAttr(detail)}"
-      style="--px:${px}px;--py:${py}px"
+      style="--px:${px}px;--py:${py}px;left:${px}px;top:${py}px;transform:translate(-50%, -50%)"
       title="${escapeAttr(detail)}">
       <span class="im-sector-inner">
         <span class="im-sector-label">${escapeHtml(action.name || '使用')}</span>
@@ -2753,7 +3369,7 @@ function renderImQuestOptions() {
     document.getElementById('im-hint').textContent = '暂无可传令';
     sectors.innerHTML = `<button type="button" class="im-sector im-opt-sector disabled"
       onpointerdown="handleInteractionMenuSectorClick(event)"
-      style="--px:90px;--py:90px" title="当前没有可下发任务">
+      style="--px:90px;--py:90px;left:90px;top:90px;transform:translate(-50%, -50%)" title="当前没有可下发任务">
       <span class="im-sector-inner">
         <span class="im-sector-label">不可传令</span>
         <span class="im-quest-hint">暂无任务</span>
@@ -2772,7 +3388,7 @@ function renderImQuestOptions() {
     const hint = reason ? `${tpl.name} · ${reason}` : tpl.name;
     return `<button type="button" class="im-sector im-opt-sector im-quest-sector"
       onpointerdown="handleInteractionMenuSectorClick(event)"
-      data-qid="${tpl.id}" style="--px:${px}px;--py:${py}px" title="${hint}">
+      data-qid="${tpl.id}" style="--px:${px}px;--py:${py}px;left:${px}px;top:${py}px;transform:translate(-50%, -50%)" title="${hint}">
       <span class="im-sector-inner">
         <span class="im-sector-label">${tpl.name}</span>
         ${reason ? `<span class="im-quest-hint">${reason}</span>` : ''}
@@ -2784,59 +3400,22 @@ function renderImQuestOptions() {
 }
 
 function renderImOptions(catId) {
-  const group = imMenuGroups.find(g => g.cat.id === catId);
-  if (!group) return;
-  const menu = document.getElementById('interaction-menu');
-  const sectors = document.getElementById('im-sectors');
-  menu.classList.add('im-options');
-
-  const items = group.items;
-  const enabledCount = items.filter(item => item.ok !== false && item.ok !== 0).length;
-  document.getElementById('im-hint').textContent = enabledCount
-    ? group.cat.name
-    : `${group.cat.name} · 当前状态下暂无可用选项`;
-  const n = items.length;
-  const baseAngle = imMenuCatAngles[catId] ?? -90;
-  const { ringSize, radius, span, start } = imOptionsLayout(n, baseAngle);
-  setImRingSize(ringSize);
-
-  const initiator = CHARS[selectedIdx];
-  const target = CHARS[menuTargetIdx];
-
-  sectors.innerHTML = items.map(({ tpl, ok, reason, risky, riskHint, willingness }, i) => {
-    const angle = n === 1 ? baseAngle : start + (span / (n - 1)) * i;
-    const { px, py } = imSectorCenter(angle, radius, ringSize);
-    const isLow = ok === 'low';
-    const disabled = ok === false || ok === 0;
-    const hasLlm = !disabled && initiator && target
-      && InteractionLlmSystem?.shouldUse?.(initiator, target, tpl);
-    const isRisky = !disabled && !!risky;
-    const will = willingness || (initiator && target && InteractionScoreSystem?.socialWillingness?.(initiator, target, tpl));
-    const willStrength = Math.max(0.08, Math.min(1, will?.strength ?? 0.5));
-    const isHot = !disabled && !isLow && willStrength >= 0.78;
-    const cls = `${disabled ? ' disabled' : isLow ? ' im-warn' : isHot ? ' im-hot' : ''}${hasLlm ? ' im-llm-opt' : ''}${isRisky ? ' im-risky' : ''}`;
-    let hint = disabled ? reason : tpl.name;
-    if (!disabled && hasLlm) hint += ' · 模型生成对白';
-    if (isRisky && riskHint) hint = `${tpl.name} · ⚠ ${riskHint}`;
-    return `<button type="button" class="im-sector im-opt-sector${cls}"
-      onpointerdown="handleInteractionMenuSectorClick(event)"
-      data-iid="${tpl.id}" style="--px:${px}px;--py:${py}px;--will:${willStrength.toFixed(2)}" title="${escapeAttr(hint)}">
-      <span class="im-sector-inner">
-        <span class="im-sector-label">${tpl.name}</span>
-        ${hasLlm ? '<span class="im-llm-badge" title="模型生成对白">墨</span>' : ''}
-        ${isRisky ? '<span class="im-risk-badge" title="逾矩行为">⚠</span>' : ''}
-        ${disabled ? `<span class="im-reason">${reason}</span>` : ''}
-      </span>
-    </button>`;
-  }).join('');
-
-  requestAnimationFrame(() => positionInteractionMenu());
+  const idx = imMenuGroups.findIndex(g => g.cat.id === catId);
+  if (idx >= 0) {
+    imMenuCurrentIndex = idx;
+    renderImCategories();
+  }
 }
 
 function handleInteractionMenuSectorClick(e) {
-  const btn = e.target.closest('.im-sector');
   const sectors = document.getElementById('im-sectors');
+  const btn = e.target.closest('.sub-menu-item') || e.target.closest('.im-sector');
   if (!btn || !sectors.contains(btn)) return;
+  if (btn.classList.contains('im-blank') || btn.dataset.cat === '_blank') {
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
   if (btn.dataset.consumed === '1') {
     e.preventDefault();
     e.stopPropagation();
@@ -2854,6 +3433,16 @@ function handleInteractionMenuSectorClick(e) {
   }
   e.preventDefault();
   e.stopPropagation();
+
+  if (btn.dataset.cat && imMenuMode === 'interaction') {
+    const nextIndex = Number(btn.dataset.cycleIndex);
+    if (Number.isFinite(nextIndex) && nextIndex !== imMenuCurrentIndex) {
+      imMenuCurrentIndex = imWrapIndex(nextIndex, imMenuGroups.length);
+      imMenuSubIndex = 0;
+      renderImCategories();
+    }
+    return;
+  }
 
   if (btn.dataset.furnAction) {
     const cur = CHARS[selectedIdx];
@@ -2902,8 +3491,10 @@ function handleInteractionMenuSectorClick(e) {
     return;
   }
 
-  const tpl = getInteractionTemplate(+btn.dataset.iid);
+  const tpl = getInteractionTemplate(+btn.dataset.iid) || getInteractionTemplate(btn.dataset.iid);
   if (!tpl) return;
+  btn.dataset.consumed = '1';
+  btn.classList.add('is-clicked');
   enqueueAction(initiator, makeInteractionItem(initiator, target, tpl), imMenuShiftKey);
   closeInteractionMenu();
   buildUI();
@@ -2918,6 +3509,7 @@ function openFurnitureActionMenu(c, inst, clientX, clientY, shiftKey) {
   imMenuCatAngles = {};
   imFurnitureInstanceId = inst.instanceId;
   const menu = document.getElementById('interaction-menu');
+  menu.onwheel = null;
   menu.classList.add('open');
   renderFurnitureActions(inst);
   requestAnimationFrame(() => positionInteractionMenu());
@@ -2932,6 +3524,8 @@ function openInteractionMenu(targetIdx, clientX, clientY, shiftKey) {
   imMenuShiftKey = !!shiftKey;
   imMenuAnchor = { x: clientX, y: clientY };
   imMenuGroups = getAvailableInteractions(initiator, target);
+  imMenuCurrentIndex = Math.min(1, Math.max(0, imMenuGroups.length - 1));
+  imMenuSubIndex = 0;
   const canQuest = QuestIssueSystem?.canIssueAny?.(initiator, target);
   if (!imMenuGroups.length && !canQuest) {
     const gate = QuestIssueSystem?.issuerMayIssueTo?.(initiator.id, target.id);
@@ -2940,8 +3534,10 @@ function openInteractionMenu(targetIdx, clientX, clientY, shiftKey) {
   }
 
   document.getElementById('im-target').textContent = target.short;
+  setInteractionMenuAvatar(target);
 
   const menu = document.getElementById('interaction-menu');
+  menu.onwheel = handleImCycleWheel;
   menu.classList.add('open');
   renderImCategories();
   requestAnimationFrame(() => positionInteractionMenu());
@@ -2960,6 +3556,7 @@ function openQuestIssueMenu(targetIdx, clientX, clientY, shiftKey) {
 
 function closeInteractionMenu() {
   const menu = document.getElementById('interaction-menu');
+  menu.onwheel = null;
   menu.classList.remove('open', 'im-options', 'im-quest', 'im-furniture');
   resetImRingSize();
   document.getElementById('im-target').textContent = '—';
@@ -2968,6 +3565,8 @@ function closeInteractionMenu() {
   imMenuMode = 'interaction';
   imMenuGroups = [];
   imMenuCatAngles = {};
+  imMenuSubIndex = 0;
+  imMenuIsScrolling = false;
   imFurnitureInstanceId = 0;
   imFurnitureDefaultHint = '';
 }
@@ -3037,6 +3636,7 @@ document.getElementById('btn-rel').onclick = () => openPanel(buildRelationsPanel
 document.getElementById('btn-profile').onclick = () => openCharacterProfilePanel();
 document.getElementById('btn-routine').onclick = () => openRoutinePanel();
 document.getElementById('btn-msg').onclick = () => toggleLogDrawer();
+document.getElementById('btn-order').onclick = () => OrderBookSystem?.openPanel?.();
 document.getElementById('btn-bag').onclick = () => {
   setMoreShortcutsOpen(false);
   openPanel(`<h3>背包</h3><p style="color:var(--jn-text-soft)">暂未开放</p><button class="sys-btn" onclick="document.getElementById('panel-overlay').classList.remove('open')">关闭</button>`);
@@ -3060,6 +3660,7 @@ document.addEventListener('keydown', e => {
   if (k === 'p') { openCharacterProfilePanel(); return; }
   if (k === 'q') { openRoutinePanel(); return; }
   if (k === 'm') { toggleLogDrawer(); return; }
+  if (k === 'y') { OrderBookSystem?.openPanel?.(); return; }
   if (k === 'k') { openPanel(buildSkillPanel()); return; }
   if (k === 'v') { openSavePanel(); return; }
   if (k === 'b') {

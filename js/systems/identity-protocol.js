@@ -33,7 +33,7 @@ const IdentityProtocolSystem = (() => {
     const map = cfg().interactionCatMap || {};
     if (tpl?.id != null && map[tpl.id]) return map[tpl.id];
     const cat = CONFIG.interactionCategories?.find(c => c.id === tpl?.category);
-    return cat?.name || tpl?.category || '叙旧';
+    return cat?.name || tpl?.category || '闲谈';
   }
 
   function getHierarchyRule(hierarchyRel, cat) {
@@ -69,7 +69,7 @@ const IdentityProtocolSystem = (() => {
     return {
       templateId: template?.id,
       actionType: base.actionType || (template ? 'interaction' : ''),
-      category: base.category || (template ? getInteractionCat(template) : '叙旧'),
+      category: base.category || (template ? getInteractionCat(template) : '闲谈'),
       sceneId: base.sceneId || '',
       scenePrivacy: base.scenePrivacy || '',
       witnessIds: base.witnessIds || [],
@@ -130,10 +130,10 @@ const IdentityProtocolSystem = (() => {
   }
 
   function evaluateProtocolBehavior(initiator, target, actionOrTemplate, context = {}) {
-    if (!initiator || !target) return { behavior: 'allowed', reason: '', rel: 'peer', actionType: '', category: '叙旧' };
+    if (!initiator || !target) return { behavior: 'allowed', reason: '', rel: 'peer', actionType: '', category: '闲谈' };
     const action = resolveActionContext(actionOrTemplate, context);
     const hrel = getHierarchyRelation(initiator.id, target.id);
-    const cat = action.category || '叙旧';
+    const cat = action.category || '闲谈';
     const tpl = action.template;
     const rule = getHierarchyRule(hrel, cat);
     let behavior = rule?.behavior || 'allowed';
@@ -262,8 +262,8 @@ const IdentityProtocolSystem = (() => {
 
   function formatInteractionProtocol(initiator, target, tpl) {
     const protocol = evaluateProtocolBehavior(initiator, target, tpl);
-    const cat = protocol.category || '叙旧';
-    if (protocol.behavior === 'allowed' && cat === '叙旧') return '';
+    const cat = protocol.category || '闲谈';
+    if (protocol.behavior === 'allowed' && cat === '闲谈') return '';
     const relText = protocolRoleLabel(protocol.rel || getHierarchyRelation(initiator.id, target.id));
     const parts = [`${relText}中「${cat}」：${protocol.behavior}`];
     if (protocol.reason) parts.push(protocol.reason);

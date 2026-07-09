@@ -256,12 +256,36 @@ const InteractionDepthSystem = (() => {
       .replace(/\{count\}/g, String(rec?.count || 0));
   }
 
-  function templateLinePools(tpl, mode, rec, context) {
+  function hierarchyFor(initiator, target) {
+    return (typeof IdentityProtocolSystem !== 'undefined' && IdentityProtocolSystem?.getHierarchyRelation)
+      ? IdentityProtocolSystem.getHierarchyRelation(initiator.id, target.id)
+      : '';
+  }
+
+  function identityRiskPools(rd, rel, kind) {
+    const byRel = rd?.identity_fail_lines?.[rel];
+    if (!byRel) return [];
+    const pools = [];
+    if (kind === 'witnessed' && byRel.witnessed) pools.push(byRel.witnessed);
+    if (kind === 'repeat' && byRel.repeat) pools.push(byRel.repeat);
+    if (byRel.fail) pools.push(byRel.fail);
+    return pools;
+  }
+
+  function templateLinePools(tpl, mode, rec, context, initiator, target) {
     const pools = [];
     if (mode === 'risk_fail') {
       const rd = tpl?.risky_details || {};
-      if (context.witnessed && rd.witnessed_fail_lines) pools.push(rd.witnessed_fail_lines);
-      if ((rec?.count || 0) > 1 && rd.repeat_fail_lines) pools.push(rd.repeat_fail_lines);
+      const rel = hierarchyFor(initiator, target);
+      if (context.witnessed) {
+        pools.push(...identityRiskPools(rd, rel, 'witnessed'));
+        if (rd.witnessed_fail_lines) pools.push(rd.witnessed_fail_lines);
+      }
+      if ((rec?.count || 0) > 1) {
+        pools.push(...identityRiskPools(rd, rel, 'repeat'));
+        if (rd.repeat_fail_lines) pools.push(rd.repeat_fail_lines);
+      }
+      pools.push(...identityRiskPools(rd, rel, 'fail'));
       if (rd.fail_lines) pools.push(rd.fail_lines);
     } else {
       const low = tpl?.onLowScore || {};
@@ -299,7 +323,7 @@ const InteractionDepthSystem = (() => {
     const level = context.level || resolveLevel(rec, conf, context);
     const mode = context.mode || 'low_score';
     const pools = [
-      ...templateLinePools(tpl, mode, rec, context),
+      ...templateLinePools(tpl, mode, rec, context, initiator, target),
       level?.lines?.[mode],
       level?.lines?.default,
     ];

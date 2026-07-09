@@ -7,6 +7,7 @@ const AssetSystem = (() => {
   const sheets = {};   // key -> HTMLImageElement（仅含已成功加载的）
   const avatarUrls = {}; // charKey -> src 路径
   const portraitUrls = {}; // charKey -> HUD 半身立绘路径
+  const fullBodyPortraitUrls = {}; // charKey -> 全身立绘路径
   const roomBackgrounds = {}; // sceneId -> HTMLImageElement
   const tileImages = {}; // groundType -> HTMLImageElement
   const furnitureImages = {}; // templateId/assetKey -> HTMLImageElement
@@ -44,6 +45,9 @@ const AssetSystem = (() => {
       const src = def.hud || def.portrait;
       const img = src ? await loadImage(src) : null;
       if (img) portraitUrls[key] = src;
+      const fullSrc = def.fullBody || def.fullbody || def.fullPortrait;
+      const fullImg = fullSrc ? await loadImage(fullSrc) : null;
+      if (fullImg) fullBodyPortraitUrls[key] = fullSrc;
     }));
     const roomEntries = Object.entries(manifest.roomBackgrounds || {});
     await Promise.all(roomEntries.map(async ([key, def]) => {
@@ -64,6 +68,7 @@ const AssetSystem = (() => {
     if (ready) console.log(`[assets] 已加载 ${Object.keys(sheets).length} 张精灵图:`, Object.keys(sheets).join(', '));
     if (Object.keys(avatarUrls).length) console.log(`[assets] 已加载 ${Object.keys(avatarUrls).length} 张头像:`, Object.keys(avatarUrls).join(', '));
     if (Object.keys(portraitUrls).length) console.log(`[assets] 已加载 ${Object.keys(portraitUrls).length} 张 HUD 立绘:`, Object.keys(portraitUrls).join(', '));
+    if (Object.keys(fullBodyPortraitUrls).length) console.log(`[assets] 已加载 ${Object.keys(fullBodyPortraitUrls).length} 张全身立绘:`, Object.keys(fullBodyPortraitUrls).join(', '));
     if (Object.keys(roomBackgrounds).length) console.log(`[assets] 已加载 ${Object.keys(roomBackgrounds).length} 张房间背景:`, Object.keys(roomBackgrounds).join(', '));
     if (Object.keys(tileImages).length) console.log(`[assets] 已加载 ${Object.keys(tileImages).length} 张地面 tile:`, Object.keys(tileImages).join(', '));
     if (Object.keys(furnitureImages).length) console.log(`[assets] 已加载 ${Object.keys(furnitureImages).length} 张家具站位图:`, Object.keys(furnitureImages).join(', '));
@@ -213,6 +218,12 @@ const AssetSystem = (() => {
     return c?.id ? (manifest?.portraits?.[c.id]?.portrait || portraitUrls[c.id] || null) : null;
   }
 
+  function fullBodyPortraitUrlForChar(c) {
+    if (!c?.id) return null;
+    const def = manifest?.portraits?.[c.id] || {};
+    return fullBodyPortraitUrls[c.id] || def.fullBody || def.fullbody || def.fullPortrait || def.portrait || portraitUrls[c.id] || null;
+  }
+
   function roomBackgroundForScene(sceneId) {
     return roomBackgrounds[String(sceneId)] || null;
   }
@@ -236,6 +247,7 @@ const AssetSystem = (() => {
     avatarUrl,
     portraitUrlForChar,
     fullPortraitUrlForChar,
+    fullBodyPortraitUrlForChar,
     roomBackgroundForScene,
     roomBackgroundDef,
     get ready() { return ready; },

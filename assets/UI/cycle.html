@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古风扇面意愿轮 - 循环扇形版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2d1f1a 0%, #1a1410 50%, #0d0a08 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "STKaiti", "KaiTi", "SimKaiti", serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .bg-decoration {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ctext x='10' y='50' font-size='40' fill='%23d4af37' opacity='0.3'%3E梅%3C/text%3E%3C/svg%3E");
+        }
+
+        .menu-container {
+            position: relative;
+            width: 900px;
+            height: 700px;
+        }
+
+        /* 中心角色 */
+        .character-center {
+            position: absolute;
+            top: 50%;
+            left: 140px;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #f5f5dc, #d4af37);
+            border: 3px solid #8b4513;
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .character-center::before { content: "👤"; font-size: 50px; }
+
+        /* 意愿气泡 */
+        .desire-bubble {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(145deg, #fff8dc, #f5deb3);
+            padding: 6px 14px;
+            border-radius: 15px;
+            font-size: 13px;
+            color: #5a3a2a;
+            white-space: nowrap;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+
+        .desire-bubble::after {
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #f5deb3;
+        }
+
+        /* 扇面区域 */
+        .fan-area {
+            position: absolute;
+            top: 50%;
+            left: 140px;
+            transform: translateY(-50%);
+            width: 600px;
+            height: 600px;
+            pointer-events: none;
+        }
+
+        /* 花笺样式 - 横版 */
+        .menu-item {
+            position: absolute;
+            width: 90px;
+            height: 50px;
+            pointer-events: auto;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .menu-item-inner {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #f8f4e8 0%, #f0e8d8 100%);
+            border: 1px solid #c9b896;
+            border-radius: 4px 10px 10px 4px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding-left: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+
+        /* 左侧绳结装饰 */
+        .menu-item-inner::before {
+            content: "";
+            position: absolute;
+            left: -2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 20px;
+            background: linear-gradient(180deg, #c9a86c 0%, #a08050 100%);
+            border-radius: 2px;
+        }
+
+        /* 序号标签 */
+        .item-index {
+            font-size: 11px;
+            color: #8b7355;
+            margin-right: 4px;
+            font-weight: normal;
+        }
+
+        .item-name {
+            font-size: 16px;
+            color: #4a3728;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        /* 意愿印章 */
+        .desire-seal {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 14px;
+            height: 14px;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: #fff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .desire-seal.high { background: linear-gradient(145deg, #d4af37, #b8941f); }
+        .desire-seal.medium { background: linear-gradient(145deg, #cd853f, #a06830); }
+        .desire-seal.low { background: linear-gradient(145deg, #8b7355, #6b5743); }
+
+        /* 选中高亮 */
+        .menu-item.active .menu-item-inner {
+            background: linear-gradient(180deg, #fff9e6 0%, #f5ecd8 100%);
+            border-color: #d4af37;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5), 0 4px 15px rgba(0,0,0,0.2);
+            transform: scale(1.15);
+        }
+
+        .menu-item.active .item-name { color: #8b4513; }
+
+        /* 二级菜单 - 同样式扇形 */
+        .sub-menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+
+        .sub-menu-item {
+            position: absolute;
+            width: 75px;
+            height: 42px;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(180deg, #f8f4e8 0%, #f0e8d8 100%);
+            border: 1px solid #c9b896;
+            border-radius: 4px 10px 10px 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-left: 4px;
+            color: #4a3728;
+            font-size: 14px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            opacity: 0;
+            pointer-events: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .sub-menu-item::before {
+            content: "";
+            position: absolute;
+            left: -2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 5px;
+            height: 16px;
+            background: linear-gradient(180deg, #c9a86c 0%, #a08050 100%);
+            border-radius: 2px;
+        }
+
+        .menu-item.active .sub-menu-item {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .sub-menu-item:hover {
+            background: linear-gradient(180deg, #fff9e6 0%, #f5ecd8 100%);
+            border-color: #d4af37;
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+
+        /* 二级位置由JS动态计算 */
+
+        .feedback-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: linear-gradient(145deg, #4a3728, #2c1810);
+            border: 2px solid #d4af37;
+            border-radius: 15px;
+            padding: 15px 30px;
+            color: #d4af37;
+            font-size: 18px;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .feedback-toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-decoration"></div>
+
+    <div class="menu-container">
+        <div class="character-center">
+            <div class="desire-bubble" id="desireBubble">想与你闲谈片刻</div>
+        </div>
+
+        <div class="fan-area" id="fanArea"></div>
+    </div>
+
+    <div class="feedback-toast" id="feedbackToast"></div>
+
+    <script>
+        // ==================== 6个一级选项 ====================
+        const menuData = [
+            { name: "宽慰", desire: 3, reason: "看你心事重重，想宽慰你几句", sub: ["倾听", "开解", "陪伴"] },
+            { name: "闲谈", desire: 3, reason: "天气正好，不如闲谈片刻", sub: ["家常", "趣闻", "琐事"] },
+            { name: "论艺", desire: 2, reason: "近来有所悟，想与你论艺", sub: ["琴", "棋", "书", "画"] },
+            { name: "传情", desire: 2, reason: "有些话，想当面说与你听", sub: ["暗示", "表白", "赠诗", "邀约"] },
+            { name: "玩笑", desire: 2, reason: "心情甚好，想与你玩笑几句", sub: ["调侃", "打趣", "恶作剧", "猜谜"] },
+            { name: "争执", desire: 1, reason: "此事我绝不退让", sub: ["辩论", "争论", "置气"] },
+        ];
+
+        const TOTAL = 6;
+        const VISIBLE_SLOTS = 5;
+        const CENTER_SLOT = 2;
+
+        // 序号标记
+        const INDEX_MARKS = ["①", "②", "③", "④", "⑤", "⑥"];
+
+        // 扇形参数
+        const ARC_CENTER_X = 0;
+        const ARC_CENTER_Y = 300;
+        const L1_RADIUS = 130;          // 一级半径
+        const L2_RADIUS = 155;          // 二级半径（更靠近一级）
+        const ARC_ANGLE_START = -50;    // 起始角度
+        const ARC_ANGLE_END = 50;       // 结束角度
+
+        // 计算槽位
+        const SLOTS = [];
+        for (let i = 0; i < VISIBLE_SLOTS; i++) {
+            const t = i / (VISIBLE_SLOTS - 1);
+            const angle = ARC_ANGLE_START + t * (ARC_ANGLE_END - ARC_ANGLE_START);
+            const rad = angle * Math.PI / 180;
+            SLOTS.push({
+                x: ARC_CENTER_X + Math.cos(rad) * L1_RADIUS,
+                y: ARC_CENTER_Y + Math.sin(rad) * L1_RADIUS,
+                angle: angle,
+                scale: 1 - Math.abs(t - 0.5) * 0.15
+            });
+        }
+
+        let currentIndex = 1; // 当前中心指向的数据索引
+        let isScrolling = false;
+
+        const fanArea = document.getElementById('fanArea');
+        const desireBubble = document.getElementById('desireBubble');
+        const feedbackToast = document.getElementById('feedbackToast');
+
+        // 循环索引
+        function wrapIndex(idx) {
+            return (idx + TOTAL) % TOTAL;
+        }
+
+        // 计算二级位置（扇形，同样式）
+        function calcSubPositions(count) {
+            const positions = [];
+            const span = 70; // 二级扇形跨度
+            const step = count > 1 ? span / (count - 1) : 0;
+            const startAngle = -span / 2;
+
+            for (let i = 0; i < count; i++) {
+                const angle = startAngle + i * step;
+                const rad = angle * Math.PI / 180;
+                positions.push({
+                    x: Math.cos(rad) * L2_RADIUS,
+                    y: Math.sin(rad) * L2_RADIUS
+                });
+            }
+            return positions;
+        }
+
+        // 创建槽位元素
+        const slotElements = [];
+
+        SLOTS.forEach((slot, slotIdx) => {
+            const el = document.createElement('div');
+            el.className = 'menu-item';
+            el.style.left = `${slot.x}px`;
+            el.style.top = `${slot.y}px`;
+            el.style.transform = `translate(-50%, -50%) scale(${slot.scale})`;
+
+            if (slotIdx === CENTER_SLOT) el.classList.add('active');
+
+            el.innerHTML = `
+                <div class="menu-item-inner">
+                    <span class="item-index"></span>
+                    <span class="item-name"></span>
+                    <div class="desire-seal"></div>
+                    <div class="sub-menu"></div>
+                </div>
+            `;
+
+            // 点击
+            el.addEventListener('click', (e) => {
+                if (e.target.closest('.sub-menu-item')) return;
+                const offset = slotIdx - CENTER_SLOT;
+                if (offset !== 0) {
+                    currentIndex = wrapIndex(currentIndex + offset);
+                    render();
+                }
+            });
+
+            fanArea.appendChild(el);
+            slotElements.push({ el, slotIdx, slot });
+        });
+
+        // 渲染
+        function render() {
+            slotElements.forEach(({ el, slotIdx }) => {
+                const offset = slotIdx - CENTER_SLOT;
+                const dataIdx = wrapIndex(currentIndex + offset);
+                const data = menuData[dataIdx];
+
+                // 序号 + 名称
+                el.querySelector('.item-index').textContent = INDEX_MARKS[dataIdx];
+                el.querySelector('.item-name').textContent = data.name;
+
+                // 印章
+                const seal = el.querySelector('.desire-seal');
+                seal.className = `desire-seal ${data.desire >= 3 ? 'high' : data.desire >= 2 ? 'medium' : 'low'}`;
+                seal.textContent = data.desire >= 3 ? '急' : data.desire >= 2 ? '愿' : '可';
+
+                // 二级菜单（同样式扇形）
+                const subContainer = el.querySelector('.sub-menu');
+                const subPositions = calcSubPositions(data.sub.length);
+
+                subContainer.innerHTML = data.sub.map((subName, i) => {
+                    const pos = subPositions[i];
+                    return `<div class="sub-menu-item" style="left:${pos.x}px;top:${pos.y}px" data-sub="${subName}">${subName}</div>`;
+                }).join('');
+
+                // 绑定二级点击
+                subContainer.querySelectorAll('.sub-menu-item').forEach(sub => {
+                    sub.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        showFeedback(`${data.name} · ${sub.dataset.sub}`);
+                    });
+                });
+
+                // 选中状态
+                el.classList.toggle('active', offset === 0);
+
+                // 气泡
+                if (offset === 0) {
+                    desireBubble.textContent = data.reason;
+                }
+            });
+        }
+
+        // 滚轮循环
+        document.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (isScrolling) return;
+            isScrolling = true;
+
+            const dir = e.deltaY > 0 ? 1 : -1;
+            currentIndex = wrapIndex(currentIndex + dir);
+            render();
+
+            setTimeout(() => { isScrolling = false; }, 150);
+        }, { passive: false });
+
+        // 键盘
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                currentIndex = wrapIndex(currentIndex + 1);
+                render();
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                currentIndex = wrapIndex(currentIndex - 1);
+                render();
+            }
+        });
+
+        function showFeedback(text) {
+            feedbackToast.textContent = text;
+            feedbackToast.classList.add('show');
+            setTimeout(() => feedbackToast.classList.remove('show'), 1500);
+        }
+
+        render();
+    </script>
+</body>
+</html>

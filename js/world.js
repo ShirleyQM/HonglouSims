@@ -36,6 +36,29 @@ function isConnection(col, row) {
   return CONFIG.connections.some(c => c.col === col && c.row === row);
 }
 
+function sceneWalkMaskChar(sc, col, row) {
+  if (!Array.isArray(sc.walkMask)) return null;
+  const localRow = row - sc.originRow;
+  const localCol = col - sc.originCol;
+  const maskRow = sc.walkMask[localRow];
+  if (typeof maskRow !== 'string' || localCol < 0 || localCol >= maskRow.length) return null;
+  return maskRow[localCol];
+}
+
+function walkableFromMask(ch) {
+  if (ch == null) return null;
+  if (ch === '#' || ch === 'X' || ch === '~' || ch === ' ') return false;
+  if (ch === '.' || ch === ',' || ch === 'D' || ch === '=' || ch === 'w') return true;
+  return null;
+}
+
+function groundFromMask(ch, fallback) {
+  if (ch === 'w') return 'wood';
+  if (ch === ',' || ch === 'D' || ch === '=') return 'stone_herringbone';
+  if (ch === '~') return 'stone_muddy';
+  return fallback;
+}
+
 function buildWorldGrid() {
   WORLD_COLS = Math.max(...CONFIG.scenes.map(s => s.originCol + s.cols));
   WORLD_ROWS = Math.max(...CONFIG.scenes.map(s => s.originRow + s.rows));
@@ -48,9 +71,17 @@ function buildWorldGrid() {
       for (let r = sc.originRow; r < sc.originRow + sc.rows; r++) {
         const edge = c === sc.originCol || r === sc.originRow || c === sc.originCol + sc.cols - 1 || r === sc.originRow + sc.rows - 1;
         const conn = isConnection(c, r);
+        const maskChar = sceneWalkMaskChar(sc, c, r);
+        const maskedWalkable = walkableFromMask(maskChar);
+        let walkable = road || openEdge || !edge || conn;
+        let ground = road || (conn && !openEdge) ? 'corridor' : sc.ground;
+        if (maskedWalkable != null) {
+          walkable = maskedWalkable || conn;
+          ground = groundFromMask(maskChar, ground);
+        }
         WORLD[c][r] = {
-          walkable: road || openEdge || !edge || conn,
-          ground: road || (conn && !openEdge) ? 'corridor' : sc.ground,
+          walkable,
+          ground,
           sceneId: sc.id,
           furnitureId: 0,
           entryFor: 0,

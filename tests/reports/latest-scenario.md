@@ -1,7 +1,7 @@
 # 场景测试注册表
 
-- Started: 2026-06-26T08:08:49.326Z
-- Finished: 2026-06-26T08:08:49.329Z
+- Started: 2026-06-29T09:19:55.781Z
+- Finished: 2026-06-29T09:19:55.784Z
 - Result: PASS
 - Counts: PASS 1 / WARN 6 / FAIL 0
 

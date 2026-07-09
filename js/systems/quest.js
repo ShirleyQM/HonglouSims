@@ -90,6 +90,49 @@ const QuestSystem = (() => {
     return snap;
   }
 
+  function traitTelemetrySnapshot(charId) {
+    const c = getChar(charId);
+    if (!c) return null;
+    const labels = CONFIG.charSpecialtyConfig?.traitLabels || {};
+    const traits = TraitEffectSystem?.traitsOf?.(c) || [];
+    const specialties = TraitEffectSystem?.specialtiesOf?.(c) || [];
+    return {
+      traits,
+      traitLabels: traits.map(id => labels[id] || CONFIG.charSpecialtyConfig?.traitMetadata?.[id]?.label || id),
+      specialties,
+    };
+  }
+
+  function questTelemetryContext(inst, t, outcome = {}) {
+    const order = (typeof OrderBookSystem !== 'undefined' && OrderBookSystem?.buildQuestOrderContext)
+      ? OrderBookSystem.buildQuestOrderContext(t || inst.templateId, inst.issuerId, inst.assigneeId, outcome)
+      : {};
+    return {
+      category: t?.category || '',
+      questType: t?.questType || '',
+      failurePolicy: inst?.failurePolicy || null,
+      issuerTraits: traitTelemetrySnapshot(inst.issuerId),
+      assigneeTraits: traitTelemetrySnapshot(inst.assigneeId),
+      ...order,
+    };
+  }
+
+  function emitOrderImpact(inst, t, outcome = {}) {
+    const ctx = questTelemetryContext(inst, t, outcome);
+    if (!ctx.orderIsManagementTask) return;
+    EventBus.emit('order:impact', {
+      instanceId: inst.instanceId,
+      templateId: inst.templateId,
+      issuerId: inst.issuerId,
+      assigneeId: inst.assigneeId,
+      status: outcome.status || '',
+      qualityScore: outcome.qualityScore,
+      qualityLabel: outcome.qualityLabel,
+      onTime: outcome.onTime,
+      ...ctx,
+    });
+  }
+
   function calcDeadline(t, acceptedTs) {
     if (!t || t.deadlineMode === 'NO_DEADLINE') return 0;
     const p = t.deadlineParam ?? 0;
@@ -196,15 +239,19 @@ const QuestSystem = (() => {
     return true;
   }
 
-  function createInstance(templateId, issuerId, assigneeId, dailySlotId, batchId) {
+  function createInstance(templateId, issuerId, assigneeId, dailySlotId, batchId, opts = {}) {
     const t = tpl(templateId);
     if (!t || !getChar(assigneeId)) return null;
     const now = getGameTimestamp();
+    const failurePolicy = buildFailurePolicy(t, issuerId, [assigneeId], opts.failurePolicy || {});
     return {
       instanceId: nextId++, templateId, issuerId: issuerId || null, assigneeId,
       status: QUEST_STATUS.PENDING, acceptedTime: 0, deadlineTime: 0,
       progress: {}, dailySlotId: dailySlotId || 0, issuedTime: now,
       batchId: batchId || 0,
+      economyAdjustment: opts.economyAdjustment || 'none',
+      economyIssueCost: opts.economyIssueCost || 0,
+      failurePolicy,
       blockedReason: '', recommendedAction: '', _activeReason: '',
     };
   }
@@ -258,6 +305,221 @@ const QuestSystem = (() => {
     }
   }
 
+  const PUNISHMENT_DEFS = [
+    { id: 'lenient', label: '宽恕', desc: '不追加责罚，略减积怨；适合轻微失误或体恤下属。' },
+    { id: 'reprimand', label: '训斥', desc: '默认处置。以口头责问为主，若模板没有惩罚状态，会补一个受责状态。' },
+    { id: 'make_up', label: '加派补做', desc: '要求补救或重做，暂先记录和提示，后续可自动生成补做任务。' },
+    { id: 'fine_allowance', label: '扣月银', desc: '钱项处罚。需要账房、管事、家主或有财务权的直属主子背书。' },
+  ];
+
+  const PUNISHMENT_TRIGGERS = [
+    { id: 'onFirstFailure', label: '首次失败', desc: '失败立即处置。' },
+    { id: 'onRepeatedFailure', label: '连续2次', desc: '同类任务连续失败两次才处置。', count: 2 },
+    { id: 'onMonthlyCount', label: '本月3次', desc: '本月同类任务累计失败三次才处置。', count: 3, window: 'monthly' },
+    { id: 'onSevereFailure', label: '严重失败', desc: '质量极低或造成损失时处置。' },
+    { id: 'manualReview', label: '手动复核', desc: '失败后只提示玩家处理，不自动追加处置。' },
+  ];
+
+  function deadlineLabel(t) {
+    if (!t?.deadlineMode) return '';
+    if (t.deadlineMode === 'GAME_HOURS') return `${t.deadlineParam || 0}小时内完成`;
+    if (t.deadlineMode === 'GAME_DAYS') return `${t.deadlineParam || 0}日内完成`;
+    if (t.deadlineMode === 'BY_TIME_OF_DAY') return `${t.deadlineParam || 0}时前完成`;
+    return `限时：${t.deadlineMode}`;
+  }
+
+  function failureConditionLabels(t) {
+    const labels = [];
+    const dl = deadlineLabel(t);
+    if (dl) labels.push(dl);
+    for (const cond of t?.failConditions || []) {
+      labels.push(cond.description || cond.label || cond.type || '失败条件');
+    }
+    labels.push('超时 / 路径不可达 / 质量低于30');
+    return [...new Set(labels.filter(Boolean))];
+  }
+
+  function defaultFailureTrigger(t) {
+    if (['采办', '家宴', '禁足', '功课'].includes(t?.category)) return 'onFirstFailure';
+    if (['侍奉', '传话', '洒扫', '杂役', '粗使'].includes(t?.category)) return 'onRepeatedFailure';
+    return 'onFirstFailure';
+  }
+
+  function defaultPunishmentId(t) {
+    return t?.failurePolicy?.defaultPunishmentId || 'reprimand';
+  }
+
+  function hasMoneyPunishmentRight(issuerId, assigneeId, t) {
+    const issuer = getChar(issuerId);
+    const assignee = getChar(assigneeId);
+    const rel = IdentityProtocolSystem?.getHierarchyRelation?.(issuerId, assigneeId) || '';
+    const issuerFamily = FamilySystem?.findFamilyOfChar?.(issuerId);
+    const assigneeFamily = FamilySystem?.findFamilyOfChar?.(assigneeId);
+    const issuerRole = issuerFamily?.members?.find(m => m.charId === issuerId)?.role || '';
+    const sameFamily = issuerFamily && assigneeFamily && issuerFamily.id === assigneeFamily.id;
+    const accountCategory = ['采办', '家宴', '账房', '粗使'].includes(t?.category);
+    const isAccountant = ['xifeng', 'wangfuren'].includes(issuerId);
+    const isHouseAuthority = sameFamily && ['家主', '配偶', '长辈'].includes(issuerRole);
+    const direct = rel === 'master_to_servant' && !!ServantRelationSystem?.getDirectContract?.(issuerId, assigneeId);
+    const ok = !!(isAccountant || isHouseAuthority || (direct && accountCategory));
+    let reason = '钱项处罚需要管账人或有财务权的上级背书。';
+    if (isAccountant) reason = `${issuer?.short || '发布者'}掌管账房，可执行钱项处罚。`;
+    else if (isHouseAuthority) reason = `${issuer?.short || '发布者'}是本家庭主事身份，可对本家庭钱项作出处置。`;
+    else if (direct && accountCategory) reason = '直属差事且涉及采买/家宴等钱项，可记录为扣月银待执行。';
+    else if (rel === 'master_to_servant') reason = '可训斥或补做；扣月银需管账人背书。';
+    else if (!sameFamily) reason = '跨院钱项处罚通常越权，需交由管账人执行。';
+    return {
+      ok,
+      source: ok ? 'monthly_allowance' : 'pending_approval',
+      executorId: ok ? issuerId : (isAccountant ? issuerId : 'xifeng'),
+      requiresApproval: !ok,
+      orderFit: ok ? 'proper' : 'needs_backing',
+      reason,
+    };
+  }
+
+  function buildFailurePolicy(t, issuerId, assigneeIds = [], raw = {}) {
+    const selectedPunishmentId = raw.selectedPunishmentId || raw.punishmentId || t?.failurePolicy?.selectedPunishmentId || defaultPunishmentId(t);
+    const triggerId = raw.trigger?.type || raw.triggerId || t?.failurePolicy?.trigger?.type || defaultFailureTrigger(t);
+    const triggerDef = PUNISHMENT_TRIGGERS.find(row => row.id === triggerId) || PUNISHMENT_TRIGGERS[0];
+    const targets = (assigneeIds || []).filter(Boolean);
+    const gates = targets.map(id => hasMoneyPunishmentRight(issuerId, id, t));
+    const moneyAllowed = gates.length ? gates.every(g => g.ok) : false;
+    const needsApproval = gates.some(g => g.requiresApproval);
+    const gate = gates.find(g => !g.ok) || gates[0] || { ok: false, reason: '尚未选择目标。', requiresApproval: true };
+    return {
+      failureConditionsPreview: failureConditionLabels(t),
+      defaultPunishmentId: defaultPunishmentId(t),
+      selectedPunishmentId,
+      selectedPunishmentLabel: PUNISHMENT_DEFS.find(row => row.id === selectedPunishmentId)?.label || selectedPunishmentId,
+      trigger: {
+        type: triggerDef.id,
+        label: triggerDef.label,
+        count: raw.trigger?.count || triggerDef.count || 1,
+        window: raw.trigger?.window || triggerDef.window || '',
+      },
+      moneyPenalty: {
+        enabled: selectedPunishmentId === 'fine_allowance',
+        amount: Math.max(0, Math.round(raw.moneyPenalty?.amount ?? t?.failurePolicy?.moneyPenalty?.amount ?? 6)),
+        source: gate.source || 'monthly_allowance',
+        requiresApproval: needsApproval || !moneyAllowed,
+        executorId: gate.executorId || issuerId || '',
+        orderFit: gate.orderFit || (moneyAllowed ? 'proper' : 'needs_backing'),
+        reason: gate.reason || '',
+      },
+    };
+  }
+
+  function punishmentOptionsFor(t, issuerId, assigneeIds = []) {
+    const basePolicy = buildFailurePolicy(t, issuerId, assigneeIds);
+    const gate = basePolicy.moneyPenalty;
+    return PUNISHMENT_DEFS.map(row => ({
+      ...row,
+      disabled: false,
+      hint: row.id === 'fine_allowance' ? gate.reason : row.desc,
+      requiresApproval: row.id === 'fine_allowance' ? gate.requiresApproval : false,
+    }));
+  }
+
+  function countRecentFailures(inst, t, trigger) {
+    const now = getGameTimestamp();
+    const minTime = trigger?.window === 'monthly' ? now - 30 * 24 * 60 : 0;
+    const relevant = history.filter(row => {
+      const rt = tpl(row.templateId);
+      if (row.status !== QUEST_STATUS.FAILED) return false;
+      if (row.assigneeId !== inst.assigneeId || row.issuerId !== inst.issuerId) return false;
+      if ((rt?.category || '') !== (t?.category || '')) return false;
+      if (minTime && (row.finishedTime || 0) < minTime) return false;
+      return true;
+    });
+    return relevant.length + 1;
+  }
+
+  function shouldApplyFailurePolicy(inst, t, outcome = {}) {
+    const policy = inst.failurePolicy || buildFailurePolicy(t, inst.issuerId, [inst.assigneeId]);
+    const trigger = policy.trigger || {};
+    if (trigger.type === 'manualReview') return false;
+    if (trigger.type === 'onSevereFailure') return (outcome.qualityScore ?? 0) <= 20;
+    if (trigger.type === 'onRepeatedFailure' || trigger.type === 'onMonthlyCount') {
+      return countRecentFailures(inst, t, trigger) >= (trigger.count || 2);
+    }
+    return true;
+  }
+
+  function templateHasEffect(t, type, stateId) {
+    return (t?.penalties || []).some(ef => ef.type === type && (!stateId || ef.stateId === stateId));
+  }
+
+  function applyFailurePolicy(inst, t, outcome = {}) {
+    const policy = inst.failurePolicy || buildFailurePolicy(t, inst.issuerId, [inst.assigneeId]);
+    const punishmentId = policy.selectedPunishmentId || 'reprimand';
+    const punishment = PUNISHMENT_DEFS.find(row => row.id === punishmentId) || PUNISHMENT_DEFS[1];
+    const applied = shouldApplyFailurePolicy(inst, t, outcome);
+    const result = {
+      applied,
+      punishmentId,
+      punishmentLabel: punishment.label,
+      triggerType: policy.trigger?.type || '',
+      moneyPenalty: policy.moneyPenalty || null,
+      note: '',
+    };
+    if (!applied) {
+      result.note = policy.trigger?.type === 'manualReview'
+        ? '等待玩家复核处置。'
+        : `未达到${policy.trigger?.label || '处置'}触发条件。`;
+      EventBus.emit('punishment:skipped', {
+        charId: inst.assigneeId, issuerId: inst.issuerId, assigneeId: inst.assigneeId,
+        instanceId: inst.instanceId, templateId: inst.templateId,
+        punishmentId, punishmentLabel: punishment.label,
+        triggerType: result.triggerType, reason: result.note,
+      });
+      return result;
+    }
+
+    if (punishmentId === 'lenient') {
+      CharacterEffectSystem?.apply?.({
+        type: 'relation', idA: inst.issuerId, idB: inst.assigneeId, delta: 1,
+      }, { source: `quest:${inst.templateId}:punishment`, reason: '失败后宽恕' });
+      result.note = '宽恕处置：不追加责罚。';
+      showQuestBubble(inst.issuerId || inst.assigneeId, '这回且罢，下次仔细些。', 'speech');
+    } else if (punishmentId === 'reprimand') {
+      if (!templateHasEffect(t, 'state', 'punished')) {
+        CharacterEffectSystem?.apply?.({
+          type: 'state', charId: inst.assigneeId, stateId: 'punished',
+        }, { source: `quest:${inst.templateId}:punishment`, reason: '失败后训斥' });
+      }
+      result.note = '训斥处置：已记录受责。';
+      showQuestBubble(inst.issuerId || inst.assigneeId, '这点差事也办不好？下次仔细。', 'speech');
+    } else if (punishmentId === 'make_up') {
+      result.note = '加派补做：已记录，后续可生成补做任务。';
+      showQuestBubble(inst.assigneeId, '还得补做一回。', 'thought');
+    } else if (punishmentId === 'fine_allowance') {
+      result.note = policy.moneyPenalty?.requiresApproval
+        ? `扣月银需背书：${policy.moneyPenalty.reason || '等待管账人处理。'}`
+        : `扣月银待处理：${policy.moneyPenalty.amount || 0}两。`;
+      EventBus.emit('punishment:money_pending', {
+        charId: inst.assigneeId, issuerId: inst.issuerId, assigneeId: inst.assigneeId,
+        instanceId: inst.instanceId, templateId: inst.templateId,
+        amount: policy.moneyPenalty?.amount || 0,
+        source: policy.moneyPenalty?.source || 'monthly_allowance',
+        requiresApproval: !!policy.moneyPenalty?.requiresApproval,
+        executorId: policy.moneyPenalty?.executorId || '',
+        orderFit: policy.moneyPenalty?.orderFit || '',
+        reason: policy.moneyPenalty?.reason || '',
+      });
+      showQuestBubble(inst.issuerId || inst.assigneeId, policy.moneyPenalty?.requiresApproval ? '这笔扣月银，须交管账人裁断。' : '这回先记下，月银里扣。', 'speech');
+    }
+    EventBus.emit('punishment:applied', {
+      charId: inst.assigneeId, issuerId: inst.issuerId, assigneeId: inst.assigneeId,
+      instanceId: inst.instanceId, templateId: inst.templateId,
+      punishmentId, punishmentLabel: punishment.label,
+      triggerType: result.triggerType,
+      note: result.note,
+      moneyPenalty: policy.moneyPenalty || null,
+    });
+    return result;
+  }
+
   function primeAcceptedQuestAction(inst, t) {
     if (!t?.interruptOnAccept) return;
     const assignee = getChar(inst.assigneeId);
@@ -297,6 +559,7 @@ const QuestSystem = (() => {
       hierarchyRelation: hierarchyRelation(inst.issuerId, inst.assigneeId),
       acceptChance: inst.acceptChance,
       ...relationSnapshot(inst.issuerId, inst.assigneeId),
+      ...questTelemetryContext(inst, t, { status: 'accepted' }),
     });
     const issueText = fillText(t.texts?.issue, inst);
     if (issueText) showQuestBubble(inst.issuerId || inst.assigneeId, issueText);
@@ -318,6 +581,14 @@ const QuestSystem = (() => {
     inst.status = QUEST_STATUS.COMPLETED;
     applyEffects(t?.rewards, inst);
     applyEffects(st().categoryCompletionNeedRewards?.[t?.category], inst);
+    if (typeof EconomySystem !== 'undefined') {
+      EconomySystem?.applyQuestCompletionEconomy?.(inst, t, {
+        status: 'completed',
+        qualityScore: quality?.score,
+        qualityLabel: quality?.label,
+        onTime,
+      });
+    }
     setCooldown(inst.templateId, inst.assigneeId, t);
     history.unshift({ ...inst, finishedTime });
     if (history.length > 30) history.pop();
@@ -336,6 +607,18 @@ const QuestSystem = (() => {
       servantLoyalty: servantQuality?.runtime?.loyalty,
       servantGrievance: servantQuality?.runtime?.grievance,
       servantLaborPressure: servantQuality?.runtime?.laborPressure,
+      ...questTelemetryContext(inst, t, {
+        status: 'completed',
+        qualityScore: quality?.score,
+        qualityLabel: quality?.label,
+        onTime,
+      }),
+    });
+    emitOrderImpact(inst, t, {
+      status: 'completed',
+      qualityScore: quality?.score,
+      qualityLabel: quality?.label,
+      onTime,
     });
     const assignee = getChar(inst.assigneeId);
     if (assignee?.lifePath && LifePathSystem?.questMatchesPath?.(inst.templateId, assignee)) {
@@ -360,8 +643,23 @@ const QuestSystem = (() => {
     if (servantQuality) inst.servantRuntime = servantQuality.runtime;
     inst.status = QUEST_STATUS.FAILED;
     applyEffects(t?.penalties, inst);
+    if (typeof EconomySystem !== 'undefined') {
+      EconomySystem?.applyQuestCompletionEconomy?.(inst, t, {
+        status: 'failed',
+        qualityScore: quality?.score,
+        qualityLabel: quality?.label,
+        onTime: false,
+      });
+    }
+    const punishmentResult = applyFailurePolicy(inst, t, {
+      status: 'failed',
+      qualityScore: quality?.score,
+      qualityLabel: quality?.label,
+      onTime: false,
+      reason,
+    });
     setCooldown(inst.templateId, inst.assigneeId, t);
-    history.unshift({ ...inst, finishedTime: getGameTimestamp(), failReason: reason });
+    history.unshift({ ...inst, finishedTime: getGameTimestamp(), failReason: reason, punishmentResult });
     if (history.length > 30) history.pop();
     EventBus.emit('quest:failed', {
       instanceId: inst.instanceId, templateId: inst.templateId,
@@ -377,6 +675,20 @@ const QuestSystem = (() => {
       servantLoyalty: servantQuality?.runtime?.loyalty,
       servantGrievance: servantQuality?.runtime?.grievance,
       servantLaborPressure: servantQuality?.runtime?.laborPressure,
+      failurePolicy: inst.failurePolicy,
+      punishmentResult,
+      ...questTelemetryContext(inst, t, {
+        status: 'failed',
+        qualityScore: quality?.score,
+        qualityLabel: quality?.label,
+        onTime: false,
+      }),
+    });
+    emitOrderImpact(inst, t, {
+      status: 'failed',
+      qualityScore: quality?.score,
+      qualityLabel: quality?.label,
+      onTime: false,
     });
     showQuestBubble(inst.assigneeId, fillText(t?.texts?.fail, inst) || `任务失败：${t?.name}`);
     log(`${getChar(inst.assigneeId)?.short}未能完成「${t?.name}」：${reason || '失败'}`);
@@ -395,7 +707,9 @@ const QuestSystem = (() => {
       hierarchyRelation: hierarchyRelation(inst.issuerId, inst.assigneeId),
       acceptChance: inst.acceptChance,
       ...relationSnapshot(inst.issuerId, inst.assigneeId),
+      ...questTelemetryContext(inst, t, { status: 'declined' }),
     });
+    emitOrderImpact(inst, t, { status: 'declined' });
     showQuestBubble(inst.issuerId || inst.assigneeId, fillText(t?.texts?.decline, inst) || '罢了。');
     log(`${getChar(inst.assigneeId)?.short}婉拒「${t?.name}」`);
     instances = instances.filter(q => q.instanceId !== inst.instanceId);
@@ -415,15 +729,36 @@ const QuestSystem = (() => {
     return true;
   }
 
-  function issueQuest(templateId, issuerId, assigneeId, dailySlotId, batchId) {
+  function issueQuest(templateId, issuerId, assigneeId, dailySlotId, batchId, opts = {}) {
     const t = tpl(templateId);
     if (!t || !canAssignTemplate(t, issuerId, assigneeId)) return null;
-    const inst = createInstance(templateId, issuerId, assigneeId, dailySlotId, batchId);
+    let economyIssueCost = opts.economyIssueCost || 0;
+    if (issuerId && !opts.skipEconomyIssueCost && typeof EconomySystem !== 'undefined') {
+      const check = EconomySystem?.canIssueQuestEconomy?.(issuerId, t, 1, opts.economyAdjustment || 'none');
+      if (check && !check.ok) {
+        log(`⚠ ${check.reason || '公账不足，无法下发差事'}`);
+        return null;
+      }
+      const paid = EconomySystem?.applyQuestIssueCost?.({
+        issuerId, templateId, targetCount: 1, adjustment: opts.economyAdjustment || 'none',
+      });
+      if (paid && !paid.ok) return null;
+      economyIssueCost = paid?.cost || 0;
+    }
+    const inst = createInstance(templateId, issuerId, assigneeId, dailySlotId, batchId, {
+      economyAdjustment: opts.economyAdjustment || 'none',
+      economyIssueCost,
+      failurePolicy: opts.failurePolicy || null,
+    });
     instances.push(inst);
     EventBus.emit('quest:issued', {
       instanceId: inst.instanceId, templateId, assigneeId, issuerId, batchId: inst.batchId || 0,
       category: t.category || '', questType: t.questType || '',
+      economyAdjustment: inst.economyAdjustment,
+      economyIssueCost: inst.economyIssueCost,
+      failurePolicy: inst.failurePolicy,
       hierarchyRelation: hierarchyRelation(issuerId, assigneeId),
+      ...questTelemetryContext(inst, t, { status: 'issued' }),
     });
     if (t.autoAccept || t.questType === 'daily') {
       acceptQuest(inst, true);
@@ -449,6 +784,7 @@ const QuestSystem = (() => {
         servantRole: inst.servantRole,
         servantInScope: inst.servantInScope,
         ...relationSnapshot(issuerId, assigneeId),
+        ...questTelemetryContext(inst, t, { status: 'acceptance_checked' }),
       });
       if (Math.random() < acceptChance) acceptQuest(inst, true);
       else declineQuest(inst);
@@ -457,18 +793,39 @@ const QuestSystem = (() => {
     return inst;
   }
 
-  function issueBatch(templateId, issuerId, assigneeIds) {
+  function issueBatch(templateId, issuerId, assigneeIds, opts = {}) {
     const t = tpl(templateId);
     if (!t || !assigneeIds?.length) return { batchId: 0, count: 0, instances: [] };
+    let economyIssueCost = opts.economyIssueCost || 0;
+    if (issuerId && !opts.skipEconomyIssueCost && typeof EconomySystem !== 'undefined') {
+      const check = EconomySystem?.canIssueQuestEconomy?.(issuerId, t, assigneeIds.length, opts.economyAdjustment || 'none');
+      if (check && !check.ok) {
+        log(`⚠ ${check.reason || '公账不足，无法群体传令'}`);
+        return { batchId: 0, count: 0, instances: [] };
+      }
+      const paid = EconomySystem?.applyQuestIssueCost?.({
+        issuerId, templateId, targetCount: assigneeIds.length, adjustment: opts.economyAdjustment || 'none',
+      });
+      if (paid && !paid.ok) return { batchId: 0, count: 0, instances: [] };
+      economyIssueCost = paid?.cost || 0;
+    }
     const batchId = nextBatchId++;
     const created = [];
     for (const aid of assigneeIds) {
-      const inst = issueQuest(templateId, issuerId, aid, 0, batchId);
+      const inst = issueQuest(templateId, issuerId, aid, 0, batchId, {
+        economyAdjustment: opts.economyAdjustment || 'none',
+        economyIssueCost,
+        failurePolicy: opts.failurePolicy || null,
+        skipEconomyIssueCost: true,
+      });
       if (inst) created.push(inst);
     }
     if (created.length) {
       EventBus.emit('quest:batch_issued', {
         batchId, templateId, issuerId, count: created.length, assigneeIds: created.map(i => i.assigneeId),
+        economyAdjustment: opts.economyAdjustment || 'none',
+        economyIssueCost,
+        failurePolicy: opts.failurePolicy || null,
       });
     }
     return { batchId, count: created.length, instances: created };
@@ -612,6 +969,7 @@ const QuestSystem = (() => {
           assigneeId: inst.assigneeId, issuerId: inst.issuerId,
           conditionId: cond.id, conditionType: cond.type,
           reason: nextBlocked, recommendedAction: inst.recommendedAction,
+          ...questTelemetryContext(inst, t, { status: 'blocked' }),
         });
       }
     }
@@ -622,6 +980,7 @@ const QuestSystem = (() => {
         assigneeId: inst.assigneeId, issuerId: inst.issuerId,
         conditionId: cond.id, conditionType: cond.type,
         recommendedAction: inst.recommendedAction,
+        ...questTelemetryContext(inst, t, { status: 'started' }),
       });
     }
     inst._activeReason = activeReason;
@@ -685,7 +1044,14 @@ const QuestSystem = (() => {
     const nv = Math.min(cond.targetValue, cur + delta);
     if (nv !== cur) {
       inst.progress[cond.id] = nv;
-      EventBus.emit('quest:progress', { instanceId: inst.instanceId, conditionId: cond.id, progress: nv, target: cond.targetValue });
+      const t = tpl(inst.templateId);
+      EventBus.emit('quest:progress', {
+        instanceId: inst.instanceId, templateId: inst.templateId,
+        assigneeId: inst.assigneeId, issuerId: inst.issuerId,
+        conditionId: cond.id, conditionType: cond.type,
+        progress: nv, target: cond.targetValue,
+        ...questTelemetryContext(inst, t, { status: 'progress' }),
+      });
     }
   }
 
@@ -764,7 +1130,9 @@ const QuestSystem = (() => {
           instanceId: inst.instanceId, templateId: inst.templateId,
           assigneeId: inst.assigneeId, issuerId: inst.issuerId,
           reason: '待回应超时',
+          ...questTelemetryContext(inst, tpl(inst.templateId), { status: 'expired' }),
         });
+        emitOrderImpact(inst, tpl(inst.templateId), { status: 'expired' });
         instances = instances.filter(q => q.instanceId !== inst.instanceId);
       }
     });
@@ -1479,6 +1847,7 @@ const QuestSystem = (() => {
     revokeQuest: id => { const q = instances.find(x => x.instanceId === id); if (q) revokeQuest(q); },
     revokeBatch, getBatchesForIssuer, getBatchInstances,
     canIssue, isTemplateExecutableBy, issueOne: issueQuest, issueBatch,
+    failureConditionLabels, buildFailurePolicy, punishmentOptionsFor,
     debugIssue: (templateId, issuerId, assigneeId) => issueQuest(templateId, issuerId, assigneeId),
     serialize, apply, getInstances: () => instances.slice(),
   };

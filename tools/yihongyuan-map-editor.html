@@ -1,0 +1,905 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>场景地图标注</title>
+  <style>
+    :root {
+      --bg: #e8e2d2;
+      --panel: #f8f4e8;
+      --line: #b8aa8e;
+      --text: #3d3028;
+      --muted: #786a59;
+      --accent: #8e5043;
+      --gold: #b58b3b;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+    body { display: grid; grid-template-columns: minmax(720px, 1fr) 380px; gap: 10px; padding: 10px; }
+    #stageWrap { min-width: 0; border: 1px solid var(--line); background: #d5cfbf; padding: 8px; overflow: auto; }
+    #stage { display: block; width: 100%; max-width: 1160px; aspect-ratio: 1.4; background: #222; border: 1px solid #7b6c58; cursor: crosshair; }
+    aside { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+    section { border: 1px solid var(--line); background: var(--panel); padding: 10px; }
+    h1, h2 { margin: 0 0 8px; font-size: 16px; font-weight: 600; color: #563a2e; }
+    h2 { font-size: 13px; }
+    .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
+    button, select, input {
+      border: 1px solid var(--line);
+      background: #fffaf0;
+      color: var(--text);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font: inherit;
+      font-size: 12px;
+    }
+    button { cursor: pointer; }
+    button.active { background: #ead7a7; border-color: var(--gold); box-shadow: inset 0 0 0 1px rgba(181,139,59,.25); }
+    label { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+    #furnitureList, #occlusionList { max-height: 210px; overflow: auto; border: 1px solid rgba(184,170,142,.65); background: rgba(255,250,240,.58); }
+    .furn-row, .occ-row {
+      display: grid;
+      grid-template-columns: 44px 1fr 64px;
+      gap: 6px;
+      padding: 6px;
+      border-bottom: 1px solid rgba(184,170,142,.45);
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .occ-row { grid-template-columns: 44px 1fr 54px; }
+    .furn-row.active, .occ-row.active { background: #f0dfae; }
+    .furn-row:last-child, .occ-row:last-child { border-bottom: 0; }
+    .muted { color: var(--muted); font-size: 12px; }
+    textarea {
+      width: 100%;
+      min-height: 210px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      background: #1f1c18;
+      color: #f5ecd7;
+      padding: 8px;
+      font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .swatch { width: 14px; height: 14px; border: 1px solid rgba(0,0,0,.3); display: inline-block; border-radius: 3px; }
+    @media (max-width: 1100px) {
+      body { grid-template-columns: 1fr; }
+      aside { display: grid; grid-template-columns: 1fr 1fr; }
+      section.output { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <main id="stageWrap">
+    <canvas id="stage" width="1120" height="800"></canvas>
+  </main>
+  <aside>
+    <section>
+      <h1 id="sceneTitle">场景地图标注</h1>
+      <div class="row">
+        <button id="tool-select" class="active" data-tool="select">拖家具</button>
+        <button id="tool-paint" data-tool="paint">刷遮罩</button>
+        <button id="tool-erase" data-tool="erase">橡皮</button>
+        <button id="tool-occ-rect" data-tool="occRect">遮挡矩形</button>
+        <button id="tool-occ-poly" data-tool="occPoly">遮挡多边形</button>
+        <button id="tool-occ-select" data-tool="occSelect">选遮挡</button>
+      </div>
+      <div class="row" id="brushes"></div>
+      <div class="row">
+        <label><input id="showAnnotations" type="checkbox" checked>显示标注</label>
+        <label><input id="showMask" type="checkbox" checked>遮罩</label>
+        <label><input id="showGrid" type="checkbox" checked>网格</label>
+        <label><input id="showFurniture" type="checkbox" checked>家具</label>
+        <label><input id="showEntries" type="checkbox" checked>入口</label>
+        <label><input id="showOcclusion" type="checkbox" checked>遮挡</label>
+      </div>
+      <div class="row">
+        <label>标注格
+          <select id="gridScale">
+            <option value="1">1x 原格</option>
+            <option value="2">2x 细格</option>
+            <option value="4">4x 超细</option>
+          </select>
+        </label>
+      </div>
+      <div class="muted" id="cursorInfo"></div>
+    </section>
+
+    <section>
+      <h2>家具</h2>
+      <div id="furnitureList"></div>
+      <div class="row" style="margin-top:8px">
+        <button id="nudgeUp">↑</button>
+        <button id="nudgeLeft">←</button>
+        <button id="nudgeRight">→</button>
+        <button id="nudgeDown">↓</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>遮挡</h2>
+      <div id="occlusionList"></div>
+      <div class="row" style="margin-top:8px">
+        <button id="finishOccPoly">闭合多边形</button>
+        <button id="undoOccPoint">撤销点</button>
+        <button id="deleteOcc">删除选中</button>
+        <button id="clearOcc">清空</button>
+      </div>
+      <div class="muted">矩形：拖拽生成。多边形：逐点点击，点“闭合多边形”完成。坐标按图片 0~1 导出。</div>
+    </section>
+
+    <section>
+      <h2>导出</h2>
+      <div class="row">
+        <button id="copyMask">复制 walkMask</button>
+        <button id="copyFurniture">复制家具</button>
+        <button id="copyOcclusion">复制遮挡</button>
+        <button id="copyAll">复制全部</button>
+      </div>
+      <textarea id="output" spellcheck="false"></textarea>
+    </section>
+  </aside>
+
+  <script src="../js/config.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const requestedSceneId = Number(params.get('scene') || 4);
+    const sceneId = DEFAULT_CONFIG.scenes.some(s => s.id === requestedSceneId) ? requestedSceneId : 4;
+    const canvas = document.getElementById('stage');
+    const ctx = canvas.getContext('2d');
+    const scene = structuredClone(DEFAULT_CONFIG.scenes.find(s => s.id === sceneId));
+    const templates = DEFAULT_CONFIG.furnitureTemplates;
+    const furniture = structuredClone(DEFAULT_CONFIG.furnitureInstances.filter(f => f.sceneId === sceneId));
+    let manifest = null;
+    let bg = new Image();
+    let tool = 'select';
+    let brush = 'D';
+    let selectedId = furniture[0]?.instanceId || 0;
+    let selectedOcc = -1;
+    let gridScale = Number(params.get('scale') || localStorage.getItem(`dayuan-map-editor:scene:${sceneId}:gridScale`) || 2);
+    if (![1, 2, 4].includes(gridScale)) gridScale = 2;
+    let dragging = false;
+    let dragOffset = { c: 0, r: 0 };
+    let furnitureDrag = null;
+    let occDrag = null;
+    let occDraft = null;
+    const furnitureFine = new Map();
+    const colors = {
+      '#': 'rgba(165, 48, 45, .50)',
+      '.': 'rgba(83, 165, 86, .30)',
+      'D': 'rgba(65, 127, 210, .48)',
+      '~': 'rgba(40, 140, 180, .55)',
+      'w': 'rgba(174, 111, 43, .34)',
+      ',': 'rgba(210, 200, 170, .34)',
+      '=': 'rgba(218, 176, 77, .42)',
+    };
+    const labels = {
+      '#': '不可达',
+      '.': '可达',
+      'D': '门',
+      '~': '水',
+      'w': '木地板',
+      ',': '石路',
+      '=': '甬道',
+    };
+
+    function clamp01(v) {
+      return Math.max(0, Math.min(1, Number(v) || 0));
+    }
+
+    function normalizePoint(point) {
+      if (Array.isArray(point)) return [clamp01(point[0]), clamp01(point[1])];
+      return [clamp01(point?.x), clamp01(point?.y)];
+    }
+
+    function normalizeOcclusionPolygons(raw) {
+      const source = Array.isArray(raw)
+        ? raw
+        : (Array.isArray(raw?.polygons) ? raw.polygons : []);
+      return source
+        .map(poly => {
+          const points = Array.isArray(poly?.points) ? poly.points : poly;
+          return Array.isArray(points) ? points.map(normalizePoint).filter(p => Number.isFinite(p[0]) && Number.isFinite(p[1])) : [];
+        })
+        .filter(points => points.length >= 3);
+    }
+
+    const storageKey = `dayuan-map-editor:scene:${sceneId}:occlusionPolygons`;
+    const furnitureStorageKey = `dayuan-map-editor:scene:${sceneId}:furnitureFinePlacements`;
+    let occlusionPolygons = normalizeOcclusionPolygons(scene.occlusionPolygons || scene.occlusion);
+
+    function applyFurnitureFineItems(items) {
+      if (!Array.isArray(items)) return;
+      const dims = fineDims();
+      for (const item of items) {
+        if (!furniture.some(inst => inst.instanceId === item.instanceId)) continue;
+        const sourceScale = Number(item.fineScale) || gridScale;
+        const ratio = gridScale / sourceScale;
+        const tpl = templates[item.templateId] || templates[furniture.find(inst => inst.instanceId === item.instanceId)?.templateId] || {};
+        const fallbackW = Number(item.w) ? Number(item.w) * dims.cols : (tpl.gridW || 1) * gridScale;
+        const fallbackH = Number(item.h) ? Number(item.h) * dims.rows : (tpl.gridH || 1) * gridScale;
+        furnitureFine.set(item.instanceId, {
+          c: Math.max(0, Math.round((Number(item.fineCol ?? item.c) || 0) * ratio)),
+          r: Math.max(0, Math.round((Number(item.fineRow ?? item.r) || 0) * ratio)),
+          w: Math.max(1, Math.round((Number(item.fineW) || fallbackW) * ratio)),
+          h: Math.max(1, Math.round((Number(item.fineH) || fallbackH) * ratio)),
+        });
+      }
+    }
+
+    function loadConfigFurnitureFine() {
+      applyFurnitureFineItems(scene.furnitureFinePlacements);
+    }
+
+    function loadStoredOcclusions() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(storageKey) || 'null');
+        if (Array.isArray(stored) && stored.length) occlusionPolygons = normalizeOcclusionPolygons(stored);
+      } catch (err) {
+        console.warn('读取遮挡草稿失败', err);
+      }
+    }
+
+    function persistOcclusions() {
+      localStorage.setItem(storageKey, JSON.stringify(occlusionPolygons));
+    }
+
+    function loadStoredFurnitureFine() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(furnitureStorageKey) || 'null');
+        applyFurnitureFineItems(stored);
+      } catch (err) {
+        console.warn('读取家具标注草稿失败', err);
+      }
+    }
+
+    function persistFurnitureFine() {
+      localStorage.setItem(furnitureStorageKey, JSON.stringify(furniture.map(inst => {
+        const loc = localInst(inst);
+        return { instanceId: inst.instanceId, fineScale: gridScale, fineCol: loc.c, fineRow: loc.r, fineW: loc.w, fineH: loc.h };
+      })));
+    }
+
+    function normalizeMask() {
+      const rows = Array.isArray(scene.walkMask) ? scene.walkMask.slice(0, scene.rows) : [];
+      while (rows.length < scene.rows) rows.push(''.padEnd(scene.cols, '#'));
+      scene.walkMask = rows.map(row => String(row || '').padEnd(scene.cols, '#').slice(0, scene.cols));
+    }
+
+    function setMask(localCol, localRow, ch) {
+      if (localCol < 0 || localRow < 0 || localCol >= scene.cols || localRow >= scene.rows) return;
+      const row = scene.walkMask[localRow].split('');
+      row[localCol] = ch;
+      scene.walkMask[localRow] = row.join('');
+      render();
+      updateOutput('mask');
+    }
+
+    function cellSize() {
+      return { w: canvas.width / scene.cols, h: canvas.height / scene.rows };
+    }
+
+    function fineDims() {
+      return { cols: scene.cols * gridScale, rows: scene.rows * gridScale };
+    }
+
+    function fineCellSize() {
+      const dims = fineDims();
+      return { w: canvas.width / dims.cols, h: canvas.height / dims.rows };
+    }
+
+    function eventCell(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const x = (evt.clientX - rect.left) * canvas.width / rect.width;
+      const y = (evt.clientY - rect.top) * canvas.height / rect.height;
+      const s = cellSize();
+      return { c: Math.floor(x / s.w), r: Math.floor(y / s.h), x, y };
+    }
+
+    function eventFineCell(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const x = (evt.clientX - rect.left) * canvas.width / rect.width;
+      const y = (evt.clientY - rect.top) * canvas.height / rect.height;
+      const s = fineCellSize();
+      const dims = fineDims();
+      return {
+        c: Math.max(0, Math.min(dims.cols - 1, Math.floor(x / s.w))),
+        r: Math.max(0, Math.min(dims.rows - 1, Math.floor(y / s.h))),
+        x,
+        y,
+      };
+    }
+
+    function eventPoint(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.max(0, Math.min(canvas.width, (evt.clientX - rect.left) * canvas.width / rect.width));
+      const y = Math.max(0, Math.min(canvas.height, (evt.clientY - rect.top) * canvas.height / rect.height));
+      return { x, y, nx: x / canvas.width, ny: y / canvas.height };
+    }
+
+    function pointToCanvas(point) {
+      return { x: point[0] * canvas.width, y: point[1] * canvas.height };
+    }
+
+    function rectToPolygon(a, b) {
+      const x1 = clamp01(Math.min(a.nx, b.nx));
+      const x2 = clamp01(Math.max(a.nx, b.nx));
+      const y1 = clamp01(Math.min(a.ny, b.ny));
+      const y2 = clamp01(Math.max(a.ny, b.ny));
+      if (Math.abs(x2 - x1) < 0.003 || Math.abs(y2 - y1) < 0.003) return null;
+      return [[x1, y1], [x2, y1], [x2, y2], [x1, y2]];
+    }
+
+    function pointInPolygon(point, poly) {
+      let inside = false;
+      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const xi = poly[i][0], yi = poly[i][1];
+        const xj = poly[j][0], yj = poly[j][1];
+        const intersect = ((yi > point.ny) !== (yj > point.ny))
+          && (point.nx < (xj - xi) * (point.ny - yi) / ((yj - yi) || 1e-6) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    function occlusionAt(point) {
+      for (let i = occlusionPolygons.length - 1; i >= 0; i--) {
+        if (pointInPolygon(point, occlusionPolygons[i])) return i;
+      }
+      return -1;
+    }
+
+    function fineStateFor(inst) {
+      if (!furnitureFine.has(inst.instanceId)) {
+        const tpl = templates[inst.templateId] || {};
+        furnitureFine.set(inst.instanceId, {
+          c: (inst.anchorCol - scene.originCol) * gridScale,
+          r: (inst.anchorRow - scene.originRow) * gridScale,
+          w: (tpl.gridW || 1) * gridScale,
+          h: (tpl.gridH || 1) * gridScale,
+        });
+      }
+      return furnitureFine.get(inst.instanceId);
+    }
+
+    function syncInstFromFine(inst) {
+      const state = fineStateFor(inst);
+      inst.anchorCol = scene.originCol + Math.round(state.c / gridScale);
+      inst.anchorRow = scene.originRow + Math.round(state.r / gridScale);
+    }
+
+    function rescaleFineFurniture(nextScale) {
+      const oldDims = fineDims();
+      for (const inst of furniture) {
+        const state = fineStateFor(inst);
+        const normC = state.c / oldDims.cols;
+        const normR = state.r / oldDims.rows;
+        const normW = state.w / oldDims.cols;
+        const normH = state.h / oldDims.rows;
+        state.c = Math.round(normC * scene.cols * nextScale);
+        state.r = Math.round(normR * scene.rows * nextScale);
+        state.w = Math.max(1, Math.round(normW * scene.cols * nextScale));
+        state.h = Math.max(1, Math.round(normH * scene.rows * nextScale));
+      }
+      gridScale = nextScale;
+      localStorage.setItem(`dayuan-map-editor:scene:${sceneId}:gridScale`, String(gridScale));
+      for (const inst of furniture) syncInstFromFine(inst);
+      persistFurnitureFine();
+    }
+
+    function localInst(inst) {
+      const tpl = templates[inst.templateId] || { gridW: 1, gridH: 1, entryOffset: [0, 0], name: '?' };
+      const state = fineStateFor(inst);
+      return {
+        tpl,
+        c: state.c,
+        r: state.r,
+        w: state.w,
+        h: state.h,
+        baseC: inst.anchorCol - scene.originCol,
+        baseR: inst.anchorRow - scene.originRow,
+      };
+    }
+
+    function instAt(localCol, localRow) {
+      for (let i = furniture.length - 1; i >= 0; i--) {
+        const inst = furniture[i];
+        const loc = localInst(inst);
+        if (localCol >= loc.c && localCol < loc.c + loc.w && localRow >= loc.r && localRow < loc.r + loc.h) return inst;
+      }
+      return null;
+    }
+
+    function selectedInst() {
+      return furniture.find(f => f.instanceId === selectedId) || null;
+    }
+
+    function furnitureHandleAt(fineCol, fineRow) {
+      const inst = selectedInst();
+      if (!inst) return null;
+      const loc = localInst(inst);
+      const edge = Math.max(1, Math.ceil(gridScale / 2));
+      const inX = fineCol >= loc.c && fineCol < loc.c + loc.w;
+      const inY = fineRow >= loc.r && fineRow < loc.r + loc.h;
+      if (!inX || !inY) return null;
+      const nearRight = fineCol >= loc.c + loc.w - edge;
+      const nearBottom = fineRow >= loc.r + loc.h - edge;
+      if (nearRight && nearBottom) return 'se';
+      if (nearRight) return 'e';
+      if (nearBottom) return 's';
+      return null;
+    }
+
+    function moveSelected(dc, dr) {
+      const inst = furniture.find(f => f.instanceId === selectedId);
+      if (!inst) return;
+      const loc = localInst(inst);
+      const dims = fineDims();
+      const nc = Math.max(0, Math.min(dims.cols - loc.w, loc.c + dc));
+      const nr = Math.max(0, Math.min(dims.rows - loc.h, loc.r + dr));
+      const state = fineStateFor(inst);
+      state.c = nc;
+      state.r = nr;
+      syncInstFromFine(inst);
+      persistFurnitureFine();
+      renderFurnitureList();
+      render();
+      updateOutput('furniture');
+    }
+
+    function drawBackground() {
+      ctx.fillStyle = '#24201a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      if (bg.complete && bg.naturalWidth) ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+    }
+
+    function drawMask() {
+      const s = cellSize();
+      for (let r = 0; r < scene.rows; r++) {
+        for (let c = 0; c < scene.cols; c++) {
+          const ch = scene.walkMask[r][c];
+          ctx.fillStyle = colors[ch] || 'rgba(0,0,0,.2)';
+          ctx.fillRect(c * s.w, r * s.h, s.w, s.h);
+        }
+      }
+    }
+
+    function drawGrid() {
+      const s = fineCellSize();
+      const dims = fineDims();
+      ctx.strokeStyle = 'rgba(255,255,255,.55)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let c = 0; c <= dims.cols; c++) {
+        ctx.moveTo(Math.round(c * s.w) + .5, 0);
+        ctx.lineTo(Math.round(c * s.w) + .5, canvas.height);
+      }
+      for (let r = 0; r <= dims.rows; r++) {
+        ctx.moveTo(0, Math.round(r * s.h) + .5);
+        ctx.lineTo(canvas.width, Math.round(r * s.h) + .5);
+      }
+      ctx.stroke();
+      if (gridScale > 1) {
+        const base = cellSize();
+        ctx.strokeStyle = 'rgba(255, 220, 120, .72)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let c = 0; c <= scene.cols; c++) {
+          ctx.moveTo(Math.round(c * base.w) + .5, 0);
+          ctx.lineTo(Math.round(c * base.w) + .5, canvas.height);
+        }
+        for (let r = 0; r <= scene.rows; r++) {
+          ctx.moveTo(0, Math.round(r * base.h) + .5);
+          ctx.lineTo(canvas.width, Math.round(r * base.h) + .5);
+        }
+        ctx.stroke();
+      }
+    }
+
+    function drawConnections() {
+      const s = cellSize();
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,230,110,.85)';
+      for (const conn of DEFAULT_CONFIG.connections || []) {
+        if (conn.col < scene.originCol || conn.col >= scene.originCol + scene.cols || conn.row < scene.originRow || conn.row >= scene.originRow + scene.rows) continue;
+        const c = conn.col - scene.originCol;
+        const r = conn.row - scene.originRow;
+        ctx.fillRect(c * s.w + s.w * .25, r * s.h + s.h * .25, s.w * .5, s.h * .5);
+      }
+      ctx.restore();
+    }
+
+    function drawFurniture() {
+      const s = fineCellSize();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (const inst of furniture) {
+        const loc = localInst(inst);
+        const x = loc.c * s.w;
+        const y = loc.r * s.h;
+        const w = loc.w * s.w;
+        const h = loc.h * s.h;
+        const active = inst.instanceId === selectedId;
+        ctx.fillStyle = active ? 'rgba(245, 205, 93, .58)' : 'rgba(80, 45, 35, .42)';
+        ctx.strokeStyle = active ? '#ffd55d' : '#4b3028';
+        ctx.lineWidth = active ? 3 : 2;
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+        if (active) {
+          ctx.fillStyle = '#ffd55d';
+          const handle = Math.max(8, Math.min(18, Math.min(s.w, s.h) * 1.2));
+          ctx.fillRect(x + w - handle, y + h - handle, handle, handle);
+          ctx.fillRect(x + w - handle, y + h / 2 - handle / 2, handle, handle);
+          ctx.fillRect(x + w / 2 - handle / 2, y + h - handle, handle, handle);
+        }
+        ctx.fillStyle = '#fff8dc';
+        ctx.font = '12px sans-serif';
+        ctx.fillText(loc.tpl.name || inst.templateId, x + w / 2, y + h / 2);
+        if (document.getElementById('showEntries').checked) {
+          const off = loc.tpl.entryOffset || [0, 0];
+          const ec = loc.c + off[0] * gridScale;
+          const er = loc.r + off[1] * gridScale;
+          ctx.fillStyle = 'rgba(80,190,255,.88)';
+          ctx.beginPath();
+          ctx.arc((ec + .5) * s.w, (er + .5) * s.h, Math.min(s.w, s.h) * .18, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    function drawOcclusionPolygon(points, active = false, draft = false) {
+      if (!points?.length) return;
+      ctx.save();
+      ctx.beginPath();
+      const first = pointToCanvas(points[0]);
+      ctx.moveTo(first.x, first.y);
+      for (let i = 1; i < points.length; i++) {
+        const p = pointToCanvas(points[i]);
+        ctx.lineTo(p.x, p.y);
+      }
+      if (!draft && points.length >= 3) ctx.closePath();
+      ctx.fillStyle = draft ? 'rgba(255, 126, 76, .18)' : (active ? 'rgba(255, 116, 76, .34)' : 'rgba(70, 35, 35, .24)');
+      ctx.strokeStyle = active ? '#ff7048' : '#6c342b';
+      ctx.lineWidth = active ? 3 : 2;
+      if (draft) ctx.setLineDash([8, 5]);
+      if (points.length >= 3) ctx.fill();
+      ctx.stroke();
+      ctx.setLineDash([]);
+      for (const point of points) {
+        const p = pointToCanvas(point);
+        ctx.fillStyle = active || draft ? '#ff7048' : '#6c342b';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawOcclusions() {
+      for (let i = 0; i < occlusionPolygons.length; i++) drawOcclusionPolygon(occlusionPolygons[i], i === selectedOcc);
+      if (occDrag?.type === 'rect' && occDrag.current) {
+        const poly = rectToPolygon(occDrag.start, occDrag.current);
+        if (poly) drawOcclusionPolygon(poly, true, true);
+      }
+      if (occDraft?.type === 'poly') drawOcclusionPolygon(occDraft.points, true, true);
+    }
+
+    function render() {
+      drawBackground();
+      if (!document.getElementById('showAnnotations').checked) return;
+      if (document.getElementById('showMask').checked) drawMask();
+      drawConnections();
+      if (document.getElementById('showGrid').checked) drawGrid();
+      if (document.getElementById('showFurniture').checked) drawFurniture();
+      if (document.getElementById('showOcclusion').checked) drawOcclusions();
+    }
+
+    function renderBrushes() {
+      const box = document.getElementById('brushes');
+      box.innerHTML = '';
+      for (const ch of ['#', '.', 'D', '~', 'w', ',', '=']) {
+        const btn = document.createElement('button');
+        btn.className = ch === brush ? 'active' : '';
+        btn.innerHTML = `<span class="swatch" style="background:${colors[ch]}"></span> ${labels[ch]}`;
+        btn.onclick = () => { brush = ch; renderBrushes(); };
+        box.appendChild(btn);
+      }
+    }
+
+    function renderFurnitureList() {
+      const list = document.getElementById('furnitureList');
+      list.innerHTML = '';
+      for (const inst of furniture) {
+        syncInstFromFine(inst);
+        const tpl = templates[inst.templateId] || {};
+        const loc = localInst(inst);
+        const row = document.createElement('div');
+        row.className = 'furn-row' + (inst.instanceId === selectedId ? ' active' : '');
+        row.innerHTML = `<span>${inst.instanceId}</span><span>${tpl.name || inst.templateId}</span><span>${loc.c},${loc.r} ${loc.w}×${loc.h}</span>`;
+        row.onclick = () => { selectedId = inst.instanceId; renderFurnitureList(); render(); updateOutput('furniture'); };
+        list.appendChild(row);
+      }
+    }
+
+    function renderOcclusionList() {
+      const list = document.getElementById('occlusionList');
+      list.innerHTML = '';
+      if (!occlusionPolygons.length) {
+        const empty = document.createElement('div');
+        empty.className = 'muted';
+        empty.style.padding = '8px';
+        empty.textContent = '暂无遮挡区域';
+        list.appendChild(empty);
+        return;
+      }
+      occlusionPolygons.forEach((poly, idx) => {
+        const row = document.createElement('div');
+        row.className = 'occ-row' + (idx === selectedOcc ? ' active' : '');
+        row.innerHTML = `<span>#${idx + 1}</span><span>${poly.length} 点</span><span>${poly[0][0].toFixed(2)},${poly[0][1].toFixed(2)}</span>`;
+        row.onclick = () => { selectedOcc = idx; renderOcclusionList(); render(); updateOutput('occlusion'); };
+        list.appendChild(row);
+      });
+    }
+
+    function maskCode() {
+      return 'walkMask: [\n' + scene.walkMask.map(row => `        '${row}',`).join('\n') + '\n      ]';
+    }
+
+    function connectionsCode() {
+      const rows = [];
+      for (let c = 0; c < scene.cols; c++) {
+        for (let r = 0; r < scene.rows; r++) {
+          if (scene.walkMask[r][c] === 'D' && (r === 0 || c === 0 || r === scene.rows - 1 || c === scene.cols - 1)) {
+            rows.push({ col: scene.originCol + c, row: scene.originRow + r, type: 'gate' });
+          }
+        }
+      }
+      return rows.map(row => `{ col: ${row.col}, row: ${row.row}, type: 'gate' }`).join(', ');
+    }
+
+    function furnitureCode() {
+      for (const inst of furniture) syncInstFromFine(inst);
+      return furniture.map(inst =>
+        `    { instanceId: ${inst.instanceId}, sceneId: ${inst.sceneId}, templateId: ${inst.templateId}, anchorCol: ${inst.anchorCol}, anchorRow: ${inst.anchorRow} },`
+      ).join('\n');
+    }
+
+    function furnitureFineCode() {
+      const dims = fineDims();
+      return 'furnitureFinePlacements: [\n' + furniture.map(inst => {
+        const tpl = templates[inst.templateId] || {};
+        const loc = localInst(inst);
+        const x = loc.c / dims.cols;
+        const y = loc.r / dims.rows;
+        const w = loc.w / dims.cols;
+        const h = loc.h / dims.rows;
+        return `    { instanceId: ${inst.instanceId}, sceneId: ${inst.sceneId}, templateId: ${inst.templateId}, name: ${JSON.stringify(tpl.name || String(inst.templateId))}, fineScale: ${gridScale}, fineCol: ${loc.c}, fineRow: ${loc.r}, fineW: ${loc.w}, fineH: ${loc.h}, x: ${x.toFixed(4)}, y: ${y.toFixed(4)}, w: ${w.toFixed(4)}, h: ${h.toFixed(4)} },`;
+      }).join('\n') + '\n  ]';
+    }
+
+    function occlusionCode() {
+      const lines = occlusionPolygons.map(poly => {
+        const pts = poly.map(p => `[${Number(p[0]).toFixed(4)}, ${Number(p[1]).toFixed(4)}]`).join(', ');
+        return `        [${pts}],`;
+      });
+      return 'occlusionPolygons: [\n' + lines.join('\n') + '\n      ]';
+    }
+
+    function updateOutput(kind = 'all') {
+      const out = document.getElementById('output');
+      const parts = [];
+      if (kind === 'mask' || kind === 'all') parts.push(maskCode());
+      if (kind === 'connections' || kind === 'all') parts.push('// boundary gates from D cells\n' + connectionsCode());
+      if (kind === 'furniture' || kind === 'all') parts.push('// furnitureInstances rounded to current game grid\n' + furnitureCode() + '\n\n// fine furniture annotations for this background\n' + furnitureFineCode());
+      if (kind === 'occlusion' || kind === 'all') parts.push(occlusionCode());
+      out.value = parts.join('\n\n');
+    }
+
+    async function copyOutput(kind) {
+      updateOutput(kind);
+      await navigator.clipboard.writeText(document.getElementById('output').value);
+    }
+
+    async function init() {
+      document.title = `${scene.name}地图标注`;
+      document.getElementById('sceneTitle').textContent = `${scene.name}地图标注`;
+      normalizeMask();
+      loadConfigFurnitureFine();
+      loadStoredFurnitureFine();
+      loadStoredOcclusions();
+      document.getElementById('gridScale').value = String(gridScale);
+      for (const inst of furniture) fineStateFor(inst);
+      renderBrushes();
+      renderFurnitureList();
+      renderOcclusionList();
+      updateOutput('all');
+      manifest = await fetch('../assets/manifest.json', { cache: 'no-cache' }).then(r => r.json());
+      const src = manifest.roomBackgrounds?.[String(sceneId)]?.src || manifest.roomBackgrounds?.['4']?.src || 'assets/rooms/怡红院-v1.png';
+      bg.onload = render;
+      bg.src = '../' + src;
+      render();
+    }
+
+    function finishOccPolygon() {
+      if (!occDraft?.points || occDraft.points.length < 3) return;
+      occlusionPolygons.push(occDraft.points.map(normalizePoint));
+      selectedOcc = occlusionPolygons.length - 1;
+      occDraft = null;
+      persistOcclusions();
+      renderOcclusionList();
+      render();
+      updateOutput('occlusion');
+    }
+
+    function undoOccPoint() {
+      if (!occDraft?.points?.length) return;
+      occDraft.points.pop();
+      if (!occDraft.points.length) occDraft = null;
+      render();
+    }
+
+    function deleteSelectedOcc() {
+      if (selectedOcc < 0 || selectedOcc >= occlusionPolygons.length) return;
+      occlusionPolygons.splice(selectedOcc, 1);
+      selectedOcc = Math.min(selectedOcc, occlusionPolygons.length - 1);
+      persistOcclusions();
+      renderOcclusionList();
+      render();
+      updateOutput('occlusion');
+    }
+
+    function clearOcclusions() {
+      if (!occlusionPolygons.length || !confirm('清空当前场景的遮挡标注？')) return;
+      occlusionPolygons = [];
+      selectedOcc = -1;
+      occDraft = null;
+      persistOcclusions();
+      renderOcclusionList();
+      render();
+      updateOutput('occlusion');
+    }
+
+    document.querySelectorAll('button[data-tool]').forEach(btn => {
+      btn.onclick = () => {
+        tool = btn.dataset.tool;
+        document.querySelectorAll('button[data-tool]').forEach(b => b.classList.toggle('active', b === btn));
+      };
+    });
+    ['showAnnotations', 'showMask', 'showGrid', 'showFurniture', 'showEntries', 'showOcclusion'].forEach(id => document.getElementById(id).onchange = render);
+    document.getElementById('copyMask').onclick = () => copyOutput('mask');
+    document.getElementById('copyFurniture').onclick = () => copyOutput('furniture');
+    document.getElementById('copyOcclusion').onclick = () => copyOutput('occlusion');
+    document.getElementById('copyAll').onclick = () => copyOutput('all');
+    document.getElementById('nudgeUp').onclick = () => moveSelected(0, -1);
+    document.getElementById('nudgeDown').onclick = () => moveSelected(0, 1);
+    document.getElementById('nudgeLeft').onclick = () => moveSelected(-1, 0);
+    document.getElementById('nudgeRight').onclick = () => moveSelected(1, 0);
+    document.getElementById('gridScale').onchange = evt => {
+      rescaleFineFurniture(Number(evt.target.value));
+      renderFurnitureList();
+      render();
+      updateOutput('all');
+    };
+    document.getElementById('finishOccPoly').onclick = finishOccPolygon;
+    document.getElementById('undoOccPoint').onclick = undoOccPoint;
+    document.getElementById('deleteOcc').onclick = deleteSelectedOcc;
+    document.getElementById('clearOcc').onclick = clearOcclusions;
+
+    canvas.addEventListener('mousedown', evt => {
+      const cell = eventCell(evt);
+      const fine = eventFineCell(evt);
+      const point = eventPoint(evt);
+      if (tool === 'paint' || tool === 'erase') {
+        setMask(cell.c, cell.r, tool === 'erase' ? '#' : brush);
+        dragging = true;
+        return;
+      }
+      if (tool === 'occRect') {
+        occDrag = { type: 'rect', start: point, current: point };
+        dragging = true;
+        render();
+        return;
+      }
+      if (tool === 'occPoly') {
+        if (!occDraft) occDraft = { type: 'poly', points: [] };
+        occDraft.points.push([point.nx, point.ny]);
+        render();
+        return;
+      }
+      if (tool === 'occSelect') {
+        selectedOcc = occlusionAt(point);
+        renderOcclusionList();
+        render();
+        updateOutput('occlusion');
+        return;
+      }
+      const handle = furnitureHandleAt(fine.c, fine.r);
+      if (handle) {
+        furnitureDrag = { type: 'resize', handle, startFine: fine, startState: { ...fineStateFor(selectedInst()) } };
+        dragging = true;
+        return;
+      }
+      const inst = instAt(fine.c, fine.r);
+      if (inst) {
+        selectedId = inst.instanceId;
+        const loc = localInst(inst);
+        dragOffset = { c: fine.c - loc.c, r: fine.r - loc.r };
+        furnitureDrag = { type: 'move' };
+        dragging = true;
+        renderFurnitureList();
+        render();
+      }
+    });
+    canvas.addEventListener('mousemove', evt => {
+      const cell = eventCell(evt);
+      const fine = eventFineCell(evt);
+      const point = eventPoint(evt);
+      const globalCol = scene.originCol + cell.c;
+      const globalRow = scene.originRow + cell.r;
+      document.getElementById('cursorInfo').textContent = `fine ${fine.c},${fine.r} / local ${cell.c},${cell.r} / global ${globalCol},${globalRow} / image ${point.nx.toFixed(3)},${point.ny.toFixed(3)} / ${labels[scene.walkMask[cell.r]?.[cell.c]] || ''}`;
+      if (!dragging) return;
+      if (tool === 'occRect' && occDrag?.type === 'rect') {
+        occDrag.current = point;
+        render();
+        return;
+      }
+      if (tool === 'paint' || tool === 'erase') {
+        setMask(cell.c, cell.r, tool === 'erase' ? '#' : brush);
+        return;
+      }
+      const inst = selectedInst();
+      if (!inst) return;
+      if (furnitureDrag?.type === 'resize') {
+        const dims = fineDims();
+        const state = fineStateFor(inst);
+        const start = furnitureDrag.startState;
+        const dc = fine.c - furnitureDrag.startFine.c;
+        const dr = fine.r - furnitureDrag.startFine.r;
+        if (furnitureDrag.handle.includes('e')) state.w = Math.max(1, Math.min(dims.cols - state.c, start.w + dc));
+        if (furnitureDrag.handle.includes('s')) state.h = Math.max(1, Math.min(dims.rows - state.r, start.h + dr));
+        syncInstFromFine(inst);
+        persistFurnitureFine();
+        renderFurnitureList();
+        render();
+        updateOutput('furniture');
+        return;
+      }
+      const loc = localInst(inst);
+      const dims = fineDims();
+      const nc = Math.max(0, Math.min(dims.cols - loc.w, fine.c - dragOffset.c));
+      const nr = Math.max(0, Math.min(dims.rows - loc.h, fine.r - dragOffset.r));
+      const state = fineStateFor(inst);
+      state.c = nc;
+      state.r = nr;
+      syncInstFromFine(inst);
+      persistFurnitureFine();
+      renderFurnitureList();
+      render();
+      updateOutput('furniture');
+    });
+    window.addEventListener('mouseup', () => {
+      if (dragging && tool === 'occRect' && occDrag?.type === 'rect') {
+        const poly = rectToPolygon(occDrag.start, occDrag.current || occDrag.start);
+        if (poly) {
+          occlusionPolygons.push(poly);
+          selectedOcc = occlusionPolygons.length - 1;
+          persistOcclusions();
+          renderOcclusionList();
+          updateOutput('occlusion');
+        }
+        occDrag = null;
+        render();
+      }
+      furnitureDrag = null;
+      dragging = false;
+    });
+    canvas.addEventListener('dblclick', evt => {
+      if (tool === 'occPoly') {
+        evt.preventDefault();
+        finishOccPolygon();
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>

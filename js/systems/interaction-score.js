@@ -65,6 +65,10 @@ const InteractionScoreSystem = (() => {
     if (score < minScore) {
       return { soft: true, score, minScore, reason: 'score' };
     }
+    const maxScore = tpl.relMax;
+    if (maxScore != null && score > maxScore) {
+      return { soft: true, score, minScore, maxScore, reason: 'score_high' };
+    }
     if (tpl.axisReq) {
       const axisChk = checkAxisReq(initiator.id, target.id, tpl.axisReq);
       if (!axisChk.ok) {
@@ -92,6 +96,10 @@ const InteractionScoreSystem = (() => {
 
   function relationConditionFactor(initiator, target, tpl) {
     const factors = [];
+    const score = axisValue(initiator, target, 'score');
+    if (tpl.minScore != null) factors.push(relationThresholdFactor(score, tpl.minScore, null));
+    else if (tpl.relMin != null) factors.push(relationThresholdFactor(score, tpl.relMin, null));
+    if (tpl.relMax != null) factors.push(relationThresholdFactor(score, null, tpl.relMax));
     const uc = tpl.unlock_conditions || {};
     const pairs = [
       ['min_score', 'score'],
@@ -112,6 +120,54 @@ const InteractionScoreSystem = (() => {
     return factors.reduce((acc, v) => acc * v, 1);
   }
 
+  function protocolWillingness(initiator, target, tpl) {
+    if (!IdentityProtocolSystem?.evaluateProtocolBehavior) {
+      return { factor: 1, behavior: 'allowed', pressure: 0, witnessCount: 0 };
+    }
+    const protocol = IdentityProtocolSystem.evaluateProtocolBehavior(initiator, target, tpl);
+    const behavior = protocol?.behavior || 'allowed';
+    const basePressure = {
+      allowed: 0,
+      conditional: 0.24,
+      risky: 0.52,
+      forbidden: 0.95,
+    }[behavior] ?? 0;
+    const witnesses = InteractionSocialSystem?.countWitnesses?.(initiator, target) || [];
+    const sc = typeof sceneAt === 'function'
+      ? sceneAt(Math.round(initiator.gridCol), Math.round(initiator.gridRow))
+      : null;
+    const context = {
+      behavior,
+      category: protocol?.category || IdentityProtocolSystem.getInteractionCat?.(tpl) || tpl.category,
+      relation: protocol?.rel || getHierarchy(initiator, target),
+      contactType: protocol?.contactType || tpl.contact_type || 'none',
+      witnessCount: witnesses.length,
+      sceneType: sc?.sceneType || '',
+      templateId: tpl.id,
+    };
+    const pressureMult = TraitEffectSystem?.protocolPressureMultiplier?.(initiator, context) || 1;
+    const impulseMult = TraitEffectSystem?.protocolImpulseMultiplier?.(initiator, context) || 1;
+    const witnessMult = TraitEffectSystem?.protocolWitnessMultiplier?.(initiator, context) || 1;
+    const witnessPressure = Math.min(0.34, witnesses.length * 0.07 * witnessMult)
+      + (sc?.sceneType === 'public' ? 0.08 * witnessMult : 0);
+    const impulseRelief = Math.max(0, impulseMult - 1) * 0.26;
+    const pressure = Math.max(0, basePressure * pressureMult + witnessPressure - impulseRelief);
+    let factor = Math.max(0.08, Math.min(1.12, 1 - pressure));
+    if (behavior === 'forbidden') factor = Math.min(factor, 0.22);
+    if (behavior === 'risky') factor = Math.min(factor, 0.62);
+    if (behavior === 'conditional') factor = Math.min(factor, 0.88);
+    return {
+      factor,
+      behavior,
+      pressure,
+      witnessCount: witnesses.length,
+      pressureMult,
+      impulseMult,
+      witnessMult,
+      reason: protocol?.reason || '',
+    };
+  }
+
   function socialWillingness(initiator, target, tpl) {
     const categoryFactor = (typeof AiDrama !== 'undefined' && AiDrama?.socialFactor)
       ? AiDrama.socialFactor(initiator, {
@@ -121,14 +177,16 @@ const InteractionScoreSystem = (() => {
       tags: tpl.tags || [],
     }) : 1;
     const thresholdFactor = relationConditionFactor(initiator, target, tpl);
-    const raw = categoryFactor * thresholdFactor;
+    const protocolFactor = protocolWillingness(initiator, target, tpl);
+    const raw = categoryFactor * thresholdFactor * protocolFactor.factor;
     const strength = Math.max(0, Math.min(1, raw / 3));
+    const factor = Math.max(0.18, Math.min(2.2, raw));
     let label = '平';
     if (strength >= 0.78) label = '高';
     else if (strength >= 0.42) label = '中';
     else if (strength >= 0.18) label = '低';
     else label = '冷';
-    return { raw, strength, label, categoryFactor, thresholdFactor };
+    return { raw, strength, factor, label, categoryFactor, thresholdFactor, protocolFactor };
   }
 
   function lowScoreHint(tpl, initiator, target) {

@@ -1,0 +1,11 @@
+{
+  "chapters": [
+    "ch003_lindaiyu_enters_jiafu",
+    "ch017_grand_view_garden_inscriptions",
+    "ch029_qingxu_temple_baodai_quarrel"
+  ],
+  "quote_items": 377,
+  "conversation_scenes": 14,
+  "interaction_patterns": 5,
+  "runtime_note": "素材资产，尚未直接接入现有 JS 运行时；若接入，需要新增 scene/pattern interpreter。"
+}

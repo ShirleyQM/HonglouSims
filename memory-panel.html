@@ -689,19 +689,19 @@
 
     const portraitFallback = {
       baoyu: '',
-      daiyu: 'assets/lihui/processed/daiyu_portrait.webp',
+      daiyu: 'assets/全身立绘/processed/daiyu_portrait.webp',
       baochai: 'assets/lihui/processed/baochai_portrait.webp',
       tanchun: 'assets/lihui/processed/tanchun_portrait.webp',
       xifeng: 'assets/lihui/processed/xifeng_portrait.webp',
-      xiren: 'assets/lihui/processed/xiren_portrait.webp',
-      qingwen: 'assets/lihui/processed/qingwen_portrait.webp',
-      zijuan: 'assets/lihui/processed/zijuan_portrait.webp',
-      xueyan: 'assets/lihui/processed/xueyan_portrait.webp',
+      xiren: 'assets/全身立绘/processed/xiren_portrait.webp',
+      qingwen: 'assets/全身立绘/processed/qingwen_portrait.webp',
+      zijuan: 'assets/全身立绘/processed/zijuan_portrait.webp',
+      xueyan: 'assets/全身立绘/processed/xueyan_portrait.webp',
       yinger: 'assets/lihui/processed/yinger_portrait.webp',
       xiangyun: 'assets/lihui/processed/xiangyun_portrait.webp',
-      sheyue: 'assets/lihui/processed/sheyue_portrait.webp',
+      sheyue: 'assets/全身立绘/processed/sheyue_portrait.webp',
       liwan: 'assets/lihui/processed/liwan_portrait.webp',
-      yingchun: 'assets/lihui/processed/yingchun_portrait.webp',
+      yingchun: 'assets/全身立绘/processed/yingchun_portrait.webp',
       yuanchun: 'assets/lihui/processed/yuanchun_portrait.webp',
       qinkeqing: 'assets/lihui/processed/qinkeqing_portrait.webp',
     };
@@ -799,7 +799,7 @@
     }
 
     function avatarFor(c) {
-      return state.manifest?.portraits?.[c.id]?.hud || state.manifest?.avatars?.[c.id]?.src || portraitFallback[c.id] || '';
+      return state.manifest?.avatars?.[c.id]?.src || state.manifest?.portraits?.[c.id]?.hud || portraitFallback[c.id] || '';
     }
 
     function splitMemoryPalace(text) {

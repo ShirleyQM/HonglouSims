@@ -2024,32 +2024,65 @@ function candidateScoreHints(raw) {
   return rows;
 }
 
-function relationCategoryFactor(c, other, tpl) {
+function interactionWillingnessFactor(c, other, tpl) {
   const info = getRelationInfo?.(c.id, other.id);
-  if (!info) return { factor: 1, hints: [] };
-  const cat = tpl.category || '';
-  const score = info.score || 0;
-  const affection = info.affection || 0;
-  const trust = info.trust || 0;
-  const friendship = info.friendship || 0;
-  const submission = info.submissionAtoB || 0;
-  let factor = 1;
+  const willingness = InteractionScoreSystem?.socialWillingness?.(c, other, tpl);
+  const factor = willingness?.factor ?? 1;
   const hints = [];
   const push = (text) => { if (text) hints.push({ key: 'relation', value: text }); };
-  if (['xujiu', 'lundao', 'tiaoxiao'].includes(cat)) {
-    factor *= Math.max(0.35, Math.min(2.05, 0.45 + Math.max(-30, Math.min(85, score)) / 55));
-  } else if (cat === 'weijie') {
-    factor *= Math.max(0.4, Math.min(2.0, 0.55 + Math.max(-20, Math.min(80, trust + friendship * 0.5)) / 65));
-  } else if (cat === 'chuanqing') {
-    factor *= Math.max(0.25, Math.min(2.2, 0.35 + Math.max(-30, Math.min(90, affection + trust * 0.4)) / 55));
-  } else if (cat === 'zhengchi') {
-    factor *= score < 10 ? 1 + Math.min(70, Math.abs(score - 10)) / 90 : Math.max(0.25, 1 - score / 70);
+  const label = willingness?.label || '平';
+  if (factor >= 1.25) push(`${other.short}:${info?.typeLabel || '关系'}促成·${label}`);
+  else if (factor <= 0.75) push(`${other.short}:${info?.typeLabel || '关系'}压低·${label}`);
+  const pf = willingness?.protocolFactor;
+  if (pf?.behavior && pf.behavior !== 'allowed') {
+    const behaviorLabel = { conditional: '需分寸', risky: '逾矩', forbidden: '犯忌' }[pf.behavior] || pf.behavior;
+    push(`${behaviorLabel}·礼法压力${Math.round((pf.pressure || 0) * 100)}`);
   }
-  if (submission > 35 && ['xujiu', 'weijie'].includes(cat)) factor *= 1.18;
-  if (trust < -25 && cat !== 'zhengchi') factor *= 0.55;
-  if (factor >= 1.25) push(`${other.short}:${info.typeLabel || '关系'}促成`);
-  else if (factor <= 0.75) push(`${other.short}:${info.typeLabel || '关系'}压低`);
-  return { factor: Math.max(0.18, Math.min(2.2, factor)), hints };
+  return { factor, hints, willingness, info };
+}
+
+function hasPendingSameInteraction(c, targetId, interactionId) {
+  const same = item => item?.type === 'interaction'
+    && item.targetCharId === targetId
+    && String(item.interactionId) === String(interactionId);
+  return same(c?.action) || (c?.actionQueue || []).some(same);
+}
+
+function aiAutonomousInteractionAllowed(c, tpl, rel) {
+  const rule = tpl?.aiAutonomy || {};
+  if (rule.enabled === false) return false;
+  if (Array.isArray(rule.requiredTraitsAny) && rule.requiredTraitsAny.length) {
+    const traits = new Set(TraitEffectSystem?.traitsOf?.(c) || []);
+    const specs = new Set(TraitEffectSystem?.specialtiesOf?.(c) || []);
+    const ok = rule.requiredTraitsAny.some(id => traits.has(id) || specs.has(id));
+    if (!ok) return false;
+  }
+  const pf = rel?.willingness?.protocolFactor;
+  const behavior = pf?.behavior || 'allowed';
+  if (behavior === 'forbidden') return false;
+  if (behavior === 'risky' && (rel?.factor ?? 1) < 0.75) return false;
+  if (behavior === 'conditional' && (rel?.factor ?? 1) < 0.35) return false;
+  const isCourtship = tpl?.category === 'chuanqing';
+  if (isCourtship || rule.minScore != null || rule.minAffection != null || rule.minTrust != null || rule.minFriendship != null) {
+    const info = rel?.info || {};
+    const unlock = tpl?.unlock_conditions || {};
+    const score = info.score ?? 0;
+    const affection = info.affection ?? 0;
+    const trust = info.trust ?? 0;
+    const friendship = info.friendship ?? 0;
+    const minScore = rule.minScore ?? tpl.relMin ?? unlock.min_score ?? (isCourtship ? 30 : -100);
+    const minAffection = rule.minAffection ?? unlock.min_affection ?? (isCourtship ? Math.max(20, minScore - 10) : -100);
+    const minTrust = rule.minTrust ?? unlock.min_trust ?? -100;
+    const minFriendship = rule.minFriendship ?? unlock.min_friendship ?? unlock.min_intimacy ?? -100;
+    const minWillingness = rule.minWillingness ?? (isCourtship ? 0.8 : 0);
+    if (score < minScore) return false;
+    if (affection < minAffection) return false;
+    if (trust < minTrust) return false;
+    if (friendship < minFriendship) return false;
+    if ((rel?.factor ?? 1) < minWillingness) return false;
+  }
+  if (rule.maxWitnesses != null && (pf?.witnessCount ?? 0) > rule.maxWitnesses) return false;
+  return true;
 }
 
 function relationSeekCandidates(c, accessible) {
@@ -2234,12 +2267,20 @@ function ensureBuiltinCandidateProviders() {
         for (const tpl of Object.values(CONFIG.interactionTemplates || {})) {
           ctx.check('social');
           social.templatesChecked++;
+          if (hasPendingSameInteraction(c, oid, tpl.id)) {
+            ctx.reject('social', 'duplicate_pending_interaction');
+            continue;
+          }
           if (!checkInteractionAvailable(c, other, tpl, { ignoreCooldown: true }).ok) {
             social.availabilityBlocked++;
             ctx.reject('social', 'unavailable');
             continue;
           }
-          const rel = relationCategoryFactor(c, other, tpl);
+          const rel = interactionWillingnessFactor(c, other, tpl);
+          if (!aiAutonomousInteractionAllowed(c, tpl, rel)) {
+            ctx.reject('social', 'protocol_autonomy_low');
+            continue;
+          }
           ctx.accept('social', {
             key: `int:${tpl.id}:${oid}`, kind: 'interaction',
             interactionId: tpl.id, targetCharId: oid,
@@ -3166,8 +3207,28 @@ function migrateConfig(cfg) {
     cfg.interactionTemplates = DEFAULT_CONFIG.interactionTemplates;
   } else {
     for (const [id, tpl] of Object.entries(DEFAULT_CONFIG.interactionTemplates || {})) {
-      if (!cfg.interactionTemplates[id])
+      if (!cfg.interactionTemplates[id]) {
         cfg.interactionTemplates[id] = JSON.parse(JSON.stringify(tpl));
+        continue;
+      }
+      const cur = cfg.interactionTemplates[id];
+      if (tpl.lineVariants && !cur.lineVariants) {
+        cur.lineVariants = JSON.parse(JSON.stringify(tpl.lineVariants));
+      }
+      if (tpl.risky_details) {
+        cur.risky_details = cur.risky_details || {};
+        for (const key of ['fail_lines', 'repeat_fail_lines', 'witnessed_fail_lines']) {
+          if (tpl.risky_details[key] && !cur.risky_details[key]) {
+            cur.risky_details[key] = JSON.parse(JSON.stringify(tpl.risky_details[key]));
+          }
+        }
+        if (tpl.risky_details.identity_fail_lines) {
+          cur.risky_details.identity_fail_lines = deepMerge(
+            JSON.parse(JSON.stringify(tpl.risky_details.identity_fail_lines)),
+            cur.risky_details.identity_fail_lines || {},
+          );
+        }
+      }
     }
   }
   if (!cfg.interactionSocialConfig) {

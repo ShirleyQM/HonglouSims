@@ -164,7 +164,21 @@ const InteractionSocialSystem = (() => {
     if (isRomanticBond(initiator.id, target.id) && tpl.contact_type === 'kiss') rate += 0.25;
 
     const witnesses = countWitnesses(initiator, target);
-    const penalty = rd.witness_penalty ?? riskyDefaults.witness_penalty ?? 0.15;
+    const ctx = {
+      behavior,
+      category: protocol?.actionContext?.category || IdentityProtocolSystem?.getInteractionCat?.(tpl) || tpl.category,
+      relation: protocol?.rankRelation || IdentityProtocolSystem?.getHierarchyRelation?.(initiator.id, target.id),
+      contactType: tpl.contact_type || 'none',
+      witnessCount: witnesses.length,
+      templateId: tpl.id,
+    };
+    const initiatorImpulse = TraitEffectSystem?.protocolImpulseMultiplier?.(initiator, ctx) || 1;
+    const targetPressure = TraitEffectSystem?.protocolPressureMultiplier?.(target, ctx) || 1;
+    const targetWitness = TraitEffectSystem?.protocolWitnessMultiplier?.(target, ctx) || 1;
+    rate += (initiatorImpulse - 1) * 0.08;
+    rate -= (targetPressure - 1) * 0.1;
+
+    const penalty = (rd.witness_penalty ?? riskyDefaults.witness_penalty ?? 0.15) * targetWitness;
     rate -= witnesses.length * penalty;
 
     const sc = sceneAt(Math.round(initiator.gridCol), Math.round(initiator.gridRow));
@@ -180,27 +194,35 @@ const InteractionSocialSystem = (() => {
   }
 
   function evaluate(initiator, target, tpl) {
-    const unlock = checkUnlockConditions(initiator, target, tpl);
-    if (!unlock.ok) return unlock;
-
+    const softRisks = [];
     const gender = checkGender(initiator, target, tpl.gender_constraint);
-    if (!gender.ok) return { ok: false, reason: gender.reason, locked: true };
+    if (!gender.ok) softRisks.push(gender.reason);
 
     const age = checkAgeRelation(initiator, target, tpl.age_constraint);
-    if (!age.ok) return { ok: false, reason: age.reason, locked: true };
+    if (!age.ok) softRisks.push(age.reason);
 
     const furn = checkFurnitureReq(initiator, target, tpl);
     if (!furn.ok) return { ok: false, reason: furn.reason };
 
     const risk = resolveRisk(initiator, target, tpl);
-    if (risk.forbidden) return { ok: false, reason: risk.reason };
+    if (risk.forbidden) softRisks.push(risk.reason || '礼法所禁');
+    const risky = risk.isRisky || softRisks.length > 0;
+    const riskHint = [risk.riskHint, ...softRisks].filter(Boolean).join('；');
+    const riskMeta = {
+      ...risk,
+      isRisky: risky,
+      forbidden: !!risk.forbidden,
+      riskHint,
+      softRisks,
+      successRate: risk.forbidden ? 0 : risk.successRate,
+    };
 
     return {
       ok: true,
-      risky: risk.isRisky,
-      riskHint: risk.riskHint,
-      successRate: risk.successRate,
-      riskMeta: risk,
+      risky,
+      riskHint,
+      successRate: riskMeta.successRate,
+      riskMeta,
     };
   }
 
@@ -249,6 +271,7 @@ const InteractionSocialSystem = (() => {
       witnessed: !!riskMeta?.witnessCount,
       witnessCount: riskMeta?.witnessCount || 0,
     });
+    if (riskMeta) riskMeta.depthOutcome = depthOutcome;
     const failSt = InteractionScoreSystem?.resolveRiskFailState?.(initiator, target, tpl, riskMeta)
       || riskMeta?.failStatus || rd.fail_status || 'awkward';
     emitRiskState(initiator, failSt, initiator, target, tpl, 'risk_fail');

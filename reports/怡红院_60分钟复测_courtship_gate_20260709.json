@@ -1,0 +1,1043 @@
+{
+  "outFile": "/Users/bytedance/Desktop/myCursor/game/reports/怡红院_60分钟复测_courtship_gate_20260709.md",
+  "jsonOutFile": "/Users/bytedance/Desktop/myCursor/game/reports/怡红院_60分钟复测_courtship_gate_20260709.json",
+  "targetIds": [
+    "baoyu",
+    "xiren",
+    "qingwen",
+    "sheyue"
+  ],
+  "targetNames": [
+    "宝玉",
+    "袭人",
+    "晴雯",
+    "麝月"
+  ],
+  "startDay": 1,
+  "endBeforeDay": 8,
+  "seed": 70002,
+  "rows": [
+    {
+      "time": "第01日 08:01",
+      "day": 1,
+      "hour": 8,
+      "minute": 1,
+      "type": "queue:add",
+      "person": "袭人",
+      "action": "行动入队：前往怡红院",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:01",
+      "day": 1,
+      "hour": 8,
+      "minute": 1,
+      "type": "ai:decision",
+      "person": "袭人",
+      "action": "AI选择：跟随宝玉 [quest-follow:1:baoyu] provider=quest routine=followRotation:follow:baoyu:xiren:day_follow:1:2002",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:01",
+      "day": 1,
+      "hour": 8,
+      "minute": 1,
+      "type": "queue:add",
+      "person": "麝月",
+      "action": "行动入队：🛁 在浴盆",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:01",
+      "day": 1,
+      "hour": 8,
+      "minute": 1,
+      "type": "ai:decision",
+      "person": "麝月",
+      "action": "AI选择：浴盆·使用浴盆 [furn:4005:default_use] provider=furniture routine=morning_hygiene",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:03",
+      "day": 1,
+      "hour": 8,
+      "minute": 3,
+      "type": "quest:started",
+      "person": "袭人",
+      "action": "开始任务：晨起理妆",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:03",
+      "day": 1,
+      "hour": 8,
+      "minute": 3,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 1/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:03",
+      "day": 1,
+      "hour": 8,
+      "minute": 3,
+      "type": "ai:routine_completed",
+      "person": "宝玉",
+      "action": "作息完成：晨起梳洗 via=wardrobe",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:03",
+      "day": 1,
+      "hour": 8,
+      "minute": 3,
+      "type": "furniture:use_started",
+      "person": "宝玉",
+      "action": "开始用家具：梳洗妆台 / tidy_dress",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:04",
+      "day": 1,
+      "hour": 8,
+      "minute": 4,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 2/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:04",
+      "day": 1,
+      "hour": 8,
+      "minute": 4,
+      "type": "queue:add",
+      "person": "宝玉",
+      "action": "行动入队：🔥 备膳",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:04",
+      "day": 1,
+      "hour": 8,
+      "minute": 4,
+      "type": "ai:decision",
+      "person": "宝玉",
+      "action": "AI选择：厨房灶台·备膳 [furn:4009:prepare_meal] provider=furniture routine=breakfast",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:05",
+      "day": 1,
+      "hour": 8,
+      "minute": 5,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 3/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:06",
+      "day": 1,
+      "hour": 8,
+      "minute": 6,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 4/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:07",
+      "day": 1,
+      "hour": 8,
+      "minute": 7,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 5/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:08",
+      "day": 1,
+      "hour": 8,
+      "minute": 8,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 6/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:08",
+      "day": 1,
+      "hour": 8,
+      "minute": 8,
+      "type": "ai:routine_completed",
+      "person": "麝月",
+      "action": "作息完成：晨起梳洗 via=bath",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:08",
+      "day": 1,
+      "hour": 8,
+      "minute": 8,
+      "type": "furniture:use_started",
+      "person": "麝月",
+      "action": "开始用家具：浴盆 / default_use",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:09",
+      "day": 1,
+      "hour": 8,
+      "minute": 9,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 7/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:13",
+      "day": 1,
+      "hour": 8,
+      "minute": 13,
+      "type": "furniture:complete",
+      "person": "麝月",
+      "action": "完成用家具：浴盆 / default_use",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "queue:add",
+      "person": "袭人",
+      "action": "行动入队：前往怡红院",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "ai:decision",
+      "person": "袭人",
+      "action": "AI选择：寻宝玉 [relseek:baoyu] provider=relation routine=followRotation:follow:baoyu:xiren:day_follow:1:2002",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "queue:add",
+      "person": "麝月",
+      "action": "行动入队：🍚 独自用膳",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "ai:decision",
+      "person": "麝月",
+      "action": "AI选择：饭桌·独自用膳 [furn:4006:eat_alone] provider=furniture routine=breakfast",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "ai:routine_completed",
+      "person": "晴雯",
+      "action": "作息完成：早餐 via=meal",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "furniture:use_started",
+      "person": "晴雯",
+      "action": "开始用家具：饭桌 / complain_food",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:16",
+      "day": 1,
+      "hour": 8,
+      "minute": 16,
+      "type": "queue:add",
+      "person": "袭人",
+      "action": "行动入队：前往怡红院",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:16",
+      "day": 1,
+      "hour": 8,
+      "minute": 16,
+      "type": "ai:decision",
+      "person": "袭人",
+      "action": "AI选择：跟随宝玉 [quest-follow:1:baoyu] provider=quest routine=followRotation:follow:baoyu:xiren:day_follow:1:2002",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:16",
+      "day": 1,
+      "hour": 8,
+      "minute": 16,
+      "type": "ai:routine_completed",
+      "person": "宝玉",
+      "action": "作息完成：早餐 via=kitchen",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:16",
+      "day": 1,
+      "hour": 8,
+      "minute": 16,
+      "type": "furniture:use_started",
+      "person": "宝玉",
+      "action": "开始用家具：厨房灶台 / prepare_meal",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:17",
+      "day": 1,
+      "hour": 8,
+      "minute": 17,
+      "type": "furniture:complete",
+      "person": "晴雯",
+      "action": "完成用家具：饭桌 / complain_food",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:18",
+      "day": 1,
+      "hour": 8,
+      "minute": 18,
+      "type": "queue:add",
+      "person": "袭人",
+      "action": "行动入队：前往怡红院",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:18",
+      "day": 1,
+      "hour": 8,
+      "minute": 18,
+      "type": "ai:decision",
+      "person": "袭人",
+      "action": "AI选择：跟随宝玉 [quest-follow:1:baoyu] provider=quest routine=followRotation:follow:baoyu:xiren:day_follow:1:2002",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:21",
+      "day": 1,
+      "hour": 8,
+      "minute": 21,
+      "type": "furniture:complete",
+      "person": "宝玉",
+      "action": "完成用家具：厨房灶台 / prepare_meal",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:23",
+      "day": 1,
+      "hour": 8,
+      "minute": 23,
+      "type": "quest:started",
+      "person": "袭人",
+      "action": "开始任务：晨起理妆",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:23",
+      "day": 1,
+      "hour": 8,
+      "minute": 23,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 8/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:23",
+      "day": 1,
+      "hour": 8,
+      "minute": 23,
+      "type": "queue:add",
+      "person": "袭人",
+      "action": "行动入队：前往怡红院",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:23",
+      "day": 1,
+      "hour": 8,
+      "minute": 23,
+      "type": "ai:decision",
+      "person": "袭人",
+      "action": "AI选择：跟随宝玉 [quest-follow:1:baoyu] provider=quest routine=followRotation:follow:baoyu:xiren:day_follow:1:2002",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:23",
+      "day": 1,
+      "hour": 8,
+      "minute": 23,
+      "type": "ai:routine_completed",
+      "person": "麝月",
+      "action": "作息完成：早餐 via=meal",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:23",
+      "day": 1,
+      "hour": 8,
+      "minute": 23,
+      "type": "furniture:use_started",
+      "person": "麝月",
+      "action": "开始用家具：饭桌 / eat_alone",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:24",
+      "day": 1,
+      "hour": 8,
+      "minute": 24,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 9/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:25",
+      "day": 1,
+      "hour": 8,
+      "minute": 25,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 10/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:26",
+      "day": 1,
+      "hour": 8,
+      "minute": 26,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 11/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:27",
+      "day": 1,
+      "hour": 8,
+      "minute": 27,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 12/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:27",
+      "day": 1,
+      "hour": 8,
+      "minute": 27,
+      "type": "furniture:complete",
+      "person": "麝月",
+      "action": "完成用家具：饭桌 / eat_alone",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:28",
+      "day": 1,
+      "hour": 8,
+      "minute": 28,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 13/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:29",
+      "day": 1,
+      "hour": 8,
+      "minute": 29,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 14/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:30",
+      "day": 1,
+      "hour": 8,
+      "minute": 30,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 15/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:31",
+      "day": 1,
+      "hour": 8,
+      "minute": 31,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 16/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:32",
+      "day": 1,
+      "hour": 8,
+      "minute": 32,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 17/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:33",
+      "day": 1,
+      "hour": 8,
+      "minute": 33,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 18/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:34",
+      "day": 1,
+      "hour": 8,
+      "minute": 34,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 19/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:35",
+      "day": 1,
+      "hour": 8,
+      "minute": 35,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 20/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:35",
+      "day": 1,
+      "hour": 8,
+      "minute": 35,
+      "type": "quest:completed",
+      "person": "袭人",
+      "action": "完成任务：晨起理妆",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:45",
+      "day": 1,
+      "hour": 8,
+      "minute": 45,
+      "type": "queue:add",
+      "person": "宝玉",
+      "action": "行动入队：💬 调侃·晴雯",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:45",
+      "day": 1,
+      "hour": 8,
+      "minute": 45,
+      "type": "ai:decision",
+      "person": "宝玉",
+      "action": "AI选择：调侃·晴雯 [int:302:qingwen] provider=social",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:50",
+      "day": 1,
+      "hour": 8,
+      "minute": 50,
+      "type": "ai:daily_social_count",
+      "person": "宝玉",
+      "action": "AI每日主动社交计数：晴雯 1/10",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:50",
+      "day": 1,
+      "hour": 8,
+      "minute": 50,
+      "type": "interaction:started",
+      "person": "宝玉",
+      "action": "开始互动：与晴雯「调侃」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:50",
+      "day": 1,
+      "hour": 8,
+      "minute": 50,
+      "type": "interaction:started",
+      "person": "晴雯",
+      "action": "被宝玉发起互动：「调侃」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:57",
+      "day": 1,
+      "hour": 8,
+      "minute": 57,
+      "type": "ai:social_target_cooldown",
+      "person": "宝玉",
+      "action": "AI目标频控：晴雯 75分钟",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:57",
+      "day": 1,
+      "hour": 8,
+      "minute": 57,
+      "type": "interaction:complete",
+      "person": "宝玉",
+      "action": "完成互动：与晴雯「调侃」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:57",
+      "day": 1,
+      "hour": 8,
+      "minute": 57,
+      "type": "interaction:complete",
+      "person": "晴雯",
+      "action": "被宝玉完成互动：「调侃」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "quest:issued",
+      "person": "袭人",
+      "action": "任务下发：备膳",
+      "issuer": "宝玉"
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "quest:issued",
+      "person": "宝玉",
+      "action": "下发任务给袭人：备膳",
+      "issuer": "宝玉"
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "quest:accepted",
+      "person": "袭人",
+      "action": "接受任务：备膳",
+      "issuer": "宝玉"
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "quest:accepted",
+      "person": "宝玉",
+      "action": "接受任务：备膳",
+      "issuer": "宝玉"
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "queue:add",
+      "person": "袭人",
+      "action": "行动入队：🤝 按摩·宝玉",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "ai:decision",
+      "person": "袭人",
+      "action": "AI选择：按摩·宝玉 [int:704:baoyu] provider=social",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "queue:add",
+      "person": "麝月",
+      "action": "行动入队：🍶 在酒案",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "ai:decision",
+      "person": "麝月",
+      "action": "AI选择：酒案·使用酒案 [furn:4004:default_use] provider=furniture routine=skill-routine_study-18",
+      "issuer": ""
+    }
+  ],
+  "perPersonDay": {
+    "1|袭人": {
+      "total": 37,
+      "tasks": 25,
+      "furniture": 0,
+      "interactions": 0,
+      "blocked": 0,
+      "decisions": 6,
+      "samples": [
+        " 08:01 行动入队：前往怡红院",
+        " 08:01 AI选择：跟随宝玉 [quest-follow:1:baoyu] provider=quest routine=followRotation:follow:baoyu:xiren:day_follow:1:2002",
+        " 08:03 开始任务：晨起理妆",
+        " 08:15 行动入队：前往怡红院",
+        " 08:15 AI选择：寻宝玉 [relseek:baoyu] provider=relation routine=followRotation:follow:baoyu:xiren:day_follow:1:2002"
+      ]
+    },
+    "1|麝月": {
+      "total": 12,
+      "tasks": 0,
+      "furniture": 4,
+      "interactions": 0,
+      "blocked": 0,
+      "decisions": 3,
+      "samples": [
+        " 08:01 行动入队：🛁 在浴盆",
+        " 08:01 AI选择：浴盆·使用浴盆 [furn:4005:default_use] provider=furniture routine=morning_hygiene",
+        " 08:08 作息完成：晨起梳洗 via=bath",
+        " 08:08 开始用家具：浴盆 / default_use",
+        " 08:13 完成用家具：浴盆 / default_use"
+      ]
+    },
+    "1|宝玉": {
+      "total": 15,
+      "tasks": 2,
+      "furniture": 3,
+      "interactions": 2,
+      "blocked": 0,
+      "decisions": 2,
+      "samples": [
+        " 08:03 作息完成：晨起梳洗 via=wardrobe",
+        " 08:03 开始用家具：梳洗妆台 / tidy_dress",
+        " 08:04 行动入队：🔥 备膳",
+        " 08:04 AI选择：厨房灶台·备膳 [furn:4009:prepare_meal] provider=furniture routine=breakfast",
+        " 08:16 作息完成：早餐 via=kitchen"
+      ]
+    },
+    "1|晴雯": {
+      "total": 5,
+      "tasks": 0,
+      "furniture": 2,
+      "interactions": 2,
+      "blocked": 0,
+      "decisions": 0,
+      "samples": [
+        " 08:15 作息完成：早餐 via=meal",
+        " 08:15 开始用家具：饭桌 / complain_food",
+        " 08:17 完成用家具：饭桌 / complain_food",
+        " 08:50 被宝玉发起互动：「调侃」",
+        " 08:57 被宝玉完成互动：「调侃」"
+      ]
+    }
+  },
+  "actionCounts": {
+    "袭人|行动入队：前往怡红院": 5,
+    "袭人|AI选择：跟随宝玉 [quest-follow:1:baoyu] provider=quest routine=followRotation:follow:baoyu:xiren:day_follow:1:2002": 4,
+    "麝月|行动入队：🛁 在浴盆": 1,
+    "麝月|AI选择：浴盆·使用浴盆 [furn:4005:default_use] provider=furniture routine=morning_hygiene": 1,
+    "袭人|开始任务：晨起理妆": 2,
+    "袭人|任务进度：晨起理妆 1/20": 1,
+    "宝玉|作息完成：晨起梳洗 via=wardrobe": 1,
+    "宝玉|开始用家具：梳洗妆台 / tidy_dress": 1,
+    "袭人|任务进度：晨起理妆 2/20": 1,
+    "宝玉|行动入队：🔥 备膳": 1,
+    "宝玉|AI选择：厨房灶台·备膳 [furn:4009:prepare_meal] provider=furniture routine=breakfast": 1,
+    "袭人|任务进度：晨起理妆 3/20": 1,
+    "袭人|任务进度：晨起理妆 4/20": 1,
+    "袭人|任务进度：晨起理妆 5/20": 1,
+    "袭人|任务进度：晨起理妆 6/20": 1,
+    "麝月|作息完成：晨起梳洗 via=bath": 1,
+    "麝月|开始用家具：浴盆 / default_use": 1,
+    "袭人|任务进度：晨起理妆 7/20": 1,
+    "麝月|完成用家具：浴盆 / default_use": 1,
+    "袭人|AI选择：寻宝玉 [relseek:baoyu] provider=relation routine=followRotation:follow:baoyu:xiren:day_follow:1:2002": 1,
+    "麝月|行动入队：🍚 独自用膳": 1,
+    "麝月|AI选择：饭桌·独自用膳 [furn:4006:eat_alone] provider=furniture routine=breakfast": 1,
+    "晴雯|作息完成：早餐 via=meal": 1,
+    "晴雯|开始用家具：饭桌 / complain_food": 1,
+    "宝玉|作息完成：早餐 via=kitchen": 1,
+    "宝玉|开始用家具：厨房灶台 / prepare_meal": 1,
+    "晴雯|完成用家具：饭桌 / complain_food": 1,
+    "宝玉|完成用家具：厨房灶台 / prepare_meal": 1,
+    "袭人|任务进度：晨起理妆 8/20": 1,
+    "麝月|作息完成：早餐 via=meal": 1,
+    "麝月|开始用家具：饭桌 / eat_alone": 1,
+    "袭人|任务进度：晨起理妆 9/20": 1,
+    "袭人|任务进度：晨起理妆 10/20": 1,
+    "袭人|任务进度：晨起理妆 11/20": 1,
+    "袭人|任务进度：晨起理妆 12/20": 1,
+    "麝月|完成用家具：饭桌 / eat_alone": 1,
+    "袭人|任务进度：晨起理妆 13/20": 1,
+    "袭人|任务进度：晨起理妆 14/20": 1,
+    "袭人|任务进度：晨起理妆 15/20": 1,
+    "袭人|任务进度：晨起理妆 16/20": 1,
+    "袭人|任务进度：晨起理妆 17/20": 1,
+    "袭人|任务进度：晨起理妆 18/20": 1,
+    "袭人|任务进度：晨起理妆 19/20": 1,
+    "袭人|任务进度：晨起理妆 20/20": 1,
+    "袭人|完成任务：晨起理妆": 1,
+    "宝玉|行动入队：💬 调侃·晴雯": 1,
+    "宝玉|AI选择：调侃·晴雯 [int:302:qingwen] provider=social": 1,
+    "宝玉|AI每日主动社交计数：晴雯 1/10": 1,
+    "宝玉|开始互动：与晴雯「调侃」": 1,
+    "晴雯|被宝玉发起互动：「调侃」": 1,
+    "宝玉|AI目标频控：晴雯 75分钟": 1,
+    "宝玉|完成互动：与晴雯「调侃」": 1,
+    "晴雯|被宝玉完成互动：「调侃」": 1,
+    "袭人|任务下发：备膳": 1,
+    "宝玉|下发任务给袭人：备膳": 1,
+    "袭人|接受任务：备膳": 1,
+    "宝玉|接受任务：备膳": 1,
+    "袭人|行动入队：🤝 按摩·宝玉": 1,
+    "袭人|AI选择：按摩·宝玉 [int:704:baoyu] provider=social": 1,
+    "麝月|行动入队：🍶 在酒案": 1,
+    "麝月|AI选择：酒案·使用酒案 [furn:4004:default_use] provider=furniture routine=skill-routine_study-18": 1
+  },
+  "rawCounts": {
+    "quest:issued": 2,
+    "quest:accepted": 2,
+    "quest:blocked": 5,
+    "servant:follow_state": 4,
+    "log:add": 193,
+    "state:add": 50,
+    "character:effect": 39,
+    "time:tick": 61,
+    "queue:add": 51,
+    "ai:decision": 51,
+    "ai:routine_completed": 25,
+    "furniture:use_started": 29,
+    "ai:state": 92,
+    "observer:triggered": 2,
+    "observer:executed": 2,
+    "ai:daily_social_count": 9,
+    "interaction:started": 9,
+    "scene:enter:allowed": 20,
+    "scene:entered": 20,
+    "quest:candidate": 44,
+    "need:band_changed": 49,
+    "quest:started": 3,
+    "quest:progress": 22,
+    "furniture:complete": 24,
+    "furniture:released": 29,
+    "furniture:reaction": 9,
+    "relation:axis_change": 21,
+    "relation:change": 5,
+    "interaction:effects": 8,
+    "ai:social_target_cooldown": 8,
+    "interaction:complete": 8,
+    "state:remove": 23,
+    "quest:completed": 2,
+    "reputation_domain:change": 11,
+    "reputation:change": 3,
+    "need:combination_triggered": 3,
+    "emotion:resisted": 5,
+    "lifePath:storyNode": 1,
+    "emotion:contagion": 2,
+    "trait:competition": 1,
+    "family:fund_changed": 1,
+    "economy:quest_cost": 1,
+    "time:hour": 1
+  },
+  "problems": [
+    "第1日 袭人 没有记录到社交完成事件，日常仍偏“自己找家具/任务”。",
+    "第1日 麝月 没有记录到社交完成事件，日常仍偏“自己找家具/任务”。"
+  ],
+  "repeated": [],
+  "finalChars": [
+    {
+      "id": "baoyu",
+      "name": "贾宝玉",
+      "short": "宝玉",
+      "sceneId": 4,
+      "statusText": "闲庭漫步",
+      "actionType": "",
+      "queue": [],
+      "needs": {
+        "hunger": 97.47279999999988,
+        "energy": 57.74084800000002,
+        "fun": 60.517999999999866,
+        "hygiene": 69.47640000000001,
+        "social": 100,
+        "mood": 81.08040868174137
+      },
+      "aiState": "IDLE"
+    },
+    {
+      "id": "xiren",
+      "name": "花袭人",
+      "short": "袭人",
+      "sceneId": 4,
+      "statusText": "去找宝玉·按摩",
+      "actionType": "move",
+      "queue": [
+        "🤝 按摩·宝玉"
+      ],
+      "needs": {
+        "hunger": 69.46632000000025,
+        "energy": 66.63864000000032,
+        "fun": 48.47425000000008,
+        "hygiene": 79.6132500000002,
+        "social": 85,
+        "mood": 80.74500000000023
+      },
+      "aiState": "EXECUTING"
+    },
+    {
+      "id": "qingwen",
+      "name": "晴雯",
+      "short": "晴雯",
+      "sceneId": 4,
+      "statusText": "让开些",
+      "actionType": "move",
+      "queue": [],
+      "needs": {
+        "hunger": 78.80707999999981,
+        "energy": 55.60682320000004,
+        "fun": 68.02500000000002,
+        "hygiene": 71.50912500000001,
+        "social": 100,
+        "mood": 81.07040868174138
+      },
+      "aiState": "IDLE"
+    },
+    {
+      "id": "sheyue",
+      "name": "麝月",
+      "short": "麝月",
+      "sceneId": 4,
+      "statusText": "行走中",
+      "actionType": "move",
+      "queue": [
+        "🍶 在酒案"
+      ],
+      "needs": {
+        "hunger": 98.52142750000006,
+        "energy": 64.55548000000027,
+        "fun": 47.15400000000008,
+        "hygiene": 109.68453333333345,
+        "social": 85,
+        "mood": 77.82012499999985
+      },
+      "aiState": "EXECUTING"
+    }
+  ],
+  "finalFamilies": [
+    {
+      "id": 1,
+      "name": "怡红院",
+      "fund": 520,
+      "memberIds": [
+        "baoyu",
+        "xiren",
+        "qingwen",
+        "sheyue"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "潇湘馆",
+      "fund": 280,
+      "memberIds": [
+        "daiyu",
+        "zijuan",
+        "xueyan"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "蘅芜苑",
+      "fund": 380,
+      "memberIds": [
+        "baochai",
+        "yinger"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "荣禧堂",
+      "fund": 1200,
+      "memberIds": [
+        "jiazheng",
+        "wangfuren",
+        "jiamu",
+        "jiashe",
+        "xiangyun"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "秋爽斋",
+      "fund": 320,
+      "memberIds": [
+        "tanchun"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "宁国府",
+      "fund": 680,
+      "memberIds": [
+        "jiazhen",
+        "jiarong"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "协理院",
+      "fund": 450,
+      "memberIds": [
+        "xifeng",
+        "jialian",
+        "laiwang"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "刘家庄",
+      "fund": 40,
+      "memberIds": [
+        "liulaolao"
+      ]
+    }
+  ]
+}

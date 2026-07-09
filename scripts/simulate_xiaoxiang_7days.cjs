@@ -18,9 +18,11 @@ const TARGET_IDS = (process.env.SIM_TARGET_IDS || 'daiyu,zijuan,xueyan')
   .map(s => s.trim())
   .filter(Boolean);
 const TARGET_SET = new Set(TARGET_IDS);
-const SEED = 61617;
-const STEP_SEC = 1;
+const SEED = Number(process.env.SIM_SEED || 61617);
+const STEP_SEC = Number(process.env.SIM_STEP_SEC || 1);
 const DAYS = Number(process.env.SIM_DAYS || 7);
+const GAME_MINUTES_LIMIT = Number(process.env.SIM_GAME_MINUTES || 0);
+const MAX_STEPS = Number(process.env.SIM_MAX_STEPS || 0);
 const PROGRESS_EVERY_GAME_MIN = Number(process.env.SIM_PROGRESS_EVERY_GAME_MIN || 720);
 
 function makeRandom(seed) {
@@ -139,8 +141,28 @@ class ImageStub {
 const seededMath = Object.create(Math);
 seededMath.random = makeRandom(SEED);
 
+const QUIET = process.env.SIM_QUIET !== '0';
+const simConsole = QUIET
+  ? {
+      error: (...args) => console.error(...args),
+      info: (...args) => console.info(...args),
+      log(...args) {
+        if (String(args[0] || '').startsWith('[interaction-risk]')) return;
+        console.log(...args);
+      },
+      warn(...args) {
+        if (String(args[0] || '').startsWith('[interaction-risk]')) return;
+        console.warn(...args);
+      },
+      debug(...args) {
+        if (String(args[0] || '').startsWith('[interaction-risk]')) return;
+        console.debug(...args);
+      },
+    }
+  : console;
+
 const context = {
-  console,
+  console: simConsole,
   Math: seededMath,
   JSON,
   Date,
@@ -294,6 +316,22 @@ evalInContext(`
   FurnitureReactionSystem?.init?.();
   BehaviorTelemetry?.init?.();
   NeedStateSystem?.init?.();
+  if (${JSON.stringify(process.env.SIM_DISABLE_RISK === '1')}) {
+    const origEvaluate = InteractionSocialSystem?.evaluate;
+    if (origEvaluate) {
+      InteractionSocialSystem.evaluate = function(initiator, target, tpl) {
+        const res = origEvaluate(initiator, target, tpl) || {};
+        return {
+          ...res,
+          risky: false,
+          riskHint: '',
+          successRate: 1,
+          riskMeta: { ...(res.riskMeta || {}), isRisky: false, forbidden: false, successRate: 1, riskHint: '' },
+        };
+      };
+    }
+    if (InteractionSocialSystem?.applyRiskOutcome) InteractionSocialSystem.applyRiskOutcome = () => true;
+  }
   LifePathSystem?.tryIssueStoryQuestsAll?.();
   selectedIdx = -1;
   resumeCharAI = function(c) {
@@ -510,7 +548,9 @@ const endBeforeDay = startDay + DAYS;
 const startHour = evalInContext('gameHour');
 const startMinute = evalInContext('gameMinute');
 const startGameAbsMin = startDay * 1440 + startHour * 60 + startMinute;
-const endGameAbsMin = endBeforeDay * 1440;
+const endGameAbsMin = GAME_MINUTES_LIMIT > 0
+  ? startGameAbsMin + GAME_MINUTES_LIMIT
+  : endBeforeDay * 1440;
 const totalGameMin = Math.max(1, endGameAbsMin - startGameAbsMin);
 const startedAtMs = Date.now();
 let lastProgressGameMin = -Infinity;
@@ -532,7 +572,10 @@ function printProgress(force = false) {
 }
 
 context.__endBeforeDay = endBeforeDay;
+context.__endGameAbsMin = endGameAbsMin;
 context.__stepSec = STEP_SEC;
+context.__maxSteps = MAX_STEPS;
+context.__steps = 0;
 context.__hostAfterStep = () => {
   perfNowMs += STEP_SEC * 1000;
   runTimers();
@@ -540,7 +583,11 @@ context.__hostAfterStep = () => {
 };
 printProgress(true);
 evalInContext(`
-  while (gameDay < window.__endBeforeDay) {
+  while ((gameDay * 1440 + gameHour * 60 + gameMinute) < window.__endGameAbsMin) {
+    if (window.__maxSteps > 0 && window.__steps++ >= window.__maxSteps) {
+      EventBus.emit('sim:max_steps', { steps: window.__steps, reason: 'max_steps' });
+      break;
+    }
     window.__hostAfterStep();
     tickGameTime(window.__stepSec);
     CHARS.forEach(c => {

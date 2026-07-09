@@ -1,0 +1,865 @@
+{
+  "campaignId": "daiyu_first_person_original_flavor",
+  "title": "林黛玉入府与玉事三折",
+  "version": "0.1.0",
+  "perspective": {
+    "playerCharacterId": "daiyu",
+    "narrationPerson": "second_person",
+    "tone": "原书旁白近似，少白话，少现代心理术语",
+    "freedom": "limited_branching",
+    "canonPolicy": "不改人物本性，不改大事件，只允许误会程度、旁人介入早晚、关系数值和小结局轻微改变"
+  },
+  "sourceMaterial": {
+    "conversationScenes": "/Users/bytedance/Desktop/myCursor/game/hongloumeng_original/selected_chapters_conversations/all_conversation_scenes.json",
+    "interactionPatterns": "/Users/bytedance/Desktop/myCursor/game/hongloumeng_original/selected_chapters_conversations/interaction_patterns.json",
+    "chapters": [
+      "第三回 林黛玉进贾府",
+      "第十七回 大观园题额后荷包香袋",
+      "第二十九回 清虚观后白认得你"
+    ]
+  },
+  "runtimeSupport": {
+    "status": "design_asset",
+    "note": "本文件尚未接入现有 JS 运行时。接入时需要 story node / choice effect / skill check / relationship event 解释器。",
+    "compatibleConcepts": [
+      "relations.affection/trust/friendship/submission",
+      "charSpecialtyConfig.profiles.daiyu",
+      "jiafu-order skillDefs and personSkillConfig",
+      "quest/story node reward shape"
+    ]
+  },
+  "playerInitialState": {
+    "skills": {
+      "ritual": 90,
+      "literacy": 100,
+      "insight": 95,
+      "eloquence": 80,
+      "subtlety": 70,
+      "adaptability": 65,
+      "poetry": 2,
+      "talk": 2,
+      "move": 1
+    },
+    "traits": ["mingan", "duochou", "gupi", "gengzhi", "xijing", "shaochi"],
+    "specialties": ["solitude_poetry", "wind_tear", "frail"],
+    "traitState": {
+      "daiyu_composure": 1,
+      "daiyu_wounded_pride": 0,
+      "daiyu_hidden_affection": 1,
+      "daiyu_fatigue": 1,
+      "jade_conflict_heat": 0,
+      "baoyu_reassurance": 0,
+      "servant_mediation": 0
+    },
+    "relations": {
+      "jiamu": { "affection": 58, "trust": 46, "friendship": 20 },
+      "baoyu": { "affection": 30, "trust": 18, "friendship": 22 },
+      "xifeng": { "affection": 12, "trust": 8, "friendship": 5 },
+      "zijuan": { "affection": 50, "trust": 62, "friendship": 55 },
+      "xiren": { "affection": 16, "trust": 10, "friendship": 8 },
+      "baochai": { "affection": 10, "trust": 18, "friendship": 12 }
+    },
+    "globalScores": {
+      "order": 50,
+      "morale": 50,
+      "dignity": 50,
+      "affinity": 50
+    }
+  },
+  "effectTypes": {
+    "axis": "关系轴变化，targetId + axis + delta",
+    "traitState": "素材层临时性格/情绪变量变化",
+    "skillXp": "技能经验或关卡内技能倾向变化",
+    "globalScore": "法度、人心、体面、情分变化",
+    "storyFlag": "分支标记",
+    "unlockNode": "解锁后续节点",
+    "npcLine": "旁人即时发言或气泡"
+  },
+  "chapters": [
+    {
+      "chapterId": "daiyu_ch01_enter_jiafu",
+      "title": "步步留心",
+      "sourceSceneIds": [
+        "ch003_scene_entrance_etiquette",
+        "ch003_scene_xifeng_entrance",
+        "ch003_scene_baodai_first_meeting",
+        "ch003_scene_xiren_comforts_daiyu"
+      ],
+      "objective": "在荣国府第一次亮相，完成拜见、识人、安顿。",
+      "entryNode": "enter_01_gate",
+      "nodes": [
+        {
+          "nodeId": "enter_01_gate",
+          "title": "西角门",
+          "scene": "荣国府门前",
+          "narration": "轿帘微动，你只从纱窗里瞧见街市繁华、门第森严。母亲旧日的话又回到耳边：外祖母家与别家不同，凡事不可多说，不可多行。",
+          "choices": [
+            {
+              "choiceId": "observe_rules",
+              "label": "隔帘细看门第与仆从规矩",
+              "requires": [{ "type": "skill", "id": "insight", "gte": 70 }],
+              "text": "先看清人如何行走、何处下轿，再随婆子入内。",
+              "effects": [
+                { "type": "traitState", "id": "daiyu_composure", "delta": 1 },
+                { "type": "skillXp", "skill": "insight", "delta": 1 },
+                { "type": "globalScore", "id": "dignity", "delta": 1 }
+              ],
+              "next": "enter_02_jiamu"
+            },
+            {
+              "choiceId": "ask_mama",
+              "label": "低声问王嬷嬷该如何行礼",
+              "requires": [{ "type": "relation", "targetId": "zijuan", "axis": "trust", "gte": 0 }],
+              "text": "你把话压得极低，只问一句便止。",
+              "effects": [
+                { "type": "axis", "targetId": "zijuan", "axis": "trust", "delta": 2 },
+                { "type": "traitState", "id": "daiyu_composure", "delta": 1 }
+              ],
+              "next": "enter_02_jiamu"
+            },
+            {
+              "choiceId": "hold_silence",
+              "label": "一概不问，只低头随行",
+              "requires": [{ "type": "trait", "id": "xijing" }],
+              "text": "你宁可少知道些，也不愿此刻显得张皇。",
+              "effects": [
+                { "type": "traitState", "id": "daiyu_wounded_pride", "delta": 1 },
+                { "type": "globalScore", "id": "dignity", "delta": 1 }
+              ],
+              "next": "enter_02_jiamu"
+            }
+          ]
+        },
+        {
+          "nodeId": "enter_02_jiamu",
+          "title": "心肝儿肉",
+          "scene": "贾母正房",
+          "narration": "你方要拜下去，鬓发如银的老人已把你搂入怀中。满屋人的眼泪一时都落下来。礼数在此刻让了亲情一步。",
+          "choices": [
+            {
+              "choiceId": "cry_and_bow",
+              "label": "先随外祖母痛哭，稍定后再补礼",
+              "requires": [{ "type": "trait", "id": "mingan" }],
+              "effects": [
+                { "type": "axis", "targetId": "jiamu", "axis": "affection", "delta": 6 },
+                { "type": "axis", "targetId": "jiamu", "axis": "trust", "delta": 2 },
+                { "type": "traitState", "id": "daiyu_wounded_pride", "delta": -1 },
+                { "type": "npcLine", "speaker": "贾母", "text": "好孩子，只管在我这里。" }
+              ],
+              "next": "enter_03_xifeng"
+            },
+            {
+              "choiceId": "complete_ritual_first",
+              "label": "忍泪先拜见诸位长辈",
+              "requires": [{ "type": "skill", "id": "ritual", "gte": 85 }],
+              "effects": [
+                { "type": "globalScore", "id": "order", "delta": 2 },
+                { "type": "globalScore", "id": "dignity", "delta": 2 },
+                { "type": "axis", "targetId": "jiamu", "axis": "affection", "delta": 3 }
+              ],
+              "next": "enter_03_xifeng"
+            },
+            {
+              "choiceId": "suppress_too_much",
+              "label": "强忍不哭，怕失了体面",
+              "requires": [{ "type": "trait", "id": "gupi" }],
+              "effects": [
+                { "type": "traitState", "id": "daiyu_composure", "delta": 1 },
+                { "type": "traitState", "id": "daiyu_wounded_pride", "delta": 1 },
+                { "type": "axis", "targetId": "jiamu", "axis": "affection", "delta": 1 }
+              ],
+              "next": "enter_03_xifeng"
+            }
+          ]
+        },
+        {
+          "nodeId": "enter_03_xifeng",
+          "title": "凤辣子",
+          "scene": "贾母正房",
+          "narration": "后院笑语先到。众人敛声屏气，你却听见一个丽人拥着丫鬟媳妇进来，满身彩绣辉煌，未启口已有三分声势。",
+          "choices": [
+            {
+              "choiceId": "receive_warmly",
+              "label": "陪笑见礼，顺着众姊妹称琏二嫂子",
+              "requires": [{ "type": "skill", "id": "ritual", "gte": 70 }],
+              "effects": [
+                { "type": "axis", "targetId": "xifeng", "axis": "affection", "delta": 4 },
+                { "type": "axis", "targetId": "jiamu", "axis": "trust", "delta": 1 },
+                { "type": "globalScore", "id": "dignity", "delta": 1 }
+              ],
+              "next": "enter_04_baoyu"
+            },
+            {
+              "choiceId": "read_the_room",
+              "label": "看她如何奉承外祖母，再少言应对",
+              "requires": [{ "type": "skill", "id": "insight", "gte": 85 }],
+              "effects": [
+                { "type": "skillXp", "skill": "insight", "delta": 2 },
+                { "type": "traitState", "id": "daiyu_composure", "delta": 1 },
+                { "type": "storyFlag", "id": "knows_xifeng_controls_room", "value": true }
+              ],
+              "next": "enter_04_baoyu"
+            },
+            {
+              "choiceId": "answer_plainly",
+              "label": "只按礼答话，不接她的热络",
+              "requires": [{ "type": "trait", "id": "gupi" }],
+              "effects": [
+                { "type": "axis", "targetId": "xifeng", "axis": "affection", "delta": -1 },
+                { "type": "traitState", "id": "daiyu_composure", "delta": 1 },
+                { "type": "npcLine", "speaker": "王熙凤", "text": "林妹妹果然是个仔细人。" }
+              ],
+              "next": "enter_04_baoyu"
+            }
+          ]
+        },
+        {
+          "nodeId": "enter_04_baoyu",
+          "title": "这个妹妹我曾见过",
+          "scene": "贾母正房",
+          "narration": "外面脚步响，有人报宝玉来了。你本以为是个惫懒人，抬眼却见一位青年公子，眉眼之间竟似旧识。",
+          "choices": [
+            {
+              "choiceId": "admit_eye_familiarity",
+              "label": "心中承认眼熟，口中仍守礼",
+              "requires": [{ "type": "skill", "id": "subtlety", "gte": 60 }],
+              "effects": [
+                { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 5 },
+                { "type": "traitState", "id": "daiyu_hidden_affection", "delta": 1 },
+                { "type": "storyFlag", "id": "baodai_first_resonance", "value": true }
+              ],
+              "next": "enter_05_jade_question"
+            },
+            {
+              "choiceId": "answer_books_modestly",
+              "label": "问到读书，只说认得几个字",
+              "requires": [{ "type": "skill", "id": "literacy", "gte": 80 }],
+              "effects": [
+                { "type": "globalScore", "id": "dignity", "delta": 1 },
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 1 },
+                { "type": "traitState", "id": "daiyu_composure", "delta": 1 }
+              ],
+              "next": "enter_05_jade_question"
+            },
+            {
+              "choiceId": "accept_pinyin_name",
+              "label": "听他取字颦颦，只含笑不驳",
+              "requires": [{ "type": "skill", "id": "eloquence", "gte": 70 }],
+              "effects": [
+                { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 4 },
+                { "type": "axis", "targetId": "baoyu", "axis": "friendship", "delta": 2 },
+                { "type": "npcLine", "speaker": "探春", "text": "只怕又是杜撰。" }
+              ],
+              "next": "enter_05_jade_question"
+            }
+          ]
+        },
+        {
+          "nodeId": "enter_05_jade_question",
+          "title": "可有玉没有",
+          "scene": "贾母正房",
+          "narration": "他忽然问你可有玉没有。你心下忖度，因他有玉，所以才问。此处一句答得重了轻了，都要牵出他的痴性。",
+          "choices": [
+            {
+              "choiceId": "canon_no_jade",
+              "label": "照实说没有，并称他的玉是稀罕物",
+              "requires": [],
+              "effects": [
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": 2 },
+                { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 3 },
+                { "type": "unlockNode", "nodeId": "enter_06_xiren_night" }
+              ],
+              "next": "enter_06_xiren_night"
+            },
+            {
+              "choiceId": "soften_no_jade",
+              "label": "说没有，却先笑道不敢与哥哥的玉相比",
+              "requires": [{ "type": "skill", "id": "subtlety", "gte": 75 }],
+              "effects": [
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": 1 },
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 2 },
+                { "type": "globalScore", "id": "dignity", "delta": 1 }
+              ],
+              "next": "enter_06_xiren_night"
+            },
+            {
+              "choiceId": "ask_back",
+              "label": "反问玉难道人人该有",
+              "requires": [{ "type": "trait", "id": "gengzhi" }],
+              "effects": [
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": 3 },
+                { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 5 },
+                { "type": "axis", "targetId": "jiamu", "axis": "trust", "delta": -1 }
+              ],
+              "next": "enter_06_xiren_night"
+            }
+          ]
+        },
+        {
+          "nodeId": "enter_06_xiren_night",
+          "title": "碧纱厨夜话",
+          "scene": "碧纱厨",
+          "narration": "夜里安置下来，你想起方才摔玉一事，心里总不安宁。袭人悄悄进来问你怎么还不安歇。",
+          "choices": [
+            {
+              "choiceId": "accept_comfort",
+              "label": "听袭人劝解，说自己记着就是了",
+              "requires": [],
+              "effects": [
+                { "type": "axis", "targetId": "xiren", "axis": "trust", "delta": 6 },
+                { "type": "traitState", "id": "daiyu_wounded_pride", "delta": -1 },
+                { "type": "traitState", "id": "servant_mediation", "delta": 1 },
+                { "type": "storyFlag", "id": "settled_in_grace", "value": true }
+              ],
+              "ending": "settled_in_grace"
+            },
+            {
+              "choiceId": "keep_self_blame",
+              "label": "嘴上应了，心里仍怪自己初来惹事",
+              "requires": [{ "type": "trait", "id": "duochou" }],
+              "effects": [
+                { "type": "traitState", "id": "daiyu_wounded_pride", "delta": 1 },
+                { "type": "axis", "targetId": "xiren", "axis": "affection", "delta": 2 },
+                { "type": "storyFlag", "id": "future_quarrel_more_sensitive", "value": true }
+              ],
+              "ending": "settled_but_self_wounded"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapterId": "daiyu_ch02_purse_and_sachet",
+      "title": "荷包香袋",
+      "sourceSceneIds": ["ch017_scene_baodai_purse_quarrel"],
+      "objective": "处理私物误会，决定是轻轻收场还是半日冷战。",
+      "entryNode": "purse_01_missing_trinkets",
+      "nodes": [
+        {
+          "nodeId": "purse_01_missing_trinkets",
+          "title": "佩物一件不存",
+          "scene": "贾母院中",
+          "narration": "宝玉被他父亲拘了半日，回来时身上佩物都被小厮们解了去。袭人一句玩笑，你才想起自己给他的荷包。",
+          "choices": [
+            {
+              "choiceId": "ask_directly",
+              "label": "问他：我给你的那个荷包也给他们了？",
+              "requires": [{ "type": "trait", "id": "gengzhi" }],
+              "effects": [
+                { "type": "traitState", "id": "daiyu_wounded_pride", "delta": 1 },
+                { "type": "traitState", "id": "baoyu_reassurance", "delta": 1 },
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": -1 }
+              ],
+              "next": "purse_02_proof"
+            },
+            {
+              "choiceId": "hold_back",
+              "label": "先不问，只冷眼看他如何解释",
+              "requires": [{ "type": "skill", "id": "subtlety", "gte": 70 }],
+              "effects": [
+                { "type": "skillXp", "skill": "subtlety", "delta": 1 },
+                { "type": "traitState", "id": "daiyu_composure", "delta": 1 },
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 1 }
+              ],
+              "next": "purse_02_proof"
+            },
+            {
+              "choiceId": "cut_sachet",
+              "label": "回房拿起未完的香袋就铰",
+              "requires": [{ "type": "traitState", "id": "daiyu_wounded_pride", "gte": 1 }],
+              "effects": [
+                { "type": "traitState", "id": "daiyu_wounded_pride", "delta": 2 },
+                { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 2 },
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": -2 }
+              ],
+              "next": "purse_02_proof"
+            }
+          ]
+        },
+        {
+          "nodeId": "purse_02_proof",
+          "title": "贴身藏着",
+          "scene": "潇湘馆/贾母院过渡",
+          "narration": "宝玉急忙从里面衣襟上解出荷包来递给你。原来他怕人拿去，竟贴身藏着。",
+          "choices": [
+            {
+              "choiceId": "lower_head_silent",
+              "label": "低头不语，心下自悔",
+              "requires": [{ "type": "skill", "id": "insight", "gte": 80 }],
+              "effects": [
+                { "type": "traitState", "id": "baoyu_reassurance", "delta": 2 },
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 4 },
+                { "type": "traitState", "id": "daiyu_wounded_pride", "delta": -1 }
+              ],
+              "next": "purse_03_repair"
+            },
+            {
+              "choiceId": "return_purse_in_pride",
+              "label": "说既如此，连这荷包也还他罢",
+              "requires": [{ "type": "trait", "id": "gupi" }],
+              "effects": [
+                { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 3 },
+                { "type": "traitState", "id": "daiyu_wounded_pride", "delta": 1 },
+                { "type": "traitState", "id": "baoyu_reassurance", "delta": 1 }
+              ],
+              "next": "purse_03_repair"
+            },
+            {
+              "choiceId": "poetic_soften",
+              "label": "说香袋未成，倒先误会了人",
+              "requires": [{ "type": "skill", "id": "literacy", "gte": 90 }],
+              "effects": [
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 5 },
+                { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 3 },
+                { "type": "skillXp", "skill": "poetry", "delta": 1 },
+                { "type": "traitState", "id": "daiyu_wounded_pride", "delta": -2 }
+              ],
+              "next": "purse_03_repair"
+            }
+          ]
+        },
+        {
+          "nodeId": "purse_03_repair",
+          "title": "嗤的一笑",
+          "scene": "出房路上",
+          "narration": "宝玉妹妹长妹妹短地赔不是。你若再恼，他也只得跟着；若肯收住，这一场便如风过竹梢。",
+          "choices": [
+            {
+              "choiceId": "laugh_and_allow",
+              "label": "嗤的一笑，只说那也瞧我的高兴罢了",
+              "requires": [{ "type": "traitState", "id": "baoyu_reassurance", "gte": 2 }],
+              "effects": [
+                { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 6 },
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 3 },
+                { "type": "storyFlag", "id": "purse_laugh_repair", "value": true }
+              ],
+              "ending": "purse_laugh_repair"
+            },
+            {
+              "choiceId": "leave_to_wangfuren",
+              "label": "借去王夫人处，暂且把话岔开",
+              "requires": [{ "type": "skill", "id": "ritual", "gte": 80 }],
+              "effects": [
+                { "type": "globalScore", "id": "order", "delta": 1 },
+                { "type": "axis", "targetId": "baoyu", "axis": "friendship", "delta": 2 },
+                { "type": "storyFlag", "id": "quiet_cold_war", "value": true }
+              ],
+              "ending": "quiet_cold_war"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapterId": "daiyu_ch03_baorenshi",
+      "title": "白认得你",
+      "sourceSceneIds": [
+        "ch029_scene_zhang_daoshi_proposes_match",
+        "ch029_scene_gold_kylin_jealousy",
+        "ch029_scene_baorenshi_quarrel",
+        "ch029_scene_smash_jade_cut_tassel",
+        "ch029_scene_not_enemies_do_not_gather"
+      ],
+      "objective": "在婚配压力与金玉话题下，决定宝黛争执的烈度和收束方式。",
+      "entryNode": "baorenshi_01_kylin",
+      "nodes": [
+        {
+          "nodeId": "baorenshi_01_kylin",
+          "title": "金麒麟",
+          "scene": "清虚观楼上",
+          "narration": "贾母从盘中拈起一个赤金点翠的麒麟。宝钗记得湘云也有一个。你看宝玉听见后忙把那物件揣起，又拿眼瞟人。",
+          "choices": [
+            {
+              "choiceId": "cold_laugh_baochai",
+              "label": "冷笑一句：她只在这些人带的东西上留心",
+              "requires": [{ "type": "trait", "id": "mingan" }],
+              "effects": [
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": 1 },
+                { "type": "axis", "targetId": "baochai", "axis": "affection", "delta": -2 },
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": -1 }
+              ],
+              "next": "baorenshi_02_sickroom"
+            },
+            {
+              "choiceId": "silence_watch_baoyu",
+              "label": "不说宝钗，只看宝玉如何处置",
+              "requires": [{ "type": "skill", "id": "insight", "gte": 85 }],
+              "effects": [
+                { "type": "traitState", "id": "daiyu_composure", "delta": 1 },
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": 1 },
+                { "type": "skillXp", "skill": "insight", "delta": 1 }
+              ],
+              "next": "baorenshi_02_sickroom"
+            },
+            {
+              "choiceId": "accept_kylin_offer",
+              "label": "若他说替你拿着，淡淡接过",
+              "requires": [{ "type": "skill", "id": "adaptability", "gte": 65 }],
+              "effects": [
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 3 },
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": -1 },
+                { "type": "storyFlag", "id": "kylin_defused", "value": true }
+              ],
+              "next": "baorenshi_02_sickroom"
+            }
+          ]
+        },
+        {
+          "nodeId": "baorenshi_02_sickroom",
+          "title": "你只管听你的戏去罢",
+          "scene": "潇湘馆",
+          "narration": "你中了暑，宝玉一时又一时来问。你明知他因张道士提亲不自在，却偏忍不住拿听戏的话试他。",
+          "choices": [
+            {
+              "choiceId": "canon_tease",
+              "label": "说：你只管听你的戏去罢，在家里做什么",
+              "requires": [{ "type": "trait", "id": "duochou" }],
+              "effects": [
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": 2 },
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": -2 },
+                { "type": "traitState", "id": "daiyu_hidden_affection", "delta": 1 }
+              ],
+              "next": "baorenshi_03_white_known"
+            },
+            {
+              "choiceId": "soft_ask_stay",
+              "label": "只问他：外头热闹，怎么倒还往这里来",
+              "requires": [{ "type": "skill", "id": "adaptability", "gte": 65 }],
+              "effects": [
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 3 },
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": -1 },
+                { "type": "traitState", "id": "baoyu_reassurance", "delta": 1 }
+              ],
+              "next": "baorenshi_03_white_known"
+            },
+            {
+              "choiceId": "straight_gold_jade",
+              "label": "直问张道士说亲，你心里究竟如何",
+              "requires": [{ "type": "trait", "id": "gengzhi" }],
+              "effects": [
+                { "type": "globalScore", "id": "dignity", "delta": -1 },
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": 1 },
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 2 }
+              ],
+              "next": "baorenshi_03_white_known"
+            }
+          ]
+        },
+        {
+          "nodeId": "baorenshi_03_white_known",
+          "title": "白认得你",
+          "scene": "潇湘馆",
+          "narration": "宝玉脸色沉下去。你听见他说白认得你了，心中又酸又急。话若再绕，便越绕越紧。",
+          "choices": [
+            {
+              "choiceId": "canon_counter",
+              "label": "冷笑回他：我哪里像人家有什么配得上你的",
+              "requires": [{ "type": "traitState", "id": "jade_conflict_heat", "gte": 1 }],
+              "effects": [
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": 2 },
+                { "type": "traitState", "id": "daiyu_wounded_pride", "delta": 2 },
+                { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 2 },
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": -3 }
+              ],
+              "next": "baorenshi_04_vow"
+            },
+            {
+              "choiceId": "pause_before_counter",
+              "label": "忍住一息，只问他为何说白认得",
+              "requires": [{ "type": "skill", "id": "subtlety", "gte": 75 }],
+              "effects": [
+                { "type": "traitState", "id": "daiyu_composure", "delta": 1 },
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": -1 },
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 2 }
+              ],
+              "next": "baorenshi_04_vow"
+            },
+            {
+              "choiceId": "call_zijuan",
+              "label": "唤紫鹃倒茶，借人进来缓一缓",
+              "requires": [{ "type": "relation", "targetId": "zijuan", "axis": "trust", "gte": 60 }],
+              "effects": [
+                { "type": "traitState", "id": "servant_mediation", "delta": 2 },
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": -2 },
+                { "type": "npcLine", "speaker": "紫鹃", "text": "姑娘才吃了药，二爷也请略坐一坐。" }
+              ],
+              "next": "baorenshi_05_branch"
+            }
+          ]
+        },
+        {
+          "nodeId": "baorenshi_04_vow",
+          "title": "天诛地灭",
+          "scene": "潇湘馆",
+          "narration": "宝玉追问你是否安心咒他。你这才想起昨日赌咒的话，心中又急又愧，泪先落了下来。",
+          "choices": [
+            {
+              "choiceId": "canon_vow_back",
+              "label": "哭道：我要安心咒你，我也天诛地灭",
+              "requires": [{ "type": "trait", "id": "mingan" }],
+              "effects": [
+                { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 6 },
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": -1 },
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": 2 },
+                { "type": "traitState", "id": "daiyu_fatigue", "delta": 1 }
+              ],
+              "next": "baorenshi_05_branch"
+            },
+            {
+              "choiceId": "say_you_wronged_me",
+              "label": "说他拿你的话煞性子，却不赌咒",
+              "requires": [{ "type": "skill", "id": "eloquence", "gte": 80 }],
+              "effects": [
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 2 },
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": 0 },
+                { "type": "traitState", "id": "daiyu_wounded_pride", "delta": 1 }
+              ],
+              "next": "baorenshi_05_branch"
+            }
+          ]
+        },
+        {
+          "nodeId": "baorenshi_05_branch",
+          "title": "玉事将起",
+          "scene": "潇湘馆",
+          "narration": "宝玉听见好姻缘三字，越发逆了己意。此时若无人拦，通灵玉便又要替两个人受一场气。",
+          "choices": [
+            {
+              "choiceId": "let_jade_storm",
+              "label": "仍说他的好姻缘，任他摘玉",
+              "requires": [{ "type": "traitState", "id": "jade_conflict_heat", "gte": 3 }],
+              "effects": [
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": 3 },
+                { "type": "traitState", "id": "daiyu_fatigue", "delta": 2 },
+                { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 4 },
+                { "type": "storyFlag", "id": "jade_storm_canon", "value": true }
+              ],
+              "next": "baorenshi_06_jade_storm"
+            },
+            {
+              "choiceId": "ask_about_heart",
+              "label": "压着泪问他：你心里究竟重人，还是重玉",
+              "requires": [{ "type": "skill", "id": "insight", "gte": 90 }],
+              "effects": [
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 5 },
+                { "type": "traitState", "id": "baoyu_reassurance", "delta": 2 },
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": -1 }
+              ],
+              "next": "baorenshi_07_aftercare"
+            },
+            {
+              "choiceId": "let_zijuan_interrupt",
+              "label": "由紫鹃以药和身子为由打断",
+              "requires": [{ "type": "traitState", "id": "servant_mediation", "gte": 1 }],
+              "effects": [
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": -3 },
+                { "type": "axis", "targetId": "zijuan", "axis": "trust", "delta": 4 },
+                { "type": "storyFlag", "id": "early_mediation", "value": true }
+              ],
+              "next": "baorenshi_07_aftercare"
+            }
+          ]
+        },
+        {
+          "nodeId": "baorenshi_06_jade_storm",
+          "title": "砸玉剪穗",
+          "scene": "潇湘馆",
+          "narration": "他狠命摔玉，你哭着说有砸他的，不如来砸你。袭人紫鹃都赶来相劝，你胸中一急，病势也被牵动。",
+          "choices": [
+            {
+              "choiceId": "canon_cut_tassel",
+              "label": "听见袭人提玉穗，夺来剪断",
+              "requires": [{ "type": "traitState", "id": "daiyu_wounded_pride", "gte": 2 }],
+              "effects": [
+                { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 5 },
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": -4 },
+                { "type": "traitState", "id": "daiyu_fatigue", "delta": 2 },
+                { "type": "globalScore", "id": "order", "delta": -2 }
+              ],
+              "ending": "jade_storm_canon"
+            },
+            {
+              "choiceId": "collapse_to_silence",
+              "label": "不再剪物，只伏在枕上哭",
+              "requires": [{ "type": "specialty", "id": "frail" }],
+              "effects": [
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 1 },
+                { "type": "traitState", "id": "daiyu_fatigue", "delta": 2 },
+                { "type": "traitState", "id": "jade_conflict_heat", "delta": -1 },
+                { "type": "npcLine", "speaker": "袭人", "text": "二爷且别说了，姑娘身上要紧。" }
+              ],
+              "ending": "early_mediation"
+            }
+          ]
+        },
+        {
+          "nodeId": "baorenshi_07_aftercare",
+          "title": "不是冤家不聚头",
+          "scene": "潇湘馆 / 怡红院",
+          "narration": "贾母一句小冤家传到两处。你独坐窗前，忽觉得这话粗俗，却又像把两个人的心事说破了。",
+          "choices": [
+            {
+              "choiceId": "write_unsent_note",
+              "label": "写一张不送出的笺，只说今日是自己急了",
+              "requires": [{ "type": "skill", "id": "literacy", "gte": 90 }],
+              "effects": [
+                { "type": "skillXp", "skill": "poetry", "delta": 2 },
+                { "type": "traitState", "id": "daiyu_wounded_pride", "delta": -1 },
+                { "type": "storyFlag", "id": "softened_baodai", "value": true }
+              ],
+              "ending": "softened_baodai"
+            },
+            {
+              "choiceId": "ask_zijuan_to_listen",
+              "label": "让紫鹃陪坐，不传话，只听你说几句",
+              "requires": [{ "type": "relation", "targetId": "zijuan", "axis": "trust", "gte": 60 }],
+              "effects": [
+                { "type": "axis", "targetId": "zijuan", "axis": "friendship", "delta": 5 },
+                { "type": "traitState", "id": "servant_mediation", "delta": 1 },
+                { "type": "traitState", "id": "daiyu_fatigue", "delta": -1 }
+              ],
+              "ending": "early_mediation"
+            },
+            {
+              "choiceId": "hold_cold_war",
+              "label": "只把帘子放下，不许人提宝玉",
+              "requires": [{ "type": "trait", "id": "gupi" }],
+              "effects": [
+                { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": -2 },
+                { "type": "traitState", "id": "daiyu_wounded_pride", "delta": 1 },
+                { "type": "storyFlag", "id": "quiet_cold_war", "value": true }
+              ],
+              "ending": "quiet_cold_war"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "endings": {
+    "settled_in_grace": {
+      "title": "暂得安顿",
+      "summary": "你在荣国府第一日礼数未乱，贾母怜爱更深，袭人也知你不是轻狂之人。",
+      "effects": [
+        { "type": "axis", "targetId": "jiamu", "axis": "trust", "delta": 3 },
+        { "type": "globalScore", "id": "dignity", "delta": 2 }
+      ]
+    },
+    "settled_but_self_wounded": {
+      "title": "安顿而自伤",
+      "summary": "外人看你妥当，你心里却记下了初来便惹玉事的惊惶。",
+      "effects": [{ "type": "traitState", "id": "daiyu_wounded_pride", "delta": 1 }]
+    },
+    "purse_laugh_repair": {
+      "title": "嗤笑收场",
+      "summary": "荷包仍在他贴身处，你一笑收住，香袋虽破，情分反添一层。",
+      "effects": [
+        { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 5 },
+        { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 3 }
+      ]
+    },
+    "quiet_cold_war": {
+      "title": "隔帘冷战",
+      "summary": "话没有闹大，却也没有说开。两处都安静，安静里反更牵心。",
+      "effects": [
+        { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": -2 },
+        { "type": "traitState", "id": "daiyu_hidden_affection", "delta": 1 }
+      ]
+    },
+    "jade_storm_canon": {
+      "title": "玉事大闹",
+      "summary": "砸玉、夺玉、剪穗，一屋人都被牵入。真心越急，话越不像真心。",
+      "effects": [
+        { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 6 },
+        { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": -5 },
+        { "type": "globalScore", "id": "order", "delta": -3 }
+      ]
+    },
+    "early_mediation": {
+      "title": "紫鹃早解",
+      "summary": "紫鹃借身子和药拦下一截火气。未必全说开，却少惊动了长辈。",
+      "effects": [
+        { "type": "axis", "targetId": "zijuan", "axis": "trust", "delta": 5 },
+        { "type": "globalScore", "id": "order", "delta": 1 }
+      ]
+    },
+    "softened_baodai": {
+      "title": "稍得相知",
+      "summary": "你没有把话递出去，他也未必立刻懂得；但这一夜以后，两个人都少了一分硬碰硬。",
+      "effects": [
+        { "type": "axis", "targetId": "baoyu", "axis": "trust", "delta": 4 },
+        { "type": "axis", "targetId": "baoyu", "axis": "friendship", "delta": 3 },
+        { "type": "traitState", "id": "jade_conflict_heat", "delta": -2 }
+      ]
+    }
+  },
+  "freeplayEventTemplates": [
+    {
+      "templateId": "daiyu_token_misread",
+      "name": "私物误会",
+      "trigger": {
+        "any": [
+          "baoyu_loses_or_gives_token",
+          "daiyu_token_visible_to_others",
+          "third_party_mentions_token"
+        ]
+      },
+      "checks": [
+        { "type": "relation", "targetId": "baoyu", "axis": "trust", "lt": 45, "adds": "反话试探" },
+        { "type": "skill", "id": "subtlety", "gte": 70, "adds": "轻讽收场" },
+        { "type": "trait", "id": "duochou", "adds": "自伤累积" }
+      ],
+      "effects": [
+        { "type": "traitState", "id": "daiyu_wounded_pride", "delta": 1 },
+        { "type": "axis", "targetId": "baoyu", "axis": "affection", "delta": 1 }
+      ]
+    },
+    {
+      "templateId": "daiyu_gold_jade_pressure",
+      "name": "金玉话题",
+      "trigger": {
+        "any": ["baochai_same_scene", "xiangyun_token_mentioned", "marriage_proposal_mentioned", "jade_or_kylin_visible"]
+      },
+      "checks": [
+        { "type": "skill", "id": "insight", "gte": 90, "adds": "看出宝玉被刺痛" },
+        { "type": "trait", "id": "mingan", "adds": "冷笑吃味" },
+        { "type": "relation", "targetId": "zijuan", "axis": "trust", "gte": 60, "adds": "紫鹃可打断" }
+      ],
+      "effects": [
+        { "type": "traitState", "id": "jade_conflict_heat", "delta": 1 },
+        { "type": "traitState", "id": "daiyu_hidden_affection", "delta": 1 }
+      ]
+    },
+    {
+      "templateId": "daiyu_poetic_deflection",
+      "name": "诗性转圜",
+      "trigger": {
+        "all": ["daiyu_in_private_or_garden", "conflict_heat_between_1_and_3"]
+      },
+      "checks": [
+        { "type": "skill", "id": "literacy", "gte": 90, "adds": "以诗文收束" },
+        { "type": "specialty", "id": "solitude_poetry", "adds": "独处后形成记忆" }
+      ],
+      "effects": [
+        { "type": "skillXp", "skill": "poetry", "delta": 1 },
+        { "type": "traitState", "id": "daiyu_wounded_pride", "delta": -1 }
+      ]
+    },
+    {
+      "templateId": "servant_early_mediation",
+      "name": "随侍早解",
+      "trigger": {
+        "any": ["daiyu_fatigue_gte_2", "jade_conflict_heat_gte_3", "baoyu_chikuang"]
+      },
+      "checks": [
+        { "type": "relation", "targetId": "zijuan", "axis": "trust", "gte": 60, "adds": "紫鹃优先照看黛玉" },
+        { "type": "relation", "targetId": "xiren", "axis": "trust", "gte": 25, "adds": "袭人可规劝宝玉" }
+      ],
+      "effects": [
+        { "type": "traitState", "id": "servant_mediation", "delta": 1 },
+        { "type": "globalScore", "id": "order", "delta": 1 }
+      ]
+    }
+  ]
+}
+

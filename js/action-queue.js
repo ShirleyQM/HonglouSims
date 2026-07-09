@@ -409,6 +409,57 @@ function formatInteractionLine(line, a, b) {
   return line.replace(/\{A\}/g, a.short).replace(/\{B\}/g, b.short);
 }
 
+function traceInteractionRisk(label, data = {}) {
+  const summary = Object.entries(data)
+    .filter(([, v]) => v !== undefined && v !== null && v !== '')
+    .map(([k, v]) => `${k}=${typeof v === 'string' ? v : JSON.stringify(v)}`)
+    .join(' · ');
+  const text = `🧪传情调试 ${label}${summary ? ' · ' + summary : ''}`;
+  try { console.debug('[interaction-risk]', label, data); } catch (_) {}
+  if (typeof log === 'function') log(text, 'social');
+}
+
+function flattenInteractionLineVariants(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.flatMap(item => Array.isArray(item) ? item : [item]).filter(Boolean);
+  if (typeof value === 'object') return Object.values(value).flatMap(flattenInteractionLineVariants);
+  return [value];
+}
+
+function pickInteractionVariantLines(tpl, initiator, target) {
+  const variants = tpl?.lineVariants;
+  if (!variants) return null;
+  const score = typeof getRelationValue === 'function' ? getRelationValue(initiator.id, target.id) : 0;
+  const minScore = (typeof InteractionScoreSystem !== 'undefined' && InteractionScoreSystem?.getMinScore)
+    ? InteractionScoreSystem.getMinScore(tpl)
+    : (tpl.relMin ?? 0);
+  const protocol = (typeof IdentityProtocolSystem !== 'undefined' && IdentityProtocolSystem?.evaluateProtocolBehavior)
+    ? IdentityProtocolSystem.evaluateProtocolBehavior(initiator, target, tpl)
+    : null;
+  const buckets = [];
+
+  if (score >= Math.max(60, minScore + 20)) buckets.push('good');
+  if (score < minScore || score < 20) buckets.push('poor');
+  if (protocol?.behavior === 'risky' || protocol?.behavior === 'conditional') buckets.push('subtle', 'elegant');
+  buckets.push('plain', 'elegant', 'subtle');
+  if (score < minScore + 15) buckets.push('blunt');
+
+  const pool = buckets.flatMap(key => flattenInteractionLineVariants(variants[key]));
+  const fallbackPool = flattenInteractionLineVariants(variants);
+  const pickPool = pool.length ? pool : fallbackPool;
+  if (!pickPool.length) return null;
+  const picked = pickPool[Math.floor(Math.random() * pickPool.length)];
+  return Array.isArray(picked) ? picked : [picked];
+}
+
+function interactionLineHoldSeconds(tpl, lineCount = 1, opts = {}) {
+  const total = Number(tpl?.duration);
+  const baseTotal = Number.isFinite(total) && total > 0 ? total : 6;
+  const cappedTotal = Math.max(6, Math.min(10, baseTotal));
+  const minHold = opts.minHold ?? 3;
+  return Math.max(minHold, cappedTotal / Math.max(1, lineCount));
+}
+
 function getTalkBlockReason(c) {
   for (const st of c.activeStates || []) {
     const sd = CONFIG.stateDefs[st.id];
@@ -460,8 +511,6 @@ function checkInteractionAvailable(initiator, target, tpl, opts = {}) {
   const talkBlock = getTalkBlockReason(initiator);
   if (talkBlock) return { ok: false, reason: talkBlock };
   if (!canUseSkill(initiator, 'talk')) return { ok: false, reason: '无法交谈' };
-  const rel = getRelationValue(initiator.id, target.id);
-  if (rel > (tpl.relMax ?? 100)) return { ok: false, reason: '关系过高' };
   if (tpl.skillReq) {
     const lv = getSkillLevel(initiator, tpl.skillReq.skill);
     if (lv < tpl.skillReq.level) return { ok: false, reason: '技能未达' };
@@ -586,6 +635,14 @@ function runAwkwardDialogue(c, target, tpl, onComplete, ctx = {}) {
     } else {
       const sp = dialogue.speakers?.[0] ? getChar(dialogue.speakers[0]) : c;
       speechBubble = { char: sp || c, text: dialogue.lines?.[0] || fallbackText };
+      if (ctx.mode === 'risk_fail') {
+        traceInteractionRisk('气泡第1句', {
+          tpl: tpl.id,
+          speaker: (sp || c)?.short,
+          text: speechBubble.text,
+          lines: dialogue.lines?.length || 0,
+        });
+      }
     }
     uiDirty = true;
   };
@@ -596,7 +653,33 @@ function runAwkwardDialogue(c, target, tpl, onComplete, ctx = {}) {
     minScore: ctx.minScore ?? InteractionScoreSystem?.getMinScore?.(tpl),
     onLowScore: ctx.onLowOverride,
   };
-  if (InteractionLlmSystem?.tryBeginAwkward?.(c, target, tpl, awkwardCtx, begin)) return;
+  if (ctx.mode !== 'risk_fail' && InteractionLlmSystem?.tryBeginAwkward?.(c, target, tpl, awkwardCtx, begin)) return;
+
+  if (ctx.mode === 'risk_fail') {
+    const attemptRaw = pickInteractionVariantLines(tpl, c, target)
+      || (tpl.lines?.length ? tpl.lines : ['{A}与{B}相视无言。']);
+    const attemptLine = formatInteractionLine(attemptRaw[0] || attemptRaw, c, target);
+    traceInteractionRisk('构造两段逾矩演出', {
+      tpl: tpl.id,
+      attempt: attemptLine,
+      fail: fallbackText,
+      depth: ctx.depthOutcome?.levelId,
+      witnessed: !!ctx.witnessed,
+    });
+    begin({
+      lines: [attemptLine, fallbackText],
+      speakers: [c.id, target.id],
+      lineIdx: 0,
+      phase: 'lines',
+      lineTimer: interactionLineHoldSeconds(tpl, 2),
+      lineHold: interactionLineHoldSeconds(tpl, 2),
+      actTimer: 0,
+      awkwardMode: true,
+      naturalEnd: true,
+      debugRiskTrace: true,
+    });
+    return;
+  }
 
   speechBubble = { char: target, text: fallbackText };
   setTimeout(() => { speechBubble = null; if (onComplete) onComplete(); }, 2200);
@@ -742,7 +825,8 @@ function makeInteractionItem(initiator, target, tpl) {
 }
 
 function buildInteractionDialogue(c, target, tpl) {
-  const raw = tpl.lines?.length ? tpl.lines : ['{A}与{B}相视无言。'];
+  const raw = pickInteractionVariantLines(tpl, c, target)
+    || (tpl.lines?.length ? tpl.lines : ['{A}与{B}相视无言。']);
   return {
     lines: raw.map(l => formatInteractionLine(l, c, target)),
     lineIdx: 0,
@@ -792,6 +876,19 @@ function startInteraction(c, target, tpl, onComplete) {
   const autoSocialQueued = !!c.actionQueue[0]?.aiGenerated;
   const ignoreCooldown = autoSocialQueued;
   const chk = checkInteractionAvailable(c, target, tpl, { ignoreCooldown });
+  const traceRiskFlow = tpl.category === 'chuanqing' || chk.risky;
+  if (traceRiskFlow) {
+    traceInteractionRisk('开始互动检查', {
+      tpl: tpl.id,
+      name: tpl.name,
+      actor: c.short,
+      target: target.short,
+      ok: chk.ok,
+      risky: !!chk.risky,
+      rate: chk.successRate,
+      hint: chk.riskHint,
+    });
+  }
   if (!chk.ok && chk.ok !== 'low') { log(`${tpl.name}不可用：${chk.reason}`); return false; }
   const rememberAutoSocialCamera = () => {
     if (autoSocialQueued && CHARS.indexOf(c) === selectedIdx && !c._autoSocialCameraHold) {
@@ -809,7 +906,35 @@ function startInteraction(c, target, tpl, onComplete) {
   };
   // 软锁（关系不足）：走近后触发 onLowScore，并正常结束队列项
   if (chk.ok === 'low') {
-    const finish = () => runLowScoreInteraction(c, target, tpl, chk.score, onComplete, chk.onLowScore);
+    const finish = () => {
+      if (chk.risky && tpl.category === 'chuanqing') {
+        const riskMeta = chk.riskMeta || InteractionSocialSystem?.resolveRisk?.(c, target, tpl);
+        const passed = InteractionSocialSystem?.applyRiskOutcome?.(c, target, tpl, false, riskMeta);
+        traceInteractionRisk('低关系风险转逾矩', {
+          tpl: tpl.id,
+          passed: !!passed,
+          score: chk.score,
+          minScore: InteractionScoreSystem?.getMinScore?.(tpl),
+          depthLine: riskMeta?.depthOutcome?.line,
+          depthLevel: riskMeta?.depthOutcome?.levelId,
+        });
+        c.statusText = '逾矩未成';
+        target.statusText = '神色尴尬';
+        runAwkwardDialogue(c, target, tpl, onComplete, {
+          mode: 'risk_fail',
+          riskMeta,
+          witnessed: !!riskMeta?.witnessCount,
+          witnessCount: riskMeta?.witnessCount || 0,
+          depthOutcome: riskMeta?.depthOutcome,
+          score: chk.score,
+          statusReason: '逾矩未成',
+          targetStatus: '神色尴尬',
+          fallbackText: '……（退后半步，不语）',
+        });
+        return;
+      }
+      runLowScoreInteraction(c, target, tpl, chk.score, onComplete, chk.onLowScore);
+    };
     rememberAutoSocialCamera();
     if (!walkToCharAdjacent(c, target, finish)) { clearAutoSocialCameraIfFailed(); return false; }
     return true;
@@ -820,12 +945,30 @@ function startInteraction(c, target, tpl, onComplete) {
     if (riskMeta?.isRisky) {
       const roll = Math.random();
       const ok = roll <= (chk.successRate ?? riskMeta.successRate ?? 0.5);
+      traceInteractionRisk('风险掷骰', {
+        tpl: tpl.id,
+        rel: IdentityProtocolSystem?.getHierarchyRelation?.(c.id, target.id),
+        roll: Number(roll.toFixed(3)),
+        rate: chk.successRate ?? riskMeta.successRate,
+        witnesses: riskMeta.witnessCount || 0,
+        behavior: riskMeta.behavior,
+      });
       const passed = InteractionSocialSystem?.applyRiskOutcome?.(c, target, tpl, ok, riskMeta);
+      traceInteractionRisk('风险结算', {
+        tpl: tpl.id,
+        passed: !!passed,
+        depthLine: riskMeta?.depthOutcome?.line,
+        depthLevel: riskMeta?.depthOutcome?.levelId,
+      });
       if (!passed) {
         c.statusText = '逾矩未成';
         target.statusText = '神色尴尬';
         runAwkwardDialogue(c, target, tpl, onComplete, {
           mode: 'risk_fail',
+          riskMeta,
+          witnessed: !!riskMeta?.witnessCount,
+          witnessCount: riskMeta?.witnessCount || 0,
+          depthOutcome: riskMeta?.depthOutcome,
           score: getRelationValue(c.id, target.id),
           statusReason: '逾矩未成',
           targetStatus: '神色尴尬',
@@ -1553,16 +1696,29 @@ function updateAction(c, dt) {
       if (d.lineTimer <= 0) {
         d.lineIdx++;
         if (d.lineIdx >= d.lines.length) {
+          if (d.debugRiskTrace) {
+            traceInteractionRisk('两段逾矩演出结束', {
+              tpl: tpl.id,
+              lines: d.lines.length,
+            });
+          }
           if (tpl.type === 'action' && d.actTimer > 0) {
             d.phase = 'acting';
             speechBubble = null;
             c.statusText = `${tpl.name}中…`;
           } else finishInteractionAction(c);
         } else {
-          d.lineTimer = 2.5;
+          d.lineTimer = d.lineHold || 2.5;
           const speakerId = d.speakers?.[d.lineIdx];
           const speaker = speakerId ? getChar(speakerId) : (d.lineIdx % 2 === 0 ? c : t);
           speechBubble = { char: speaker, text: d.lines[d.lineIdx] };
+          if (d.debugRiskTrace) {
+            traceInteractionRisk(`气泡第${d.lineIdx + 1}句`, {
+              tpl: tpl.id,
+              speaker: speaker?.short,
+              text: speechBubble.text,
+            });
+          }
         }
       }
     } else if (d.phase === 'acting') {

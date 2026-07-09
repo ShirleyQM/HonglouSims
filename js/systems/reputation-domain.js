@@ -1,12 +1,12 @@
 /* ═══════════════════ REPUTATION DOMAIN SYSTEM (P1：分域声望) ═══════════════════ */
 const ReputationDomainSystem = (() => {
   const DEFAULT_DOMAINS = {
-    general: { label: '总体名声', identityWeight: 1, servantWeight: 0.8, masterWeight: 1 },
-    family: { label: '府内体面', identityWeight: 1.2, servantWeight: 1.1, masterWeight: 1.2 },
-    servant: { label: '下人间口碑', identityWeight: 0.9, servantWeight: 1.5, masterWeight: 0.7 },
+    general: { label: '声望', identityWeight: 1, servantWeight: 0.8, masterWeight: 1 },
+    family: { label: '面子', identityWeight: 1.2, servantWeight: 1.1, masterWeight: 1.2 },
+    servant: { label: '仆从口碑', identityWeight: 0.9, servantWeight: 1.5, masterWeight: 0.7 },
     scholarly: { label: '才名', identityWeight: 0.8, servantWeight: 0.5, masterWeight: 1 },
-    official: { label: '功名体面', identityWeight: 1, servantWeight: 0.4, masterWeight: 1.2 },
-    outside: { label: '外部名声', identityWeight: 0.9, servantWeight: 0.6, masterWeight: 1.1 },
+    official: { label: '功名', identityWeight: 1, servantWeight: 0.4, masterWeight: 1.2 },
+    outside: { label: '口碑', identityWeight: 0.9, servantWeight: 0.6, masterWeight: 1.1 },
   };
 
   const PATH_DOMAIN_MAP = {
@@ -182,7 +182,7 @@ const ReputationDomainSystem = (() => {
 
   function getBestDomain(cOrId) {
     const c = getCharRef(cOrId);
-    if (!c) return { domain: 'general', value: 0, label: '总体名声' };
+    if (!c) return { domain: 'general', value: 0, label: '声望' };
     initChar(c);
     const entries = Object.entries(c.reputationDomains || {});
     const [domain, value] = entries.sort((a, b) => b[1] - a[1])[0] || ['general', 0];

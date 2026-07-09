@@ -1,0 +1,3 @@
+display_name: 大观园策划配置
+short_description: 把策划点子转成大观园性格、互动、状态等配置。
+default_prompt: 把我的策划想法整理成当前项目可用的配置，先去重，再说明需要写入哪些字段和文件。

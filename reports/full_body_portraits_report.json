@@ -1,0 +1,212 @@
+{
+  "sourceDir": "assets/全身立绘",
+  "skippedDirs": [
+    "其他"
+  ],
+  "count": 7,
+  "preview": "reports/full_body_portraits_preview.png",
+  "updatedManifest": "assets/manifest.json",
+  "updatedReferenceFiles": [],
+  "items": [
+    {
+      "id": "qingwen",
+      "source": "晴雯.png",
+      "sourceMode": "fullBodyOnly",
+      "bustSourcePath": null,
+      "fullBodySourcePath": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/晴雯.png",
+      "outputs": {
+        "avatar": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/qingwen_avatar.webp",
+        "portrait": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/qingwen_portrait.webp",
+        "hud": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/qingwen_hud.webp",
+        "fullBody": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/qingwen_fullbody.webp",
+        "fullBodyHud": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/qingwen_fullbody_hud.webp"
+      },
+      "bustMetrics": null,
+      "fullBodyMetrics": {
+        "sourceWidth": 941,
+        "sourceHeight": 1672,
+        "removedPixels": 881645,
+        "removedPercent": 56.04,
+        "alphaBBox": [
+          55,
+          59,
+          907,
+          1651
+        ]
+      }
+    },
+    {
+      "id": "zijuan",
+      "source": "紫鹃.png",
+      "sourceMode": "fullBodyOnly",
+      "bustSourcePath": null,
+      "fullBodySourcePath": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/紫鹃.png",
+      "outputs": {
+        "avatar": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/zijuan_avatar.webp",
+        "portrait": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/zijuan_portrait.webp",
+        "hud": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/zijuan_hud.webp",
+        "fullBody": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/zijuan_fullbody.webp",
+        "fullBodyHud": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/zijuan_fullbody_hud.webp"
+      },
+      "bustMetrics": null,
+      "fullBodyMetrics": {
+        "sourceWidth": 1086,
+        "sourceHeight": 1448,
+        "removedPixels": 1079009,
+        "removedPercent": 68.62,
+        "alphaBBox": [
+          217,
+          37,
+          906,
+          1397
+        ]
+      }
+    },
+    {
+      "id": "xiren",
+      "source": "袭人.png",
+      "sourceMode": "fullBodyOnly",
+      "bustSourcePath": null,
+      "fullBodySourcePath": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/袭人.png",
+      "outputs": {
+        "avatar": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/xiren_avatar.webp",
+        "portrait": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/xiren_portrait.webp",
+        "hud": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/xiren_hud.webp",
+        "fullBody": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/xiren_fullbody.webp",
+        "fullBodyHud": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/xiren_fullbody_hud.webp"
+      },
+      "bustMetrics": null,
+      "fullBodyMetrics": {
+        "sourceWidth": 1086,
+        "sourceHeight": 1448,
+        "removedPixels": 1070769,
+        "removedPercent": 68.09,
+        "alphaBBox": [
+          147,
+          47,
+          860,
+          1430
+        ]
+      }
+    },
+    {
+      "id": "yingchun",
+      "source": "迎春.png",
+      "sourceMode": "fullBodyOnly",
+      "bustSourcePath": null,
+      "fullBodySourcePath": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/迎春.png",
+      "outputs": {
+        "avatar": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/yingchun_avatar.webp",
+        "portrait": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/yingchun_portrait.webp",
+        "hud": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/yingchun_hud.webp",
+        "fullBody": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/yingchun_fullbody.webp",
+        "fullBodyHud": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/yingchun_fullbody_hud.webp"
+      },
+      "bustMetrics": null,
+      "fullBodyMetrics": {
+        "sourceWidth": 1086,
+        "sourceHeight": 1448,
+        "removedPixels": 1119298,
+        "removedPercent": 71.18,
+        "alphaBBox": [
+          200,
+          30,
+          940,
+          1437
+        ]
+      }
+    },
+    {
+      "id": "xueyan",
+      "source": "雪雁.png",
+      "sourceMode": "fullBodyOnly",
+      "bustSourcePath": null,
+      "fullBodySourcePath": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/雪雁.png",
+      "outputs": {
+        "avatar": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/xueyan_avatar.webp",
+        "portrait": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/xueyan_portrait.webp",
+        "hud": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/xueyan_hud.webp",
+        "fullBody": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/xueyan_fullbody.webp",
+        "fullBodyHud": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/xueyan_fullbody_hud.webp"
+      },
+      "bustMetrics": null,
+      "fullBodyMetrics": {
+        "sourceWidth": 1086,
+        "sourceHeight": 1448,
+        "removedPixels": 1119795,
+        "removedPercent": 71.21,
+        "alphaBBox": [
+          236,
+          48,
+          760,
+          1419
+        ]
+      }
+    },
+    {
+      "id": "sheyue",
+      "source": "麝月.png",
+      "sourceMode": "fullBodyOnly",
+      "bustSourcePath": null,
+      "fullBodySourcePath": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/麝月.png",
+      "outputs": {
+        "avatar": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/sheyue_avatar.webp",
+        "portrait": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/sheyue_portrait.webp",
+        "hud": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/sheyue_hud.webp",
+        "fullBody": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/sheyue_fullbody.webp",
+        "fullBodyHud": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/sheyue_fullbody_hud.webp"
+      },
+      "bustMetrics": null,
+      "fullBodyMetrics": {
+        "sourceWidth": 941,
+        "sourceHeight": 1672,
+        "removedPixels": 981291,
+        "removedPercent": 62.37,
+        "alphaBBox": [
+          169,
+          52,
+          736,
+          1644
+        ]
+      }
+    },
+    {
+      "id": "daiyu",
+      "source": "黛玉半身.png + 黛玉全身高清.png",
+      "sourceMode": "separateBustAndFullBody",
+      "bustSourcePath": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/黛玉半身.png",
+      "fullBodySourcePath": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/黛玉全身高清.png",
+      "outputs": {
+        "avatar": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/daiyu_avatar.webp",
+        "portrait": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/daiyu_portrait.webp",
+        "hud": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/daiyu_hud.webp",
+        "fullBody": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/daiyu_fullbody.webp",
+        "fullBodyHud": "/Users/bytedance/Desktop/myCursor/game/assets/全身立绘/processed/daiyu_fullbody_hud.webp"
+      },
+      "bustMetrics": {
+        "sourceWidth": 928,
+        "sourceHeight": 1232,
+        "removedPixels": 725443,
+        "removedPercent": 63.45,
+        "alphaBBox": [
+          181,
+          31,
+          805,
+          1232
+        ]
+      },
+      "fullBodyMetrics": {
+        "sourceWidth": 1632,
+        "sourceHeight": 2912,
+        "removedPixels": 3043575,
+        "removedPercent": 64.04,
+        "alphaBBox": [
+          137,
+          209,
+          1623,
+          2912
+        ]
+      }
+    }
+  ]
+}

@@ -2,6 +2,121 @@
 
 > AI 与梦想系统的统一分层方案见 `持续更新_19_AI与梦想系统联动.md`。本文继续作为 Utility、作息、候选评分和 AI 行为质量的专项文档。
 
+## 2026-07-09 置顶补充：社交 AI 的规则/LLM 同构接口
+
+长期目标是让 NPC 逐步走向 Generative Agent：拥有可检索记忆、日终反思、关系牵挂、短期计划和自然语言解释。但当前阶段先用规则引擎实现同构接口，保证未来替换成 LLM 或 hybrid 推理器时，不改上游输入和下游执行。
+
+### 核心口径
+
+社交 AI 不再只问“附近有谁、哪个互动分最高”，而拆成四层：
+
+```text
+社交需求层：我现在需要人吗？
+目标牵挂层：我想见谁 / 避开谁 / 照顾谁 / 找谁理论？
+社交实践层：我用什么分寸接近？寒暄、宽慰、试探、调笑、避嫌、管束、哄骗、争执？
+具体互动层：选哪个 interactionTemplate，并进入 ActionQueue。
+```
+
+这四层最终仍落回 Utility AI：
+
+```text
+Needs / State / Memory / Relation / Identity / Trait / Task
+  -> SocialDecisionInput
+  -> Social Reasoner（V1 rule，未来 LLM/hybrid）
+  -> SocialDecisionResult
+  -> Candidate Provider 产出 seek / interaction 候选
+  -> Utility Scoring
+  -> Action Queue
+```
+
+### 输入输出稳定协议
+
+`SocialDecisionInput` 必须包含足够让规则和 LLM 做同一件事的信息：
+
+| 模块 | 内容 |
+|---|---|
+| actor | 需求、状态、性格、专属性格、身份、任务、近期行为、记忆摘要 |
+| targets | 候选对象、关系三轴、第四轴、最近互动时间、可达性、当前状态 |
+| context | 时间、场景、见证者、人群、秩序、礼法、家庭角色、当前事件 |
+| affordances | 可用互动类别、模板、家具、任务动作、硬条件 |
+
+`SocialDecisionResult` 必须结构化输出：
+
+| 字段 | 用途 |
+|---|---|
+| `targetDesires[]` | 每个目标的牵挂分、牵挂类型和解释因子。 |
+| `practiceCandidates[]` | 对目标采用的社交实践，例如问候、宽慰、试探、避嫌、哄骗。 |
+| `interactionCandidates[]` | 具体模板意愿、风险、是否允许 NPC 自主、预期结果。 |
+| `selected` | 选中的目标、实践、互动或 seek，并标记 provider 为 `rule/llm/hybrid`。 |
+| `explanation` | 给调试面板和埋点看的结构化解释，不只是一句自然语言。 |
+
+V1 规则引擎写死公式和阈值；未来 LLM 只能替换 `Social Reasoner`，不能绕过 `checkInteractionAvailable`、礼法风险、行动队列和任务硬条件。
+
+### 目标牵挂 Target Desire
+
+目标牵挂回答“为什么想找这个人”，不是“对这个人做什么”。建议公式：
+
+```text
+targetDesire(A,B) =
+  socialNeedPressure(A)
++ affectionPull(A,B)
++ friendshipFamiliarity(A,B)
++ trustSafety(A,B)
++ memorySalience(A,B)
++ absencePressure(A,B)
++ traitCompatibility(A,B)
++ dutyOrRolePressure(A,B)
++ opportunity(A,B)
+- avoidancePressure(A,B)
+- fatigue(A,B)
+- etiquettePressure(A,B)
+```
+
+牵挂类型建议：
+
+| 类型 | 说明 | 示例 |
+|---|---|---|
+| `miss` | 思念、惦记、想见熟人。 | 黛玉久不见宝玉，心绪低时想见。 |
+| `comfort` | 对方状态差，自己在乎。 | 紫鹃见黛玉感伤，想宽慰。 |
+| `duty` | 身份、任务或职业职责。 | 袭人照料宝玉，仆从请安。 |
+| `court` | 传情/亲近冲动。 | 好感高、无人旁观、心动状态。 |
+| `confront` | 不满、争执、算账。 | 关系差、被冒犯、任务失败。 |
+| `avoid` | 回避麻烦、避嫌、躲管束。 | 贾琏躲凤姐，仆从避开责罚。 |
+| `opportunistic` | 机会主义亲近。 | 风流/放诞角色见低风险对象。 |
+
+### 社交实践 Social Practice
+
+社交实践回答“以什么分寸接近”，位于目标与模板之间：
+
+| practiceId | 语义 | 候选类别 |
+|---|---|---|
+| `greet` | 礼貌问候、日常往来。 | `xujiu` |
+| `keep_company` | 陪坐、闲聊、维持关系。 | `xujiu/weijie` |
+| `comfort` | 安慰、照拂、倾诉承接。 | `weijie` |
+| `debate` | 论艺、对弈、评诗。 | `lundao` |
+| `court_subtle` | 含蓄传情、凝眸、赠物。 | `chuanqing` 低阶 |
+| `court_private` | 私语、牵袖、亲密接触。 | `chuanqing` 高阶 |
+| `joke` | 打趣、玩笑、嬉闹。 | `tiaoxiao` |
+| `discipline` | 提点、训诫、管束。 | `zhengchi/xujiu` |
+| `appease` | 哄骗、赔不是、送礼降温。 | `xujiu/weijie/chuanqing` |
+| `avoid` | 避嫌、绕开、装忙。 | `seek` 反向或闲游 |
+
+实践层可由规则或 LLM 生成，但必须输出同样字段。古代背景的“分寸”主要在这一层体现：同样想亲近，公开场合可能转成问安/递茶，私密场合才可能走传情。
+
+### 贾琏式人格示例
+
+不要用 `渣男=true` 写死行为，而是让目标牵挂和实践选择自然涌现：
+
+| 维度 | 配置倾向 |
+|---|---|
+| 目标选择 | 对新鲜对象、低风险对象、对自己有好感者加权；对强约束/会追责对象增加 `avoid`。 |
+| 实践偏好 | `joke`、`court_subtle`、`appease`、`opportunistic` 加权；公开场合转为正常问候。 |
+| 礼法与羞耻 | 低见证者压力、低失败羞耻；但高名声风险时回避。 |
+| 关系结算 | 传情成功可涨 affection，但 trust 增长低；败露时目标 trust 大跌。 |
+| 失败后行为 | 优先哄骗、赔笑、送礼、转移话题，而不是真诚反思。 |
+
+这样角色表现会是“见机会就亲近，见风险就躲，出事先糊弄”，而不是每隔一段时间随机触发固定剧情。
+
 ## 2026-06-25 置顶补充：起居覆盖层与 Utility AI 兜底合并
 
 起居系统已经并入 Utility AI 的候选评分链，不再作为独立脚本执行层。当前口径如下：
@@ -312,14 +427,18 @@ thresholdFactor(value, null, max) = clamp(1 + (max - value) / 50, 0.15, 1.8)
 
 菜单展示：
 - 所有通过硬规则的互动都显示。
-- 用颜色深浅表示意愿：`strength = clamp(interactionWillingness / 3, 0, 1)`。
-- 文案显示为“意愿高 / 中 / 低 / 冷”。
+- UI 不展示“意愿高/中/低/冷”文字，只用外框表达。
+- 高意愿：黄色发光外框。
+- 关系/轴/阈值不足：灰色虚线外框，点击后进入低分收场或失败深度链。
+- 普通意愿：保持默认样式。
 - 关系不足不禁用，点击后可能进入“被拒绝 / 尴尬 / 难过”等结果链。
+- AI 自主社交与 UI 共用 `InteractionScoreSystem.socialWillingness()`；NPC 候选权重读取 `willingness.factor`，菜单读取 `willingness.strength`。
 
 仍然会硬拦的内容：
-- 无效对象、不能说话、技能不足、冷却、一次性互动已用。
-- 礼法/身份强禁忌、性别年龄硬约束、家具/场景硬条件。
-- 这些是世界规则，不是关系意愿。
+- 无效对象、不能说话、技能不足、一次性互动已用。
+- 家具/场景硬条件，例如“需近座椅/床/妆台”。
+- 礼法强禁忌、性别年龄约束不再硬锁，改为风险/逾矩/失败链；成功率可为 0。
+- 冷却不作为玩家菜单的长期硬锁；普通互动模板冷却上限为 10 秒，AI 自主社交仍保留目标频控，避免同一 NPC 反复刷同一对象。
 
 暂不接入：
 - 第四象限（服从/体恤/孝道/慈爱）暂不进入通用 `ai-drama`。

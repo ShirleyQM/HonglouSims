@@ -19,7 +19,25 @@
   },
   "avatars": {
     "daiyu": {
-      "src": "assets/avatars/daiyu.png"
+      "src": "assets/全身立绘/processed/daiyu_avatar.webp"
+    },
+    "qingwen": {
+      "src": "assets/全身立绘/processed/qingwen_avatar.webp"
+    },
+    "zijuan": {
+      "src": "assets/全身立绘/processed/zijuan_avatar.webp"
+    },
+    "xiren": {
+      "src": "assets/全身立绘/processed/xiren_avatar.webp"
+    },
+    "yingchun": {
+      "src": "assets/全身立绘/processed/yingchun_avatar.webp"
+    },
+    "xueyan": {
+      "src": "assets/全身立绘/processed/xueyan_avatar.webp"
+    },
+    "sheyue": {
+      "src": "assets/全身立绘/processed/sheyue_avatar.webp"
     }
   },
   "animations": {
@@ -240,6 +258,20 @@
         "anchor": "bottom-center",
         "fit": "contain"
       },
+      "301": {
+        "name": "浴盆",
+        "sourceName": "浴桶",
+        "src": "assets/furnitures/restroom/浴桶.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
+      "311": {
+        "name": "铜面盆",
+        "sourceName": "铜面盆",
+        "src": "assets/furnitures/restroom/铜面盆.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
       "312": {
         "name": "梳洗妆台",
         "sourceName": "卧室_碧纱橱",
@@ -268,6 +300,27 @@
         "anchor": "bottom-center",
         "fit": "contain"
       },
+      "701": {
+        "name": "花圃",
+        "sourceName": "long_flower_bed",
+        "src": "assets/furnitures/garden/long_flower_bed.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
+      "801": {
+        "name": "凉亭",
+        "sourceName": "凉亭",
+        "src": "assets/furnitures/garden/凉亭.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
+      "901": {
+        "name": "石凳",
+        "sourceName": "石凳_1",
+        "src": "assets/furnitures/garden/石凳_1.png",
+        "anchor": "bottom-center",
+        "fit": "contain"
+      },
       "902": {
         "name": "轿凳歇脚",
         "sourceName": "客厅_美人靠1",
@@ -279,8 +332,10 @@
   },
   "portraits": {
     "daiyu": {
-      "portrait": "assets/lihui/processed/daiyu_portrait.webp",
-      "hud": "assets/lihui/processed/daiyu_hud.webp"
+      "portrait": "assets/全身立绘/processed/daiyu_portrait.webp",
+      "hud": "assets/全身立绘/processed/daiyu_hud.webp",
+      "fullBody": "assets/全身立绘/processed/daiyu_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/daiyu_fullbody_hud.webp"
     },
     "baochai": {
       "portrait": "assets/lihui/processed/baochai_portrait.webp",
@@ -295,12 +350,16 @@
       "hud": "assets/lihui/processed/xifeng_hud.webp"
     },
     "zijuan": {
-      "portrait": "assets/lihui/processed/zijuan_portrait.webp",
-      "hud": "assets/lihui/processed/zijuan_hud.webp"
+      "portrait": "assets/全身立绘/processed/zijuan_portrait.webp",
+      "hud": "assets/全身立绘/processed/zijuan_hud.webp",
+      "fullBody": "assets/全身立绘/processed/zijuan_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/zijuan_fullbody_hud.webp"
     },
     "xueyan": {
-      "portrait": "assets/lihui/processed/xueyan_portrait.webp",
-      "hud": "assets/lihui/processed/xueyan_hud.webp"
+      "portrait": "assets/全身立绘/processed/xueyan_portrait.webp",
+      "hud": "assets/全身立绘/processed/xueyan_hud.webp",
+      "fullBody": "assets/全身立绘/processed/xueyan_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/xueyan_fullbody_hud.webp"
     },
     "yinger": {
       "portrait": "assets/lihui/processed/yinger_portrait.webp",
@@ -311,24 +370,32 @@
       "hud": "assets/lihui/processed/xiangyun_hud.webp"
     },
     "xiren": {
-      "portrait": "assets/lihui/processed/xiren_portrait.webp",
-      "hud": "assets/lihui/processed/xiren_hud.webp"
+      "portrait": "assets/全身立绘/processed/xiren_portrait.webp",
+      "hud": "assets/全身立绘/processed/xiren_hud.webp",
+      "fullBody": "assets/全身立绘/processed/xiren_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/xiren_fullbody_hud.webp"
     },
     "qingwen": {
-      "portrait": "assets/lihui/processed/qingwen_portrait.webp",
-      "hud": "assets/lihui/processed/qingwen_hud.webp"
+      "portrait": "assets/全身立绘/processed/qingwen_portrait.webp",
+      "hud": "assets/全身立绘/processed/qingwen_hud.webp",
+      "fullBody": "assets/全身立绘/processed/qingwen_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/qingwen_fullbody_hud.webp"
     },
     "sheyue": {
-      "portrait": "assets/lihui/processed/sheyue_portrait.webp",
-      "hud": "assets/lihui/processed/sheyue_hud.webp"
+      "portrait": "assets/全身立绘/processed/sheyue_portrait.webp",
+      "hud": "assets/全身立绘/processed/sheyue_hud.webp",
+      "fullBody": "assets/全身立绘/processed/sheyue_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/sheyue_fullbody_hud.webp"
     },
     "liwan": {
       "portrait": "assets/lihui/processed/liwan_portrait.webp",
       "hud": "assets/lihui/processed/liwan_hud.webp"
     },
     "yingchun": {
-      "portrait": "assets/lihui/processed/yingchun_portrait.webp",
-      "hud": "assets/lihui/processed/yingchun_hud.webp"
+      "portrait": "assets/全身立绘/processed/yingchun_portrait.webp",
+      "hud": "assets/全身立绘/processed/yingchun_hud.webp",
+      "fullBody": "assets/全身立绘/processed/yingchun_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/yingchun_fullbody_hud.webp"
     },
     "yuanchun": {
       "portrait": "assets/lihui/processed/yuanchun_portrait.webp",
@@ -341,9 +408,14 @@
   },
   "roomBackgrounds": {
     "1": {
-      "src": "assets/rooms/潇湘馆.png",
+      "src": "assets/rooms/潇湘馆-v1.png",
       "fit": "cover",
-      "dim": 0.04
+      "dim": 0.02
+    },
+    "4": {
+      "src": "assets/rooms/怡红院-open-top-v1.png",
+      "fit": "cover",
+      "dim": 0.02
     }
   }
 }

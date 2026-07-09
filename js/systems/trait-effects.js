@@ -8,6 +8,7 @@ const TraitEffectSystem = (() => {
     need: [0.4, 2.2],
     state: [0.35, 2.5],
     movement: [0.75, 1.25],
+    protocol: [0.35, 2.5],
   };
 
   function clamp(value, min, max) {
@@ -210,6 +211,31 @@ const TraitEffectSystem = (() => {
     return clamp(factor, min, max);
   }
 
+  function protocolMultiplier(c, key, min = LIMITS.protocol[0], max = LIMITS.protocol[1]) {
+    let factor = combinedMultiplier(c, 'protocol', key, min, max);
+    if (key === 'pressureMultiplier' && typeof getSkillLevel === 'function') {
+      const ritualLv = Math.max(1, getSkillLevel(c, 'ritual') || 1);
+      factor *= 1 + Math.min(0.18, (ritualLv - 1) * 0.035);
+    }
+    return clamp(factor, min, max);
+  }
+
+  function protocolPressureMultiplier(c) {
+    return protocolMultiplier(c, 'pressureMultiplier', 0.35, 2.5);
+  }
+
+  function protocolImpulseMultiplier(c) {
+    return protocolMultiplier(c, 'impulseMultiplier', 0.35, 2.5);
+  }
+
+  function protocolWitnessMultiplier(c) {
+    return protocolMultiplier(c, 'witnessMultiplier', 0.35, 2.5);
+  }
+
+  function protocolShameMultiplier(c) {
+    return protocolMultiplier(c, 'shameMultiplier', 0.35, 2.8);
+  }
+
   function memoryChanceMultiplier(c) {
     return combinedMultiplier(c, 'memory', 'chanceMultiplier', 0.25, 2);
   }
@@ -242,9 +268,12 @@ const TraitEffectSystem = (() => {
     let chance = 0;
     let amountMultiplier = 1;
     const labels = [];
+    const skipFoodSpending = typeof EconomySystem !== 'undefined'
+      && EconomySystem?.foodPersonalSpendingEnabled?.() === false;
     for (const row of effectsOf(c)) {
       const money = row.effects.money;
       if (!money) continue;
+      if (skipFoodSpending && money.category === 'food') continue;
       chance += money.spendChance || 0;
       amountMultiplier *= money.amountMultiplier || 1;
       if (money.label) labels.push(money.label);
@@ -276,7 +305,9 @@ const TraitEffectSystem = (() => {
     modifyRelationDelta, movementMultiplier, socialJoinMultiplier,
     crowdPenaltyMultiplier, questWeightMultiplier, questAcceptanceChance, questEarlyPrepareMinutes,
     invitationAcceptanceChance, memoryChanceMultiplier, memoryStrengthMultiplier,
-    memoryDecayMultiplier, spendingProfile, competitionBonus, decisionTrace,
+    memoryDecayMultiplier, spendingProfile, competitionBonus,
+    protocolPressureMultiplier, protocolImpulseMultiplier, protocolWitnessMultiplier,
+    protocolShameMultiplier, decisionTrace,
   };
 })();
 window.TraitEffectSystem = TraitEffectSystem;

@@ -441,9 +441,18 @@ ${sceneNote}
     return CATEGORY_TONE[tpl.category] || '家常对话';
   }
 
+  function flattenTplLineReferences(value) {
+    if (!value) return [];
+    if (Array.isArray(value)) return value.flatMap(item => Array.isArray(item) ? item : [item]).filter(Boolean);
+    if (typeof value === 'object') return Object.values(value).flatMap(flattenTplLineReferences);
+    return [value];
+  }
+
   function formatTplReference(tpl, initiator, target) {
-    if (!tpl.lines?.length) return '';
-    return tpl.lines.map(ln => String(ln)
+    const refs = flattenTplLineReferences(tpl.lineVariants).slice(0, 8);
+    const lines = refs.length ? refs : (tpl.lines || []);
+    if (!lines.length) return '';
+    return lines.map(ln => String(ln)
       .replace(/\{A\}/g, initiator.short)
       .replace(/\{B\}/g, target.short)
     ).join(' / ');
