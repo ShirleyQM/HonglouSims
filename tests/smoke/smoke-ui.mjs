@@ -12,7 +12,7 @@ await runBrowserSmoke('前台页面冒烟', 'smoke-ui', async ({ page, report })
     selectedName: document.querySelector('.char-col-name')?.textContent?.trim() || '',
   }));
 
-  report.assert(state.title.includes('大观园'), '页面标题正确', { title: state.title });
+  report.assert(state.title.includes('HonglouSims'), '页面标题正确', { title: state.title });
   report.assert(state.hasCanvas, '游戏画布存在');
   report.assert(state.bottomPanel, '底部 HUD 存在');
   report.assert(state.commandText.includes('传令'), '底栏传令入口存在', { text: state.commandText });

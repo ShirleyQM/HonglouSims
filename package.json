@@ -1,8 +1,8 @@
 {
-  "name": "dayuan-game",
+  "name": "honglou-sims",
   "version": "1.0.0",
   "private": true,
-  "description": "大观园模拟 — 本地/局域网/远程可访问的静态游戏服务",
+  "description": "HonglouSims — 本地/局域网/远程可访问的静态游戏服务",
   "type": "module",
   "engines": {
     "node": ">=18"

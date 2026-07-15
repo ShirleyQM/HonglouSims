@@ -211,7 +211,7 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, HOST, () => {
   console.log('');
   console.log('  ╔══════════════════════════════════════╗');
-  console.log('  ║     大观园 · 像素人生  已启动        ║');
+  console.log('  ║        HonglouSims  已启动         ║');
   console.log('  ╚══════════════════════════════════════╝');
   console.log('');
   console.log(`  本机访问:   http://127.0.0.1:${PORT}`);

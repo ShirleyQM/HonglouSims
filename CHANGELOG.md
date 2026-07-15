@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v0.1.0-alpha · 大观园模拟
+## v0.1.0-alpha · HonglouSims
 
 发布日期：待发布
 
