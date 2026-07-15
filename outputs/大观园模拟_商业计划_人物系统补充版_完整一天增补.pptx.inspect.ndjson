@@ -1,0 +1,799 @@
+{"kind":"deck","id":"pr/4jwtcq","name":"Deck"}
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/2x4nap4r","slide":1,"title":"大观园模拟","textShapes":6}
+{"kind":"textbox","id":"sh/cvixczed","slide":1,"name":"Rectangle 1","text":"大观园模拟","textPreview":"大观园模拟","textChars":5,"textLines":1,"bbox":[54,84,620,70]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":1,"name":"Rectangle 2","text":"商业计划草案 · BP补充版","textPreview":"商业计划草案 · BP补充版","textChars":14,"textLines":1,"bbox":[54,162,660,48]}
+{"kind":"textbox","id":"sh/udg7adsj","slide":1,"name":"Rectangle 3","text":"定位：古代版模拟人生，一款以中国古代为背景的关系与命运模拟游戏。\n本版补齐商业计划书里的定位、市场机会、创新、风险和商业化框架。","textPreview":"定位：古代版模拟人生，一款以中国古代为背景的关系与命运模拟游戏。 | 本版补齐商业计划书里的定位、市场机会、创新、风险和商业化框架。","textChars":64,"textLines":2,"bbox":[54,250,650,104]}
+{"kind":"shape","id":"sh/nyd0z610","slide":1,"name":"Rectangle 4","bbox":[54,398,440,4]}
+{"kind":"textbox","id":"sh/cj6tovah","slide":1,"name":"Rectangle 5","text":"核心资产不是单一剧情，而是一套古代群像模拟系统：人物会生活、会被差遣、会执行任务、会产生关系和秩序后果。","textPreview":"核心资产不是单一剧情，而是一套古代群像模拟系统：人物会生活、会被差遣、会执行任务、会产生关系和秩序后果。","textChars":52,"textLines":1,"bbox":[54,438,650,86]}
+{"kind":"textbox","id":"sh/54zidony","slide":1,"name":"Rectangle 6","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/u9knih4b","slide":1,"name":"Rectangle 7","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"image","id":"im/m1cfa9w3","slide":1,"name":"Picture 8","bbox":[765,62,405,520]}
+{"kind":"notes","id":"nt/2x4nap4r","slide":1,"text":""}
+{"kind":"slide","id":"sl/pg3ex0nu","slide":2,"title":"POSITIONING","textShapes":15}
+{"kind":"textbox","id":"sh/5o7qpg3e","slide":2,"name":"Rectangle 1","text":"POSITIONING","textPreview":"POSITIONING","textChars":11,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/g3ex0nux","slide":2,"name":"Rectangle 2","text":"游戏定位：古代关系与命运模拟","textPreview":"游戏定位：古代关系与命运模拟","textChars":14,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/r65wjudg","slide":2,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"textbox","id":"sh/ylc7u54z","slide":2,"name":"Rectangle 4","text":"玩家置身于中国古代的家庭、宫廷或社会共同体中，操控名著人物或自创角色，在礼法、身份、关系、任务和日常生活里改写命运。","textPreview":"玩家置身于中国古代的家庭、宫廷或社会共同体中，操控名著人物或自创角色，在礼法、身份、关系、任务和日常生活里改写命运。","textChars":58,"textLines":1,"bbox":[80,202,1040,78]}
+{"kind":"shape","id":"sh/9cvixcze","slide":2,"name":"Rectangle 5","bbox":[78,338,330,150]}
+{"kind":"textbox","id":"sh/gr2p8nqx","slide":2,"name":"Rectangle 6","text":"范围","textPreview":"范围","textChars":2,"textLines":1,"bbox":[96,352,90,22]}
+{"kind":"textbox","id":"sh/rytsvu9k","slide":2,"name":"Rectangle 7","text":"核心题材","textPreview":"核心题材","textChars":4,"textLines":1,"bbox":[96,380,294,34]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":2,"name":"Rectangle 8","text":"首期聚焦《红楼梦》背景下的贵族家庭生活；后续可扩展到皇宫、官署、门派、市井和架空朝代。","textPreview":"首期聚焦《红楼梦》背景下的贵族家庭生活；后续可扩展到皇宫、官署、门派、市井和架空朝代。","textChars":43,"textLines":1,"bbox":[96,424,294,52]}
+{"kind":"shape","id":"sh/wb2hwfyx","slide":2,"name":"Rectangle 9","bbox":[474,338,330,150]}
+{"kind":"textbox","id":"sh/lwval87e","slide":2,"name":"Rectangle 10","text":"玩法","textPreview":"玩法","textChars":2,"textLines":1,"bbox":[492,352,90,22]}
+{"kind":"textbox","id":"sh/e9cvixcz","slide":2,"name":"Rectangle 11","text":"核心玩法","textPreview":"核心玩法","textChars":4,"textLines":1,"bbox":[492,380,294,34]}
+{"kind":"textbox","id":"sh/3q5o7qpg","slide":2,"name":"Rectangle 12","text":"生活模拟 + 关系经营 + 任务传令 + 身份礼法。玩家不是只照看小人，而是在共同体中调度人和事。","textPreview":"生活模拟 + 关系经营 + 任务传令 + 身份礼法。玩家不是只照看小人，而是在共同体中调度人和事。","textChars":49,"textLines":1,"bbox":[492,424,294,52]}
+{"kind":"shape","id":"sh/w3m94fu1","slide":2,"name":"Rectangle 13","bbox":[870,338,330,150]}
+{"kind":"textbox","id":"sh/loj2t83i","slide":2,"name":"Rectangle 14","text":"叙事","textPreview":"叙事","textChars":2,"textLines":1,"bbox":[888,352,90,22]}
+{"kind":"textbox","id":"sh/ex0nuxc3","slide":2,"name":"Rectangle 15","text":"叙事模式","textPreview":"叙事模式","textChars":4,"textLines":1,"bbox":[888,380,294,34]}
+{"kind":"textbox","id":"sh/3itgfmlk","slide":2,"name":"Rectangle 16","text":"预设故事节点与自由沙盒并存。用关键场景验证系统，再逐步开放更自由的古代人生。","textPreview":"预设故事节点与自由沙盒并存。用关键场景验证系统，再逐步开放更自由的古代人生。","textChars":38,"textLines":1,"bbox":[888,424,294,52]}
+{"kind":"textbox","id":"sh/szqtcj6t","slide":2,"name":"Rectangle 17","text":"这不是古风外皮的现代生活模拟，而是把“关系、名分、差遣、体面、命运”做成可运行规则。","textPreview":"这不是古风外皮的现代生活模拟，而是把“关系、名分、差遣、体面、命运”做成可运行规则。","textChars":42,"textLines":1,"bbox":[86,566,1030,34]}
+{"kind":"textbox","id":"sh/lkjm1cfa","slide":2,"name":"Rectangle 18","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/lc7u54zi","slide":2,"name":"Rectangle 19","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/pg3ex0nu","slide":2,"text":""}
+{"kind":"slide","id":"sl/s72x4nap","slide":3,"title":"PRODUCT SCOPE","textShapes":17}
+{"kind":"textbox","id":"sh/o7qpg3ex","slide":3,"name":"Rectangle 1","text":"PRODUCT SCOPE","textPreview":"PRODUCT SCOPE","textChars":13,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":3,"name":"Rectangle 2","text":"边界越清楚，产品越不像竞品的低配替代","textPreview":"边界越清楚，产品越不像竞品的低配替代","textChars":18,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/6dcbulwv","slide":3,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/vy90je9c","slide":3,"name":"Rectangle 4","bbox":[76,202,1088,46]}
+{"kind":"textbox","id":"sh/oj2t83it","slide":3,"name":"Rectangle 5","text":"做什么","textPreview":"做什么","textChars":3,"textLines":1,"bbox":[92,210,200,26]}
+{"kind":"textbox","id":"sh/d4vmtwra","slide":3,"name":"Rectangle 6","text":"古代日常、身份关系、传令管理、故事节点、沙盒人生","textPreview":"古代日常、身份关系、传令管理、故事节点、沙盒人生","textChars":24,"textLines":1,"bbox":[318,210,402,30]}
+{"kind":"textbox","id":"sh/6hcrmhk3","slide":3,"name":"Rectangle 7","text":"已经有系统底座承接","textPreview":"已经有系统底座承接","textChars":9,"textLines":1,"bbox":[742,210,384,30]}
+{"kind":"textbox","id":"sh/z25kb6xk","slide":3,"name":"Rectangle 8","text":"不重做什么","textPreview":"不重做什么","textChars":5,"textLines":1,"bbox":[92,284,200,26]}
+{"kind":"textbox","id":"sh/vy90je9c","slide":3,"name":"Rectangle 9","text":"不以重度种田、战斗、开放世界探索或纯经营为核心","textPreview":"不以重度种田、战斗、开放世界探索或纯经营为核心","textChars":23,"textLines":1,"bbox":[318,284,402,30]}
+{"kind":"textbox","id":"sh/6dcbulwv","slide":3,"name":"Rectangle 10","text":"避免和成熟赛道硬碰硬","textPreview":"避免和成熟赛道硬碰硬","textChars":10,"textLines":1,"bbox":[742,284,384,30]}
+{"kind":"textbox","id":"sh/d4vmtwra","slide":3,"name":"Rectangle 11","text":"首期验证","textPreview":"首期验证","textChars":4,"textLines":1,"bbox":[92,358,200,26]}
+{"kind":"textbox","id":"sh/oj2t83it","slide":3,"name":"Rectangle 12","text":"红楼梦背景，大观园/贾府人物关系与日常秩序","textPreview":"红楼梦背景，大观园/贾府人物关系与日常秩序","textChars":21,"textLines":1,"bbox":[318,358,402,30]}
+{"kind":"textbox","id":"sh/vmtwra5g","slide":3,"name":"Rectangle 13","text":"用免费文化资产降低教育成本","textPreview":"用免费文化资产降低教育成本","textChars":13,"textLines":1,"bbox":[742,358,384,30]}
+{"kind":"textbox","id":"sh/61032lsz","slide":3,"name":"Rectangle 14","text":"后续扩展","textPreview":"后续扩展","textChars":4,"textLines":1,"bbox":[92,432,200,26]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":3,"name":"Rectangle 15","text":"皇宫、修仙、官署、市井、资料片式场景包","textPreview":"皇宫、修仙、官署、市井、资料片式场景包","textChars":19,"textLines":1,"bbox":[318,432,402,30]}
+{"kind":"textbox","id":"sh/o7qpg3ex","slide":3,"name":"Rectangle 16","text":"同一套关系和秩序系统迁移","textPreview":"同一套关系和秩序系统迁移","textChars":12,"textLines":1,"bbox":[742,432,384,30]}
+{"kind":"textbox","id":"sh/vahoza1g","slide":3,"name":"Rectangle 17","text":"产品边界的关键是“生活与关系”，不是画面、建房或战斗规模。","textPreview":"产品边界的关键是“生活与关系”，不是画面、建房或战斗规模。","textChars":29,"textLines":1,"bbox":[92,568,940,38]}
+{"kind":"textbox","id":"sh/6tovahoz","slide":3,"name":"Rectangle 18","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/epkzupwb","slide":3,"name":"Rectangle 19","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/s72x4nap","slide":3,"text":""}
+{"kind":"slide","id":"sl/val87ed8","slide":4,"title":"MARKET OPPORTUNITY","textShapes":19}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":4,"name":"Rectangle 1","text":"MARKET OPPORTUNITY","textPreview":"MARKET OPPORTUNITY","textChars":18,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/je9cvixc","slide":4,"name":"Rectangle 2","text":"市场机会来自两个空白：古代生活模拟和关系管理","textPreview":"市场机会来自两个空白：古代生活模拟和关系管理","textChars":22,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/87ed8bat","slide":4,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/xs72x4na","slide":4,"name":"Rectangle 4","bbox":[74,214,330,150]}
+{"kind":"textbox","id":"sh/q1orytsv","slide":4,"name":"Rectangle 5","text":"机会","textPreview":"机会","textChars":2,"textLines":1,"bbox":[92,228,90,22]}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":4,"name":"Rectangle 6","text":"题材空白","textPreview":"题材空白","textChars":4,"textLines":1,"bbox":[92,256,294,34]}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":4,"name":"Rectangle 7","text":"《模拟人生》和 inZoi 聚焦现代生活；古代生活模拟仍缺少头部产品。","textPreview":"《模拟人生》和 inZoi 聚焦现代生活；古代生活模拟仍缺少头部产品。","textChars":35,"textLines":1,"bbox":[92,300,294,52]}
+{"kind":"shape","id":"sh/x4nap4r6","slide":4,"name":"Rectangle 8","bbox":[474,214,330,150]}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":4,"name":"Rectangle 9","text":"机会","textPreview":"机会","textChars":2,"textLines":1,"bbox":[492,228,90,22]}
+{"kind":"textbox","id":"sh/8bat47y1","slide":4,"name":"Rectangle 10","text":"玩法空白","textPreview":"玩法空白","textChars":4,"textLines":1,"bbox":[492,256,294,34]}
+{"kind":"textbox","id":"sh/jqh0fepk","slide":4,"name":"Rectangle 11","text":"国产古风大多偏战斗、家园、拍照或种田，少有产品把生活与情感关系做成核心。","textPreview":"国产古风大多偏战斗、家园、拍照或种田，少有产品把生活与情感关系做成核心。","textChars":36,"textLines":1,"bbox":[492,300,294,52]}
+{"kind":"shape","id":"sh/q5o7qpg3","slide":4,"name":"Rectangle 12","bbox":[874,214,330,150]}
+{"kind":"textbox","id":"sh/18jqh0fe","slide":4,"name":"Rectangle 13","text":"机会","textPreview":"机会","textChars":2,"textLines":1,"bbox":[892,228,90,22]}
+{"kind":"textbox","id":"sh/8nqxs72x","slide":4,"name":"Rectangle 14","text":"文化资产","textPreview":"文化资产","textChars":4,"textLines":1,"bbox":[892,256,294,34]}
+{"kind":"textbox","id":"sh/j2t83itg","slide":4,"name":"Rectangle 15","text":"红楼梦、西游记、朝代生活、节气民俗、服饰建筑都有传播基础和话题度。","textPreview":"红楼梦、西游记、朝代生活、节气民俗、服饰建筑都有传播基础和话题度。","textChars":33,"textLines":1,"bbox":[892,300,294,52]}
+{"kind":"shape","id":"sh/qh0fepkz","slide":4,"name":"Rectangle 16","bbox":[274,438,330,120]}
+{"kind":"textbox","id":"sh/1cfa9w3m","slide":4,"name":"Rectangle 17","text":"机会","textPreview":"机会","textChars":2,"textLines":1,"bbox":[292,452,90,22]}
+{"kind":"textbox","id":"sh/crmhk3q5","slide":4,"name":"Rectangle 18","text":"生命周期","textPreview":"生命周期","textChars":4,"textLines":1,"bbox":[292,480,294,34]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":4,"name":"Rectangle 19","text":"底层系统可插拔，资料片可换时代、阶层和权力场。","textPreview":"底层系统可插拔，资料片可换时代、阶层和权力场。","textChars":23,"textLines":1,"bbox":[292,524,294,22]}
+{"kind":"shape","id":"sh/h0fepkzu","slide":4,"name":"Rectangle 20","bbox":[674,438,330,120]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":4,"name":"Rectangle 21","text":"待补","textPreview":"待补","textChars":2,"textLines":1,"bbox":[692,452,90,22]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":4,"name":"Rectangle 22","text":"数据待补","textPreview":"数据待补","textChars":4,"textLines":1,"bbox":[692,480,294,34]}
+{"kind":"textbox","id":"sh/orytsvu9","slide":4,"name":"Rectangle 23","text":"市场规模、Steam 竞品售价、用户访谈和交叉人群需要下一版补充。","textPreview":"市场规模、Steam 竞品售价、用户访谈和交叉人群需要下一版补充。","textChars":33,"textLines":1,"bbox":[692,524,294,22]}
+{"kind":"textbox","id":"sh/hcrmhk3q","slide":4,"name":"Rectangle 24","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/al87ed8b","slide":4,"name":"Rectangle 25","text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/val87ed8","slide":4,"text":""}
+{"kind":"slide","id":"sl/mlkjm1cf","slide":5,"title":"PRODUCT INNOVATION","textShapes":14}
+{"kind":"textbox","id":"sh/ovahoza1","slide":5,"name":"Rectangle 1","text":"PRODUCT INNOVATION","textPreview":"PRODUCT INNOVATION","textChars":18,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/dg7adsji","slide":5,"name":"Rectangle 2","text":"创新点：古代背景下的社会关系和文化","textPreview":"创新点：古代背景下的社会关系和文化","textChars":17,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/6hcrmhk3","slide":5,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/z25kb6xk","slide":5,"name":"Rectangle 4","bbox":[78,222,330,168]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":5,"name":"Rectangle 5","text":"规则一","textPreview":"规则一","textChars":3,"textLines":1,"bbox":[96,236,90,22]}
+{"kind":"textbox","id":"sh/d8v6psfi","slide":5,"name":"Rectangle 6","text":"礼法与身份","textPreview":"礼法与身份","textChars":5,"textLines":1,"bbox":[96,264,294,34]}
+{"kind":"textbox","id":"sh/6dcbulwv","slide":5,"name":"Rectangle 7","text":"父子、主仆、长幼、夫妻、姻亲等关系天然带来边界；互动会判断逾矩、冒犯、流言和体面。","textPreview":"父子、主仆、长幼、夫妻、姻亲等关系天然带来边界；互动会判断逾矩、冒犯、流言和体面。","textChars":41,"textLines":1,"bbox":[96,308,294,70]}
+{"kind":"shape","id":"sh/vy90je9c","slide":5,"name":"Rectangle 8","bbox":[474,222,330,168]}
+{"kind":"textbox","id":"sh/nuxc3ylc","slide":5,"name":"Rectangle 9","text":"规则二","textPreview":"规则二","textChars":3,"textLines":1,"bbox":[492,236,90,22]}
+{"kind":"textbox","id":"sh/y90je9cv","slide":5,"name":"Rectangle 10","text":"传令与差遣","textPreview":"传令与差遣","textChars":5,"textLines":1,"bbox":[492,264,294,34]}
+{"kind":"textbox","id":"sh/5wjudg7a","slide":5,"name":"Rectangle 11","text":"家主、管事、主子和仆从之间可以下发任务；接受概率、执行质量和长期积怨都会被记录。","textPreview":"家主、管事、主子和仆从之间可以下发任务；接受概率、执行质量和长期积怨都会被记录。","textChars":40,"textLines":1,"bbox":[492,308,294,70]}
+{"kind":"shape","id":"sh/gbq1oryt","slide":5,"name":"Rectangle 12","bbox":[870,222,330,168]}
+{"kind":"textbox","id":"sh/n29gr2p8","slide":5,"name":"Rectangle 13","text":"规则三","textPreview":"规则三","textChars":3,"textLines":1,"bbox":[888,236,90,22]}
+{"kind":"textbox","id":"sh/yhgn29gr","slide":5,"name":"Rectangle 14","text":"秩序与社会","textPreview":"秩序与社会","textChars":5,"textLines":1,"bbox":[888,264,294,34]}
+{"kind":"textbox","id":"sh/58z25kb6","slide":5,"name":"Rectangle 15","text":"玩家管理的不只是个人需求，而是府内人心、体面、法度、腐败和温情等共同体状态。","textPreview":"玩家管理的不只是个人需求，而是府内人心、体面、法度、腐败和温情等共同体状态。","textChars":38,"textLines":1,"bbox":[888,308,294,70]}
+{"kind":"textbox","id":"sh/gn29gr2p","slide":5,"name":"Rectangle 16","text":"故事线是验证入口：用“林黛玉进贾府”这样高密度场景，把礼法、关系、差遣和反馈同时推到玩家面前。","textPreview":"故事线是验证入口：用“林黛玉进贾府”这样高密度场景，把礼法、关系、差遣和反馈同时推到玩家面前。","textChars":47,"textLines":1,"bbox":[98,502,980,60]}
+{"kind":"textbox","id":"sh/neloj2t8","slide":5,"name":"Rectangle 17","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/ytsvu9kn","slide":5,"name":"Rectangle 18","text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/mlkjm1cf","slide":5,"text":""}
+{"kind":"slide","id":"sl/58z25kb6","slide":6,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":22}
+{"kind":"textbox","id":"sh/ylc7u54z","slide":6,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/r65wjudg","slide":6,"name":"Rectangle 2","text":"当前已经实现的是一套可运行的生活模拟底座","textPreview":"当前已经实现的是一套可运行的生活模拟底座","textChars":20,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/g3ex0nux","slide":6,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/5o7qpg3e","slide":6,"name":"Rectangle 4","bbox":[72,204,330,132]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":6,"name":"Rectangle 5","text":"已做","textPreview":"已做","textChars":2,"textLines":1,"bbox":[90,218,90,22]}
+{"kind":"textbox","id":"sh/nih4byhg","slide":6,"name":"Rectangle 6","text":"主游戏","textPreview":"主游戏","textChars":3,"textLines":1,"bbox":[90,246,294,34]}
+{"kind":"textbox","id":"sh/g7adsji5","slide":6,"name":"Rectangle 7","text":"地图、人物、家具、HUD、行动队列、任务面板、存档入口都已在前台可用。","textPreview":"地图、人物、家具、HUD、行动队列、任务面板、存档入口都已在前台可用。","textChars":35,"textLines":1,"bbox":[90,290,294,34]}
+{"kind":"shape","id":"sh/9s36hcrm","slide":6,"name":"Rectangle 8","bbox":[458,204,330,132]}
+{"kind":"textbox","id":"sh/d8v6psfi","slide":6,"name":"Rectangle 9","text":"已做","textPreview":"已做","textChars":2,"textLines":1,"bbox":[476,218,90,22]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":6,"name":"Rectangle 10","text":"人物行为","textPreview":"人物行为","textChars":4,"textLines":1,"bbox":[476,246,294,34]}
+{"kind":"textbox","id":"sh/z25kb6xk","slide":6,"name":"Rectangle 11","text":"六需求、状态、性格、关系、起居、任务共同进入 Utility AI。","textPreview":"六需求、状态、性格、关系、起居、任务共同进入 Utility AI。","textChars":34,"textLines":1,"bbox":[476,290,294,34]}
+{"kind":"shape","id":"sh/6hcrmhk3","slide":6,"name":"Rectangle 12","bbox":[844,204,330,132]}
+{"kind":"textbox","id":"sh/dg7adsji","slide":6,"name":"Rectangle 13","text":"已做","textPreview":"已做","textChars":2,"textLines":1,"bbox":[862,218,90,22]}
+{"kind":"textbox","id":"sh/ovahoza1","slide":6,"name":"Rectangle 14","text":"任务传令","textPreview":"任务传令","textChars":4,"textLines":1,"bbox":[862,246,294,34]}
+{"kind":"textbox","id":"sh/vahoza1g","slide":6,"name":"Rectangle 15","text":"点名传令、群体传令、当值快捷入口、任务质量和失败处置已成第一版闭环。","textPreview":"点名传令、群体传令、当值快捷入口、任务质量和失败处置已成第一版闭环。","textChars":34,"textLines":1,"bbox":[862,290,294,34]}
+{"kind":"shape","id":"sh/6tovahoz","slide":6,"name":"Rectangle 16","bbox":[72,382,330,132]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":6,"name":"Rectangle 17","text":"已做","textPreview":"已做","textChars":2,"textLines":1,"bbox":[90,396,90,22]}
+{"kind":"textbox","id":"sh/o7qpg3ex","slide":6,"name":"Rectangle 18","text":"关系礼法","textPreview":"关系礼法","textChars":4,"textLines":1,"bbox":[90,424,294,34]}
+{"kind":"textbox","id":"sh/kjm1cfa9","slide":6,"name":"Rectangle 19","text":"四轴关系、身份礼法、场景权限、第四轴显示和 LLM 关系 HUD 已接入。","textPreview":"四轴关系、身份礼法、场景权限、第四轴显示和 LLM 关系 HUD 已接入。","textChars":37,"textLines":1,"bbox":[90,468,294,34]}
+{"kind":"shape","id":"sh/94fu18jq","slide":6,"name":"Rectangle 20","bbox":[458,382,330,132]}
+{"kind":"textbox","id":"sh/2hwfyxob","slide":6,"name":"Rectangle 21","text":"已接","textPreview":"已接","textChars":2,"textLines":1,"bbox":[476,396,90,22]}
+{"kind":"textbox","id":"sh/r2p8nqxs","slide":6,"name":"Rectangle 22","text":"秩序册","textPreview":"秩序册","textChars":3,"textLines":1,"bbox":[476,424,294,34]}
+{"kind":"textbox","id":"sh/gvy90je9","slide":6,"name":"Rectangle 23","text":"顶部【秩序】入口、只读秩序册、身份职位、事务归口、管事评估已完成第一版。","textPreview":"顶部【秩序】入口、只读秩序册、身份职位、事务归口、管事评估已完成第一版。","textChars":36,"textLines":1,"bbox":[476,468,294,34]}
+{"kind":"shape","id":"sh/9gr2p8nq","slide":6,"name":"Rectangle 24","bbox":[844,382,330,132]}
+{"kind":"textbox","id":"sh/2p8nqxs7","slide":6,"name":"Rectangle 25","text":"已做","textPreview":"已做","textChars":2,"textLines":1,"bbox":[862,396,90,22]}
+{"kind":"textbox","id":"sh/ra5gbq1o","slide":6,"name":"Rectangle 26","text":"后台工具","textPreview":"后台工具","textChars":4,"textLines":1,"bbox":[862,424,294,34]}
+{"kind":"textbox","id":"sh/kzupwb2h","slide":6,"name":"Rectangle 27","text":"后台 v2、人物设定、需求状态、互动模板、叙事规则等已表格化维护。","textPreview":"后台 v2、人物设定、需求状态、互动模板、叙事规则等已表格化维护。","textChars":33,"textLines":1,"bbox":[862,468,294,34]}
+{"kind":"textbox","id":"sh/9knih4by","slide":6,"name":"Rectangle 28","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/fa9w3m94","slide":6,"name":"Rectangle 29","text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/58z25kb6","slide":6,"text":""}
+{"kind":"slide","id":"sl/0z61032l","slide":7,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":13}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":7,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":7,"name":"Rectangle 2","text":"主界面","textPreview":"主界面","textChars":3,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/fa9w3m94","slide":7,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"textbox","id":"sh/qpg3ex0n","slide":7,"name":"Rectangle 4","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[430,222,16,18]}
+{"kind":"textbox","id":"sh/xczed8v6","slide":7,"name":"Rectangle 5","text":"中央画布：人物、地图、家具、气泡、互动连线由 draw.js 绘制。","textPreview":"中央画布：人物、地图、家具、气泡、互动连线由 draw.js 绘制。","textChars":34,"textLines":1,"bbox":[454,218,696,61]}
+{"kind":"textbox","id":"sh/8v6psfil","slide":7,"name":"Rectangle 6","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[430,280,16,18]}
+{"kind":"textbox","id":"sh/je9cvixc","slide":7,"name":"Rectangle 7","text":"底部 HUD：当前人物、六需求、状态、人物/起居/关系/技能/背包/传令/存档入口。","textPreview":"底部 HUD：当前人物、六需求、状态、人物/起居/关系/技能/背包/传令/存档入口。","textChars":42,"textLines":1,"bbox":[454,276,696,61]}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":7,"name":"Rectangle 8","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[430,338,16,18]}
+{"kind":"textbox","id":"sh/svu9knih","slide":7,"name":"Rectangle 9","text":"行动队列：玩家和 AI 行动统一入队，可展示空态、排队行动和执行反馈。","textPreview":"行动队列：玩家和 AI 行动统一入队，可展示空态、排队行动和执行反馈。","textChars":35,"textLines":1,"bbox":[454,334,696,61]}
+{"kind":"textbox","id":"sh/hgn29gr2","slide":7,"name":"Rectangle 10","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[430,396,16,18]}
+{"kind":"textbox","id":"sh/ap4r65wj","slide":7,"name":"Rectangle 11","text":"环形互动菜单：点击人物或家具出现互动/动作入口，风险和禁用项可展示。","textPreview":"环形互动菜单：点击人物或家具出现互动/动作入口，风险和禁用项可展示。","textChars":34,"textLines":1,"bbox":[454,392,696,61]}
+{"kind":"textbox","id":"sh/za1gvy90","slide":7,"name":"Rectangle 12","text":"PRD 状态：UI 总览、人物面板、通用面板规范均标记 P0 已落地。","textPreview":"PRD 状态：UI 总览、人物面板、通用面板规范均标记 P0 已落地。","textChars":35,"textLines":1,"bbox":[84,562,1000,34]}
+{"kind":"textbox","id":"sh/s36hcrmh","slide":7,"name":"Rectangle 13","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/hoza1gvy","slide":7,"name":"Rectangle 14","text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/0z61032l","slide":7,"text":""}
+{"kind":"slide","id":"sl/fu18jqh0","slide":8,"title":"CHARACTER SYSTEM","textShapes":14}
+{"kind":"textbox","id":"sh/u9knih4b","slide":8,"name":"Rectangle 1","text":"CHARACTER SYSTEM","textPreview":"CHARACTER SYSTEM","textChars":16,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/judg7ads","slide":8,"name":"Rectangle 2","text":"人物","textPreview":"人物","textChars":2,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/c7u54zid","slide":8,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/jm1cfa9w","slide":8,"name":"Rectangle 6","bbox":[72,420,340,112]}
+{"kind":"textbox","id":"sh/cvixczed","slide":8,"name":"Rectangle 7","text":"配置层","textPreview":"配置层","textChars":3,"textLines":1,"bbox":[90,434,90,22]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":8,"name":"Rectangle 8","text":"后台配置","textPreview":"后台配置","textChars":4,"textLines":1,"bbox":[90,462,304,34]}
+{"kind":"textbox","id":"sh/18jqh0fe","slide":8,"name":"Rectangle 9","text":"身份、家庭、性格、专属性格、梦想、健康、需求系数都可维护。","textPreview":"身份、家庭、性格、专属性格、梦想、健康、需求系数都可维护。","textChars":29,"textLines":1,"bbox":[90,506,304,14]}
+{"kind":"shape","id":"sh/8nqxs72x","slide":8,"name":"Rectangle 10","bbox":[470,420,340,112]}
+{"kind":"textbox","id":"sh/j2t83itg","slide":8,"name":"Rectangle 11","text":"展示层","textPreview":"展示层","textChars":3,"textLines":1,"bbox":[488,434,90,22]}
+{"kind":"textbox","id":"sh/qh0fepkz","slide":8,"name":"Rectangle 12","text":"用户面板","textPreview":"用户面板","textChars":4,"textLines":1,"bbox":[488,462,304,34]}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":8,"name":"Rectangle 13","text":"只展示玩家需要理解的结果：六需求、状态、性格小记、技能、声望和关系入口。","textPreview":"只展示玩家需要理解的结果：六需求、状态、性格小记、技能、声望和关系入口。","textChars":36,"textLines":1,"bbox":[488,506,304,14]}
+{"kind":"shape","id":"sh/8bat47y1","slide":8,"name":"Rectangle 14","bbox":[868,420,340,112]}
+{"kind":"textbox","id":"sh/jqh0fepk","slide":8,"name":"Rectangle 15","text":"体验层","textPreview":"体验层","textChars":3,"textLines":1,"bbox":[886,434,90,22]}
+{"kind":"textbox","id":"sh/q5o7qpg3","slide":8,"name":"Rectangle 16","text":"运行反馈","textPreview":"运行反馈","textChars":4,"textLines":1,"bbox":[886,462,304,34]}
+{"kind":"textbox","id":"sh/1kre1w7m","slide":8,"name":"Rectangle 17","text":"行动、气泡、任务和互动把需求、性格、状态翻译成玩家能看到的行为。","textPreview":"行动、气泡、任务和互动把需求、性格、状态翻译成玩家能看到的行为。","textChars":32,"textLines":1,"bbox":[886,506,304,14]}
+{"kind":"textbox","id":"sh/c3ylc7u5","slide":8,"name":"Rectangle 18","text":"人物 = 基础需求压力 + 性格/专属性格倾向 + 当前状态 + 叙事气泡解释。配置决定倾向，运行时决定当下，前台只展示玩家该感知的部分。","textPreview":"人物 = 基础需求压力 + 性格/专属性格倾向 + 当前状态 + 叙事气泡解释。配置决定倾向，运行时决定当下，前台只展示玩家该感知的部分。","textChars":69,"textLines":1,"bbox":[82,570,1060,42]}
+{"kind":"textbox","id":"sh/orytsvu9","slide":8,"name":"Rectangle 19","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/hcrmhk3q","slide":8,"name":"Rectangle 20","text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"image","id":"im/lc7u54zi","slide":8,"name":"Picture 24","bbox":[72,198,340,192]}
+{"kind":"image","id":"im/wra5gbq1","slide":8,"name":"Picture 4","bbox":[866.8,210.8,360.07,171.2]}
+{"kind":"image","id":"im/7u54zido","slide":8,"name":"Picture 5","bbox":[445.8,208.2,380.53,172.53]}
+{"kind":"notes","id":"nt/fu18jqh0","slide":8,"text":""}
+{"kind":"slide","id":"sl/qh0fepkz","slide":9,"title":"DAILY LOOP CASE","textShapes":21}
+{"kind":"textbox","id":"sh/ovahoza1","slide":9,"name":"Rectangle 1","text":"DAILY LOOP CASE","textPreview":"DAILY LOOP CASE","textChars":15,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/dg7adsji","slide":9,"name":"Rectangle 2","text":"一日起居：需求/任务->行动->状态 的循环","textPreview":"一日起居：需求/任务->行动->状态 的循环","textChars":22,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/6hcrmhk3","slide":9,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"textbox","id":"sh/z25kb6xk","slide":9,"name":"Rectangle 4","text":"来源：reports/tmp_xiaoxiang_probe_20steps_cached.md，离线模拟对象为黛玉、紫鹃、雪雁。","textPreview":"来源：reports/tmp_xiaoxiang_probe_20steps_cached.md，离线模拟对象为黛玉、紫鹃、雪雁。","textChars":65,"textLines":1,"bbox":[78,172,1040,28]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":9,"name":"Rectangle 5","text":"08:24","textPreview":"08:24","textChars":5,"textLines":1,"bbox":[92,228,82,28]}
+{"kind":"shape","id":"sh/d8v6psfi","slide":9,"name":"Rectangle 6","bbox":[184,243,40,1]}
+{"kind":"shape","id":"sh/6dcbulwv","slide":9,"name":"Rectangle 7","bbox":[236,214,850,54]}
+{"kind":"textbox","id":"sh/vy90je9c","slide":9,"name":"Rectangle 8","text":"黛玉晨起梳洗","textPreview":"黛玉晨起梳洗","textChars":6,"textLines":1,"bbox":[258,226,230,28]}
+{"kind":"textbox","id":"sh/nuxc3ylc","slide":9,"name":"Rectangle 9","text":"作息完成后使用梳洗妆台，洁净和仪态进入状态反馈。","textPreview":"作息完成后使用梳洗妆台，洁净和仪态进入状态反馈。","textChars":24,"textLines":1,"bbox":[508,224,520,32]}
+{"kind":"textbox","id":"sh/y90je9cv","slide":9,"name":"Rectangle 10","text":"08:45","textPreview":"08:45","textChars":5,"textLines":1,"bbox":[92,296,82,28]}
+{"kind":"shape","id":"sh/5wjudg7a","slide":9,"name":"Rectangle 11","bbox":[184,311,40,1]}
+{"kind":"shape","id":"sh/gbq1oryt","slide":9,"name":"Rectangle 12","bbox":[236,282,850,54]}
+{"kind":"textbox","id":"sh/n29gr2p8","slide":9,"name":"Rectangle 13","text":"琴台弹错走调","textPreview":"琴台弹错走调","textChars":6,"textLines":1,"bbox":[258,294,230,28]}
+{"kind":"textbox","id":"sh/yhgn29gr","slide":9,"name":"Rectangle 14","text":"意趣/学习候选被选中，行动结果也会出现失误。","textPreview":"意趣/学习候选被选中，行动结果也会出现失误。","textChars":22,"textLines":1,"bbox":[508,292,520,32]}
+{"kind":"textbox","id":"sh/58z25kb6","slide":9,"name":"Rectangle 15","text":"09:00","textPreview":"09:00","textChars":5,"textLines":1,"bbox":[92,364,82,28]}
+{"kind":"shape","id":"sh/gn29gr2p","slide":9,"name":"Rectangle 16","bbox":[184,379,40,1]}
+{"kind":"shape","id":"sh/neloj2t8","slide":9,"name":"Rectangle 17","bbox":[236,350,850,54]}
+{"kind":"textbox","id":"sh/ytsvu9kn","slide":9,"name":"Rectangle 18","text":"黛玉翻闲书，紫鹃陪伴","textPreview":"黛玉翻闲书，紫鹃陪伴","textChars":10,"textLines":1,"bbox":[258,362,263.8,28]}
+{"kind":"textbox","id":"sh/2x4nap4r","slide":9,"name":"Rectangle 19","text":"家具行动和社交候选同时生成，仆从会围绕主控人物行动。","textPreview":"家具行动和社交候选同时生成，仆从会围绕主控人物行动。","textChars":26,"textLines":1,"bbox":[508,360,520,32]}
+{"kind":"textbox","id":"sh/vixczed8","slide":9,"name":"Rectangle 20","text":"09:42","textPreview":"09:42","textChars":5,"textLines":1,"bbox":[92,432,82,28]}
+{"kind":"shape","id":"sh/k3q5o7qp","slide":9,"name":"Rectangle 21","bbox":[184,447,40,1]}
+{"kind":"shape","id":"sh/donyd0z6","slide":9,"name":"Rectangle 22","bbox":[236,418,850,54]}
+{"kind":"textbox","id":"sh/6psfil0r","slide":9,"name":"Rectangle 23","text":"陪伴触发逾矩败露","textPreview":"陪伴触发逾矩败露","textChars":8,"textLines":1,"bbox":[258,430,230,28]}
+{"kind":"textbox","id":"sh/val87ed8","slide":9,"name":"Rectangle 24","text":"互动风险造成好感和信任下降，并写入关系轴变化日志。","textPreview":"互动风险造成好感和信任下降，并写入关系轴变化日志。","textChars":25,"textLines":1,"bbox":[508,428,520,32]}
+{"kind":"textbox","id":"sh/kre1w7mp","slide":9,"name":"Rectangle 25","text":"10:00","textPreview":"10:00","textChars":5,"textLines":1,"bbox":[92,500,82,28]}
+{"kind":"shape","id":"sh/dcbulwva","slide":9,"name":"Rectangle 26","bbox":[184,515,40,1]}
+{"kind":"shape","id":"sh/2lszqtcj","slide":9,"name":"Rectangle 27","bbox":[236,486,850,54]}
+{"kind":"textbox","id":"sh/v6psfil0","slide":9,"name":"Rectangle 28","text":"黛玉下发晨昏定省","textPreview":"黛玉下发晨昏定省","textChars":8,"textLines":1,"bbox":[258,498,230,28]}
+{"kind":"textbox","id":"sh/h4byhgn2","slide":9,"name":"Rectangle 29","text":"任务系统生成、接受和执行，主仆关系进入日常管理。","textPreview":"任务系统生成、接受和执行，主仆关系进入日常管理。","textChars":24,"textLines":1,"bbox":[508,496,520,32]}
+{"kind":"textbox","id":"sh/sji5snel","slide":9,"name":"Rectangle 30","text":"这页要传达的不是“NPC 有作息表”，而是：作息、家具、社交、任务、状态和关系变化已经在同一条日循环里发生。","textPreview":"这页要传达的不是“NPC 有作息表”，而是：作息、家具、社交、任务、状态和关系变化已经在同一条日循环里发生。","textChars":54,"textLines":1,"bbox":[92,594,1030,38]}
+{"kind":"textbox","id":"sh/3ylc7u54","slide":9,"name":"Rectangle 31","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/adsji5sn","slide":9,"name":"Rectangle 32","text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/qh0fepkz","slide":9,"text":""}
+{"kind":"slide","id":"sl/29gr2p8n","slide":10,"title":"INTERACTION AND RELATION","textShapes":13}
+{"kind":"textbox","id":"sh/9gr2p8nq","slide":10,"name":"Rectangle 1","text":"INTERACTION AND RELATION","textPreview":"INTERACTION AND RELATION","textChars":24,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/gvy90je9","slide":10,"name":"Rectangle 2","text":"社交互动和关系","textPreview":"社交互动和关系","textChars":7,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/r2p8nqxs","slide":10,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/2hwfyxob","slide":10,"name":"Rectangle 4","bbox":[640,202,470,118]}
+{"kind":"textbox","id":"sh/94fu18jq","slide":10,"name":"Rectangle 5","text":"四轴","textPreview":"四轴","textChars":2,"textLines":1,"bbox":[658,216,90,22]}
+{"kind":"textbox","id":"sh/kjm1cfa9","slide":10,"name":"Rectangle 6","text":"关系模型","textPreview":"关系模型","textChars":4,"textLines":1,"bbox":[658,244,434,34]}
+{"kind":"textbox","id":"sh/rqd4vmtw","slide":10,"name":"Rectangle 7","text":"好感/姻缘、信任、友谊为双向共享轴；服从、体恤、孝道等第四象限按身份和关系派生展示。","textPreview":"好感/姻缘、信任、友谊为双向共享轴；服从、体恤、孝道等第四象限按身份和关系派生展示。","textChars":42,"textLines":1,"bbox":[658,288,434,20]}
+{"kind":"shape","id":"sh/25kb6xkf","slide":10,"name":"Rectangle 8","bbox":[640,344,470,118]}
+{"kind":"textbox","id":"sh/4fu18jqh","slide":10,"name":"Rectangle 9","text":"事件","textPreview":"事件","textChars":2,"textLines":1,"bbox":[658,358,90,22]}
+{"kind":"textbox","id":"sh/x0nuxc3y","slide":10,"name":"Rectangle 10","text":"互动结算","textPreview":"互动结算","textChars":4,"textLines":1,"bbox":[658,386,434,34]}
+{"kind":"textbox","id":"sh/m94fu18j","slide":10,"name":"Rectangle 11","text":"互动成功、失败、逾矩、被目击等上下文会写入 relation:axis_change 和 relation:change。","textPreview":"互动成功、失败、逾矩、被目击等上下文会写入 relation:axis_change 和 relation:change。","textChars":61,"textLines":1,"bbox":[658,430,434,20]}
+{"kind":"shape","id":"sh/fu18jqh0","slide":10,"name":"Rectangle 12","bbox":[640,486,470,74]}
+{"kind":"textbox","id":"sh/83itgfml","slide":10,"name":"Rectangle 13","text":"日志案例","textPreview":"日志案例","textChars":4,"textLines":1,"bbox":[662,500,120,24]}
+{"kind":"textbox","id":"sh/xobm58z2","slide":10,"name":"Rectangle 14","text":"紫鹃与黛玉因“逾矩败露”：好感 61.93→47.21，信任 49.98→38.48，综合关系 52→41。","textPreview":"紫鹃与黛玉因“逾矩败露”：好感 61.93→47.21，信任 49.98→38.48，综合关系 52→41。","textChars":54,"textLines":1,"bbox":[782,496,302,42]}
+{"kind":"textbox","id":"sh/qxs72x4n","slide":10,"name":"Rectangle 15","text":"玩家体感：一次互动会留下数值、标签、气泡和后续 AI 倾向，不只是播放一段对话。","textPreview":"玩家体感：一次互动会留下数值、标签、气泡和后续 AI 倾向，不只是播放一段对话。","textChars":40,"textLines":1,"bbox":[90,594,1020,38]}
+{"kind":"textbox","id":"sh/fil0rqd4","slide":10,"name":"Rectangle 16","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/4zidonyd","slide":10,"name":"Rectangle 17","text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"image","id":"im/a9w3m94f","slide":10,"name":"Picture 21","bbox":[72,195,520,330]}
+{"kind":"notes","id":"nt/29gr2p8n","slide":10,"text":""}
+{"kind":"slide","id":"sl/re1w7mp0","slide":11,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":20}
+{"kind":"textbox","id":"sh/6tovahoz","slide":11,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/vahoza1g","slide":11,"name":"Rectangle 2","text":"人物不只是站在地图上，而是被需求、状态和性格驱动","textPreview":"人物不只是站在地图上，而是被需求、状态和性格驱动","textChars":24,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/onyd0z61","slide":11,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/d8v6psfi","slide":11,"name":"Rectangle 4","bbox":[76,206,1088,46]}
+{"kind":"textbox","id":"sh/6hcrmhk3","slide":11,"name":"Rectangle 5","text":"六需求","textPreview":"六需求","textChars":3,"textLines":1,"bbox":[92,214,200,26]}
+{"kind":"textbox","id":"sh/z25kb6xk","slide":11,"name":"Rectangle 6","text":"饥饿、精力、意趣、洁净、交游、心绪自然衰退和恢复","textPreview":"饥饿、精力、意趣、洁净、交游、心绪自然衰退和恢复","textChars":24,"textLines":1,"bbox":[318,214,402,30]}
+{"kind":"textbox","id":"sh/oj2t83it","slide":11,"name":"Rectangle 7","text":"影响 AI 候选与行动优先级","textPreview":"影响 AI 候选与行动优先级","textChars":14,"textLines":1,"bbox":[742,214,384,30]}
+{"kind":"textbox","id":"sh/d4vmtwra","slide":11,"name":"Rectangle 8","text":"需求系数","textPreview":"需求系数","textChars":4,"textLines":1,"bbox":[92,276,200,26]}
+{"kind":"textbox","id":"sh/h4byhgn2","slide":11,"name":"Rectangle 9","text":"人物基础系数、性格、状态、长期适应共同进入 calcNeedCoeffs","textPreview":"人物基础系数、性格、状态、长期适应共同进入 calcNeedCoeffs","textChars":36,"textLines":1,"bbox":[318,276,402,30]}
+{"kind":"textbox","id":"sh/sji5snel","slide":11,"name":"Rectangle 10","text":"让每个人生活节律不同","textPreview":"让每个人生活节律不同","textChars":10,"textLines":1,"bbox":[742,276,384,30]}
+{"kind":"textbox","id":"sh/3ylc7u54","slide":11,"name":"Rectangle 11","text":"状态系统","textPreview":"状态系统","textChars":4,"textLines":1,"bbox":[92,338,200,26]}
+{"kind":"textbox","id":"sh/adsji5sn","slide":11,"name":"Rectangle 12","text":"状态有分类、极性、时长、互斥组、需求修正、AI 权重修正","textPreview":"状态有分类、极性、时长、互斥组、需求修正、AI 权重修正","textChars":28,"textLines":1,"bbox":[318,338,402,30]}
+{"kind":"textbox","id":"sh/lszqtcj6","slide":11,"name":"Rectangle 13","text":"支持微醺、感伤、恼怒、受责等反馈","textPreview":"支持微醺、感伤、恼怒、受责等反馈","textChars":16,"textLines":1,"bbox":[742,338,384,30]}
+{"kind":"textbox","id":"sh/s72x4nap","slide":11,"name":"Rectangle 14","text":"长期习惯","textPreview":"长期习惯","textChars":4,"textLines":1,"bbox":[92,400,200,26]}
+{"kind":"textbox","id":"sh/3m94fu18","slide":11,"name":"Rectangle 15","text":"NeedAdaptationSystem 根据反复使用行为形成适应","textPreview":"NeedAdaptationSystem 根据反复使用行为形成适应","textChars":33,"textLines":1,"bbox":[318,400,402,30]}
+{"kind":"textbox","id":"sh/a5gbq1or","slide":11,"name":"Rectangle 16","text":"人物会被玩家安排改变生活惯性","textPreview":"人物会被玩家安排改变生活惯性","textChars":14,"textLines":1,"bbox":[742,400,384,30]}
+{"kind":"textbox","id":"sh/hoza1gvy","slide":11,"name":"Rectangle 17","text":"性格解释器","textPreview":"性格解释器","textChars":5,"textLines":1,"bbox":[92,462,200,26]}
+{"kind":"textbox","id":"sh/s36hcrmh","slide":11,"name":"Rectangle 18","text":"TraitEffectSystem 读取 traitMetadata.effects","textPreview":"TraitEffectSystem 读取 traitMetadata.effects","textChars":42,"textLines":1,"bbox":[318,462,402,30]}
+{"kind":"textbox","id":"sh/4zidonyd","slide":11,"name":"Rectangle 19","text":"性格能改需求阈值、状态概率、AI 权重","textPreview":"性格能改需求阈值、状态概率、AI 权重","textChars":19,"textLines":1,"bbox":[742,462,384,30]}
+{"kind":"textbox","id":"sh/xkf6dcbu","slide":11,"name":"Rectangle 20","text":"商业含义：角色不是剧情开关，而是可被系统持续塑造的模拟对象。","textPreview":"商业含义：角色不是剧情开关，而是可被系统持续塑造的模拟对象。","textChars":30,"textLines":1,"bbox":[92,572,950,38]}
+{"kind":"textbox","id":"sh/mtwra5gb","slide":11,"name":"Rectangle 21","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/fepkzupw","slide":11,"name":"Rectangle 22","text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/re1w7mp0","slide":11,"text":""}
+{"kind":"slide","id":"sl/4fu18jqh","slide":12,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":16}
+{"kind":"textbox","id":"sh/s72x4nap","slide":12,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/lszqtcj6","slide":12,"name":"Rectangle 2","text":"起居、家具和行动队列已经接成同一条执行链","textPreview":"起居、家具和行动队列已经接成同一条执行链","textChars":20,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/adsji5sn","slide":12,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/3ylc7u54","slide":12,"name":"Rectangle 4","bbox":[72,214,342,190]}
+{"kind":"textbox","id":"sh/sji5snel","slide":12,"name":"Rectangle 5","text":"已做","textPreview":"已做","textChars":2,"textLines":1,"bbox":[90,228,90,22]}
+{"kind":"textbox","id":"sh/h4byhgn2","slide":12,"name":"Rectangle 6","text":"起居面板","textPreview":"起居面板","textChars":4,"textLines":1,"bbox":[90,256,306,34]}
+{"kind":"textbox","id":"sh/ap4r65wj","slide":12,"name":"Rectangle 7","text":"48 刻网格、周历、模板、跨日就寝、不重叠规则。新起居覆盖 Utility AI，旧作息只做空白时段兜底。","textPreview":"48 刻网格、周历、模板、跨日就寝、不重叠规则。新起居覆盖 Utility AI，旧作息只做空白时段兜底。","textChars":53,"textLines":1,"bbox":[90,300,306,92]}
+{"kind":"shape","id":"sh/za1gvy90","slide":12,"name":"Rectangle 8","bbox":[468,214,342,190]}
+{"kind":"textbox","id":"sh/z61032ls","slide":12,"name":"Rectangle 9","text":"已做","textPreview":"已做","textChars":2,"textLines":1,"bbox":[486,228,90,22]}
+{"kind":"textbox","id":"sh/al87ed8b","slide":12,"name":"Rectangle 10","text":"家具多动作","textPreview":"家具多动作","textChars":5,"textLines":1,"bbox":[486,256,306,34]}
+{"kind":"textbox","id":"sh/hcrmhk3q","slide":12,"name":"Rectangle 11","text":"书案、饭桌、茶案、琴台、花圃等支持多个动作；点击家具可选择动作，AI 候选也按家具实例 + action 展开。","textPreview":"书案、饭桌、茶案、琴台、花圃等支持多个动作；点击家具可选择动作，AI 候选也按家具实例 + action 展开。","textChars":56,"textLines":1,"bbox":[486,300,306,92]}
+{"kind":"shape","id":"sh/orytsvu9","slide":12,"name":"Rectangle 12","bbox":[864,214,342,190]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":12,"name":"Rectangle 13","text":"部分扩展","textPreview":"部分扩展","textChars":4,"textLines":1,"bbox":[882,228,90,22]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":12,"name":"Rectangle 14","text":"动作效果","textPreview":"动作效果","textChars":4,"textLines":1,"bbox":[882,256,306,34]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":12,"name":"Rectangle 15","text":"家具动作已支持需求、状态、技能经验、日志；使用链路读取 duration、needRestores、effects、text、maxUsers。","textPreview":"家具动作已支持需求、状态、技能经验、日志；使用链路读取 duration、needRestores、effects、text、maxUsers。","textChars":72,"textLines":1,"bbox":[882,300,306,92]}
+{"kind":"shape","id":"sh/sfil0rqd","slide":12,"name":"Rectangle 16","bbox":[270,450,740,104]}
+{"kind":"textbox","id":"sh/zqtcj6to","slide":12,"name":"Rectangle 17","text":"已做基础","textPreview":"已做基础","textChars":4,"textLines":1,"bbox":[288,464,90,22]}
+{"kind":"textbox","id":"sh/65wjudg7","slide":12,"name":"Rectangle 18","text":"旁观反应","textPreview":"旁观反应","textChars":4,"textLines":1,"bbox":[288,492,704,34]}
+{"kind":"textbox","id":"sh/ed8bat47","slide":12,"name":"Rectangle 19","text":"FurnitureReactionSystem 监听家具动作开始，同场景旁观者可按动作标签、性格和关系触发气泡/埋点。","textPreview":"FurnitureReactionSystem 监听家具动作开始，同场景旁观者可按动作标签、性格和关系触发气泡/埋点。","textChars":59,"textLines":1,"bbox":[288,536,704,6]}
+{"kind":"textbox","id":"sh/7u54zido","slide":12,"name":"Rectangle 20","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/wfyxobm5","slide":12,"name":"Rectangle 21","text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/4fu18jqh","slide":12,"text":""}
+{"kind":"slide","id":"sl/lwval87e","slide":13,"title":"起居系统——npc太不听话，干脆J人","textShapes":12}
+{"kind":"textbox","id":"sh/wfyxobm5","slide":13,"name":"Rectangle 2","text":"起居系统——npc太不听话，干脆J人","textPreview":"起居系统——npc太不听话，干脆J人","textChars":18,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/eloj2t83","slide":13,"bbox":[930,166,270,356]}
+{"kind":"textbox","id":"sh/lc7u54zi","slide":13,"text":"玩法说明","textPreview":"玩法说明","textChars":4,"textLines":1,"bbox":[956,190,160,28]}
+{"kind":"textbox","id":"sh/wra5gbq1","slide":13,"text":"排一天","textPreview":"排一天","textChars":3,"textLines":1,"bbox":[956,238,78,24]}
+{"kind":"textbox","id":"sh/7adsji5s","slide":13,"text":"按48刻安排需求、技能、职业活动。","textPreview":"按48刻安排需求、技能、职业活动。","textChars":17,"textLines":1,"bbox":[1042,235,128,42]}
+{"kind":"textbox","id":"sh/epkzupwb","slide":13,"text":"看合身","textPreview":"看合身","textChars":3,"textLines":1,"bbox":[956,304,78,24]}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":13,"text":"满意度反馈日程是否贴合性格与状态。","textPreview":"满意度反馈日程是否贴合性格与状态。","textChars":17,"textLines":1,"bbox":[1042,301,128,42]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":13,"text":"管惯性","textPreview":"管惯性","textChars":3,"textLines":1,"bbox":[956,370,78,24]}
+{"kind":"textbox","id":"sh/qd4vmtwr","slide":13,"text":"起居优先进入 AI，空白时段再由家具、社交、任务补足。","textPreview":"起居优先进入 AI，空白时段再由家具、社交、任务补足。","textChars":27,"textLines":1,"bbox":[1042,367,128,42]}
+{"kind":"textbox","id":"sh/fyxobm58","slide":13,"text":"可扩展","textPreview":"可扩展","textChars":3,"textLines":1,"bbox":[956,436,78,24]}
+{"kind":"textbox","id":"sh/8v6psfil","slide":13,"text":"家规、管家差事、请安礼数、读书休养都能接进来。","textPreview":"家规、管家差事、请安礼数、读书休养都能接进来。","textChars":23,"textLines":1,"bbox":[1042,433,128,42]}
+{"kind":"shape","id":"sh/xczed8v6","slide":13,"bbox":[54,568,1068,74]}
+{"kind":"textbox","id":"sh/qpg3ex0n","slide":13,"text":"商业表达","textPreview":"商业表达","textChars":4,"textLines":1,"bbox":[82,588,118,28]}
+{"kind":"textbox","id":"sh/fa9w3m94","slide":13,"text":"它补上了模拟游戏里最关键的体感问题：我今天到底该干嘛。玩家不是盯数值救火，而是在塑造角色的生活惯性。","textPreview":"它补上了模拟游戏里最关键的体感问题：我今天到底该干嘛。玩家不是盯数值救火，而是在塑造角色的生活惯性。","textChars":50,"textLines":1,"bbox":[222,586,820,34]}
+{"kind":"image","id":"im/re1w7mp0","slide":13,"name":"Picture 1","bbox":[42.73,155.87,848.53,382.67]}
+{"kind":"notes","id":"nt/lwval87e","slide":13,"text":""}
+{"kind":"slide","id":"sl/25kb6xkf","slide":14,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":17}
+{"kind":"textbox","id":"sh/kre1w7mp","slide":14,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/dcbulwva","slide":14,"name":"Rectangle 2","text":"任务和传令已经是目前最强的可玩模块","textPreview":"任务和传令已经是目前最强的可玩模块","textChars":17,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/2x4nap4r","slide":14,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/vixczed8","slide":14,"name":"Rectangle 4","bbox":[76,200,500,78]}
+{"kind":"textbox","id":"sh/k3q5o7qp","slide":14,"name":"Rectangle 5","text":"点名传令","textPreview":"点名传令","textChars":4,"textLines":1,"bbox":[94,218,130,28]}
+{"kind":"textbox","id":"sh/donyd0z6","slide":14,"name":"Rectangle 6","text":"点击人物、当值标记或底栏传令，预选目标并下发任务。","textPreview":"点击人物、当值标记或底栏传令，预选目标并下发任务。","textChars":25,"textLines":1,"bbox":[241,215,300,42]}
+{"kind":"shape","id":"sh/29gr2p8n","slide":14,"name":"Rectangle 7","bbox":[636,200,500,78]}
+{"kind":"textbox","id":"sh/vu9knih4","slide":14,"name":"Rectangle 8","text":"群体传令","textPreview":"群体传令","textChars":4,"textLines":1,"bbox":[654,218,130,28]}
+{"kind":"textbox","id":"sh/3ylc7u54","slide":14,"name":"Rectangle 9","text":"原群体任务面板已并入传令右栏，按条件范围批量下发。","textPreview":"原群体任务面板已并入传令右栏，按条件范围批量下发。","textChars":25,"textLines":1,"bbox":[801,215,300,42]}
+{"kind":"shape","id":"sh/adsji5sn","slide":14,"name":"Rectangle 10","bbox":[76,312,500,78]}
+{"kind":"textbox","id":"sh/h4byhgn2","slide":14,"name":"Rectangle 11","text":"接受概率","textPreview":"接受概率","textChars":4,"textLines":1,"bbox":[94,330,130,28]}
+{"kind":"textbox","id":"sh/sji5snel","slide":14,"name":"Rectangle 12","text":"任务是否接受读取职责、服从、信任、好感和当前负担。","textPreview":"任务是否接受读取职责、服从、信任、好感和当前负担。","textChars":25,"textLines":1,"bbox":[241,327,300,42]}
+{"kind":"shape","id":"sh/3m94fu18","slide":14,"name":"Rectangle 13","bbox":[636,312,500,78]}
+{"kind":"textbox","id":"sh/a5gbq1or","slide":14,"name":"Rectangle 14","text":"日课与随侍","textPreview":"日课与随侍","textChars":5,"textLines":1,"bbox":[654,330,130,28]}
+{"kind":"textbox","id":"sh/lszqtcj6","slide":14,"name":"Rectangle 15","text":"dutyRoutines 生成日常任务；followRotations 配置宝玉、黛玉的当值仆从。","textPreview":"dutyRoutines 生成日常任务；followRotations 配置宝玉、黛玉的当值仆从。","textChars":49,"textLines":1,"bbox":[801,327,300,42]}
+{"kind":"shape","id":"sh/s72x4nap","slide":14,"name":"Rectangle 16","bbox":[76,424,500,78]}
+{"kind":"textbox","id":"sh/zidonyd0","slide":14,"name":"Rectangle 17","text":"任务质量","textPreview":"任务质量","textChars":4,"textLines":1,"bbox":[94,442,130,28]}
+{"kind":"textbox","id":"sh/a1gvy90j","slide":14,"name":"Rectangle 18","text":"任务结果有 0-100 分，分出出色、合格、敷衍、失败。","textPreview":"任务结果有 0-100 分，分出出色、合格、敷衍、失败。","textChars":28,"textLines":1,"bbox":[241,439,300,42]}
+{"kind":"shape","id":"sh/ylc7u54z","slide":14,"name":"Rectangle 19","bbox":[636,424,500,78]}
+{"kind":"textbox","id":"sh/r65wjudg","slide":14,"name":"Rectangle 20","text":"长期反馈","textPreview":"长期反馈","textChars":4,"textLines":1,"bbox":[654,442,130,28]}
+{"kind":"textbox","id":"sh/gr2p8nqx","slide":14,"name":"Rectangle 21","text":"仆从忠诚、积怨、劳役压力、完成次数、失败次数会被记录。","textPreview":"仆从忠诚、积怨、劳役压力、完成次数、失败次数会被记录。","textChars":27,"textLines":1,"bbox":[801,439,300,42]}
+{"kind":"textbox","id":"sh/9cvixcze","slide":14,"name":"Rectangle 22","text":"这页是上一版缺失最大的地方：传令不是概念，已经有 UI、权限、经济选项、任务实例和质量结算。","textPreview":"这页是上一版缺失最大的地方：传令不是概念，已经有 UI、权限、经济选项、任务实例和质量结算。","textChars":46,"textLines":1,"bbox":[90,574,1040,38]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":14,"name":"Rectangle 23","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/nih4byhg","slide":14,"name":"Rectangle 24","text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/25kb6xkf","slide":14,"text":""}
+{"kind":"slide","id":"sl/7y1kre1w","slide":15,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":12}
+{"kind":"textbox","id":"sh/yd0z6103","slide":15,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/rytsvu9k","slide":15,"name":"Rectangle 2","text":"关系系统已经从单一好感扩展成四轴模型","textPreview":"关系系统已经从单一好感扩展成四轴模型","textChars":18,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/g7adsji5","slide":15,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"textbox","id":"sh/9s36hcrm","slide":15,"name":"Rectangle 4","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[82,226,16,18]}
+{"kind":"textbox","id":"sh/y1kre1w7","slide":15,"name":"Rectangle 5","text":"四轴：好感、信任、友谊为双向共享，服从为方向性轴。","textPreview":"四轴：好感、信任、友谊为双向共享，服从为方向性轴。","textChars":25,"textLines":1,"bbox":[106,222,626,65]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":15,"name":"Rectangle 6","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[82,288,16,18]}
+{"kind":"textbox","id":"sh/g3ex0nux","slide":15,"name":"Rectangle 7","text":"综合分：好感 45% + 信任 35% + 友谊 20%，服从不进入综合分。","textPreview":"综合分：好感 45% + 信任 35% + 友谊 20%，服从不进入综合分。","textChars":38,"textLines":1,"bbox":[106,284,626,65]}
+{"kind":"textbox","id":"sh/5o7qpg3e","slide":15,"name":"Rectangle 8","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[82,350,16,18]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":15,"name":"Rectangle 9","text":"第四象限显示：主仆显示服从/体恤，长幼显示孝道/慈爱。","textPreview":"第四象限显示：主仆显示服从/体恤，长幼显示孝道/慈爱。","textChars":27,"textLines":1,"bbox":[106,346,626,65]}
+{"kind":"textbox","id":"sh/cvixczed","slide":15,"name":"Rectangle 10","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[82,412,16,18]}
+{"kind":"textbox","id":"sh/nap4r65w","slide":15,"name":"Rectangle 11","text":"关系面板：每行人物卡片，四象限外环进度条；LLM 对话 HUD 共用同一套轴。","textPreview":"关系面板：每行人物卡片，四象限外环进度条；LLM 对话 HUD 共用同一套轴。","textChars":39,"textLines":1,"bbox":[106,408,626,65]}
+{"kind":"textbox","id":"sh/upwb2hwf","slide":15,"name":"Rectangle 12","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/54zidony","slide":15,"name":"Rectangle 13","text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"image","id":"im/bulwval8","slide":15,"name":"Picture 17","bbox":[800,345.62,350,28.76]}
+{"kind":"notes","id":"nt/7y1kre1w","slide":15,"text":""}
+{"kind":"slide","id":"sl/8z25kb6x","slide":16,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":16}
+{"kind":"textbox","id":"sh/pg3ex0nu","slide":16,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/wval87ed","slide":16,"name":"Rectangle 2","text":"身份礼法和秩序册已经进入主游戏，只是还没有反向改 AI","textPreview":"身份礼法和秩序册已经进入主游戏，只是还没有反向改 AI","textChars":27,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/7mp0bi9s","slide":16,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/e1w7mp0b","slide":16,"name":"Rectangle 4","bbox":[72,220,330,150]}
+{"kind":"textbox","id":"sh/psfil0rq","slide":16,"name":"Rectangle 5","text":"已接","textPreview":"已接","textChars":2,"textLines":1,"bbox":[90,234,90,22]}
+{"kind":"textbox","id":"sh/w7mp0bi9","slide":16,"name":"Rectangle 6","text":"身份礼法","textPreview":"身份礼法","textChars":4,"textLines":1,"bbox":[90,262,294,34]}
+{"kind":"textbox","id":"sh/7u54zido","slide":16,"name":"Rectangle 7","text":"身份位阶、名分、接触类型、风险默认值和场景权限已进入互动意愿与风险判断。","textPreview":"身份位阶、名分、接触类型、风险默认值和场景权限已进入互动意愿与风险判断。","textChars":36,"textLines":1,"bbox":[90,306,294,52]}
+{"kind":"shape","id":"sh/ed8bat47","slide":16,"name":"Rectangle 8","bbox":[474,220,330,150]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":16,"name":"Rectangle 9","text":"已做","textPreview":"已做","textChars":2,"textLines":1,"bbox":[492,234,90,22]}
+{"kind":"textbox","id":"sh/d8v6psfi","slide":16,"name":"Rectangle 10","text":"秩序入口","textPreview":"秩序入口","textChars":4,"textLines":1,"bbox":[492,262,294,34]}
+{"kind":"textbox","id":"sh/6hcrmhk3","slide":16,"name":"Rectangle 11","text":"顶部【秩序】入口和快捷键 Y 已接入主游戏 panel-overlay。","textPreview":"顶部【秩序】入口和快捷键 Y 已接入主游戏 panel-overlay。","textChars":36,"textLines":1,"bbox":[492,306,294,52]}
+{"kind":"shape","id":"sh/z25kb6xk","slide":16,"name":"Rectangle 12","bbox":[876,220,330,150]}
+{"kind":"textbox","id":"sh/ovahoza1","slide":16,"name":"Rectangle 13","text":"已做","textPreview":"已做","textChars":2,"textLines":1,"bbox":[894,234,90,22]}
+{"kind":"textbox","id":"sh/dg7adsji","slide":16,"name":"Rectangle 14","text":"只读秩序册","textPreview":"只读秩序册","textChars":5,"textLines":1,"bbox":[894,262,294,34]}
+{"kind":"textbox","id":"sh/6tovahoz","slide":16,"name":"Rectangle 15","text":"读取秩序元数据、人物身份、关系第四轴、技能值和事务归口，生成面板。","textPreview":"读取秩序元数据、人物身份、关系第四轴、技能值和事务归口，生成面板。","textChars":33,"textLines":1,"bbox":[894,306,294,52]}
+{"kind":"shape","id":"sh/vahoza1g","slide":16,"name":"Rectangle 16","bbox":[218,432,844,112]}
+{"kind":"textbox","id":"sh/o7qpg3ex","slide":16,"name":"Rectangle 17","text":"已做第一版","textPreview":"已做第一版","textChars":5,"textLines":1,"bbox":[236,446,90,22]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":16,"name":"Rectangle 18","text":"管事评估","textPreview":"管事评估","textChars":4,"textLines":1,"bbox":[236,474,808,34]}
+{"kind":"textbox","id":"sh/hk3q5o7q","slide":16,"name":"Rectangle 19","text":"已能展示身份职位、事务归口、管事评估摘要、第四轴观察；当前不实际改派，不直接影响 AI。","textPreview":"已能展示身份职位、事务归口、管事评估摘要、第四轴观察；当前不实际改派，不直接影响 AI。","textChars":44,"textLines":1,"bbox":[236,518,808,14]}
+{"kind":"textbox","id":"sh/oza1gvy9","slide":16,"name":"Rectangle 20","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/zed8v6ps","slide":16,"name":"Rectangle 21","text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/8z25kb6x","slide":16,"text":""}
+{"kind":"slide","id":"sl/54zidony","slide":17,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":13}
+{"kind":"textbox","id":"sh/x0nuxc3y","slide":17,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/4fu18jqh","slide":17,"name":"Rectangle 2","text":"叙事反馈已经不只是随机冒泡","textPreview":"叙事反馈已经不只是随机冒泡","textChars":13,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/fil0rqd4","slide":17,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"textbox","id":"sh/qxs72x4n","slide":17,"name":"Rectangle 4","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[86,214,16,18]}
+{"kind":"textbox","id":"sh/xobm58z2","slide":17,"name":"Rectangle 5","text":"BubbleContext 已接入：性格、需求、状态、行动、关系、场景和记忆进入候选。","textPreview":"BubbleContext 已接入：性格、需求、状态、行动、关系、场景和记忆进入候选。","textChars":43,"textLines":1,"bbox":[110,210,626,65]}
+{"kind":"textbox","id":"sh/83itgfml","slide":17,"name":"Rectangle 6","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[86,276,16,18]}
+{"kind":"textbox","id":"sh/fepkzupw","slide":17,"name":"Rectangle 7","text":"旧需求气泡、互动状态气泡、记忆浮现已转为统一候选来源。","textPreview":"旧需求气泡、互动状态气泡、记忆浮现已转为统一候选来源。","textChars":27,"textLines":1,"bbox":[110,272,626,65]}
+{"kind":"textbox","id":"sh/mtwra5gb","slide":17,"name":"Rectangle 8","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[86,338,16,18]}
+{"kind":"textbox","id":"sh/oj2t83it","slide":17,"name":"Rectangle 9","text":"已监听 need_band、state_add、scene_entered、interaction_state 和低频 scan。","textPreview":"已监听 need_band、state_add、scene_entered、interaction_state 和低频 scan。","textChars":65,"textLines":1,"bbox":[110,334,626,65]}
+{"kind":"textbox","id":"sh/d4vmtwra","slide":17,"name":"Rectangle 10","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[86,400,16,18]}
+{"kind":"textbox","id":"sh/6dcbulwv","slide":17,"name":"Rectangle 11","text":"多人物旁观、情绪传染、家具旁观、性格行为气泡均有第一版。","textPreview":"多人物旁观、情绪传染、家具旁观、性格行为气泡均有第一版。","textChars":28,"textLines":1,"bbox":[110,396,626,65]}
+{"kind":"textbox","id":"sh/vy90je9c","slide":17,"name":"Rectangle 12","text":"玩家体感：行动不只是数值变化，而会被角色用当下口吻说出来。","textPreview":"玩家体感：行动不只是数值变化，而会被角色用当下口吻说出来。","textChars":29,"textLines":1,"bbox":[94,572,900,34]}
+{"kind":"textbox","id":"sh/o7qpg3ex","slide":17,"name":"Rectangle 13","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":17,"name":"Rectangle 14","text":"16","textPreview":"16","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"image","id":"im/1cfa9w3m","slide":17,"name":"Picture 18","bbox":[822,218.19,340,305.62]}
+{"kind":"notes","id":"nt/54zidony","slide":17,"text":""}
+{"kind":"slide","id":"sl/m58z25kb","slide":18,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":19}
+{"kind":"textbox","id":"sh/t83itgfm","slide":18,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/4nap4r65","slide":18,"name":"Rectangle 2","text":"技能成长和主题玩法包已经接上家具、任务和状态","textPreview":"技能成长和主题玩法包已经接上家具、任务和状态","textChars":22,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/bq1oryts","slide":18,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/m58z25kb","slide":18,"name":"Rectangle 4","bbox":[72,210,354,154]}
+{"kind":"textbox","id":"sh/twra5gbq","slide":18,"name":"Rectangle 5","text":"已接","textPreview":"已接","textChars":2,"textLines":1,"bbox":[90,224,90,22]}
+{"kind":"textbox","id":"sh/4byhgn29","slide":18,"name":"Rectangle 6","text":"技能效果入口","textPreview":"技能效果入口","textChars":6,"textLines":1,"bbox":[90,252,318,34]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":18,"name":"Rectangle 7","text":"CharacterEffectSystem.apply 支持 skillXp；家具动作和任务奖励/惩罚都能发放技能经验。","textPreview":"CharacterEffectSystem.apply 支持 skillXp；家具动作和任务奖励/惩罚都能发放技能经验。","textChars":60,"textLines":1,"bbox":[90,296,318,56]}
+{"kind":"shape","id":"sh/m1cfa9w3","slide":18,"name":"Rectangle 8","bbox":[464,210,354,154]}
+{"kind":"textbox","id":"sh/cfa9w3m9","slide":18,"name":"Rectangle 9","text":"已配置","textPreview":"已配置","textChars":3,"textLines":1,"bbox":[482,224,90,22]}
+{"kind":"textbox","id":"sh/1032lszq","slide":18,"name":"Rectangle 10","text":"管理技能子集","textPreview":"管理技能子集","textChars":6,"textLines":1,"bbox":[482,252,318,34]}
+{"kind":"textbox","id":"sh/u9knih4b","slide":18,"name":"Rectangle 11","text":"规矩、文墨、察言、办事、心计、口才、勤勉、藏锋、通变用于解释管事能力。","textPreview":"规矩、文墨、察言、办事、心计、口才、勤勉、藏锋、通变用于解释管事能力。","textChars":35,"textLines":1,"bbox":[482,296,318,56]}
+{"kind":"shape","id":"sh/judg7ads","slide":18,"name":"Rectangle 12","bbox":[856,210,354,154]}
+{"kind":"textbox","id":"sh/c7u54zid","slide":18,"name":"Rectangle 13","text":"已落地","textPreview":"已落地","textChars":3,"textLines":1,"bbox":[874,224,90,22]}
+{"kind":"textbox","id":"sh/1orytsvu","slide":18,"name":"Rectangle 14","text":"Activity Pack","textPreview":"Activity Pack","textChars":13,"textLines":1,"bbox":[874,252,318,34]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":18,"name":"Rectangle 15","text":"主题玩法包支持声明家具动作，并自动并入玩家菜单、AI 候选和动作效果结算。","textPreview":"主题玩法包支持声明家具动作，并自动并入玩家菜单、AI 候选和动作效果结算。","textChars":37,"textLines":1,"bbox":[874,296,318,56]}
+{"kind":"shape","id":"sh/jm1cfa9w","slide":18,"name":"Rectangle 16","bbox":[170,434,420,110]}
+{"kind":"textbox","id":"sh/cvixczed","slide":18,"name":"Rectangle 17","text":"第一版","textPreview":"第一版","textChars":3,"textLines":1,"bbox":[188,448,90,22]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":18,"name":"Rectangle 18","text":"饮酒样板","textPreview":"饮酒样板","textChars":4,"textLines":1,"bbox":[188,476,384,34]}
+{"kind":"textbox","id":"sh/90je9cvi","slide":18,"name":"Rectangle 19","text":"酒案 5 个动作已挂载，酒量技能、好饮/慎饮性格已接；AlcoholSystem 尚未落地。","textPreview":"酒案 5 个动作已挂载，酒量技能、好饮/慎饮性格已接；AlcoholSystem 尚未落地。","textChars":46,"textLines":1,"bbox":[188,520,384,12]}
+{"kind":"shape","id":"sh/gfmlkjm1","slide":18,"name":"Rectangle 20","bbox":[690,434,420,110]}
+{"kind":"textbox","id":"sh/rytsvu9k","slide":18,"name":"Rectangle 21","text":"P0配置版","textPreview":"P0配置版","textChars":5,"textLines":1,"bbox":[708,448,90,22]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":18,"name":"Rectangle 22","text":"写诗样板","textPreview":"写诗样板","textChars":4,"textLines":1,"bbox":[708,476,384,34]}
+{"kind":"textbox","id":"sh/9s36hcrm","slide":18,"name":"Rectangle 23","text":"书案/花圃 4 个日常动作已挂载，得句、苦吟、诗兴、败兴等状态已接。","textPreview":"书案/花圃 4 个日常动作已挂载，得句、苦吟、诗兴、败兴等状态已接。","textChars":34,"textLines":1,"bbox":[708,520,384,12]}
+{"kind":"textbox","id":"sh/g7adsji5","slide":18,"name":"Rectangle 24","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":18,"name":"Rectangle 25","text":"17","textPreview":"17","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/m58z25kb","slide":18,"text":""}
+{"kind":"slide","id":"sl/bat47y1k","slide":19,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":22}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":19,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/je9cvixc","slide":19,"name":"Rectangle 2","text":"后台 v2 已经是策划维护内容的主入口","textPreview":"后台 v2 已经是策划维护内容的主入口","textChars":19,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/87ed8bat","slide":19,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/xs72x4na","slide":19,"name":"Rectangle 4","bbox":[76,202,1088,46]}
+{"kind":"textbox","id":"sh/q1orytsv","slide":19,"name":"Rectangle 5","text":"人物设定","textPreview":"人物设定","textChars":4,"textLines":1,"bbox":[92,210,200,26]}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":19,"name":"Rectangle 6","text":"单人物可编辑总览：立绘、身份、家庭、职业、阶段、性格、梦想、需求系数","textPreview":"单人物可编辑总览：立绘、身份、家庭、职业、阶段、性格、梦想、需求系数","textChars":34,"textLines":1,"bbox":[318,210,402,30]}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":19,"name":"Rectangle 7","text":"前台人物档案只读展示","textPreview":"前台人物档案只读展示","textChars":10,"textLines":1,"bbox":[742,210,384,30]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":19,"name":"Rectangle 8","text":"需求状态","textPreview":"需求状态","textChars":4,"textLines":1,"bbox":[92,270,200,26]}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":19,"name":"Rectangle 9","text":"基础需求和状态合并展示，需求一行一个紧凑配置","textPreview":"基础需求和状态合并展示，需求一行一个紧凑配置","textChars":22,"textLines":1,"bbox":[318,270,402,30]}
+{"kind":"textbox","id":"sh/8bat47y1","slide":19,"name":"Rectangle 10","text":"避免散落后台页","textPreview":"避免散落后台页","textChars":7,"textLines":1,"bbox":[742,270,384,30]}
+{"kind":"textbox","id":"sh/jqh0fepk","slide":19,"name":"Rectangle 11","text":"互动相关","textPreview":"互动相关","textChars":4,"textLines":1,"bbox":[92,330,200,26]}
+{"kind":"textbox","id":"sh/q5o7qpg3","slide":19,"name":"Rectangle 12","text":"互动模板 / 多人互动合并为配置表格页","textPreview":"互动模板 / 多人互动合并为配置表格页","textChars":19,"textLines":1,"bbox":[318,330,402,30]}
+{"kind":"textbox","id":"sh/18jqh0fe","slide":19,"name":"Rectangle 13","text":"支持结构化维护","textPreview":"支持结构化维护","textChars":7,"textLines":1,"bbox":[742,330,384,30]}
+{"kind":"textbox","id":"sh/8nqxs72x","slide":19,"name":"Rectangle 14","text":"叙事气泡","textPreview":"叙事气泡","textChars":4,"textLines":1,"bbox":[92,390,200,26]}
+{"kind":"textbox","id":"sh/j2t83itg","slide":19,"name":"Rectangle 15","text":"drivenRules 表格编辑、条件/打分/文案详情、复制/删除/校验","textPreview":"drivenRules 表格编辑、条件/打分/文案详情、复制/删除/校验","textChars":36,"textLines":1,"bbox":[318,390,402,30]}
+{"kind":"textbox","id":"sh/qh0fepkz","slide":19,"name":"Rectangle 16","text":"旧规则可一键迁移","textPreview":"旧规则可一键迁移","textChars":8,"textLines":1,"bbox":[742,390,384,30]}
+{"kind":"textbox","id":"sh/1cfa9w3m","slide":19,"name":"Rectangle 17","text":"Utility AI","textPreview":"Utility AI","textChars":10,"textLines":1,"bbox":[92,450,200,26]}
+{"kind":"textbox","id":"sh/crmhk3q5","slide":19,"name":"Rectangle 18","text":"行为规则调参和诊断页表格化","textPreview":"行为规则调参和诊断页表格化","textChars":13,"textLines":1,"bbox":[318,450,402,30]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":19,"name":"Rectangle 19","text":"减少顶部杂项","textPreview":"减少顶部杂项","textChars":6,"textLines":1,"bbox":[742,450,384,30]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":19,"name":"Rectangle 20","text":"故事系统","textPreview":"故事系统","textChars":4,"textLines":1,"bbox":[92,510,200,26]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":19,"name":"Rectangle 21","text":"路径和故事节点移入【故事系统】页签","textPreview":"路径和故事节点移入【故事系统】页签","textChars":17,"textLines":1,"bbox":[318,510,402,30]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":19,"name":"Rectangle 22","text":"不作为当前核心依赖","textPreview":"不作为当前核心依赖","textChars":9,"textLines":1,"bbox":[742,510,384,30]}
+{"kind":"textbox","id":"sh/orytsvu9","slide":19,"name":"Rectangle 23","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/hcrmhk3q","slide":19,"name":"Rectangle 24","text":"18","textPreview":"18","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/bat47y1k","slide":19,"text":""}
+{"kind":"slide","id":"sl/j2t83itg","slide":20,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":16}
+{"kind":"textbox","id":"sh/mhk3q5o7","slide":20,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":20,"name":"Rectangle 2","text":"资产、配置和调试工具让系统能持续扩内容","textPreview":"资产、配置和调试工具让系统能持续扩内容","textChars":19,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/4byhgn29","slide":20,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/twra5gbq","slide":20,"name":"Rectangle 4","bbox":[72,212,330,126]}
+{"kind":"textbox","id":"sh/m58z25kb","slide":20,"name":"Rectangle 5","text":"已做","textPreview":"已做","textChars":2,"textLines":1,"bbox":[90,226,90,22]}
+{"kind":"textbox","id":"sh/bq1oryts","slide":20,"name":"Rectangle 6","text":"资产 manifest","textPreview":"资产 manifest","textChars":11,"textLines":1,"bbox":[90,254,294,34]}
+{"kind":"textbox","id":"sh/47y1kre1","slide":20,"name":"Rectangle 7","text":"portraits、avatars、rooms、tiles 等走 assets/manifest.json；无图时有头像色块回退。","textPreview":"portraits、avatars、rooms、tiles 等走 assets/manifest.json；无图时有头像色块回退。","textChars":65,"textLines":1,"bbox":[90,298,294,28]}
+{"kind":"shape","id":"sh/tsvu9kni","slide":20,"name":"Rectangle 8","bbox":[474,212,330,126]}
+{"kind":"textbox","id":"sh/90je9cvi","slide":20,"name":"Rectangle 9","text":"已做","textPreview":"已做","textChars":2,"textLines":1,"bbox":[492,226,90,22]}
+{"kind":"textbox","id":"sh/gfmlkjm1","slide":20,"name":"Rectangle 10","text":"立绘处理","textPreview":"立绘处理","textChars":4,"textLines":1,"bbox":[492,254,294,34]}
+{"kind":"textbox","id":"sh/rytsvu9k","slide":20,"name":"Rectangle 11","text":"npm run portraits 调用处理脚本，生成头像、HUD、全身立绘等多规格资产。","textPreview":"npm run portraits 调用处理脚本，生成头像、HUD、全身立绘等多规格资产。","textChars":45,"textLines":1,"bbox":[492,298,294,28]}
+{"kind":"shape","id":"sh/yd0z6103","slide":20,"name":"Rectangle 12","bbox":[876,212,330,126]}
+{"kind":"textbox","id":"sh/9s36hcrm","slide":20,"name":"Rectangle 13","text":"已做","textPreview":"已做","textChars":2,"textLines":1,"bbox":[894,226,90,22]}
+{"kind":"textbox","id":"sh/g7adsji5","slide":20,"name":"Rectangle 14","text":"行为埋点","textPreview":"行为埋点","textChars":4,"textLines":1,"bbox":[894,254,294,34]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":20,"name":"Rectangle 15","text":"AI 候选、队列失败、任务、角色效果、秩序影响、经济和失败处置均有事件记录。","textPreview":"AI 候选、队列失败、任务、角色效果、秩序影响、经济和失败处置均有事件记录。","textChars":38,"textLines":1,"bbox":[894,298,294,28]}
+{"kind":"shape","id":"sh/y1kre1w7","slide":20,"name":"Rectangle 16","bbox":[272,412,736,112]}
+{"kind":"textbox","id":"sh/5o7qpg3e","slide":20,"name":"Rectangle 17","text":"已做部分","textPreview":"已做部分","textChars":4,"textLines":1,"bbox":[290,426,90,22]}
+{"kind":"textbox","id":"sh/g3ex0nux","slide":20,"name":"Rectangle 18","text":"多日模拟","textPreview":"多日模拟","textChars":4,"textLines":1,"bbox":[290,454,700,34]}
+{"kind":"textbox","id":"sh/cfa9w3m9","slide":20,"name":"Rectangle 19","text":"simulate_xiaoxiang_7days.cjs 可生成报告；经济、需求适应、需求状态已有部分自动测试。","textPreview":"simulate_xiaoxiang_7days.cjs 可生成报告；经济、需求适应、需求状态已有部分自动测试。","textChars":56,"textLines":1,"bbox":[290,498,700,14]}
+{"kind":"textbox","id":"sh/1032lszq","slide":20,"name":"Rectangle 20","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/u9knih4b","slide":20,"name":"Rectangle 21","text":"19","textPreview":"19","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/j2t83itg","slide":20,"text":""}
+{"kind":"slide","id":"sl/mhk3q5o7","slide":21,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":19}
+{"kind":"textbox","id":"sh/onyd0z61","slide":21,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/d8v6psfi","slide":21,"name":"Rectangle 2","text":"可对外讲的产品闭环已经比较清楚","textPreview":"可对外讲的产品闭环已经比较清楚","textChars":15,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/6tovahoz","slide":21,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/vahoza1g","slide":21,"name":"Rectangle 4","bbox":[70,255,188,142]}
+{"kind":"textbox","id":"sh/ovahoza1","slide":21,"name":"Rectangle 5","text":"人物状态","textPreview":"人物状态","textChars":4,"textLines":1,"bbox":[86,285,150,32]}
+{"kind":"textbox","id":"sh/dg7adsji","slide":21,"name":"Rectangle 6","text":"需求/性格/关系/身份","textPreview":"需求/性格/关系/身份","textChars":11,"textLines":1,"bbox":[86,334,150,40]}
+{"kind":"textbox","id":"sh/61032lsz","slide":21,"name":"Rectangle 7","text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[268,304,28,34]}
+{"kind":"shape","id":"sh/vmtwra5g","slide":21,"name":"Rectangle 8","bbox":[302,255,188,142]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":21,"name":"Rectangle 9","text":"AI候选","textPreview":"AI候选","textChars":4,"textLines":1,"bbox":[318,285,150,32]}
+{"kind":"textbox","id":"sh/mhk3q5o7","slide":21,"name":"Rectangle 10","text":"家具/社交/任务/起居","textPreview":"家具/社交/任务/起居","textChars":11,"textLines":1,"bbox":[318,334,150,40]}
+{"kind":"textbox","id":"sh/t83itgfm","slide":21,"name":"Rectangle 11","text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[500,304,28,34]}
+{"kind":"shape","id":"sh/4nap4r65","slide":21,"name":"Rectangle 12","bbox":[534,255,188,142]}
+{"kind":"textbox","id":"sh/bq1oryts","slide":21,"name":"Rectangle 13","text":"玩家干预","textPreview":"玩家干预","textChars":4,"textLines":1,"bbox":[550,285,150,32]}
+{"kind":"textbox","id":"sh/m58z25kb","slide":21,"name":"Rectangle 14","text":"传令/起居/互动","textPreview":"传令/起居/互动","textChars":8,"textLines":1,"bbox":[550,334,150,40]}
+{"kind":"textbox","id":"sh/twra5gbq","slide":21,"name":"Rectangle 15","text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[732,304,28,34]}
+{"kind":"shape","id":"sh/4byhgn29","slide":21,"name":"Rectangle 16","bbox":[766,255,188,142]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":21,"name":"Rectangle 17","text":"执行结算","textPreview":"执行结算","textChars":4,"textLines":1,"bbox":[782,285,150,32]}
+{"kind":"textbox","id":"sh/m1cfa9w3","slide":21,"name":"Rectangle 18","text":"质量/失败/技能/经济","textPreview":"质量/失败/技能/经济","textChars":11,"textLines":1,"bbox":[782,334,150,40]}
+{"kind":"textbox","id":"sh/q5o7qpg3","slide":21,"name":"Rectangle 19","text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[964,304,28,34]}
+{"kind":"shape","id":"sh/jqh0fepk","slide":21,"name":"Rectangle 20","bbox":[998,255,188,142]}
+{"kind":"textbox","id":"sh/8bat47y1","slide":21,"name":"Rectangle 21","text":"世界反馈","textPreview":"世界反馈","textChars":4,"textLines":1,"bbox":[1014,285,150,32]}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":21,"name":"Rectangle 22","text":"关系/第四轴/秩序/叙事气泡","textPreview":"关系/第四轴/秩序/叙事气泡","textChars":14,"textLines":1,"bbox":[1014,334,150,40]}
+{"kind":"textbox","id":"sh/qh0fepkz","slide":21,"name":"Rectangle 23","text":"这条链路已经不是纯 PRD：每一段都有现有代码入口或第一版实现，只是秩序反向影响 AI 还在 P1。","textPreview":"这条链路已经不是纯 PRD：每一段都有现有代码入口或第一版实现，只是秩序反向影响 AI 还在 P1。","textChars":50,"textLines":1,"bbox":[92,488,1000,48]}
+{"kind":"textbox","id":"sh/j2t83itg","slide":21,"name":"Rectangle 24","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/8nqxs72x","slide":21,"name":"Rectangle 25","text":"20","textPreview":"20","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/mhk3q5o7","slide":21,"text":""}
+{"kind":"slide","id":"sl/5wjudg7a","slide":22,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":13}
+{"kind":"textbox","id":"sh/5o7qpg3e","slide":22,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/g3ex0nux","slide":22,"name":"Rectangle 2","text":"商业差异化来自“古代共同体管理”，不是画面竞争","textPreview":"商业差异化来自“古代共同体管理”，不是画面竞争","textChars":23,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/r65wjudg","slide":22,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"textbox","id":"sh/ylc7u54z","slide":22,"name":"Rectangle 4","text":"竞品强项","textPreview":"竞品强项","textChars":4,"textLines":1,"bbox":[92,210,200,26]}
+{"kind":"textbox","id":"sh/9cvixcze","slide":22,"name":"Rectangle 5","text":"画面、建造、家具动作、现代生活题材易懂","textPreview":"画面、建造、家具动作、现代生活题材易懂","textChars":19,"textLines":1,"bbox":[318,210,402,30]}
+{"kind":"shape","id":"sh/gr2p8nqx","slide":22,"name":"Rectangle 6","bbox":[742,210,384,30]}
+{"kind":"shape","id":"sh/rytsvu9k","slide":22,"name":"Rectangle 7","bbox":[76,280,1088,46]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":22,"name":"Rectangle 8","text":"我们已做底座","textPreview":"我们已做底座","textChars":6,"textLines":1,"bbox":[92,288,200,26]}
+{"kind":"textbox","id":"sh/wb2hwfyx","slide":22,"name":"Rectangle 9","text":"身份礼法、传令、任务质量、第四轴、起居、秩序册、叙事反馈","textPreview":"身份礼法、传令、任务质量、第四轴、起居、秩序册、叙事反馈","textChars":28,"textLines":1,"bbox":[318,288,402,30]}
+{"kind":"textbox","id":"sh/lwval87e","slide":22,"name":"Rectangle 10","text":"当前已实现模块支撑","textPreview":"当前已实现模块支撑","textChars":9,"textLines":1,"bbox":[742,288,384,30]}
+{"kind":"textbox","id":"sh/e9cvixcz","slide":22,"name":"Rectangle 11","text":"玩家差异体验","textPreview":"玩家差异体验","textChars":6,"textLines":1,"bbox":[92,366,200,26]}
+{"kind":"textbox","id":"sh/3q5o7qpg","slide":22,"name":"Rectangle 12","text":"不是让角色自由生活，而是在府内关系和规矩里调度人、事和人情","textPreview":"不是让角色自由生活，而是在府内关系和规矩里调度人、事和人情","textChars":29,"textLines":1,"bbox":[318,366,402,30]}
+{"kind":"shape","id":"sh/w3m94fu1","slide":22,"name":"Rectangle 13","bbox":[742,366,384,30]}
+{"kind":"textbox","id":"sh/loj2t83i","slide":22,"name":"Rectangle 14","text":"扩展方向","textPreview":"扩展方向","textChars":4,"textLines":1,"bbox":[92,444,200,26]}
+{"kind":"textbox","id":"sh/ex0nuxc3","slide":22,"name":"Rectangle 15","text":"贾府验证后可迁移到皇宫、官署、宅斗、门派等权力场","textPreview":"贾府验证后可迁移到皇宫、官署、宅斗、门派等权力场","textChars":24,"textLines":1,"bbox":[318,444,402,30]}
+{"kind":"shape","id":"sh/3itgfmlk","slide":22,"name":"Rectangle 16","bbox":[742,444,384,30]}
+{"kind":"textbox","id":"sh/szqtcj6t","slide":22,"name":"Rectangle 17","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/lkjm1cfa","slide":22,"name":"Rectangle 18","text":"21","textPreview":"21","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/5wjudg7a","slide":22,"text":""}
+{"kind":"slide","id":"sl/crmhk3q5","slide":23,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":17}
+{"kind":"textbox","id":"sh/tsvu9kni","slide":23,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/47y1kre1","slide":23,"name":"Rectangle 2","text":"第一阶段 demo 应该聚焦“林黛玉进贾府”","textPreview":"第一阶段 demo 应该聚焦“林黛玉进贾府”","textChars":22,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/bat47y1k","slide":23,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"textbox","id":"sh/mp0bi9s3","slide":23,"name":"Rectangle 4","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[92,202,16,18]}
+{"kind":"textbox","id":"sh/tgfmlkjm","slide":23,"name":"Rectangle 5","text":"移动：黛玉入府，前往关键人物和场景。","textPreview":"移动：黛玉入府，前往关键人物和场景。","textChars":18,"textLines":1,"bbox":[116,198,956,61]}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":23,"name":"Rectangle 6","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[92,260,16,18]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":23,"name":"Rectangle 7","text":"礼法：先见谁、怎么见、是否合规。","textPreview":"礼法：先见谁、怎么见、是否合规。","textChars":16,"textLines":1,"bbox":[116,256,956,61]}
+{"kind":"textbox","id":"sh/mhk3q5o7","slide":23,"name":"Rectangle 8","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[92,318,16,18]}
+{"kind":"textbox","id":"sh/0z61032l","slide":23,"name":"Rectangle 9","text":"传令：贾母、王夫人、凤姐安排迎接、通报、安置和随侍。","textPreview":"传令：贾母、王夫人、凤姐安排迎接、通报、安置和随侍。","textChars":26,"textLines":1,"bbox":[116,314,956,61]}
+{"kind":"textbox","id":"sh/pkzupwb2","slide":23,"name":"Rectangle 10","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[92,376,16,18]}
+{"kind":"textbox","id":"sh/itgfmlkj","slide":23,"name":"Rectangle 11","text":"任务：引路、取物、整理行李、安排住处，进入质量和失败结算。","textPreview":"任务：引路、取物、整理行李、安排住处，进入质量和失败结算。","textChars":29,"textLines":1,"bbox":[116,372,956,61]}
+{"kind":"textbox","id":"sh/7ed8bat4","slide":23,"name":"Rectangle 12","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[92,434,16,18]}
+{"kind":"textbox","id":"sh/0nuxc3yl","slide":23,"name":"Rectangle 13","text":"关系：贾母疼惜、宝玉好奇、王夫人审视、丫鬟服侍产生可见变化。","textPreview":"关系：贾母疼惜、宝玉好奇、王夫人审视、丫鬟服侍产生可见变化。","textChars":30,"textLines":1,"bbox":[116,430,956,61]}
+{"kind":"textbox","id":"sh/p8nqxs72","slide":23,"name":"Rectangle 14","text":"■","textPreview":"■","textChars":1,"textLines":1,"bbox":[92,492,16,18]}
+{"kind":"textbox","id":"sh/ih4byhgn","slide":23,"name":"Rectangle 15","text":"秩序：谁通传、谁越权、谁得体，结算为法度、人心、体面等长期后果。","textPreview":"秩序：谁通传、谁越权、谁得体，结算为法度、人心、体面等长期后果。","textChars":32,"textLines":1,"bbox":[116,488,956,61]}
+{"kind":"textbox","id":"sh/72x4nap4","slide":23,"name":"Rectangle 16","text":"目标不是做整本红楼，而是用一个高密度场景把现有系统一一展开。","textPreview":"目标不是做整本红楼，而是用一个高密度场景把现有系统一一展开。","textChars":30,"textLines":1,"bbox":[100,586,940,34]}
+{"kind":"textbox","id":"sh/wjudg7ad","slide":23,"name":"Rectangle 17","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/p4r65wju","slide":23,"name":"Rectangle 18","text":"22","textPreview":"22","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/crmhk3q5","slide":23,"text":""}
+{"kind":"slide","id":"sl/bq1oryts","slide":24,"title":"BUSINESS PLAN LOGIC","textShapes":14}
+{"kind":"textbox","id":"sh/y1kre1w7","slide":24,"name":"Rectangle 1","text":"BUSINESS PLAN LOGIC","textPreview":"BUSINESS PLAN LOGIC","textChars":19,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":24,"name":"Rectangle 2","text":"商业计划要回答三件事，当前最强证据是 Demo 能力","textPreview":"商业计划要回答三件事，当前最强证据是 Demo 能力","textChars":26,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/gfmlkjm1","slide":24,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/90je9cvi","slide":24,"name":"Rectangle 4","bbox":[82,222,330,166]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":24,"name":"Rectangle 5","text":"待验证","textPreview":"待验证","textChars":3,"textLines":1,"bbox":[100,236,90,22]}
+{"kind":"textbox","id":"sh/rytsvu9k","slide":24,"name":"Rectangle 6","text":"这游戏真有人玩吗","textPreview":"这游戏真有人玩吗","textChars":8,"textLines":1,"bbox":[100,264,294,34]}
+{"kind":"textbox","id":"sh/gr2p8nqx","slide":24,"name":"Rectangle 7","text":"需要补市场数据、用户访谈和竞品销售/评价证据；当前只能先用题材空白和玩家需求假设搭框架。","textPreview":"需要补市场数据、用户访谈和竞品销售/评价证据；当前只能先用题材空白和玩家需求假设搭框架。","textChars":44,"textLines":1,"bbox":[100,308,294,68]}
+{"kind":"shape","id":"sh/9cvixcze","slide":24,"name":"Rectangle 8","bbox":[474,222,330,166]}
+{"kind":"textbox","id":"sh/tovahoza","slide":24,"name":"Rectangle 9","text":"已有证据","textPreview":"已有证据","textChars":4,"textLines":1,"bbox":[492,236,90,22]}
+{"kind":"textbox","id":"sh/032lszqt","slide":24,"name":"Rectangle 10","text":"团队能做出来吗","textPreview":"团队能做出来吗","textChars":7,"textLines":1,"bbox":[492,264,294,34]}
+{"kind":"textbox","id":"sh/bi9s36hc","slide":24,"name":"Rectangle 11","text":"当前已有主游戏、后台 v2、任务传令、关系礼法、叙事气泡、秩序册和资产管线，可证明核心版本不是纯概念。","textPreview":"当前已有主游戏、后台 v2、任务传令、关系礼法、叙事气泡、秩序册和资产管线，可证明核心版本不是纯概念。","textChars":51,"textLines":1,"bbox":[492,308,294,68]}
+{"kind":"shape","id":"sh/ixczed8v","slide":24,"name":"Rectangle 12","bbox":[866,222,330,166]}
+{"kind":"textbox","id":"sh/p0bi9s36","slide":24,"name":"Rectangle 13","text":"可设计","textPreview":"可设计","textChars":3,"textLines":1,"bbox":[884,236,90,22]}
+{"kind":"textbox","id":"sh/0fepkzup","slide":24,"name":"Rectangle 14","text":"未来怎么赚钱","textPreview":"未来怎么赚钱","textChars":6,"textLines":1,"bbox":[884,264,294,34]}
+{"kind":"textbox","id":"sh/bulwval8","slide":24,"name":"Rectangle 15","text":"适合买断/抢先体验 + 资料片/DLC + 创作工具与社区内容，先不依赖长线氪金。","textPreview":"适合买断/抢先体验 + 资料片/DLC + 创作工具与社区内容，先不依赖长线氪金。","textChars":41,"textLines":1,"bbox":[884,308,294,68]}
+{"kind":"textbox","id":"sh/i9s36hcr","slide":24,"name":"Rectangle 16","text":"因此这版 BP 的重点不是装成已经完成商业验证，而是明确：产品方向有空白，核心系统已可演示，下一步要用 demo 拿用户反馈。","textPreview":"因此这版 BP 的重点不是装成已经完成商业验证，而是明确：产品方向有空白，核心系统已可演示，下一步要用 demo 拿用户反馈。","textChars":63,"textLines":1,"bbox":[92,506,1020,58]}
+{"kind":"textbox","id":"sh/t47y1kre","slide":24,"name":"Rectangle 17","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/0je9cvix","slide":24,"name":"Rectangle 18","text":"23","textPreview":"23","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/bq1oryts","slide":24,"text":""}
+{"kind":"slide","id":"sl/61032lsz","slide":25,"title":"MONETIZATION","textShapes":17}
+{"kind":"textbox","id":"sh/0je9cvix","slide":25,"name":"Rectangle 1","text":"MONETIZATION","textPreview":"MONETIZATION","textChars":12,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/t47y1kre","slide":25,"name":"Rectangle 2","text":"盈利模型可以先走买断和资料片，而不是重度数值付费","textPreview":"盈利模型可以先走买断和资料片，而不是重度数值付费","textChars":24,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/il0rqd4v","slide":25,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/b6xkf6dc","slide":25,"name":"Rectangle 4","bbox":[76,204,1088,46]}
+{"kind":"textbox","id":"sh/0rqd4vmt","slide":25,"name":"Rectangle 5","text":"基础买断","textPreview":"基础买断","textChars":4,"textLines":1,"bbox":[92,212,200,26]}
+{"kind":"textbox","id":"sh/tcj6tova","slide":25,"name":"Rectangle 6","text":"完整核心版本：红楼/贾府生活模拟 + 沙盒系统","textPreview":"完整核心版本：红楼/贾府生活模拟 + 沙盒系统","textChars":23,"textLines":1,"bbox":[318,212,402,30]}
+{"kind":"textbox","id":"sh/ixczed8v","slide":25,"name":"Rectangle 7","text":"适合独立游戏和 Steam 发行","textPreview":"适合独立游戏和 Steam 发行","textChars":16,"textLines":1,"bbox":[742,212,384,30]}
+{"kind":"textbox","id":"sh/bi9s36hc","slide":25,"name":"Rectangle 8","text":"抢先体验","textPreview":"抢先体验","textChars":4,"textLines":1,"bbox":[92,286,200,26]}
+{"kind":"textbox","id":"sh/rytsvu9k","slide":25,"name":"Rectangle 9","text":"先发布可玩的贾府 demo，持续扩任务、人物、场景和后台工具","textPreview":"先发布可玩的贾府 demo，持续扩任务、人物、场景和后台工具","textChars":30,"textLines":1,"bbox":[318,286,402,30]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":25,"name":"Rectangle 10","text":"用玩家反馈验证管理乐趣","textPreview":"用玩家反馈验证管理乐趣","textChars":11,"textLines":1,"bbox":[742,286,384,30]}
+{"kind":"textbox","id":"sh/90je9cvi","slide":25,"name":"Rectangle 11","text":"资料片/DLC","textPreview":"资料片/DLC","textChars":7,"textLines":1,"bbox":[92,360,200,26]}
+{"kind":"textbox","id":"sh/gfmlkjm1","slide":25,"name":"Rectangle 12","text":"皇宫、修仙、官署、市井、节气民俗、服饰家具、角色包","textPreview":"皇宫、修仙、官署、市井、节气民俗、服饰家具、角色包","textChars":25,"textLines":1,"bbox":[318,360,402,30]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":25,"name":"Rectangle 13","text":"利用系统可迁移性延长生命周期","textPreview":"利用系统可迁移性延长生命周期","textChars":14,"textLines":1,"bbox":[742,360,384,30]}
+{"kind":"textbox","id":"sh/y1kre1w7","slide":25,"name":"Rectangle 14","text":"创作生态","textPreview":"创作生态","textChars":4,"textLines":1,"bbox":[92,434,200,26]}
+{"kind":"textbox","id":"sh/9s36hcrm","slide":25,"name":"Rectangle 15","text":"中后期开放人物、剧情、院落、任务模板和互动文案编辑能力","textPreview":"中后期开放人物、剧情、院落、任务模板和互动文案编辑能力","textChars":27,"textLines":1,"bbox":[318,434,402,30]}
+{"kind":"textbox","id":"sh/g7adsji5","slide":25,"name":"Rectangle 16","text":"向 Mod/UGC 社群靠拢","textPreview":"向 Mod/UGC 社群靠拢","textChars":14,"textLines":1,"bbox":[742,434,384,30]}
+{"kind":"textbox","id":"sh/nih4byhg","slide":25,"name":"Rectangle 17","text":"商业化原则：卖世界、场景和创作空间，不把核心体验拆成破坏沉浸的付费点。","textPreview":"商业化原则：卖世界、场景和创作空间，不把核心体验拆成破坏沉浸的付费点。","textChars":35,"textLines":1,"bbox":[92,568,1030,38]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":25,"name":"Rectangle 18","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/61032lsz","slide":25,"name":"Rectangle 19","text":"24","textPreview":"24","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/61032lsz","slide":25,"text":""}
+{"kind":"slide","id":"sl/psfil0rq","slide":26,"title":"RISKS AND MITIGATION","textShapes":19}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":26,"name":"Rectangle 1","text":"RISKS AND MITIGATION","textPreview":"RISKS AND MITIGATION","textChars":20,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/je9cvixc","slide":26,"name":"Rectangle 2","text":"主要风险已经能对应到当前工程策略","textPreview":"主要风险已经能对应到当前工程策略","textChars":16,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/87ed8bat","slide":26,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/xs72x4na","slide":26,"name":"Rectangle 4","bbox":[76,190,1088,46]}
+{"kind":"textbox","id":"sh/q1orytsv","slide":26,"name":"Rectangle 5","text":"美术和动画资源重","textPreview":"美术和动画资源重","textChars":8,"textLines":1,"bbox":[92,198,200,26]}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":26,"name":"Rectangle 6","text":"生活模拟天然吃资源，单人团队难堆 3D 体量","textPreview":"生活模拟天然吃资源，单人团队难堆 3D 体量","textChars":22,"textLines":1,"bbox":[318,198,402,30]}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":26,"name":"Rectangle 7","text":"先用 2D/俯视场景和立绘验证核心乐趣","textPreview":"先用 2D/俯视场景和立绘验证核心乐趣","textChars":19,"textLines":1,"bbox":[742,198,384,30]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":26,"name":"Rectangle 8","text":"系统耦合高","textPreview":"系统耦合高","textChars":5,"textLines":1,"bbox":[92,270,200,26]}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":26,"name":"Rectangle 9","text":"新增玩法容易牵动需求、AI、任务、关系和 UI","textPreview":"新增玩法容易牵动需求、AI、任务、关系和 UI","textChars":23,"textLines":1,"bbox":[318,270,402,30]}
+{"kind":"textbox","id":"sh/8bat47y1","slide":26,"name":"Rectangle 10","text":"配置化后台、行为埋点、多日模拟和关键链路测试已经在做","textPreview":"配置化后台、行为埋点、多日模拟和关键链路测试已经在做","textChars":26,"textLines":1,"bbox":[742,270,384,30]}
+{"kind":"textbox","id":"sh/jqh0fepk","slide":26,"name":"Rectangle 11","text":"AI NPC 难平衡","textPreview":"AI NPC 难平衡","textChars":10,"textLines":1,"bbox":[92,342,200,26]}
+{"kind":"textbox","id":"sh/q5o7qpg3","slide":26,"name":"Rectangle 12","text":"既要玩家有掌控感，又要角色有惊喜和长线性格","textPreview":"既要玩家有掌控感，又要角色有惊喜和长线性格","textChars":21,"textLines":1,"bbox":[318,342,402,30]}
+{"kind":"textbox","id":"sh/18jqh0fe","slide":26,"name":"Rectangle 13","text":"起居、Utility AI、性格效果、叙事气泡共同解释行为","textPreview":"起居、Utility AI、性格效果、叙事气泡共同解释行为","textChars":29,"textLines":1,"bbox":[742,342,384,30]}
+{"kind":"textbox","id":"sh/8nqxs72x","slide":26,"name":"Rectangle 14","text":"性能和场景扩展","textPreview":"性能和场景扩展","textChars":7,"textLines":1,"bbox":[92,414,200,26]}
+{"kind":"textbox","id":"sh/j2t83itg","slide":26,"name":"Rectangle 15","text":"多人、多场景、寻路和家具交互会累积复杂度","textPreview":"多人、多场景、寻路和家具交互会累积复杂度","textChars":20,"textLines":1,"bbox":[318,414,402,30]}
+{"kind":"textbox","id":"sh/qh0fepkz","slide":26,"name":"Rectangle 16","text":"先控制首期场景规模，用局部高密度 demo 验证","textPreview":"先控制首期场景规模，用局部高密度 demo 验证","textChars":24,"textLines":1,"bbox":[742,414,384,30]}
+{"kind":"textbox","id":"sh/1cfa9w3m","slide":26,"name":"Rectangle 17","text":"多人模式诱惑","textPreview":"多人模式诱惑","textChars":6,"textLines":1,"bbox":[92,486,200,26]}
+{"kind":"textbox","id":"sh/crmhk3q5","slide":26,"name":"Rectangle 18","text":"可以做府邸造访、诗社宴席等异步社交，但会扩大范围","textPreview":"可以做府邸造访、诗社宴席等异步社交，但会扩大范围","textChars":24,"textLines":1,"bbox":[318,486,402,30]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":26,"name":"Rectangle 19","text":"放在中后期，不作为首期核心承诺","textPreview":"放在中后期，不作为首期核心承诺","textChars":15,"textLines":1,"bbox":[742,486,384,30]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":26,"name":"Rectangle 20","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":26,"name":"Rectangle 21","text":"25","textPreview":"25","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/psfil0rq","slide":26,"text":""}
+{"kind":"slide","id":"sl/gfmlkjm1","slide":27,"title":"ROADMAP","textShapes":16}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":27,"name":"Rectangle 1","text":"ROADMAP","textPreview":"ROADMAP","textChars":7,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":27,"name":"Rectangle 2","text":"阶段路线应该围绕一个可试玩场景收敛","textPreview":"阶段路线应该围绕一个可试玩场景收敛","textChars":17,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/qpg3ex0n","slide":27,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/fa9w3m94","slide":27,"name":"Rectangle 4","bbox":[92,246,224,184]}
+{"kind":"textbox","id":"sh/8v6psfil","slide":27,"name":"Rectangle 5","text":"P0 已有","textPreview":"P0 已有","textChars":5,"textLines":1,"bbox":[110,278,184,34]}
+{"kind":"textbox","id":"sh/xczed8v6","slide":27,"name":"Rectangle 6","text":"生活模拟底座、任务传令、关系礼法、叙事气泡、后台 v2、秩序册。","textPreview":"生活模拟底座、任务传令、关系礼法、叙事气泡、后台 v2、秩序册。","textChars":32,"textLines":1,"bbox":[110,338,174,74]}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":27,"name":"Rectangle 7","text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[330,312,28,34]}
+{"kind":"shape","id":"sh/je9cvixc","slide":27,"name":"Rectangle 8","bbox":[374,246,224,184]}
+{"kind":"textbox","id":"sh/nih4byhg","slide":27,"name":"Rectangle 9","text":"P1 demo","textPreview":"P1 demo","textChars":7,"textLines":1,"bbox":[392,278,184,34]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":27,"name":"Rectangle 10","text":"林黛玉进贾府：用 15-30 分钟流程验证礼法、传令、关系和反馈。","textPreview":"林黛玉进贾府：用 15-30 分钟流程验证礼法、传令、关系和反馈。","textChars":33,"textLines":1,"bbox":[392,338,174,74]}
+{"kind":"textbox","id":"sh/5o7qpg3e","slide":27,"name":"Rectangle 11","text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[612,312,28,34]}
+{"kind":"shape","id":"sh/g3ex0nux","slide":27,"name":"Rectangle 12","bbox":[656,246,224,184]}
+{"kind":"textbox","id":"sh/r65wjudg","slide":27,"name":"Rectangle 13","text":"P2 扩展","textPreview":"P2 扩展","textChars":5,"textLines":1,"bbox":[674,278,184,34]}
+{"kind":"textbox","id":"sh/ylc7u54z","slide":27,"name":"Rectangle 14","text":"补齐人物日程、事务管理、技能成长、更多家具和场景互动。","textPreview":"补齐人物日程、事务管理、技能成长、更多家具和场景互动。","textChars":27,"textLines":1,"bbox":[674,338,174,74]}
+{"kind":"textbox","id":"sh/9cvixcze","slide":27,"name":"Rectangle 15","text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[894,312,28,34]}
+{"kind":"shape","id":"sh/gr2p8nqx","slide":27,"name":"Rectangle 16","bbox":[938,246,224,184]}
+{"kind":"textbox","id":"sh/rytsvu9k","slide":27,"name":"Rectangle 17","text":"P3 商业验证","textPreview":"P3 商业验证","textChars":7,"textLines":1,"bbox":[956,278,184,34]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":27,"name":"Rectangle 18","text":"用户测试、Demo 页面、Steam/小红书/B站素材、合作或融资资料。","textPreview":"用户测试、Demo 页面、Steam/小红书/B站素材、合作或融资资料。","textChars":36,"textLines":1,"bbox":[956,338,174,74]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":27,"name":"Rectangle 19","text":"短期目标不是铺开整本红楼，而是证明玩家能感受到“我在管理这个府里的生活和命运”。","textPreview":"短期目标不是铺开整本红楼，而是证明玩家能感受到“我在管理这个府里的生活和命运”。","textChars":40,"textLines":1,"bbox":[92,540,1020,44]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":27,"name":"Rectangle 20","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":27,"name":"Rectangle 21","text":"26","textPreview":"26","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/gfmlkjm1","slide":27,"text":""}
+{"kind":"slide","id":"sl/vahoza1g","slide":28,"title":"IMPLEMENTED PRODUCT MODULES","textShapes":14}
+{"kind":"textbox","id":"sh/2hwfyxob","slide":28,"name":"Rectangle 1","text":"IMPLEMENTED PRODUCT MODULES","textPreview":"IMPLEMENTED PRODUCT MODULES","textChars":27,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/r2p8nqxs","slide":28,"name":"Rectangle 2","text":"下一版商业计划需要补数据，但产品部分已经能重写得更实","textPreview":"下一版商业计划需要补数据，但产品部分已经能重写得更实","textChars":26,"textLines":1,"bbox":[54,72,1020,62]}
+{"kind":"shape","id":"sh/gvy90je9","slide":28,"name":"Rectangle 3","bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/9gr2p8nq","slide":28,"name":"Rectangle 4","bbox":[72,220,330,178]}
+{"kind":"textbox","id":"sh/2p8nqxs7","slide":28,"name":"Rectangle 5","text":"待补","textPreview":"待补","textChars":2,"textLines":1,"bbox":[90,234,90,22]}
+{"kind":"textbox","id":"sh/ra5gbq1o","slide":28,"name":"Rectangle 6","text":"市场与用户","textPreview":"市场与用户","textChars":5,"textLines":1,"bbox":[90,262,294,34]}
+{"kind":"textbox","id":"sh/kzupwb2h","slide":28,"name":"Rectangle 7","text":"待补：目标用户画像、红楼/古风/模拟经营/女性向/文字游戏用户访谈、竞品价格和留存。","textPreview":"待补：目标用户画像、红楼/古风/模拟经营/女性向/文字游戏用户访谈、竞品价格和留存。","textChars":42,"textLines":1,"bbox":[90,306,294,80]}
+{"kind":"shape","id":"sh/9knih4by","slide":28,"name":"Rectangle 8","bbox":[474,220,330,178]}
+{"kind":"textbox","id":"sh/p8nqxs72","slide":28,"name":"Rectangle 9","text":"P0","textPreview":"P0","textChars":2,"textLines":1,"bbox":[492,234,90,22]}
+{"kind":"textbox","id":"sh/0nuxc3yl","slide":28,"name":"Rectangle 10","text":"产品验证","textPreview":"产品验证","textChars":4,"textLines":1,"bbox":[492,262,294,34]}
+{"kind":"textbox","id":"sh/72x4nap4","slide":28,"name":"Rectangle 11","text":"下一步：用林黛玉进贾府验证 15-30 分钟可玩链路，观察玩家是否理解传令、起居和反馈。","textPreview":"下一步：用林黛玉进贾府验证 15-30 分钟可玩链路，观察玩家是否理解传令、起居和反馈。","textChars":44,"textLines":1,"bbox":[492,306,294,80]}
+{"kind":"shape","id":"sh/ih4byhgn","slide":28,"name":"Rectangle 12","bbox":[876,220,330,178]}
+{"kind":"textbox","id":"sh/pkzupwb2","slide":28,"name":"Rectangle 13","text":"待补","textPreview":"待补","textChars":2,"textLines":1,"bbox":[894,234,90,22]}
+{"kind":"textbox","id":"sh/0z61032l","slide":28,"name":"Rectangle 14","text":"商业化","textPreview":"商业化","textChars":3,"textLines":1,"bbox":[894,262,294,34]}
+{"kind":"textbox","id":"sh/7ed8bat4","slide":28,"name":"Rectangle 15","text":"待补：买断、抢先体验、DLC 场景包、角色包、创作工具和社区内容的取舍。","textPreview":"待补：买断、抢先体验、DLC 场景包、角色包、创作工具和社区内容的取舍。","textChars":36,"textLines":1,"bbox":[894,306,294,80]}
+{"kind":"textbox","id":"sh/itgfmlkj","slide":28,"name":"Rectangle 16","text":"新版 PPT 的定位：先把“已经做出来的系统”讲清楚，再承接市场调研和商业测算。","textPreview":"新版 PPT 的定位：先把“已经做出来的系统”讲清楚，再承接市场调研和商业测算。","textChars":40,"textLines":1,"bbox":[92,514,1030,46]}
+{"kind":"textbox","id":"sh/pwb2hwfy","slide":28,"name":"Rectangle 17","text":"大观园模拟 · 商业计划 BP 补充版","textPreview":"大观园模拟 · 商业计划 BP 补充版","textChars":19,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/0bi9s36h","slide":28,"name":"Rectangle 18","text":"27","textPreview":"27","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/vahoza1g","slide":28,"text":""}
+{"kind":"slide","id":"sl/mllpps","slide":29,"title":"ADDENDUM","textShapes":13}
+{"kind":"textbox","id":"sh/2p8nqxs7","slide":29,"text":"ADDENDUM","textPreview":"ADDENDUM","textChars":8,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/9gr2p8nq","slide":29,"text":"新增一组“完整一天”页，先给你删改用","textPreview":"新增一组“完整一天”页，先给你删改用","textChars":18,"textLines":1,"bbox":[54,72,1060,62]}
+{"kind":"shape","id":"sh/gvy90je9","slide":29,"bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/2hwfyxob","slide":29,"bbox":[78,204,280,142]}
+{"kind":"textbox","id":"sh/94fu18jq","slide":29,"text":"来源","textPreview":"来源","textChars":2,"textLines":1,"bbox":[98,222,240,28]}
+{"kind":"textbox","id":"sh/kjm1cfa9","slide":29,"text":"基于潇湘馆 08:00-10:00 实跑日志，并参考起居面板和任务 PRD 补足全天节奏。","textPreview":"基于潇湘馆 08:00-10:00 实跑日志，并参考起居面板和任务 PRD 补足全天节奏。","textChars":45,"textLines":1,"bbox":[98,262,240,72]}
+{"kind":"shape","id":"sh/rqd4vmtw","slide":29,"bbox":[390,204,280,142]}
+{"kind":"textbox","id":"sh/25kb6xkf","slide":29,"text":"黛玉","textPreview":"黛玉","textChars":2,"textLines":1,"bbox":[410,222,240,28]}
+{"kind":"textbox","id":"sh/4fu18jqh","slide":29,"text":"突出才艺、文墨、敏感、多愁、喜静。她的一天不是效率表，而是才情和心绪互相牵动。","textPreview":"突出才艺、文墨、敏感、多愁、喜静。她的一天不是效率表，而是才情和心绪互相牵动。","textChars":39,"textLines":1,"bbox":[410,262,240,72]}
+{"kind":"shape","id":"sh/x0nuxc3y","slide":29,"bbox":[78,386,280,142]}
+{"kind":"textbox","id":"sh/m94fu18j","slide":29,"text":"紫鹃","textPreview":"紫鹃","textChars":2,"textLines":1,"bbox":[98,404,240,28]}
+{"kind":"textbox","id":"sh/fu18jqh0","slide":29,"text":"突出贴身侍女的职责链：自理、陪伴、接受任务、执行、回报与继续待命。","textPreview":"突出贴身侍女的职责链：自理、陪伴、接受任务、执行、回报与继续待命。","textChars":33,"textLines":1,"bbox":[98,444,240,72]}
+{"kind":"shape","id":"sh/83itgfml","slide":29,"bbox":[390,386,280,142]}
+{"kind":"textbox","id":"sh/xobm58z2","slide":29,"text":"删改建议","textPreview":"删改建议","textChars":4,"textLines":1,"bbox":[410,404,240,28]}
+{"kind":"textbox","id":"sh/qxs72x4n","slide":29,"text":"这组页可以整组删，也可以只保留“黛玉一天”和“紫鹃任务闭环”两页。","textPreview":"这组页可以整组删，也可以只保留“黛玉一天”和“紫鹃任务闭环”两页。","textChars":33,"textLines":1,"bbox":[410,444,240,72]}
+{"kind":"textbox","id":"sh/fil0rqd4","slide":29,"text":"写法原则：保留日志里的真实时刻和事件，再把缺失的下午、夜间按现有起居与任务系统补成可展示样稿。","textPreview":"写法原则：保留日志里的真实时刻和事件，再把缺失的下午、夜间按现有起居与任务系统补成可展示样稿。","textChars":47,"textLines":1,"bbox":[82,586,1040,38]}
+{"kind":"textbox","id":"sh/4zidonyd","slide":29,"text":"大观园模拟 · 完整一天增补稿","textPreview":"大观园模拟 · 完整一天增补稿","textChars":15,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/xkf6dcbu","slide":29,"text":"29","textPreview":"29","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"image","id":"im/q1orytsv","slide":29,"name":"","alt":"起居面板截图","bbox":[742,184,410,260]}
+{"kind":"notes","id":"nt/mllpps","slide":29,"text":""}
+{"kind":"slide","id":"sl/7b2i17","slide":30,"title":"A DAY IN SYSTEM","textShapes":26}
+{"kind":"textbox","id":"sh/qxs72x4n","slide":30,"text":"A DAY IN SYSTEM","textPreview":"A DAY IN SYSTEM","textChars":15,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/xobm58z2","slide":30,"text":"林黛玉的一天：才艺不是稳定产出，而会被心绪牵动","textPreview":"林黛玉的一天：才艺不是稳定产出，而会被心绪牵动","textChars":23,"textLines":1,"bbox":[54,72,1060,62]}
+{"kind":"shape","id":"sh/83itgfml","slide":30,"bbox":[54,154,1170,1]}
+{"kind":"textbox","id":"sh/fu18jqh0","slide":30,"text":"08:24","textPreview":"08:24","textChars":5,"textLines":1,"bbox":[92,196,76,24]}
+{"kind":"shape","id":"sh/m94fu18j","slide":30,"bbox":[180,210,38,1]}
+{"kind":"shape","id":"sh/x0nuxc3y","slide":30,"bbox":[236,186,850,50]}
+{"kind":"textbox","id":"sh/4fu18jqh","slide":30,"text":"晨起梳洗","textPreview":"晨起梳洗","textChars":4,"textLines":1,"bbox":[258,199,220,26]}
+{"kind":"textbox","id":"sh/f6dcbulw","slide":30,"text":"完成晨起作息，使用梳洗妆台；先收束仪态，再进入一日行动。","textPreview":"完成晨起作息，使用梳洗妆台；先收束仪态，再进入一日行动。","textChars":28,"textLines":1,"bbox":[500,195,540,32]}
+{"kind":"textbox","id":"sh/mlkjm1cf","slide":30,"text":"08:45","textPreview":"08:45","textChars":5,"textLines":1,"bbox":[92,254,76,24]}
+{"kind":"shape","id":"sh/gbq1oryt","slide":30,"bbox":[180,268,38,1]}
+{"kind":"shape","id":"sh/5wjudg7a","slide":30,"bbox":[236,244,850,50]}
+{"kind":"textbox","id":"sh/y90je9cv","slide":30,"text":"琴台弹错走调","textPreview":"琴台弹错走调","textChars":6,"textLines":1,"bbox":[258,257,220,26]}
+{"kind":"textbox","id":"sh/nuxc3ylc","slide":30,"text":"才艺候选被选中，但结果不是完美演奏，敏感和心绪会让才情出现波动。","textPreview":"才艺候选被选中，但结果不是完美演奏，敏感和心绪会让才情出现波动。","textChars":32,"textLines":1,"bbox":[500,253,540,32]}
+{"kind":"textbox","id":"sh/gn29gr2p","slide":30,"text":"09:00","textPreview":"09:00","textChars":5,"textLines":1,"bbox":[92,312,76,24]}
+{"kind":"shape","id":"sh/58z25kb6","slide":30,"bbox":[180,326,38,1]}
+{"kind":"shape","id":"sh/yhgn29gr","slide":30,"bbox":[236,302,850,50]}
+{"kind":"textbox","id":"sh/n29gr2p8","slide":30,"text":"红木书案翻闲书","textPreview":"红木书案翻闲书","textChars":7,"textLines":1,"bbox":[258,315,220,26]}
+{"kind":"textbox","id":"sh/czed8v6p","slide":30,"text":"从消遣性阅读进入文墨活动，意趣和诗词能力被拉起。","textPreview":"从消遣性阅读进入文墨活动，意趣和诗词能力被拉起。","textChars":24,"textLines":1,"bbox":[500,311,540,32]}
+{"kind":"textbox","id":"sh/5kb6xkf6","slide":30,"text":"09:30","textPreview":"09:30","textChars":5,"textLines":1,"bbox":[92,370,76,24]}
+{"kind":"shape","id":"sh/9cvixcze","slide":30,"bbox":[180,384,38,1]}
+{"kind":"shape","id":"sh/gr2p8nqx","slide":30,"bbox":[236,360,850,50]}
+{"kind":"textbox","id":"sh/r65wjudg","slide":30,"text":"再次弹错走调","textPreview":"再次弹错走调","textChars":6,"textLines":1,"bbox":[258,373,220,26]}
+{"kind":"textbox","id":"sh/ylc7u54z","slide":30,"text":"同一才艺动作重复出现失手，说明系统能表现“会，但今天不顺”。","textPreview":"同一才艺动作重复出现失手，说明系统能表现“会，但今天不顺”。","textChars":30,"textLines":1,"bbox":[500,369,540,32]}
+{"kind":"textbox","id":"sh/5o7qpg3e","slide":30,"text":"09:55","textPreview":"09:55","textChars":5,"textLines":1,"bbox":[92,428,76,24]}
+{"kind":"shape","id":"sh/g3ex0nux","slide":30,"bbox":[180,442,38,1]}
+{"kind":"shape","id":"sh/nih4byhg","slide":30,"bbox":[236,418,850,50]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":30,"text":"翻旧例","textPreview":"翻旧例","textChars":3,"textLines":1,"bbox":[258,431,220,26]}
+{"kind":"textbox","id":"sh/9s36hcrm","slide":30,"text":"从闲书转向礼法规矩，体现她心里明白、处处自持的一面。","textPreview":"从闲书转向礼法规矩，体现她心里明白、处处自持的一面。","textChars":26,"textLines":1,"bbox":[500,427,540,32]}
+{"kind":"textbox","id":"sh/g7adsji5","slide":30,"text":"午后","textPreview":"午后","textChars":2,"textLines":1,"bbox":[92,486,76,24]}
+{"kind":"shape","id":"sh/ap4r65wj","slide":30,"bbox":[180,500,38,1]}
+{"kind":"shape","id":"sh/za1gvy90","slide":30,"bbox":[236,476,850,50]}
+{"kind":"textbox","id":"sh/svu9knih","slide":30,"text":"散步、吟哦、避人","textPreview":"散步、吟哦、避人","textChars":8,"textLines":1,"bbox":[258,489,220,26]}
+{"kind":"textbox","id":"sh/hgn29gr2","slide":30,"text":"补全天：喜静和多愁让她倾向独处、赏景、写诗，而不是高频社交。","textPreview":"补全天：喜静和多愁让她倾向独处、赏景、写诗，而不是高频社交。","textChars":30,"textLines":1,"bbox":[500,485,540,32]}
+{"kind":"textbox","id":"sh/a1gvy90j","slide":30,"text":"夜间","textPreview":"夜间","textChars":2,"textLines":1,"bbox":[92,544,76,24]}
+{"kind":"shape","id":"sh/zidonyd0","slide":30,"bbox":[180,558,38,1]}
+{"kind":"shape","id":"sh/s36hcrmh","slide":30,"bbox":[236,534,850,50]}
+{"kind":"textbox","id":"sh/hoza1gvy","slide":30,"text":"小憩、就寝前仍挂心","textPreview":"小憩、就寝前仍挂心","textChars":9,"textLines":1,"bbox":[258,547,220,26]}
+{"kind":"textbox","id":"sh/a5gbq1or","slide":30,"text":"补全天：精力下降、心绪偏低，夜里更容易进入感伤或低声自语。","textPreview":"补全天：精力下降、心绪偏低，夜里更容易进入感伤或低声自语。","textChars":29,"textLines":1,"bbox":[500,543,540,32]}
+{"kind":"textbox","id":"sh/3m94fu18","slide":30,"text":"玩家体感：黛玉不是“读书+弹琴”的功能组合，而是才艺、规矩、敏感和低心绪共同生成的一天。","textPreview":"玩家体感：黛玉不是“读书+弹琴”的功能组合，而是才艺、规矩、敏感和低心绪共同生成的一天。","textChars":44,"textLines":1,"bbox":[92,610,1030,34]}
+{"kind":"textbox","id":"sh/7adsji5s","slide":30,"text":"大观园模拟 · 完整一天增补稿","textPreview":"大观园模拟 · 完整一天增补稿","textChars":15,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/epkzupwb","slide":30,"text":"30","textPreview":"30","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/7b2i17","slide":30,"text":""}
+{"kind":"slide","id":"sl/86ga3b","slide":31,"title":"A DAY IN SYSTEM","textShapes":13}
+{"kind":"textbox","id":"sh/bm58z25k","slide":31,"text":"A DAY IN SYSTEM","textPreview":"A DAY IN SYSTEM","textChars":15,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/47y1kre1","slide":31,"text":"黛玉这一天要让玩家看见“人味”","textPreview":"黛玉这一天要让玩家看见“人味”","textChars":15,"textLines":1,"bbox":[54,72,1060,62]}
+{"kind":"shape","id":"sh/tsvu9kni","slide":31,"bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/bat47y1k","slide":31,"bbox":[602,202,250,142]}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":31,"text":"才艺","textPreview":"才艺","textChars":2,"textLines":1,"bbox":[622,220,210,28]}
+{"kind":"textbox","id":"sh/tgfmlkjm","slide":31,"text":"琴台、书案、诗词、文墨都能进入候选，但系统允许失误、停顿和转向，不把才艺做成稳定加分按钮。","textPreview":"琴台、书案、诗词、文墨都能进入候选，但系统允许失误、停顿和转向，不把才艺做成稳定加分按钮。","textChars":45,"textLines":1,"bbox":[622,260,210,72]}
+{"kind":"shape","id":"sh/mhk3q5o7","slide":31,"bbox":[884,202,250,142]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":31,"text":"性格","textPreview":"性格","textChars":2,"textLines":1,"bbox":[904,220,210,28]}
+{"kind":"textbox","id":"sh/f6dcbulw","slide":31,"text":"敏感、多愁、少食、喜静会改变行动权重、状态概率和关系变化强度。","textPreview":"敏感、多愁、少食、喜静会改变行动权重、状态概率和关系变化强度。","textChars":31,"textLines":1,"bbox":[904,260,210,72]}
+{"kind":"shape","id":"sh/mlkjm1cf","slide":31,"bbox":[602,382,250,150]}
+{"kind":"textbox","id":"sh/xc3ylc7u","slide":31,"text":"状态","textPreview":"状态","textChars":2,"textLines":1,"bbox":[622,400,210,28]}
+{"kind":"textbox","id":"sh/4r65wjud","slide":31,"text":"最终状态里黛玉仍在翻旧例，饥饿 56、精力 38、心绪 34；说明她在低精力和低心绪下仍被文墨与礼法牵引。","textPreview":"最终状态里黛玉仍在翻旧例，饥饿 56、精力 38、心绪 34；说明她在低精力和低心绪下仍被文墨与礼法牵引。","textChars":53,"textLines":1,"bbox":[622,440,210,80]}
+{"kind":"shape","id":"sh/fepkzupw","slide":31,"bbox":[884,382,250,150]}
+{"kind":"textbox","id":"sh/mtwra5gb","slide":31,"text":"反馈","textPreview":"反馈","textChars":2,"textLines":1,"bbox":[904,400,210,28]}
+{"kind":"textbox","id":"sh/xkf6dcbu","slide":31,"text":"叙事气泡和关系变化可以把“她为什么这样做”说出来，避免玩家只看见一串 AI 决策。","textPreview":"叙事气泡和关系变化可以把“她为什么这样做”说出来，避免玩家只看见一串 AI 决策。","textChars":41,"textLines":1,"bbox":[904,440,210,80]}
+{"kind":"textbox","id":"sh/4zidonyd","slide":31,"text":"一句话：黛玉的好玩点不是排成满分日程，而是照顾一个才情极高、心绪极易受伤的人。","textPreview":"一句话：黛玉的好玩点不是排成满分日程，而是照顾一个才情极高、心绪极易受伤的人。","textChars":39,"textLines":1,"bbox":[88,586,1030,38]}
+{"kind":"textbox","id":"sh/fil0rqd4","slide":31,"text":"大观园模拟 · 完整一天增补稿","textPreview":"大观园模拟 · 完整一天增补稿","textChars":15,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/qxs72x4n","slide":31,"text":"31","textPreview":"31","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"image","id":"im/j6tovaho","slide":31,"name":"","alt":"林黛玉人物面板","bbox":[74,194,470,290]}
+{"kind":"notes","id":"nt/86ga3b","slide":31,"text":""}
+{"kind":"slide","id":"sl/26wdus","slide":32,"title":"A DAY IN SYSTEM","textShapes":26}
+{"kind":"textbox","id":"sh/36hcrmhk","slide":32,"text":"A DAY IN SYSTEM","textPreview":"A DAY IN SYSTEM","textChars":15,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/wra5gbq1","slide":32,"text":"紫鹃的一天：她不是背景丫鬟，而是职责在身的人","textPreview":"紫鹃的一天：她不是背景丫鬟，而是职责在身的人","textChars":22,"textLines":1,"bbox":[54,72,1060,62]}
+{"kind":"shape","id":"sh/lc7u54zi","slide":32,"bbox":[54,154,1170,1]}
+{"kind":"textbox","id":"sh/ed8bat47","slide":32,"text":"08:04","textPreview":"08:04","textChars":5,"textLines":1,"bbox":[92,196,76,24]}
+{"kind":"shape","id":"sh/7u54zido","slide":32,"bbox":[180,210,38,1]}
+{"kind":"shape","id":"sh/wfyxobm5","slide":32,"bbox":[236,186,850,50]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":32,"text":"先去浴盆","textPreview":"先去浴盆","textChars":4,"textLines":1,"bbox":[258,199,220,26]}
+{"kind":"textbox","id":"sh/e1w7mp0b","slide":32,"text":"AI 选择浴盆，说明仆从也先维护洁净和精力，不是永远待命。","textPreview":"AI 选择浴盆，说明仆从也先维护洁净和精力，不是永远待命。","textChars":29,"textLines":1,"bbox":[500,195,540,32]}
+{"kind":"textbox","id":"sh/7mp0bi9s","slide":32,"text":"08:36","textPreview":"08:36","textChars":5,"textLines":1,"bbox":[92,254,76,24]}
+{"kind":"shape","id":"sh/zed8v6ps","slide":32,"bbox":[180,268,38,1]}
+{"kind":"shape","id":"sh/6xkf6dcb","slide":32,"bbox":[236,244,850,50]}
+{"kind":"textbox","id":"sh/hk3q5o7q","slide":32,"text":"完成自理","textPreview":"完成自理","textChars":4,"textLines":1,"bbox":[258,257,220,26]}
+{"kind":"textbox","id":"sh/oza1gvy9","slide":32,"text":"开始并完成浴盆使用，进入可承担差事的状态。","textPreview":"开始并完成浴盆使用，进入可承担差事的状态。","textChars":21,"textLines":1,"bbox":[500,253,540,32]}
+{"kind":"textbox","id":"sh/zqtcj6to","slide":32,"text":"09:00","textPreview":"09:00","textChars":5,"textLines":1,"bbox":[92,312,76,24]}
+{"kind":"shape","id":"sh/65wjudg7","slide":32,"bbox":[180,326,38,1]}
+{"kind":"shape","id":"sh/hwfyxobm","slide":32,"bbox":[236,302,850,50]}
+{"kind":"textbox","id":"sh/obm58z25","slide":32,"text":"陪伴黛玉","textPreview":"陪伴黛玉","textChars":4,"textLines":1,"bbox":[258,315,220,26]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":32,"text":"主动生成陪伴黛玉候选，贴身侍女围绕主子状态行动。","textPreview":"主动生成陪伴黛玉候选，贴身侍女围绕主子状态行动。","textChars":24,"textLines":1,"bbox":[500,311,540,32]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":32,"text":"09:42","textPreview":"09:42","textChars":5,"textLines":1,"bbox":[92,370,76,24]}
+{"kind":"shape","id":"sh/eloj2t83","slide":32,"bbox":[180,384,38,1]}
+{"kind":"shape","id":"sh/36hcrmhk","slide":32,"bbox":[236,360,850,50]}
+{"kind":"textbox","id":"sh/wra5gbq1","slide":32,"text":"逾矩败露","textPreview":"逾矩败露","textChars":4,"textLines":1,"bbox":[258,373,220,26]}
+{"kind":"textbox","id":"sh/lc7u54zi","slide":32,"text":"陪伴不一定正收益，场景和礼法风险会反噬好感与信任。","textPreview":"陪伴不一定正收益，场景和礼法风险会反噬好感与信任。","textChars":25,"textLines":1,"bbox":[500,369,540,32]}
+{"kind":"textbox","id":"sh/ed8bat47","slide":32,"text":"10:00","textPreview":"10:00","textChars":5,"textLines":1,"bbox":[92,428,76,24]}
+{"kind":"shape","id":"sh/7u54zido","slide":32,"bbox":[180,442,38,1]}
+{"kind":"shape","id":"sh/wfyxobm5","slide":32,"bbox":[236,418,850,50]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":32,"text":"接受晨昏定省","textPreview":"接受晨昏定省","textChars":6,"textLines":1,"bbox":[258,431,220,26]}
+{"kind":"textbox","id":"sh/e1w7mp0b","slide":32,"text":"黛玉下发任务，紫鹃接受；主仆差遣进入任务系统。","textPreview":"黛玉下发任务，紫鹃接受；主仆差遣进入任务系统。","textChars":23,"textLines":1,"bbox":[500,427,540,32]}
+{"kind":"textbox","id":"sh/7mp0bi9s","slide":32,"text":"午后","textPreview":"午后","textChars":2,"textLines":1,"bbox":[92,486,76,24]}
+{"kind":"shape","id":"sh/tsvu9kni","slide":32,"bbox":[180,500,38,1]}
+{"kind":"shape","id":"sh/47y1kre1","slide":32,"bbox":[236,476,850,50]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":32,"text":"洒扫、陪读、跑腿","textPreview":"洒扫、陪读、跑腿","textChars":8,"textLines":1,"bbox":[258,489,220,26]}
+{"kind":"textbox","id":"sh/m1cfa9w3","slide":32,"text":"补全天：根据紫鹃日课，推进潇湘馆洒扫、陪黛玉读书、随侍等职责。","textPreview":"补全天：根据紫鹃日课，推进潇湘馆洒扫、陪黛玉读书、随侍等职责。","textChars":31,"textLines":1,"bbox":[500,485,540,32]}
+{"kind":"textbox","id":"sh/tgfmlkjm","slide":32,"text":"夜间","textPreview":"夜间","textChars":2,"textLines":1,"bbox":[92,544,76,24]}
+{"kind":"shape","id":"sh/4vmtwra5","slide":32,"bbox":[180,558,38,1]}
+{"kind":"shape","id":"sh/bat47y1k","slide":32,"bbox":[236,534,850,50]}
+{"kind":"textbox","id":"sh/mp0bi9s3","slide":32,"text":"回到待命","textPreview":"回到待命","textChars":4,"textLines":1,"bbox":[258,547,220,26]}
+{"kind":"textbox","id":"sh/t83itgfm","slide":32,"text":"补全天：完成照料后回到闲庭漫步或夜间守候，等待下一次传令。","textPreview":"补全天：完成照料后回到闲庭漫步或夜间守候，等待下一次传令。","textChars":29,"textLines":1,"bbox":[500,543,540,32]}
+{"kind":"textbox","id":"sh/4nap4r65","slide":32,"text":"玩家体感：紫鹃的一天要有“接了事、办了事、办得好不好”的结果，不只是站在黛玉旁边。","textPreview":"玩家体感：紫鹃的一天要有“接了事、办了事、办得好不好”的结果，不只是站在黛玉旁边。","textChars":41,"textLines":1,"bbox":[92,610,1030,34]}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":32,"text":"大观园模拟 · 完整一天增补稿","textPreview":"大观园模拟 · 完整一天增补稿","textChars":15,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":32,"text":"32","textPreview":"32","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/26wdus","slide":32,"text":""}
+{"kind":"slide","id":"sl/1gi0jh","slide":33,"title":"QUEST LOOP","textShapes":23}
+{"kind":"textbox","id":"sh/val87ed8","slide":33,"text":"QUEST LOOP","textPreview":"QUEST LOOP","textChars":10,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/kre1w7mp","slide":33,"text":"紫鹃的重点是把下发任务做成可追踪闭环","textPreview":"紫鹃的重点是把下发任务做成可追踪闭环","textChars":18,"textLines":1,"bbox":[54,72,1060,62]}
+{"kind":"shape","id":"sh/dcbulwva","slide":33,"bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/2x4nap4r","slide":33,"bbox":[78,238,176,136]}
+{"kind":"textbox","id":"sh/vixczed8","slide":33,"text":"下发","textPreview":"下发","textChars":2,"textLines":1,"bbox":[96,270,130,30]}
+{"kind":"textbox","id":"sh/k3q5o7qp","slide":33,"text":"10:00 黛玉下发“晨昏定省”。","textPreview":"10:00 黛玉下发“晨昏定省”。","textChars":17,"textLines":1,"bbox":[96,318,132,42]}
+{"kind":"textbox","id":"sh/donyd0z6","slide":33,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[264,292,24,30]}
+{"kind":"shape","id":"sh/29gr2p8n","slide":33,"bbox":[302,238,176,136]}
+{"kind":"textbox","id":"sh/vu9knih4","slide":33,"text":"接受","textPreview":"接受","textChars":2,"textLines":1,"bbox":[320,270,130,30]}
+{"kind":"textbox","id":"sh/3ylc7u54","slide":33,"text":"紫鹃读取职责、服从、信任、当前负担后接受。","textPreview":"紫鹃读取职责、服从、信任、当前负担后接受。","textChars":21,"textLines":1,"bbox":[320,318,132,42]}
+{"kind":"textbox","id":"sh/adsji5sn","slide":33,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[488,292,24,30]}
+{"kind":"shape","id":"sh/h4byhgn2","slide":33,"bbox":[526,238,176,136]}
+{"kind":"textbox","id":"sh/sji5snel","slide":33,"text":"执行","textPreview":"执行","textChars":2,"textLines":1,"bbox":[544,270,130,30]}
+{"kind":"textbox","id":"sh/3m94fu18","slide":33,"text":"通过互动、跟随、停留或使用家具推进进度。","textPreview":"通过互动、跟随、停留或使用家具推进进度。","textChars":20,"textLines":1,"bbox":[544,318,132,42]}
+{"kind":"textbox","id":"sh/a5gbq1or","slide":33,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[712,292,24,30]}
+{"kind":"shape","id":"sh/lszqtcj6","slide":33,"bbox":[750,238,176,136]}
+{"kind":"textbox","id":"sh/s72x4nap","slide":33,"text":"完成","textPreview":"完成","textChars":2,"textLines":1,"bbox":[768,270,130,30]}
+{"kind":"textbox","id":"sh/zidonyd0","slide":33,"text":"任务完成后结算质量、关系、状态和日志。","textPreview":"任务完成后结算质量、关系、状态和日志。","textChars":19,"textLines":1,"bbox":[768,318,132,42]}
+{"kind":"textbox","id":"sh/a1gvy90j","slide":33,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[936,292,24,30]}
+{"kind":"shape","id":"sh/ylc7u54z","slide":33,"bbox":[974,238,176,136]}
+{"kind":"textbox","id":"sh/r65wjudg","slide":33,"text":"回流","textPreview":"回流","textChars":2,"textLines":1,"bbox":[992,270,130,30]}
+{"kind":"textbox","id":"sh/gr2p8nqx","slide":33,"text":"长期记录忠诚、积怨、劳役压力、完成次数。","textPreview":"长期记录忠诚、积怨、劳役压力、完成次数。","textChars":20,"textLines":1,"bbox":[992,318,132,42]}
+{"kind":"shape","id":"sh/9cvixcze","slide":33,"bbox":[100,450,480,94]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":33,"text":"已配置日课","textPreview":"已配置日课","textChars":5,"textLines":1,"bbox":[126,472,140,26]}
+{"kind":"textbox","id":"sh/nih4byhg","slide":33,"text":"晨起伺候黛玉、洒扫潇湘馆、陪黛玉读书、随侍黛玉。","textPreview":"晨起伺候黛玉、洒扫潇湘馆、陪黛玉读书、随侍黛玉。","textChars":24,"textLines":1,"bbox":[286,468,250,42]}
+{"kind":"shape","id":"sh/g3ex0nux","slide":33,"bbox":[650,450,480,94]}
+{"kind":"textbox","id":"sh/5o7qpg3e","slide":33,"text":"展示重点","textPreview":"展示重点","textChars":4,"textLines":1,"bbox":[676,472,140,26]}
+{"kind":"textbox","id":"sh/y1kre1w7","slide":33,"text":"让玩家看见“谁派的、谁接了、做到哪、结果如何”。","textPreview":"让玩家看见“谁派的、谁接了、做到哪、结果如何”。","textChars":24,"textLines":1,"bbox":[836,468,250,42]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":33,"text":"这页可以接任务面板截图：紫鹃身上的任务卡、进度条、完成质量、关系变化和日志。","textPreview":"这页可以接任务面板截图：紫鹃身上的任务卡、进度条、完成质量、关系变化和日志。","textChars":38,"textLines":1,"bbox":[92,588,1040,36]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":33,"text":"大观园模拟 · 完整一天增补稿","textPreview":"大观园模拟 · 完整一天增补稿","textChars":15,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/o7qpg3ex","slide":33,"text":"33","textPreview":"33","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"notes","id":"nt/1gi0jh","slide":33,"text":""}
+{"kind":"slide","id":"sl/thjlz8","slide":34,"title":"A DAY IN SYSTEM","textShapes":9}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":34,"text":"A DAY IN SYSTEM","textPreview":"A DAY IN SYSTEM","textChars":15,"textLines":1,"bbox":[54,38,500,22]}
+{"kind":"textbox","id":"sh/1gvy90je","slide":34,"text":"同一个上午，两种身份给玩家两种玩法","textPreview":"同一个上午，两种身份给玩家两种玩法","textChars":17,"textLines":1,"bbox":[54,72,1060,62]}
+{"kind":"shape","id":"sh/8z25kb6x","slide":34,"bbox":[54,154,1170,1]}
+{"kind":"shape","id":"sh/xs72x4na","slide":34,"bbox":[532,206,210,172]}
+{"kind":"textbox","id":"sh/87ed8bat","slide":34,"text":"林黛玉","textPreview":"林黛玉","textChars":3,"textLines":1,"bbox":[552,224,170,28]}
+{"kind":"textbox","id":"sh/fyxobm58","slide":34,"text":"玩家关注的是“怎么照顾这个人”：才艺、心绪、读书、礼法、少食、喜静，安排不合身会变成低心绪和关系波动。","textPreview":"玩家关注的是“怎么照顾这个人”：才艺、心绪、读书、礼法、少食、喜静，安排不合身会变成低心绪和关系波动。","textChars":51,"textLines":1,"bbox":[552,264,170,102]}
+{"kind":"shape","id":"sh/qd4vmtwr","slide":34,"bbox":[532,412,210,172]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":34,"text":"紫鹃","textPreview":"紫鹃","textChars":2,"textLines":1,"bbox":[552,430,170,28]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":34,"text":"玩家关注的是“她有没有把差事办好”：陪伴、随侍、晨昏定省、洒扫、陪读，结果要回到任务质量和关系。","textPreview":"玩家关注的是“她有没有把差事办好”：陪伴、随侍、晨昏定省、洒扫、陪读，结果要回到任务质量和关系。","textChars":48,"textLines":1,"bbox":[552,470,170,102]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":34,"text":"商业表达：这就是古代生活模拟和现代生活模拟拉开差距的地方。我们卖的不是更多家具动作，而是“身份不同，一天的目标不同”。","textPreview":"商业表达：这就是古代生活模拟和现代生活模拟拉开差距的地方。我们卖的不是更多家具动作，而是“身份不同，一天的目标不同”。","textChars":59,"textLines":1,"bbox":[86,586,1050,42]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":34,"text":"大观园模拟 · 完整一天增补稿","textPreview":"大观园模拟 · 完整一天增补稿","textChars":15,"textLines":1,"bbox":[54,676,420,20]}
+{"kind":"textbox","id":"sh/orytsvu9","slide":34,"text":"34","textPreview":"34","textChars":2,"textLines":1,"bbox":[1170,676,50,20]}
+{"kind":"image","id":"im/upwb2hwf","slide":34,"name":"","alt":"林黛玉操控界面","bbox":[76,196,420,260]}
+{"kind":"image","id":"im/nap4r65w","slide":34,"name":"","alt":"起居面板","bbox":[782,196,340,220]}
+{"kind":"notes","id":"nt/thjlz8","slide":34,"text":""}

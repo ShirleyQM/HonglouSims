@@ -129,7 +129,8 @@ const FamilySystem = (() => {
       const idx = CHARS.indexOf(head);
       if (idx >= 0) { selectedIdx = idx; updateCamera(true); return; }
     }
-    const sc = getScene(f.residenceSceneId);
+    const res = typeof ResidenceSystem !== 'undefined' ? ResidenceSystem.residenceOfFamily?.(f) : null;
+    const sc = res?.sceneId ? getScene(res.sceneId) : getScene(f.residenceSceneId);
     if (!sc) return;
     const px = gridToPixel(sc.originCol + sc.cols / 2, sc.originRow + sc.rows / 2);
     const target = typeof clampCameraTarget === 'function'
@@ -278,11 +279,13 @@ const FamilySystem = (() => {
 
   function canTriggerEvent(family, ev) {
     if (ev.needGardenScene) {
-      const sc = getScene(family.residenceSceneId);
+      const res = typeof ResidenceSystem !== 'undefined' ? ResidenceSystem.residenceOfFamily?.(family) : null;
+      const residenceSceneId = res?.sceneId || family.residenceSceneId;
+      const sc = getScene(residenceSceneId);
       if (!sc) return false;
       const hasGarden = CONFIG.furnitureInstances.some(inst =>
-        inst.sceneId === family.residenceSceneId && getTemplate(inst.templateId)?.category === 'garden');
-      if (!hasGarden && family.residenceSceneId !== 3) return false;
+        inst.sceneId === residenceSceneId && getTemplate(inst.templateId)?.category === 'garden');
+      if (!hasGarden && residenceSceneId !== 3) return false;
     }
     if (ev.needHeadIntellect) {
       const head = getChar(getHeadCharId(family.id));
@@ -341,19 +344,51 @@ const FamilySystem = (() => {
 
   function openFamilyPanel() {
     const cur = currentFamilyId;
+    const current = getFamily(cur) || families()[0];
+    const currentHead = current ? getChar(getHeadCharId(current.id)) : null;
+    const currentMembers = current?.members?.length || 0;
+    const currentFund = current ? Math.round(getFund(current.id)) : 0;
+    const currentRep = current ? Math.round(getReputation(current.id)) : 0;
+    const residence = typeof ResidenceSystem !== 'undefined'
+      ? ResidenceSystem.residenceOfFamily?.(current)
+      : null;
+    const residenceLabel = residence?.kind === 'offmap'
+      ? `${residence.label} · 地图外`
+      : residence?.kind === 'nonresidential'
+        ? `${residence.label} · 非居住`
+        : (residence?.label || getScene(current?.residenceSceneId)?.name || '未设置');
+    const activityLabel = current?.activityLabel || (current?.activitySceneId ? getScene(current.activitySceneId)?.name : '');
     const cards = families().map(f => {
       const head = getChar(getHeadCharId(f.id));
       const n = f.members?.length || 0;
+      const res = typeof ResidenceSystem !== 'undefined' ? ResidenceSystem.residenceOfFamily?.(f) : null;
+      const resText = res?.kind === 'offmap' ? '地图外' : (res?.label || '未设置');
       return `<div class="fam-card${f.id === cur ? ' sel' : ''}" data-fid="${f.id}">
         <div class="fc-crest">${f.crestIcon || '🏠'}</div>
         <div class="fc-name">${f.name}</div>
-        <div class="fc-head">家主：${head?.short || '—'}</div>
-        <div class="fc-head">${n} 口人 · 公库 ${Math.round(getFund(f.id))} 两</div>
+        <div class="fc-head">家主：${head?.short || '—'} · ${n}口</div>
+        <div class="fc-head">${resText} · ${Math.round(getFund(f.id))}两</div>
         <span class="fc-tag">${f.tag || ''}</span>
       </div>`;
     }).join('');
     document.getElementById('panel-content').innerHTML = `
       <h3>选择家庭</h3>
+      <div class="fam-current">
+        <div class="fam-current-head">
+          <div>
+            <div class="fam-current-name">${current?.crestIcon || '🏠'} ${current?.name || '当前家庭'}</div>
+            <div class="fam-current-sub">家主：${currentHead?.short || '—'}${current?.tag ? ` · ${current.tag}` : ''}</div>
+          </div>
+          <div class="fam-current-badge">当前家庭</div>
+        </div>
+        <div class="fam-current-stats">
+          <div class="fam-stat"><div class="fam-stat-k">住所</div><div class="fam-stat-v" title="${residenceLabel}">${residenceLabel}</div></div>
+          <div class="fam-stat"><div class="fam-stat-k">账面</div><div class="fam-stat-v">公库 ${currentFund} 两</div></div>
+          <div class="fam-stat"><div class="fam-stat-k">人口</div><div class="fam-stat-v">${currentMembers} 口 · 声望 ${currentRep}</div></div>
+        </div>
+        ${activityLabel ? `<div class="fam-current-sub" style="margin-top:7px">常用场所：${activityLabel}</div>` : ''}
+      </div>
+      <div class="fam-section-title">家庭列表</div>
       <div class="fam-grid">${cards}</div>
       <p style="font-size:10px;color:#8a7355;margin-top:10px">切换后底部人物栏刷新，成员依次自我介绍。快捷键 F。</p>
       <button class="sys-btn" style="margin-top:8px" onclick="document.getElementById('panel-overlay').classList.remove('open')">关闭</button>`;

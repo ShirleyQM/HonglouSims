@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="2000" viewBox="0 0 800 2000">
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#314f34"/>
+      <stop offset=".46" stop-color="#203d27"/>
+      <stop offset="1" stop-color="#45603a"/>
+    </linearGradient>
+    <radialGradient id="light" cx=".48" cy=".48" r=".68">
+      <stop offset="0" stop-color="#b8d08a" stop-opacity=".24"/>
+      <stop offset=".64" stop-color="#6d8b53" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#0e2318" stop-opacity=".42"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#08140d" flood-opacity=".35"/>
+    </filter>
+  </defs>
+  <rect width="800" height="2000" fill="url(#ground)"/>
+  <rect width="800" height="2000" fill="url(#light)"/>
+  <g opacity=".28" stroke="#101f14" stroke-width="22" stroke-linecap="round">
+    <path d="M92 0C40 280 78 448 42 704C4 982 56 1164 24 1460C4 1652 46 1828 18 2000"/>
+    <path d="M704 0C756 266 712 480 760 720C812 982 742 1190 786 1488C816 1700 758 1850 790 2000"/>
+  </g>
+  <g fill="none" stroke-linecap="round" filter="url(#shadow)">
+    <g stroke="#172f1d" stroke-width="18">
+      <path d="M112 -60C150 190 122 380 160 620C202 888 146 1120 180 1380C208 1600 166 1788 202 2060"/>
+      <path d="M338 -80C312 160 354 390 330 650C304 932 358 1130 328 1410C302 1640 350 1810 322 2060"/>
+      <path d="M560 -80C602 196 552 430 596 700C638 960 586 1200 626 1480C654 1664 610 1840 648 2060"/>
+      <path d="M714 -70C686 180 736 374 708 628C674 930 738 1140 702 1446C676 1680 724 1850 690 2060"/>
+    </g>
+    <g stroke="#4f7f39" stroke-width="10">
+      <path d="M108 -60C146 190 118 380 156 620C198 888 142 1120 176 1380C204 1600 162 1788 198 2060"/>
+      <path d="M334 -80C308 160 350 390 326 650C300 932 354 1130 324 1410C298 1640 346 1810 318 2060"/>
+      <path d="M556 -80C598 196 548 430 592 700C634 960 582 1200 622 1480C650 1664 606 1840 644 2060"/>
+      <path d="M710 -70C682 180 732 374 704 628C670 930 734 1140 698 1446C672 1680 720 1850 686 2060"/>
+    </g>
+  </g>
+  <g stroke="#85ad62" stroke-width="3" opacity=".78">
+    <path d="M96 140H196M88 350H176M126 566H220M104 790H190M142 1030H248M138 1248H218M158 1508H250M172 1740H276"/>
+    <path d="M276 120H390M288 330H414M264 560H372M292 812H406M258 1046H372M286 1280H402M250 1548H384M284 1780H430"/>
+    <path d="M494 176H624M520 386H676M488 632H618M524 862H684M506 1100H628M538 1322H700M492 1580H632M526 1810H704"/>
+    <path d="M650 96H760M632 304H744M676 540H786M628 780H746M650 1008H778M620 1244H744M662 1510H780M636 1756H760"/>
+  </g>
+  <g fill="#6f9a4b" opacity=".72">
+    <ellipse cx="194" cy="192" rx="76" ry="24" transform="rotate(-12 194 192)"/>
+    <ellipse cx="122" cy="292" rx="86" ry="26" transform="rotate(16 122 292)"/>
+    <ellipse cx="356" cy="410" rx="92" ry="28" transform="rotate(-9 356 410)"/>
+    <ellipse cx="612" cy="236" rx="112" ry="30" transform="rotate(12 612 236)"/>
+    <ellipse cx="662" cy="596" rx="124" ry="34" transform="rotate(-15 662 596)"/>
+    <ellipse cx="162" cy="760" rx="112" ry="34" transform="rotate(13 162 760)"/>
+    <ellipse cx="372" cy="980" rx="132" ry="36" transform="rotate(-12 372 980)"/>
+    <ellipse cx="600" cy="1130" rx="128" ry="34" transform="rotate(15 600 1130)"/>
+    <ellipse cx="190" cy="1320" rx="126" ry="34" transform="rotate(-12 190 1320)"/>
+    <ellipse cx="516" cy="1518" rx="140" ry="38" transform="rotate(9 516 1518)"/>
+    <ellipse cx="210" cy="1740" rx="126" ry="34" transform="rotate(14 210 1740)"/>
+    <ellipse cx="636" cy="1814" rx="126" ry="34" transform="rotate(-16 636 1814)"/>
+  </g>
+  <g fill="#20351f" opacity=".88">
+    <ellipse cx="112" cy="1870" rx="86" ry="42"/>
+    <ellipse cx="286" cy="1904" rx="110" ry="50"/>
+    <ellipse cx="566" cy="1890" rx="132" ry="58"/>
+    <ellipse cx="718" cy="1854" rx="72" ry="36"/>
+  </g>
+  <path d="M400 0C422 290 386 554 414 846C442 1130 384 1420 420 2000" fill="none" stroke="#b9c878" stroke-width="16" opacity=".22"/>
+  <rect x="4" y="4" width="792" height="1992" fill="none" stroke="#182516" stroke-width="8" opacity=".62"/>
+</svg>

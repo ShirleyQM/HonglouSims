@@ -90,6 +90,83 @@ const NarrativeBubbleSystem = (() => {
       || '';
   }
 
+  function needLabel(key) {
+    return getNeedDefs().find(n => n.key === key)?.label
+      || getNeedDefs().find(n => n.key === key)?.name
+      || key
+      || '';
+  }
+
+  function stateLabel(id) {
+    return CONFIG.stateDefs?.[id]?.name || id || '';
+  }
+
+  function moduleReasonLabel(module) {
+    return ({
+      demand: '需求偏低',
+      interaction: '互动结果',
+      memory: '旧事浮现',
+      conflict: '关系冲突',
+      observe: '旁观反应',
+      contagion: '情绪传染',
+      driven: '叙事规则',
+      trait: '性格触发',
+      furnitureReaction: '旁观家具动作',
+      family: '家族事件',
+      follow: '跟随任务',
+      quest: '任务进展',
+      relation: '关系变化',
+      access: '场景礼法',
+      storyNode: '故事节点',
+      fortune: '命运事件',
+      llm: '叙事生成',
+    })[module] || '';
+  }
+
+  function sourceEventLabel(type) {
+    if (!type) return '';
+    if (type.startsWith('need:')) return '需求变化';
+    if (type.startsWith('state:')) return '状态变化';
+    if (type.startsWith('interaction:')) return '互动结果';
+    if (type.startsWith('furniture:')) return '家具动作';
+    if (type.startsWith('relation:')) return '关系变化';
+    if (type.startsWith('quest:')) return '任务事件';
+    if (type === 'scene:entered') return '进入场景';
+    if (type === 'scan') return '日常观察';
+    if (type === 'time:tick') return '日常流逝';
+    return '';
+  }
+
+  function bubbleReasonText(data, c) {
+    if (data.reasonText) return data.reasonText;
+    const drivers = data.drivers || {};
+    const parts = [];
+    for (const key of drivers.needKeys || []) {
+      const value = c?.needs?.[key];
+      const suffix = value != null && value < 45 ? '偏低' : '';
+      const label = needLabel(key);
+      if (label) parts.push(label + suffix);
+    }
+    for (const id of drivers.stateIds || []) {
+      const label = stateLabel(id);
+      if (label) parts.push(label);
+    }
+    for (const id of drivers.traitIds || []) {
+      const label = traitLabel(id);
+      if (label) parts.push(label);
+    }
+    for (const id of drivers.specialtyIds || []) {
+      const label = specialtyLabel(data.charId, id);
+      if (label) parts.push(label);
+    }
+    if (drivers.memoryId) parts.push('旧事浮现');
+    const source = sourceEventLabel(drivers.sourceEvent);
+    if (source) parts.push(source);
+    const moduleLabel = moduleReasonLabel(data.module || '');
+    if (!parts.length && moduleLabel) parts.push(moduleLabel);
+    return [...new Set(parts.filter(Boolean))].slice(0, 3).join(' / ');
+  }
+
   function needInfo(c) {
     const out = {};
     for (const nd of getNeedDefs()) {
@@ -271,15 +348,17 @@ const NarrativeBubbleSystem = (() => {
     const max = st().maxOnScreen || 3;
     while (active.length >= max) active.shift();
     const dur = data.duration || Math.min(8, Math.max(4, (data.text?.length || 6) * 0.18));
+    const reasonText = bubbleReasonText(data, c);
     active.push({
       charId: data.charId, char: c, text: data.text,
       style: data.style || 'thought', icon: data.icon || '',
       born: performance.now(), duration: dur, fadeIn: 0.3, fadeOut: 0.5,
-      module,
+      module, reasonText,
     });
     EventBus.emit('bubble:show', {
       charId: data.charId, text: data.text, style: data.style, module: data.module,
       ruleId: data.ruleId || '', drivers: data.drivers || null, memoryId: data.memoryId || '',
+      reasonText,
     });
     return true;
   }
@@ -883,6 +962,32 @@ const NarrativeBubbleSystem = (() => {
     ctx.restore();
   }
 
+  function drawReasonCard(bx, by, bw, bh, text, alpha) {
+    if (!text) return;
+    ctx.save();
+    ctx.globalAlpha = Math.min(alpha, 0.86);
+    ctx.font = '10px "Microsoft YaHei", "PingFang SC", sans-serif';
+    const label = '因 ' + text;
+    const maxW = 116;
+    const lines = wrapText(label, maxW - 14).slice(0, 2);
+    const rw = Math.min(maxW, Math.max(...lines.map(l => ctx.measureText(l).width), 34) + 14);
+    const rh = lines.length * 13 + 9;
+    let rx = bx + bw + 6;
+    if (rx + rw > VIEW_W - 8) rx = bx - rw - 6;
+    const ry = Math.max(8, Math.min(by + 4, VIEW_H - rh - 8));
+    ctx.fillStyle = 'rgba(250, 247, 238, .58)';
+    ctx.strokeStyle = 'rgba(128, 104, 76, .26)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, 6);
+    else ctx.rect(rx, ry, rw, rh);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(77, 63, 52, .78)';
+    lines.forEach((ln, i) => ctx.fillText(ln, rx + 7, ry + 14 + i * 13));
+    ctx.restore();
+  }
+
   function draw() {
     if (!active.length) return;
     const now = performance.now();
@@ -900,7 +1005,9 @@ const NarrativeBubbleSystem = (() => {
       ctx.font = (b.style === 'exclaim' ? 'bold ' : '') + '12px "Microsoft YaHei", "PingFang SC", sans-serif';
       const maxW = 150;
       const lines = wrapText((b.icon ? b.icon + ' ' : '') + b.text, maxW);
-      const bw = Math.min(maxW, Math.max(...lines.map(l => ctx.measureText(l).width), 40)) + 14;
+      const showReason = b.reasonText && st().showReason !== false;
+      const textW = Math.max(...lines.map(l => ctx.measureText(l).width), 40);
+      const bw = Math.min(maxW, textW) + 14;
       const bh = lines.length * 14 + 10;
       const bx = Math.max(8, Math.min(x - bw / 2, VIEW_W - bw - 8));
       const stackKey = `${Math.floor(bx / 48)},${Math.floor(y / 48)}`;
@@ -915,6 +1022,7 @@ const NarrativeBubbleSystem = (() => {
       ctx.textAlign = 'left';
       lines.forEach((ln, i) => ctx.fillText(ln, bx + 7, by + 14 + i * 14));
       ctx.restore();
+      if (showReason) drawReasonCard(bx, by, bw, bh, b.reasonText, alpha);
     }
   }
 

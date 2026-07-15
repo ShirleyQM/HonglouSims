@@ -471,13 +471,17 @@ function failQueueItem(c, reason) {
 
 function getFurnitureActionRuntime(tpl, action) {
   const act = action || null;
+  const mergedEffects = [
+    ...(tpl.extraEffects || []),
+    ...((act?.effects || act?.extraEffects || [])),
+  ];
   return {
     ...tpl,
     ...(act || {}),
     name: act?.name || tpl.name,
     category: act?.category || tpl.category,
     needRestores: act?.needRestores || tpl.needRestores || [],
-    extraEffects: act?.effects || act?.extraEffects || tpl.extraEffects || [],
+    extraEffects: mergedEffects,
     duration: act?.duration ?? tpl.duration,
     maxUsers: act?.maxUsers ?? tpl.maxUsers,
     skill: act?.skill ?? tpl.skill,
@@ -519,6 +523,7 @@ function beginFurnitureUse(c, inst, item, onComplete) {
   EventBus.emit('furniture:use_started', {
     charId: c.id, instanceId: inst.instanceId,
     templateId: inst.templateId, category: effective.category, actionId: action?.id || 'default_use',
+    activityId: action?.activityId || '',
   });
   uiDirty = true;
 }
@@ -611,18 +616,21 @@ function updateQueueWait(c, dt = 0) {
 function applyFurnEffects(c, tpl, timing) {
   for (const ef of tpl.extraEffects || []) {
     if ((ef.timing || 'end') !== timing) continue;
-    if (ef.type === 'need') CharacterEffectSystem.apply({
-      type: 'need', charId: c.id, key: ef.need || ef.key, delta: ef.delta || 0,
-    }, { source: `furniture:${tpl.category}`, reason: tpl.name });
-    if (ef.type === 'addState' || ef.type === 'state') CharacterEffectSystem.apply({
-      type: 'state', charId: c.id, stateId: ef.param || ef.stateId,
-    }, { source: `furniture:${tpl.category}`, reason: tpl.name });
-    if (ef.type === 'skillXp') {
-      CharacterEffectSystem.apply({
-        type: 'skillXp', charId: c.id, skill: ef.param || ef.skill, delta: ef.delta || 1,
-      }, { source: `furniture:${tpl.category}`, reason: tpl.name });
-      log(`${c.short}「${CONFIG.skillDefs[ef.param || ef.skill]?.name}」经验+${ef.delta || 1}`);
+    const normalized = { ...ef, charId: c.id };
+    if (ef.type === 'need') {
+      normalized.key = ef.need || ef.key;
+      normalized.delta = ef.delta || 0;
     }
+    if (ef.type === 'addState') {
+      normalized.type = 'state';
+      normalized.stateId = ef.param || ef.stateId;
+    }
+    if (ef.type === 'state') normalized.stateId = ef.param || ef.stateId;
+    if (ef.type === 'skillXp') normalized.skill = ef.param || ef.skill;
+    if (['need', 'addState', 'state', 'skillXp'].includes(ef.type)) {
+      CharacterEffectSystem.apply(normalized, { source: `furniture:${tpl.category}`, reason: tpl.name });
+    }
+    if (ef.type === 'skillXp') log(`${c.short}「${CONFIG.skillDefs[ef.param || ef.skill]?.name}」经验+${ef.delta || 1}`);
     if (ef.type === 'log' && ef.text) log(ef.text.replace('{A}', c.short), ef.category || 'system');
   }
 }

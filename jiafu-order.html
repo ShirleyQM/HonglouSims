@@ -36,6 +36,96 @@
       display: grid;
       grid-template-rows: auto 1fr;
     }
+    body.embedded-order {
+      overflow: hidden;
+      background: transparent;
+    }
+    body.embedded-order .shell {
+      height: 100vh;
+      min-height: 0;
+      grid-template-rows: 1fr;
+    }
+    body.embedded-order header { display: none; }
+    body.embedded-order main {
+      min-height: 0;
+      height: 100vh;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
+    }
+    body.embedded-order .board {
+      min-height: 0;
+      overflow: auto;
+      padding: 12px;
+    }
+    body.embedded-order aside {
+      min-height: 0;
+      overflow: auto;
+    }
+    body.embedded-order .tree-shell {
+      height: clamp(420px, calc(100vh - 138px), 680px);
+    }
+    body.mini-order {
+      overflow: hidden;
+      background: transparent;
+    }
+    body.mini-order .shell {
+      height: 100vh;
+      min-height: 0;
+      grid-template-rows: 1fr;
+    }
+    body.mini-order header,
+    body.mini-order .panel-head,
+    body.mini-order aside,
+    body.mini-order .tree-filters,
+    body.mini-order .tree-tools,
+    body.mini-order .tree-hint,
+    body.mini-order .level-rail {
+      display: none !important;
+    }
+    body.mini-order main {
+      height: 100vh;
+      min-height: 0;
+      display: block;
+    }
+    body.mini-order .board {
+      height: 100vh;
+      min-height: 0;
+      padding: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+    body.mini-order .rank-toolbar {
+      position: absolute;
+      z-index: 6;
+      left: 8px;
+      top: 8px;
+      margin: 0;
+      display: block;
+    }
+    body.mini-order .mode-switch {
+      pointer-events: none;
+      opacity: .86;
+      transform: scale(.82);
+      transform-origin: left top;
+    }
+    body.mini-order .mode-switch button:not(.active) { display: none; }
+    body.mini-order .tree-shell {
+      height: 100vh;
+      border: 0;
+      border-radius: 0;
+      cursor: default;
+    }
+    body.mini-order .tree-card {
+      width: 118px;
+      min-height: 70px;
+      grid-template-columns: 32px minmax(0, 1fr);
+      gap: 6px;
+      padding: 7px;
+      transform: scale(.9);
+      transform-origin: center;
+    }
+    body.mini-order .tree-card .avatar { width: 32px; height: 32px; }
+    body.mini-order .tree-name { font-size: 13px; }
+    body.mini-order .tree-role { font-size: 9px; }
 
     header {
       display: grid;
@@ -2482,6 +2572,15 @@
   </style>
 </head>
 <body>
+  <script>
+    const orderPageParams = new URLSearchParams(location.search);
+    if (orderPageParams.get('embed') === '1') {
+      document.body.classList.add('embedded-order');
+    }
+    if (orderPageParams.get('mini') === '1') {
+      document.body.classList.add('mini-order');
+    }
+  </script>
   <!--
     变更日志 2026-07-01：
     - 事务页从“每张卡展开全员”改为“事务概览卡 + 右侧检查器配置”。
@@ -3242,8 +3341,8 @@
 
     let currentScene = '贾府';
     let currentTab = 'rank';
-    let rankMode = 'kinship';
-    let focusedPersonId = '';
+    let rankMode = orderPageParams.get('mode') === 'identity' ? 'identity' : 'kinship';
+    let focusedPersonId = orderPageParams.get('focus') || '';
     let activeYardFilter = 'all';
     let activeAffairFilter = 'all';
     let selectedAffairId = 'ritual';
@@ -3310,7 +3409,7 @@
       kinship: defaultTreeTransform('kinship'),
       identity: defaultTreeTransform('identity')
     };
-    let selected = { type: 'person', id: 'wangfuren' };
+    let selected = { type: 'person', id: focusedPersonId || 'wangfuren' };
     function controllerLabelsForAffair(affairId) {
       const labels = Object.values(positionDefs)
         .filter(position => (position.controls?.affairs || []).includes(affairId))
@@ -4305,8 +4404,10 @@
       const maxY = Math.max(...values.map(node => node.y + 82));
       const width = Math.max(1, maxX - minX);
       const height = Math.max(1, maxY - minY);
-      const pad = 44;
-      const nextScale = Math.max(.5, Math.min(.96, (shell.clientWidth - pad * 2) / width, (shell.clientHeight - pad * 2) / height));
+      const mini = document.body.classList.contains('mini-order');
+      const pad = mini ? 24 : 44;
+      const maxScale = mini ? 1.24 : .96;
+      const nextScale = Math.max(.5, Math.min(maxScale, (shell.clientWidth - pad * 2) / width, (shell.clientHeight - pad * 2) / height));
       const t = treeTransform[rankMode];
       t.scale = nextScale;
       t.x = (shell.clientWidth - width * nextScale) / 2 - minX * nextScale;
@@ -4366,6 +4467,58 @@
       </button>`;
     }
 
+    function buildMiniTreeLayout(tree, nodes, edges, mode) {
+      const ids = Object.keys(nodes || {});
+      if (!ids.length) return { ...tree, nodes, edges };
+      const focusId = focusedPersonId && nodes[focusedPersonId] ? focusedPersonId : ids[0];
+      const focusNode = nodes[focusId];
+      const rowKey = node => mode === 'identity'
+        ? Number(node.rank ?? 9)
+        : String(node.level || node.y || '一层');
+      const sourceRows = new Map();
+      ids.forEach(id => {
+        const node = nodes[id];
+        const key = rowKey(node);
+        const current = sourceRows.get(key) || { key, ids: [], y: node.y || 0 };
+        current.ids.push(id);
+        current.y = Math.min(current.y, node.y || 0);
+        sourceRows.set(key, current);
+      });
+      const rows = Array.from(sourceRows.values()).sort((a, b) => {
+        const an = Number(a.key);
+        const bn = Number(b.key);
+        if (Number.isFinite(an) && Number.isFinite(bn)) return an - bn;
+        return a.y - b.y;
+      });
+      const size = { width: 520, height: Math.max(220, rows.length * 96 + 36) };
+      const laidOut = {};
+      rows.forEach((row, rowIndex) => {
+        const sortedIds = [...row.ids].sort((a, b) => {
+          if (a === focusId) return -1;
+          if (b === focusId) return 1;
+          return (nodes[a].x || 0) - (nodes[b].x || 0);
+        });
+        const y = 18 + rowIndex * 96;
+        const gap = size.width / (sortedIds.length + 1);
+        sortedIds.forEach((id, index) => {
+          const preferredCenter = id === focusId && sortedIds.length > 1
+            ? size.width / 2
+            : gap * (index + 1);
+          const usedCenters = new Set(Object.values(laidOut).filter(n => Math.abs(n.y - y) < 2).map(n => Math.round(n.x + 66)));
+          let center = preferredCenter;
+          while (usedCenters.has(Math.round(center))) center += 80;
+          center = Math.max(82, Math.min(size.width - 82, center));
+          laidOut[id] = { ...nodes[id], x: center - 66, y };
+        });
+      });
+      if (focusNode && laidOut[focusId]) {
+        const focusRowY = laidOut[focusId].y;
+        const sameRow = Object.entries(laidOut).filter(([, node]) => Math.abs(node.y - focusRowY) < 2);
+        if (sameRow.length === 1) laidOut[focusId].x = size.width / 2 - 66;
+      }
+      return { ...tree, size, nodes: laidOut, edges };
+    }
+
     function renderRank() {
       const tree = treeDefs[rankMode] || treeDefs.kinship;
       const shell = document.getElementById('rank-tree');
@@ -4375,14 +4528,32 @@
         btn.classList.toggle('active', btn.dataset.rankMode === rankMode);
       });
       const visible = visibleTreeData(tree);
-      const renderTree = { ...tree, nodes: visible.nodes, edges: visible.edges };
+      const mini = document.body.classList.contains('mini-order');
+      const miniEdges = mini && focusedPersonId
+        ? visible.edges.filter(edge => focusedEdge(edge))
+        : visible.edges;
+      const miniNodeIds = new Set([focusedPersonId]);
+      miniEdges.forEach(edge => { miniNodeIds.add(edge.from); miniNodeIds.add(edge.to); });
+      const miniNodes = mini && focusedPersonId
+        ? Object.fromEntries(Object.entries(visible.nodes).filter(([id]) => miniNodeIds.has(id)))
+        : visible.nodes;
+      const renderTree = mini && focusedPersonId
+        ? buildMiniTreeLayout(tree, miniNodes, miniEdges, rankMode)
+        : { ...tree, nodes: miniNodes, edges: miniEdges };
       const filterIds = filteredTreeIds(renderTree);
-      shell.innerHTML = `<div class="tree-world" style="width:${tree.size.width}px;height:${tree.size.height}px">
+      shell.innerHTML = `<div class="tree-world" style="width:${renderTree.size.width}px;height:${renderTree.size.height}px">
         ${renderTreeEdges(renderTree, rankMode, filterIds)}
         ${renderLevelRail(renderTree, rankMode)}
         ${Object.values(renderTree.nodes || {}).map(node => treeNodeHtml(node, renderTree.edges, filterIds)).join('')}
       </div>
       <div class="tree-hint">拖拽移动 · 滚轮缩放 · 点击头像聚焦 · 点“全部”恢复</div>`;
+      if (focusedPersonId) {
+        const relatedNodes = {};
+        Object.entries(renderTree.nodes || {}).forEach(([id, node]) => {
+          if (focusedNode(id, renderTree.edges)) relatedNodes[id] = node;
+        });
+        fitTreeToVisibleNodes(relatedNodes);
+      }
       applyTreeTransform();
       bindTreePan();
       renderFocusChip();

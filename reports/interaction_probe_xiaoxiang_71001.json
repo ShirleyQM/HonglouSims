@@ -1,0 +1,510 @@
+{
+  "outFile": "/Users/bytedance/Desktop/myCursor/game/reports/interaction_probe_xiaoxiang_71001.md",
+  "jsonOutFile": "/Users/bytedance/Desktop/myCursor/game/reports/interaction_probe_xiaoxiang_71001.json",
+  "targetIds": [
+    "daiyu",
+    "zijuan",
+    "xueyan"
+  ],
+  "targetNames": [
+    "黛玉",
+    "紫鹃",
+    "雪雁"
+  ],
+  "startDay": 1,
+  "endBeforeDay": 8,
+  "seed": 71001,
+  "rows": [
+    {
+      "time": "第01日 08:01",
+      "day": 1,
+      "hour": 8,
+      "minute": 1,
+      "type": "queue:add",
+      "person": "黛玉",
+      "action": "行动入队：👘 理妆整衣",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:01",
+      "day": 1,
+      "hour": 8,
+      "minute": 1,
+      "type": "ai:decision",
+      "person": "黛玉",
+      "action": "AI选择：梳洗妆台·理妆整衣 [furn:1008:tidy_dress] provider=furniture routine=morning_hygiene",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:01",
+      "day": 1,
+      "hour": 8,
+      "minute": 1,
+      "type": "ai:daily_social_count",
+      "person": "紫鹃",
+      "action": "AI每日主动社交计数：黛玉 1/10",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:01",
+      "day": 1,
+      "hour": 8,
+      "minute": 1,
+      "type": "ai:routine_completed",
+      "person": "紫鹃",
+      "action": "作息完成：随侍黛玉 via=weijie",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:01",
+      "day": 1,
+      "hour": 8,
+      "minute": 1,
+      "type": "interaction:started",
+      "person": "紫鹃",
+      "action": "开始互动：与黛玉「陪伴」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:01",
+      "day": 1,
+      "hour": 8,
+      "minute": 1,
+      "type": "interaction:started",
+      "person": "黛玉",
+      "action": "被紫鹃发起互动：「陪伴」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:09",
+      "day": 1,
+      "hour": 8,
+      "minute": 9,
+      "type": "ai:routine_completed",
+      "person": "雪雁",
+      "action": "作息完成：早餐 via=meal",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:09",
+      "day": 1,
+      "hour": 8,
+      "minute": 9,
+      "type": "furniture:use_started",
+      "person": "雪雁",
+      "action": "开始用家具：饭桌 / complain_food",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:11",
+      "day": 1,
+      "hour": 8,
+      "minute": 11,
+      "type": "furniture:complete",
+      "person": "雪雁",
+      "action": "完成用家具：饭桌 / complain_food",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:19",
+      "day": 1,
+      "hour": 8,
+      "minute": 19,
+      "type": "ai:social_target_cooldown",
+      "person": "紫鹃",
+      "action": "AI目标频控：黛玉 75分钟",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:19",
+      "day": 1,
+      "hour": 8,
+      "minute": 19,
+      "type": "interaction:complete",
+      "person": "紫鹃",
+      "action": "完成互动：与黛玉「陪伴」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:19",
+      "day": 1,
+      "hour": 8,
+      "minute": 19,
+      "type": "interaction:complete",
+      "person": "黛玉",
+      "action": "被紫鹃完成互动：「陪伴」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "ai:routine_completed",
+      "person": "黛玉",
+      "action": "作息完成：晨起梳洗 via=wardrobe",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "furniture:use_started",
+      "person": "黛玉",
+      "action": "开始用家具：梳洗妆台 / tidy_dress",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:27",
+      "day": 1,
+      "hour": 8,
+      "minute": 27,
+      "type": "furniture:complete",
+      "person": "黛玉",
+      "action": "完成用家具：梳洗妆台 / tidy_dress",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:30",
+      "day": 1,
+      "hour": 8,
+      "minute": 30,
+      "type": "queue:add",
+      "person": "雪雁",
+      "action": "行动入队：💬 闲谈·黛玉",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:30",
+      "day": 1,
+      "hour": 8,
+      "minute": 30,
+      "type": "ai:daily_social_count",
+      "person": "雪雁",
+      "action": "AI每日主动社交计数：黛玉 1/10",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:30",
+      "day": 1,
+      "hour": 8,
+      "minute": 30,
+      "type": "interaction:started",
+      "person": "雪雁",
+      "action": "开始互动：与黛玉「闲谈」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:30",
+      "day": 1,
+      "hour": 8,
+      "minute": 30,
+      "type": "interaction:started",
+      "person": "黛玉",
+      "action": "被雪雁发起互动：「闲谈」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:30",
+      "day": 1,
+      "hour": 8,
+      "minute": 30,
+      "type": "ai:decision",
+      "person": "雪雁",
+      "action": "AI选择：闲谈·黛玉 [int:102:daiyu] provider=social routine=morning_hygiene",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:31",
+      "day": 1,
+      "hour": 8,
+      "minute": 31,
+      "type": "queue:add",
+      "person": "雪雁",
+      "action": "行动入队：👘 理妆整衣",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:31",
+      "day": 1,
+      "hour": 8,
+      "minute": 31,
+      "type": "ai:decision",
+      "person": "雪雁",
+      "action": "AI选择：梳洗妆台·理妆整衣 [furn:1008:tidy_dress] provider=furniture routine=morning_hygiene",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:31",
+      "day": 1,
+      "hour": 8,
+      "minute": 31,
+      "type": "ai:routine_completed",
+      "person": "雪雁",
+      "action": "作息完成：晨起梳洗 via=wardrobe",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:31",
+      "day": 1,
+      "hour": 8,
+      "minute": 31,
+      "type": "furniture:use_started",
+      "person": "雪雁",
+      "action": "开始用家具：梳洗妆台 / tidy_dress",
+      "issuer": ""
+    }
+  ],
+  "perPersonDay": {
+    "1|黛玉": {
+      "total": 8,
+      "tasks": 0,
+      "furniture": 2,
+      "interactions": 3,
+      "blocked": 0,
+      "decisions": 1,
+      "samples": [
+        " 08:01 行动入队：👘 理妆整衣",
+        " 08:01 AI选择：梳洗妆台·理妆整衣 [furn:1008:tidy_dress] provider=furniture routine=morning_hygiene",
+        " 08:01 被紫鹃发起互动：「陪伴」",
+        " 08:19 被紫鹃完成互动：「陪伴」",
+        " 08:22 作息完成：晨起梳洗 via=wardrobe"
+      ]
+    },
+    "1|紫鹃": {
+      "total": 5,
+      "tasks": 0,
+      "furniture": 0,
+      "interactions": 2,
+      "blocked": 0,
+      "decisions": 0,
+      "samples": [
+        " 08:01 AI每日主动社交计数：黛玉 1/10",
+        " 08:01 作息完成：随侍黛玉 via=weijie",
+        " 08:01 开始互动：与黛玉「陪伴」",
+        " 08:19 AI目标频控：黛玉 75分钟",
+        " 08:19 完成互动：与黛玉「陪伴」"
+      ]
+    },
+    "1|雪雁": {
+      "total": 11,
+      "tasks": 0,
+      "furniture": 3,
+      "interactions": 1,
+      "blocked": 0,
+      "decisions": 2,
+      "samples": [
+        " 08:09 作息完成：早餐 via=meal",
+        " 08:09 开始用家具：饭桌 / complain_food",
+        " 08:11 完成用家具：饭桌 / complain_food",
+        " 08:30 行动入队：💬 闲谈·黛玉",
+        " 08:30 AI每日主动社交计数：黛玉 1/10"
+      ]
+    }
+  },
+  "actionCounts": {
+    "黛玉|行动入队：👘 理妆整衣": 1,
+    "黛玉|AI选择：梳洗妆台·理妆整衣 [furn:1008:tidy_dress] provider=furniture routine=morning_hygiene": 1,
+    "紫鹃|AI每日主动社交计数：黛玉 1/10": 1,
+    "紫鹃|作息完成：随侍黛玉 via=weijie": 1,
+    "紫鹃|开始互动：与黛玉「陪伴」": 1,
+    "黛玉|被紫鹃发起互动：「陪伴」": 1,
+    "雪雁|作息完成：早餐 via=meal": 1,
+    "雪雁|开始用家具：饭桌 / complain_food": 1,
+    "雪雁|完成用家具：饭桌 / complain_food": 1,
+    "紫鹃|AI目标频控：黛玉 75分钟": 1,
+    "紫鹃|完成互动：与黛玉「陪伴」": 1,
+    "黛玉|被紫鹃完成互动：「陪伴」": 1,
+    "黛玉|作息完成：晨起梳洗 via=wardrobe": 1,
+    "黛玉|开始用家具：梳洗妆台 / tidy_dress": 1,
+    "黛玉|完成用家具：梳洗妆台 / tidy_dress": 1,
+    "雪雁|行动入队：💬 闲谈·黛玉": 1,
+    "雪雁|AI每日主动社交计数：黛玉 1/10": 1,
+    "雪雁|开始互动：与黛玉「闲谈」": 1,
+    "黛玉|被雪雁发起互动：「闲谈」": 1,
+    "雪雁|AI选择：闲谈·黛玉 [int:102:daiyu] provider=social routine=morning_hygiene": 1,
+    "雪雁|行动入队：👘 理妆整衣": 1,
+    "雪雁|AI选择：梳洗妆台·理妆整衣 [furn:1008:tidy_dress] provider=furniture routine=morning_hygiene": 1,
+    "雪雁|作息完成：晨起梳洗 via=wardrobe": 1,
+    "雪雁|开始用家具：梳洗妆台 / tidy_dress": 1
+  },
+  "rawCounts": {
+    "quest:issued": 1,
+    "quest:accepted": 1,
+    "quest:blocked": 4,
+    "servant:follow_state": 1,
+    "log:add": 123,
+    "state:add": 23,
+    "character:effect": 23,
+    "time:tick": 31,
+    "queue:add": 30,
+    "ai:decision": 30,
+    "ai:routine_completed": 21,
+    "furniture:use_started": 21,
+    "relation:axis_change": 12,
+    "relation:change": 6,
+    "ai:state": 51,
+    "observer:triggered": 2,
+    "observer:executed": 2,
+    "ai:daily_social_count": 7,
+    "interaction:started": 7,
+    "quest:started": 1,
+    "furniture:released": 20,
+    "furniture:reaction": 4,
+    "need:band_changed": 19,
+    "furniture:complete": 11,
+    "scene:enter:allowed": 17,
+    "scene:entered": 17,
+    "interaction:effects": 5,
+    "quest:progress": 1,
+    "ai:social_target_cooldown": 5,
+    "interaction:complete": 5,
+    "quest:candidate": 33,
+    "memory:add": 2,
+    "state:remove": 4,
+    "emotion:resisted": 3,
+    "emotion:contagion": 3,
+    "trait:competition": 1,
+    "sulk": 1
+  },
+  "problems": [],
+  "repeated": [],
+  "finalChars": [
+    {
+      "id": "daiyu",
+      "name": "林黛玉",
+      "short": "黛玉",
+      "sceneId": 1,
+      "statusText": "闲庭漫步",
+      "actionType": "",
+      "queue": [],
+      "needs": {
+        "hunger": 60.43313600000009,
+        "energy": 46.806906250000075,
+        "fun": 89.47800000000015,
+        "hygiene": 99.96219999999998,
+        "social": 100,
+        "mood": 86.67650000000012
+      },
+      "aiState": "IDLE"
+    },
+    {
+      "id": "zijuan",
+      "name": "紫鹃",
+      "short": "紫鹃",
+      "sceneId": 1,
+      "statusText": "闲庭漫步",
+      "actionType": "",
+      "queue": [],
+      "needs": {
+        "hunger": 66.67088000000007,
+        "energy": 61.108256000000026,
+        "fun": 70.82999999999996,
+        "hygiene": 75.80283333333344,
+        "social": 100,
+        "mood": 86.65500000000013
+      },
+      "aiState": "IDLE"
+    },
+    {
+      "id": "xueyan",
+      "name": "雪雁",
+      "short": "雪雁",
+      "sceneId": 1,
+      "statusText": "理妆整衣…",
+      "actionType": "furniture",
+      "queue": [
+        "👘 理妆整衣"
+      ],
+      "needs": {
+        "hunger": 81.39240000000001,
+        "energy": 58.999000000000024,
+        "fun": 53.85600000000008,
+        "hygiene": 73.76643333333334,
+        "social": 85,
+        "mood": 74.88000000000011
+      },
+      "aiState": "EXECUTING"
+    }
+  ],
+  "finalFamilies": [
+    {
+      "id": 1,
+      "name": "怡红院",
+      "fund": 520,
+      "memberIds": [
+        "baoyu",
+        "xiren",
+        "qingwen",
+        "sheyue"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "潇湘馆",
+      "fund": 280,
+      "memberIds": [
+        "daiyu",
+        "zijuan",
+        "xueyan"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "蘅芜苑",
+      "fund": 380,
+      "memberIds": [
+        "baochai",
+        "yinger"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "荣禧堂",
+      "fund": 1200,
+      "memberIds": [
+        "jiazheng",
+        "wangfuren",
+        "jiamu",
+        "jiashe",
+        "xiangyun"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "秋爽斋",
+      "fund": 320,
+      "memberIds": [
+        "tanchun"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "宁国府",
+      "fund": 680,
+      "memberIds": [
+        "jiazhen",
+        "jiarong"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "协理院",
+      "fund": 450,
+      "memberIds": [
+        "xifeng",
+        "jialian",
+        "laiwang"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "刘家庄",
+      "fund": 40,
+      "memberIds": [
+        "liulaolao"
+      ]
+    }
+  ]
+}

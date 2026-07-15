@@ -30,6 +30,10 @@ const QuestSystem = (() => {
   }
 
   function resolveSceneId(target, inst) {
+    const residenceScene = typeof ResidenceSystem !== 'undefined'
+      ? ResidenceSystem.resolveSceneTarget?.(target, inst)
+      : null;
+    if (residenceScene) return residenceScene;
     if (target === 'assignee_residence') {
       const fam = FamilySystem.findFamilyOfChar(inst.assigneeId);
       return fam?.residenceSceneId ?? getChar(inst.assigneeId)?.sceneId;

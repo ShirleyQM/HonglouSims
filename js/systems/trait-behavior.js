@@ -70,6 +70,7 @@ const TraitBehaviorSystem = (() => {
       style: context.style || (['accept', 'decline', 'win', 'lose'].includes(event) ? 'speech' : 'thought'),
       icon: context.icon || '',
       module: 'trait',
+      drivers: { traitIds: [traitId], sourceEvent: context.sourceEvent || `trait:${event}` },
       duration: context.duration || 4,
     });
     if (shown) bubbleCooldowns[key] = now() + (context.cooldownGameMin || 75);

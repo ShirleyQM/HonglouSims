@@ -22,6 +22,12 @@ REPORT_PATH = REPORT_DIR / "full_body_portraits_report.json"
 
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
 SKIPPED_DIRS = ["其他"]
+SKIPPED_SOURCE_MARKERS = {"背面", "像素"}
+DEFAULT_BACKGROUND_THRESHOLD = {"loMin": 226, "spreadMax": 42, "avgMin": 232}
+BACKGROUND_THRESHOLD_OVERRIDES = {
+    # 这张黛玉的浅色衣料/手帕贴近白底，默认阈值会误删；收紧阈值保住白色布料。
+    "黛玉紫色2改手.png": {"loMin": 248, "spreadMax": 18, "avgMin": 250},
+}
 HARDCODED_REF_FILES = [
     ROOT / "memory-panel.html",
     ROOT / "jiafu-order.html",
@@ -69,27 +75,42 @@ BUST_CROP_RATIOS = {
 BUST_SOURCE_CROP_RATIOS = {
     "default": 0.96,
 }
+BUST_FROM_FULL_BODY_SOURCES = {
+    # 用户指定黛玉改用这张紫色改手版，半身/头像也从同一张重新裁，避免新旧衣色混用。
+    "daiyu": {"黛玉紫色2改手.png"},
+}
+BUST_CROP_OVERRIDES = {
+    # 紫鹃的袖子和右侧发丝把半身框撑宽，导致人物偏小、头顶空；收一点左右边缘让头部位置更自然。
+    "zijuan": {"leftInset": 0.18, "rightInset": 0.20, "padXScale": 0.04},
+    # 袭人的长发横向占比很大，会把半身图缩得太小、头顶显空；略收左侧发尾后更适合作为半身像。
+    "xiren": {"leftInset": 0.24, "padXScale": 0.04},
+}
 AVATAR_SIZE = (192, 192)
 AVATAR_QUALITY = 90
 AVATAR_CROP_OVERRIDES = {
+    "baoyu": {"sideScale": 1.75, "yOffset": 0.03},
     "daiyu": {"sideScale": 1.65, "yOffset": 0.045, "xOffset": 0.04},
     # 迎春是侧身全身像，默认头像裁切会过度贴脸；这里拉远并下移一点，保留肩颈和上身。
     "yingchun": {"sideScale": 1.38, "yOffset": 0.04},
 }
 
 
-def is_edge_background(pixel: tuple[int, int, int, int]) -> bool:
+def is_edge_background(pixel: tuple[int, int, int, int], threshold: dict[str, int] = DEFAULT_BACKGROUND_THRESHOLD) -> bool:
     r, g, b, a = pixel
     if a == 0:
         return True
     lo = min(r, g, b)
     hi = max(r, g, b)
     avg = (r + g + b) / 3
-    return lo >= 226 and hi - lo <= 42 and avg >= 232
+    return lo >= threshold["loMin"] and hi - lo <= threshold["spreadMax"] and avg >= threshold["avgMin"]
 
 
-def remove_connected_background(image: Image.Image) -> tuple[Image.Image, dict[str, int | float | tuple[int, int, int, int] | None]]:
+def remove_connected_background(
+    image: Image.Image,
+    source_path: Path | None = None,
+) -> tuple[Image.Image, dict[str, int | float | str | dict[str, int] | tuple[int, int, int, int] | None]]:
     rgba = image.convert("RGBA")
+    threshold = BACKGROUND_THRESHOLD_OVERRIDES.get(source_path.name if source_path else "", DEFAULT_BACKGROUND_THRESHOLD)
     width, height = rgba.size
     pixels = rgba.load()
     visited = bytearray(width * height)
@@ -97,7 +118,7 @@ def remove_connected_background(image: Image.Image) -> tuple[Image.Image, dict[s
 
     def enqueue(x: int, y: int) -> None:
         idx = y * width + x
-        if visited[idx] or not is_edge_background(pixels[x, y]):
+        if visited[idx] or not is_edge_background(pixels[x, y], threshold):
             return
         visited[idx] = 1
         queue.append((x, y))
@@ -137,6 +158,7 @@ def remove_connected_background(image: Image.Image) -> tuple[Image.Image, dict[s
         "removedPixels": removed,
         "removedPercent": round(removed / (width * height) * 100, 2),
         "alphaBBox": output.getchannel("A").getbbox(),
+        "backgroundThreshold": threshold,
     }
 
 
@@ -157,6 +179,9 @@ def character_id_for_source(path: Path) -> str | None:
         return NAME_TO_ID[stem]
     if normalized in NAME_TO_ID:
         return NAME_TO_ID[normalized]
+    for name in sorted(NAME_TO_ID, key=len, reverse=True):
+        if stem.startswith(name):
+            return NAME_TO_ID[name]
     if re.fullmatch(r"[a-z][a-z0-9_-]*", stem):
         return stem.replace("-", "_")
     return None
@@ -164,6 +189,8 @@ def character_id_for_source(path: Path) -> str | None:
 
 def source_kind_for_path(path: Path) -> str:
     stem = path.stem.lower()
+    if "头像" in path.stem or "avatar" in stem or "head" in stem:
+        return "avatar"
     if "半身" in path.stem or "bust" in stem or "portrait" in stem:
         return "bust"
     if "全身" in path.stem or "fullbody" in stem or "full-body" in stem:
@@ -173,6 +200,8 @@ def source_kind_for_path(path: Path) -> str:
 
 def source_quality_score(path: Path) -> int:
     score = 0
+    if "改手" in path.stem or "最终" in path.stem or "定稿" in path.stem:
+        score += 2 * 10**12
     if "高清" in path.stem or re.search(r"(?:^|[-_])(?:hd|highres|high-res)(?:$|[-_])", path.stem, re.I):
         score += 10**12
     try:
@@ -187,6 +216,9 @@ def collect_character_sources() -> dict[str, dict[str, Path]]:
     sources: dict[str, dict[str, Path]] = {}
     for path in sorted(SOURCE_DIR.iterdir(), key=lambda p: p.name):
         if path.is_dir() or path.name.startswith(".") or path.suffix.lower() not in IMAGE_SUFFIXES:
+            continue
+        if any(marker in path.stem for marker in SKIPPED_SOURCE_MARKERS):
+            print(f"[skip] unsupported source variant: {path.name}")
             continue
         char_id = character_id_for_source(path)
         if not char_id:
@@ -239,14 +271,19 @@ def crop_bust(
         return image
     x0, y0, x1, y1 = bbox
     char_h = y1 - y0
-    ratio = ratios.get(char_id, ratios["default"])
+    char_w = x1 - x0
+    override = BUST_CROP_OVERRIDES.get(char_id, {})
+    ratio = float(override.get("ratio", ratios.get(char_id, ratios["default"])))
     bottom = min(y1, round(y0 + char_h * ratio))
-    pad_x = max(8, round((x1 - x0) * 0.08))
+    pad_x_scale = float(override.get("padXScale", 0.08))
+    pad_x = max(8, round(char_w * pad_x_scale))
     pad_top = max(4, round(char_h * 0.018))
+    crop_left = round(x0 + char_w * float(override.get("leftInset", 0)))
+    crop_right = round(x1 - char_w * float(override.get("rightInset", 0)))
     crop_box = (
-        max(0, x0 - pad_x),
+        max(0, crop_left - pad_x),
         max(0, y0 - pad_top),
-        min(image.width, x1 + pad_x),
+        min(image.width, crop_right + pad_x),
         bottom,
     )
     return image.crop(crop_box)
@@ -317,6 +354,26 @@ def crop_avatar(char_id: str, image: Image.Image, size: tuple[int, int] = AVATAR
     )
     if src_box[2] > src_box[0] and src_box[3] > src_box[1]:
         canvas.alpha_composite(image.crop(src_box), (paste_x, paste_y))
+    return canvas.resize(size, Image.Resampling.LANCZOS)
+
+
+def fit_explicit_avatar(image: Image.Image, size: tuple[int, int] = AVATAR_SIZE) -> Image.Image:
+    bbox = image.getchannel("A").getbbox()
+    if not bbox:
+        return Image.new("RGBA", size, (0, 0, 0, 0))
+    cropped = image.crop(bbox)
+    side = max(cropped.width, round(cropped.height * 0.94))
+    crop_left = round((cropped.width - side) / 2)
+    crop_top = 0
+    canvas = Image.new("RGBA", (side, side), (0, 0, 0, 0))
+    src_box = (
+        max(0, crop_left),
+        max(0, crop_top),
+        min(cropped.width, crop_left + side),
+        min(cropped.height, crop_top + side),
+    )
+    if src_box[2] > src_box[0] and src_box[3] > src_box[1]:
+        canvas.alpha_composite(cropped.crop(src_box), (max(0, -crop_left), max(0, -crop_top)))
     return canvas.resize(size, Image.Resampling.LANCZOS)
 
 
@@ -415,26 +472,39 @@ def main() -> None:
     for char_id, source_set in collect_character_sources().items():
         full_source = source_set.get("fullBody")
         bust_source = source_set.get("bust")
+        avatar_source = source_set.get("avatar")
+        if full_source and full_source.name in BUST_FROM_FULL_BODY_SOURCES.get(char_id, set()):
+            bust_source = None
         if not full_source and not bust_source:
             continue
 
         if full_source:
-            full_transparent, full_metrics = remove_connected_background(Image.open(full_source))
+            full_transparent, full_metrics = remove_connected_background(Image.open(full_source), full_source)
         else:
-            full_transparent, full_metrics = remove_connected_background(Image.open(bust_source))
+            full_transparent, full_metrics = remove_connected_background(Image.open(bust_source), bust_source)
 
         if bust_source:
-            bust_transparent, bust_metrics = remove_connected_background(Image.open(bust_source))
+            bust_transparent, bust_metrics = remove_connected_background(Image.open(bust_source), bust_source)
             bust = crop_bust(bust_transparent, char_id, BUST_SOURCE_CROP_RATIOS)
         else:
             bust_transparent = None
             bust_metrics = None
             bust = crop_bust(full_transparent, char_id)
 
+        if avatar_source:
+            avatar_transparent, avatar_metrics = remove_connected_background(Image.open(avatar_source), avatar_source)
+        else:
+            avatar_transparent = None
+            avatar_metrics = None
+
         paths: dict[str, str] = {}
         abs_outputs: dict[str, str] = {}
 
-        avatar = crop_avatar(char_id, bust_transparent or bust, AVATAR_SIZE)
+        avatar = (
+            fit_explicit_avatar(avatar_transparent, AVATAR_SIZE)
+            if avatar_transparent
+            else crop_avatar(char_id, bust_transparent or bust, AVATAR_SIZE)
+        )
         avatar_path = OUTPUT_DIR / f"{char_id}_avatar.webp"
         avatar.save(avatar_path, "WEBP", quality=AVATAR_QUALITY, method=6, exact=True)
         avatar_rel = avatar_path.relative_to(ROOT).as_posix()
@@ -462,11 +532,21 @@ def main() -> None:
         portraits[char_id] = {key: paths[key] for key in ("portrait", "hud", "fullBody", "fullBodyHud")}
         report_rows.append({
             "id": char_id,
-            "source": " + ".join(p.name for p in [bust_source, full_source] if p),
-            "sourceMode": "separateBustAndFullBody" if bust_source and full_source else ("bustOnly" if bust_source else "fullBodyOnly"),
+            "source": " + ".join(p.name for p in [avatar_source, bust_source, full_source] if p),
+            "sourceMode": "+".join(
+                label
+                for label, source in [
+                    ("avatar", avatar_source),
+                    ("bust", bust_source),
+                    ("fullBody", full_source),
+                ]
+                if source
+            ),
+            "avatarSourcePath": str(avatar_source) if avatar_source else None,
             "bustSourcePath": str(bust_source) if bust_source else None,
             "fullBodySourcePath": str(full_source) if full_source else None,
             "outputs": abs_outputs,
+            "avatarMetrics": avatar_metrics,
             "bustMetrics": bust_metrics,
             "fullBodyMetrics": full_metrics,
         })

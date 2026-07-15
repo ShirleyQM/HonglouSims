@@ -342,28 +342,59 @@ evalInContext(`
   CHARS.forEach(c => { if (isAIControlled(c) && c.ai.state === AI_STATE.IDLE) slowChannelTick(c); });
 `);
 
+const charNameCache = new Map(evalInContext(`CHARS.map(c => [c.id, c.short || c.name || c.id])`));
+const questTemplateNameCache = new Map(Object.entries(evalInContext(`Object.fromEntries(Object.entries(CONFIG.questConfig?.templates || {}).map(([id, tpl]) => [id, tpl.name || id]))`)));
+const furnitureTemplateNameCache = new Map(Object.entries(evalInContext(`Object.fromEntries(Object.entries(CONFIG.furnitureTemplates || {}).map(([id, tpl]) => [id, tpl.name || id]))`)));
+
 function snapshotChars() {
   return evalInContext(`CHARS.map(c => ({
     id: c.id, name: c.name, short: c.short, sceneId: c.sceneId,
     statusText: c.statusText, actionType: c.action?.type || '',
     queue: c.actionQueue?.map(i => i.itemName || i.name || i.type) || [],
     needs: c.needs, aiState: c.ai?.state || '',
+    skills: c.skills || [],
+    skillLevels: c.skillLevels || {},
   }))`);
+}
+
+function snapshotTargetSkills() {
+  return evalInContext(`${JSON.stringify(TARGET_IDS)}.map(id => {
+    const c = getChar(id);
+    return c ? {
+      id: c.id,
+      name: c.short || c.name || c.id,
+      skills: c.skills || [],
+      skillLevels: { ...(c.skillLevels || {}) },
+    } : null;
+  }).filter(Boolean)`);
+}
+
+function snapshotTargetRelations() {
+  return evalInContext(`(() => {
+    const targetIds = ${JSON.stringify(TARGET_IDS)};
+    const all = typeof serializeRelations === 'function' ? serializeRelations() : {};
+    const result = {};
+    for (const [key, value] of Object.entries(all || {})) {
+      const [a, b] = key.split('|');
+      if (targetIds.includes(a) || targetIds.includes(b)) result[key] = value;
+    }
+    return result;
+  })()`);
 }
 
 function getCharName(id) {
   if (!id) return '';
-  return evalInContext(`(getChar(${JSON.stringify(id)})?.short || getChar(${JSON.stringify(id)})?.name || ${JSON.stringify(id)})`);
+  return charNameCache.get(id) || id;
 }
 
 function getTplName(templateId) {
   if (!templateId) return '';
-  return evalInContext(`(CONFIG.questConfig?.templates?.[${JSON.stringify(templateId)}]?.name || CONFIG.furnitureTemplates?.[${JSON.stringify(templateId)}]?.name || '')`);
+  return questTemplateNameCache.get(String(templateId)) || furnitureTemplateNameCache.get(String(templateId)) || '';
 }
 
 function getFurnitureName(templateId) {
   if (!templateId) return '家具';
-  return evalInContext(`(getTemplate(${JSON.stringify(templateId)})?.name || ${JSON.stringify(templateId)})`);
+  return furnitureTemplateNameCache.get(String(templateId)) || String(templateId);
 }
 
 function hhmm(evt) {
@@ -437,6 +468,18 @@ function formatEvent(evt, perspectiveId = null) {
       if (perspectiveId && perspectiveId === evt.targetId && evt.initiatorId !== evt.targetId)
         return { person: perspectiveName, action: `被${getCharName(evt.initiatorId)}完成互动：「${evt.interactionName || evt.templateId || ''}」`, issuer: '' };
       return { person: getCharName(evt.initiatorId), action: `完成互动：与${getCharName(evt.targetId)}「${evt.interactionName || evt.templateId || ''}」`, issuer: '' };
+    case 'relation:axis_change':
+      return {
+        person: [evt.idA, evt.idB].filter(Boolean).map(getCharName).join('↔'),
+        action: `关系轴变化：${evt.axis || ''} ${Math.round((evt.old || 0) * 100) / 100}→${Math.round((evt.new || 0) * 100) / 100}（${evt.delta > 0 ? '+' : ''}${Math.round((evt.delta || 0) * 100) / 100}）${evt.reason ? ` · ${evt.reason}` : ''}`,
+        issuer: evt.source || '',
+      };
+    case 'relation:change':
+      return {
+        person: [evt.idA, evt.idB].filter(Boolean).map(getCharName).join('↔'),
+        action: `综合关系变化：${Math.round((evt.old || 0) * 100) / 100}→${Math.round((evt.new || 0) * 100) / 100}${evt.typeLabel ? `（${evt.typeLabel}）` : ''}`,
+        issuer: evt.source || '',
+      };
     case 'quest:issued':
       if (perspectiveId && perspectiveId === evt.issuerId && evt.assigneeId !== evt.issuerId) {
         return {
@@ -491,6 +534,8 @@ const interestingTypes = new Set([
   'furniture:refused',
   'interaction:started',
   'interaction:complete',
+  'relation:axis_change',
+  'relation:change',
   'quest:issued',
   'quest:accepted',
   'quest:started',
@@ -544,6 +589,8 @@ context.__recordEvent = evt => {
 };
 
 const startDay = evalInContext('gameDay');
+const initialSkills = snapshotTargetSkills();
+const initialRelations = snapshotTargetRelations();
 const endBeforeDay = startDay + DAYS;
 const startHour = evalInContext('gameHour');
 const startMinute = evalInContext('gameMinute');
@@ -608,6 +655,8 @@ evalInContext(`
 printProgress(true);
 
 const finalChars = snapshotChars().filter(c => TARGET_SET.has(c.id));
+const finalSkills = snapshotTargetSkills();
+const finalRelations = snapshotTargetRelations();
 const finalFamilies = evalInContext(`(CONFIG.familyConfig?.families || []).map(f => ({
   id: f.id,
   name: f.name,
@@ -740,6 +789,10 @@ fs.writeFileSync(JSON_OUT_FILE, JSON.stringify({
   problems: [...new Set(problems)],
   repeated,
   finalChars,
+  initialSkills,
+  finalSkills,
+  initialRelations,
+  finalRelations,
   finalFamilies,
 }, null, 2), 'utf8');
 const elapsedSec = (Date.now() - startedAtMs) / 1000;

@@ -36,9 +36,11 @@ function loop(ts) {
   drawFurnitureInstances();
   drawPathPreview();
   drawSocialLinks();
+  drawScenePlaques();
   CHARS.forEach((c, i) => drawChar(c, i === selectedIdx));
   drawSpeechBubble();
   NarrativeBubbleSystem.draw();
+  drawMinimap();
   if (hoverInst) {
     const inst = getInstance(hoverInst), tpl = getTemplate(inst.templateId);
     const nr = tpl.needRestores.map(r => getNeedDefs().find(n => n.key === r.need)?.label + '+' + r.ratePerGameMin + '/游戏分').join(' ');
@@ -73,6 +75,7 @@ if (!CONFIG?.scenes?.length || !CONFIG?.furnitureInstances?.length) {
   try { localStorage.setItem('dgy_config', JSON.stringify(CONFIG)); } catch (e) {}
 }
 initRuntime();
+setupMinimapNavigation();
 if (SceneAccessSystem?.repairAllCharacterScenes) SceneAccessSystem.repairAllCharacterScenes();
 initEventSystem();
 SceneAccessSystem.init();

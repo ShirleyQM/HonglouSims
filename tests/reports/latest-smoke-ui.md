@@ -1,7 +1,7 @@
 # 前台页面冒烟
 
-- Started: 2026-07-06T07:51:48.663Z
-- Finished: 2026-07-06T07:51:58.833Z
+- Started: 2026-07-15T08:58:31.414Z
+- Finished: 2026-07-15T08:58:36.373Z
 - Result: PASS
 - Counts: PASS 11 / WARN 0 / FAIL 0
 

@@ -2,6 +2,47 @@
 function toScreenX(x) { return x - camX; }
 function toScreenY(y) { return y - camY; }
 
+function drawMinimap() {
+  const mini = document.getElementById('minimap');
+  if (!mini || !CONFIG) return;
+  const mctx = mini.getContext('2d');
+  const worldW = Math.max(1, WORLD_COLS * CELL), worldH = Math.max(1, WORLD_ROWS * CELL);
+  const sx = mini.width / worldW, sy = mini.height / worldH;
+  mctx.clearRect(0, 0, mini.width, mini.height);
+  mctx.fillStyle = '#aebfa4';
+  mctx.fillRect(0, 0, mini.width, mini.height);
+  for (const sc of CONFIG.scenes) {
+    const x = sc.originCol * CELL * sx, y = sc.originRow * CELL * sy;
+    const w = sc.cols * CELL * sx, h = sc.rows * CELL * sy;
+    const bg = AssetSystem?.roomBackgroundForScene?.(sc.id);
+    if (bg) mctx.drawImage(bg, x, y, w, h);
+    else {
+      mctx.fillStyle = sc.ground === 'grass' ? '#718c62' : sc.ground === 'corridor' ? '#a8947d' : '#cbbb91';
+      mctx.fillRect(x, y, w, h);
+    }
+    mctx.strokeStyle = 'rgba(68,55,43,.65)';
+    mctx.lineWidth = 1;
+    mctx.strokeRect(x, y, w, h);
+  }
+  CHARS.forEach((c, i) => {
+    mctx.beginPath();
+    mctx.arc(c.x * sx, c.y * sy, i === selectedIdx ? 4 : 2, 0, Math.PI * 2);
+    mctx.fillStyle = i === selectedIdx ? '#ffe58a' : '#7b3131';
+    mctx.fill();
+    if (i === selectedIdx) { mctx.strokeStyle = '#5a3824'; mctx.stroke(); }
+  });
+  const vx = Math.max(0, camX) * sx, vy = Math.max(0, camY) * sy;
+  const vw = Math.min(VIEW_W, worldW) * sx, vh = Math.min(VIEW_H, worldH) * sy;
+  mctx.fillStyle = 'rgba(255,240,151,.12)';
+  mctx.fillRect(vx, vy, vw, vh);
+  mctx.strokeStyle = '#fff2a8';
+  mctx.lineWidth = 4;
+  mctx.strokeRect(vx, vy, vw, vh);
+  mctx.strokeStyle = '#5b392a';
+  mctx.lineWidth = 1.5;
+  mctx.strokeRect(vx, vy, vw, vh);
+}
+
 function drawWorld() {
   ctx.fillStyle = '#deded8';
   ctx.fillRect(0, 0, VIEW_W, VIEW_H);
@@ -9,10 +50,7 @@ function drawWorld() {
     const x0 = sc.originCol * CELL, y0 = sc.originRow * CELL;
     const sx = toScreenX(x0), sy = toScreenY(y0), sw = sc.cols * CELL, sh = sc.rows * CELL;
     if (sx + sw < 0 || sy + sh < 0 || sx > VIEW_W || sy > VIEW_H) continue;
-    if (drawRoomBackground(sc, sx, sy, sw, sh)) {
-      drawScenePlaque(sc, x0, sw, y0);
-      continue;
-    }
+    if (drawRoomBackground(sc, sx, sy, sw, sh)) continue;
     for (let r = 0; r < sc.rows; r++)
       for (let c = 0; c < sc.cols; c++) {
         const gc = sc.originCol + c, gr = sc.originRow + r;
@@ -21,7 +59,7 @@ function drawWorld() {
         const px = toScreenX(gc * CELL), py = toScreenY(gr * CELL);
         if (px + CELL < 0 || py + CELL < 0 || px > VIEW_W || py > VIEW_H) continue;
         const gt = cell.ground;
-        const tile = gt === 'corridor' && typeof AssetSystem !== 'undefined' ? AssetSystem.getGroundTile(gt, sc) : null;
+        const tile = typeof AssetSystem !== 'undefined' ? AssetSystem.getGroundTile(gt, sc) : null;
         if (tile) {
           ctx.drawImage(tile, px, py);
           if ((gc + gr) % 2) { ctx.fillStyle = 'rgba(0,0,0,.06)'; ctx.fillRect(px, py, CELL, CELL); }
@@ -31,11 +69,21 @@ function drawWorld() {
           ctx.fillRect(px, py, CELL, CELL);
         }
       }
+  }
+}
+
+function drawScenePlaques() {
+  if (!CONFIG?.scenes) return;
+  for (const sc of CONFIG.scenes) {
+    const x0 = sc.originCol * CELL, y0 = sc.originRow * CELL;
+    const sx = toScreenX(x0), sy = toScreenY(y0), sw = sc.cols * CELL, sh = sc.rows * CELL;
+    if (sx + sw < 0 || sy + sh < 0 || sx > VIEW_W || sy > VIEW_H) continue;
     drawScenePlaque(sc, x0, sw, y0);
   }
 }
 
 function drawScenePlaque(sc, x0, sw, y0) {
+  if (sc.hidePlaque || sc.hideTitle) return;
   const plaqueX = toScreenX(x0 + sw / 2 - 60);
   const plaqueY = toScreenY(y0 + 4);
   const plaqueGrad = ctx.createLinearGradient(plaqueX, plaqueY, plaqueX, plaqueY + 20);
@@ -58,6 +106,9 @@ function drawRoomBackground(sc, sx, sy, sw, sh) {
   if (!img) return false;
   const def = AssetSystem.roomBackgroundDef?.(sc.id) || {};
   ctx.save();
+  ctx.beginPath();
+  ctx.rect(sx, sy, sw, sh);
+  ctx.clip();
   ctx.fillStyle = '#0c0b0a';
   ctx.fillRect(sx, sy, sw, sh);
   const fit = def.fit || 'contain';
@@ -417,6 +468,36 @@ function drawCharOverlays(c, x, y, sel, topY) {
     ctx.fillStyle = '#d8d8d8';
   }
   ctx.fillText(c.short, x, y + 14);
+  drawSkillLevelBubbles(c, x, y + 28);
+}
+
+function drawSkillLevelBubbles(c, x, baseY) {
+  if (!Array.isArray(c.skillLevelBubbles) || !c.skillLevelBubbles.length) return;
+  const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  c.skillLevelBubbles = c.skillLevelBubbles.filter(b => now - (b.startedAt || now) < (b.durationMs || 2600));
+  if (!c.skillLevelBubbles.length) return;
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.font = '10px "Microsoft YaHei", "PingFang SC", sans-serif';
+  c.skillLevelBubbles.forEach((b, i) => {
+    const duration = b.durationMs || 2600;
+    const t = Math.max(0, Math.min(1, (now - (b.startedAt || now)) / duration));
+    const alpha = 1 - t;
+    const text = b.text || '';
+    const tw = ctx.measureText(text).width;
+    const bw = Math.min(96, tw + 12);
+    const bx = Math.max(6, Math.min(VIEW_W - bw - 6, x - bw / 2));
+    const by = baseY + i * 16 - t * 18;
+    ctx.globalAlpha = Math.max(0, alpha);
+    ctx.fillStyle = 'rgba(255,248,218,.94)';
+    ctx.fillRect(bx, by - 11, bw, 16);
+    ctx.strokeStyle = 'rgba(168,132,58,.82)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(bx, by - 11, bw, 16);
+    ctx.fillStyle = '#8a5c1e';
+    ctx.fillText(text, x, by + 1);
+  });
+  ctx.restore();
 }
 
 function drawSpeechBubble() {

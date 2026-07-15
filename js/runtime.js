@@ -9,6 +9,7 @@ let WORLD_COLS = 40, WORLD_ROWS = 25;
 let CHARS = [], relations = {};
 let WORLD = [], FURN_RT = {}, INST_MAP = {};
 let camX = 0, camY = 0;
+let cameraBrowseMode = false;
 let selectedIdx = 0, gameHour = 8, gameMinute = 0, timeAcc = 0, gameDay = 1;
 /** 1 游戏日 = 20 真实分钟；需求/关系按游戏分钟结算 */
 const GAME_DAY_REAL_MIN = 20;
@@ -142,6 +143,7 @@ const USER_LOG_EVENT_TYPES = new Set([
   'family:switched',
   'family:fund_changed',
   'family:event',
+  'bubble:show',
   'observer:executed',
   'emotion:contagion',
   'quest:issued',
@@ -243,7 +245,7 @@ function formatEventSummary(evt) {
     case 'need:crisis':
       return `${getChar(evt.charId)?.short} 需求危机(${evt.needKey})`;
     case 'bubble:show':
-      return `${getChar(evt.charId)?.short}：${(evt.text || '').slice(0, 12)}…`;
+      return `${getChar(evt.charId)?.short}：${(evt.text || '').slice(0, 12)}…${evt.reasonText ? '（因：' + evt.reasonText + '）' : ''}`;
     case 'family:switched':
       return `切换家庭 → ${evt.familyName || evt.familyId}`;
     case 'family:fund_changed':
@@ -343,6 +345,7 @@ function clampCameraTarget(x, y) {
 }
 
 function updateCamera(instant) {
+  if (cameraBrowseMode) return;
   const c = CHARS[selectedIdx];
   if (!c) return;
   const socialHold = c._autoSocialCameraHold;
@@ -371,6 +374,52 @@ function updateCamera(instant) {
     const el = document.getElementById('scene-label');
     if (el) el.textContent = sc.name;
   }
+}
+
+function setCameraPosition(x, y) {
+  const target = clampCameraTarget(x, y);
+  camX = target.x;
+  camY = target.y;
+}
+
+function focusSelectedCharacter() {
+  cameraBrowseMode = false;
+  const nav = document.getElementById('minimap-nav');
+  const mode = document.getElementById('minimap-mode');
+  nav?.classList.remove('browsing');
+  if (mode) mode.textContent = '跟随人物';
+  updateCamera(true);
+}
+
+function setupMinimapNavigation() {
+  const mini = document.getElementById('minimap');
+  if (!mini || mini.dataset.ready) return;
+  mini.dataset.ready = '1';
+  let dragging = false;
+  const navigate = e => {
+    const r = mini.getBoundingClientRect();
+    const nx = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    const ny = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height));
+    cameraBrowseMode = true;
+    document.getElementById('minimap-nav')?.classList.add('browsing');
+    const mode = document.getElementById('minimap-mode');
+    if (mode) mode.textContent = '自由浏览';
+    setCameraPosition(nx * WORLD_COLS * CELL - VIEW_W / 2, ny * WORLD_ROWS * CELL - VIEW_H / 2);
+  };
+  mini.addEventListener('pointerdown', e => {
+    dragging = true;
+    mini.classList.add('dragging');
+    mini.setPointerCapture(e.pointerId);
+    navigate(e);
+  });
+  mini.addEventListener('pointermove', e => { if (dragging) navigate(e); });
+  const finish = e => {
+    dragging = false;
+    mini.classList.remove('dragging');
+    if (mini.hasPointerCapture?.(e.pointerId)) mini.releasePointerCapture(e.pointerId);
+  };
+  mini.addEventListener('pointerup', finish);
+  mini.addEventListener('pointercancel', finish);
 }
 
 function resizeCanvas() {

@@ -1,0 +1,2103 @@
+{
+  "outFile": "/Users/bytedance/Desktop/myCursor/game/reports/interaction_probe_yihong_60_74002.md",
+  "jsonOutFile": "/Users/bytedance/Desktop/myCursor/game/reports/interaction_probe_yihong_60_74002.json",
+  "targetIds": [
+    "baoyu",
+    "xiren",
+    "qingwen",
+    "sheyue"
+  ],
+  "targetNames": [
+    "宝玉",
+    "袭人",
+    "晴雯",
+    "麝月"
+  ],
+  "startDay": 1,
+  "endBeforeDay": 8,
+  "seed": 74002,
+  "rows": [
+    {
+      "time": "第01日 08:03",
+      "day": 1,
+      "hour": 8,
+      "minute": 3,
+      "type": "quest:started",
+      "person": "袭人",
+      "action": "开始任务：晨起理妆",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:03",
+      "day": 1,
+      "hour": 8,
+      "minute": 3,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 1/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:03",
+      "day": 1,
+      "hour": 8,
+      "minute": 3,
+      "type": "ai:routine_completed",
+      "person": "宝玉",
+      "action": "作息完成：晨起梳洗 via=wardrobe",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:03",
+      "day": 1,
+      "hour": 8,
+      "minute": 3,
+      "type": "furniture:use_started",
+      "person": "宝玉",
+      "action": "开始用家具：梳洗妆台 / tidy_dress",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:04",
+      "day": 1,
+      "hour": 8,
+      "minute": 4,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 2/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:05",
+      "day": 1,
+      "hour": 8,
+      "minute": 5,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 3/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:06",
+      "day": 1,
+      "hour": 8,
+      "minute": 6,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 4/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:07",
+      "day": 1,
+      "hour": 8,
+      "minute": 7,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 5/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:08",
+      "day": 1,
+      "hour": 8,
+      "minute": 8,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 6/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:08",
+      "day": 1,
+      "hour": 8,
+      "minute": 8,
+      "type": "furniture:complete",
+      "person": "宝玉",
+      "action": "完成用家具：梳洗妆台 / tidy_dress",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:08",
+      "day": 1,
+      "hour": 8,
+      "minute": 8,
+      "type": "ai:routine_completed",
+      "person": "麝月",
+      "action": "作息完成：晨起梳洗 via=bath",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:08",
+      "day": 1,
+      "hour": 8,
+      "minute": 8,
+      "type": "furniture:use_started",
+      "person": "麝月",
+      "action": "开始用家具：浴盆 / default_use",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:09",
+      "day": 1,
+      "hour": 8,
+      "minute": 9,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 7/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:10",
+      "day": 1,
+      "hour": 8,
+      "minute": 10,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 8/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:11",
+      "day": 1,
+      "hour": 8,
+      "minute": 11,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 9/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:12",
+      "day": 1,
+      "hour": 8,
+      "minute": 12,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 10/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:13",
+      "day": 1,
+      "hour": 8,
+      "minute": 13,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 11/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:13",
+      "day": 1,
+      "hour": 8,
+      "minute": 13,
+      "type": "furniture:complete",
+      "person": "麝月",
+      "action": "完成用家具：浴盆 / default_use",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:14",
+      "day": 1,
+      "hour": 8,
+      "minute": 14,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 12/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 13/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "queue:add",
+      "person": "宝玉",
+      "action": "行动入队：💬 调侃·袭人",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "ai:decision",
+      "person": "宝玉",
+      "action": "AI选择：调侃·袭人 [int:302:xiren] provider=social routine=breakfast",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "queue:add",
+      "person": "袭人",
+      "action": "行动入队：🤝 品茗·宝玉",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "ai:decision",
+      "person": "袭人",
+      "action": "AI选择：品茗·宝玉 [int:104:baoyu] provider=social routine=followRotation:follow:baoyu:xiren:day_follow:1:2002",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "queue:add",
+      "person": "麝月",
+      "action": "行动入队：💬 问安·宝玉",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "ai:decision",
+      "person": "麝月",
+      "action": "AI选择：问安·宝玉 [int:103:baoyu] provider=social routine=breakfast",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "ai:daily_social_count",
+      "person": "宝玉",
+      "action": "AI每日主动社交计数：袭人 1/10",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "interaction:started",
+      "person": "宝玉",
+      "action": "开始互动：与袭人「调侃」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "interaction:started",
+      "person": "袭人",
+      "action": "被宝玉发起互动：「调侃」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "ai:routine_completed",
+      "person": "晴雯",
+      "action": "作息完成：早餐 via=meal",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "furniture:use_started",
+      "person": "晴雯",
+      "action": "开始用家具：饭桌 / complain_food",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "ai:daily_social_count",
+      "person": "麝月",
+      "action": "AI每日主动社交计数：宝玉 1/10",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "interaction:started",
+      "person": "麝月",
+      "action": "开始互动：与宝玉「问安」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "interaction:started",
+      "person": "宝玉",
+      "action": "被麝月发起互动：「问安」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:16",
+      "day": 1,
+      "hour": 8,
+      "minute": 16,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 14/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:16",
+      "day": 1,
+      "hour": 8,
+      "minute": 16,
+      "type": "ai:daily_social_count",
+      "person": "袭人",
+      "action": "AI每日主动社交计数：宝玉 1/10",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:16",
+      "day": 1,
+      "hour": 8,
+      "minute": 16,
+      "type": "ai:routine_completed",
+      "person": "袭人",
+      "action": "作息完成：随侍左右 via=xujiu",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:16",
+      "day": 1,
+      "hour": 8,
+      "minute": 16,
+      "type": "interaction:started",
+      "person": "袭人",
+      "action": "开始互动：与宝玉「品茗」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:16",
+      "day": 1,
+      "hour": 8,
+      "minute": 16,
+      "type": "interaction:started",
+      "person": "宝玉",
+      "action": "被袭人发起互动：「品茗」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:17",
+      "day": 1,
+      "hour": 8,
+      "minute": 17,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 15/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:17",
+      "day": 1,
+      "hour": 8,
+      "minute": 17,
+      "type": "queue:add",
+      "person": "麝月",
+      "action": "行动入队：🔥 备膳",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:17",
+      "day": 1,
+      "hour": 8,
+      "minute": 17,
+      "type": "ai:decision",
+      "person": "麝月",
+      "action": "AI选择：厨房灶台·备膳 [furn:4009:prepare_meal] provider=furniture routine=breakfast",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:17",
+      "day": 1,
+      "hour": 8,
+      "minute": 17,
+      "type": "furniture:complete",
+      "person": "晴雯",
+      "action": "完成用家具：饭桌 / complain_food",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:18",
+      "day": 1,
+      "hour": 8,
+      "minute": 18,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 16/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:19",
+      "day": 1,
+      "hour": 8,
+      "minute": 19,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 17/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:20",
+      "day": 1,
+      "hour": 8,
+      "minute": 20,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 18/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:21",
+      "day": 1,
+      "hour": 8,
+      "minute": 21,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 19/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "quest:progress",
+      "person": "袭人",
+      "action": "任务进度：晨起理妆 20/20",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:axis_change",
+      "person": "袭人",
+      "action": "关系轴变化：affection 51.99→53.7（+1.71） · 晨起理妆",
+      "issuer": "quest:4001"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:axis_change",
+      "person": "宝玉",
+      "action": "关系轴变化：affection 51.99→53.7（+1.71） · 晨起理妆",
+      "issuer": "quest:4001"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:axis_change",
+      "person": "袭人",
+      "action": "关系轴变化：friendship 26→26.51（+0.51） · 晨起理妆",
+      "issuer": "quest:4001"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:axis_change",
+      "person": "宝玉",
+      "action": "关系轴变化：friendship 26→26.51（+0.51） · 晨起理妆",
+      "issuer": "quest:4001"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "quest:completed",
+      "person": "袭人",
+      "action": "完成任务：晨起理妆",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:axis_change",
+      "person": "宝玉",
+      "action": "关系轴变化：affection 53.7→59.97（+6.27）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:axis_change",
+      "person": "袭人",
+      "action": "关系轴变化：affection 53.7→59.97（+6.27）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:change",
+      "person": "宝玉",
+      "action": "综合关系变化：44→47（好友/亲密）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:change",
+      "person": "袭人",
+      "action": "综合关系变化：44→47（好友/亲密）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:axis_change",
+      "person": "宝玉",
+      "action": "关系轴变化：friendship 26.51→28.08（+1.57）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:axis_change",
+      "person": "袭人",
+      "action": "关系轴变化：friendship 26.51→28.08（+1.57）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "ai:social_target_cooldown",
+      "person": "宝玉",
+      "action": "AI目标频控：袭人 75分钟",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "interaction:complete",
+      "person": "宝玉",
+      "action": "完成互动：与袭人「调侃」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "interaction:complete",
+      "person": "袭人",
+      "action": "被宝玉完成互动：「调侃」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:29",
+      "day": 1,
+      "hour": 8,
+      "minute": 29,
+      "type": "relation:axis_change",
+      "person": "袭人",
+      "action": "关系轴变化：affection 59.96→63.38（+3.42）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:29",
+      "day": 1,
+      "hour": 8,
+      "minute": 29,
+      "type": "relation:axis_change",
+      "person": "宝玉",
+      "action": "关系轴变化：affection 59.96→63.38（+3.42）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:29",
+      "day": 1,
+      "hour": 8,
+      "minute": 29,
+      "type": "relation:change",
+      "person": "袭人",
+      "action": "综合关系变化：47→49（好友/亲密）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:29",
+      "day": 1,
+      "hour": 8,
+      "minute": 29,
+      "type": "relation:change",
+      "person": "宝玉",
+      "action": "综合关系变化：47→49（好友/亲密）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:29",
+      "day": 1,
+      "hour": 8,
+      "minute": 29,
+      "type": "relation:axis_change",
+      "person": "袭人",
+      "action": "关系轴变化：trust 41.99→45.41（+3.42）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:29",
+      "day": 1,
+      "hour": 8,
+      "minute": 29,
+      "type": "relation:axis_change",
+      "person": "宝玉",
+      "action": "关系轴变化：trust 41.99→45.41（+3.42）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:29",
+      "day": 1,
+      "hour": 8,
+      "minute": 29,
+      "type": "relation:axis_change",
+      "person": "袭人",
+      "action": "关系轴变化：friendship 28.08→31.5（+3.42）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:29",
+      "day": 1,
+      "hour": 8,
+      "minute": 29,
+      "type": "relation:axis_change",
+      "person": "宝玉",
+      "action": "关系轴变化：friendship 28.08→31.5（+3.42）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:29",
+      "day": 1,
+      "hour": 8,
+      "minute": 29,
+      "type": "ai:social_target_cooldown",
+      "person": "袭人",
+      "action": "AI目标频控：宝玉 75分钟",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:29",
+      "day": 1,
+      "hour": 8,
+      "minute": 29,
+      "type": "interaction:complete",
+      "person": "袭人",
+      "action": "完成互动：与宝玉「品茗」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:29",
+      "day": 1,
+      "hour": 8,
+      "minute": 29,
+      "type": "interaction:complete",
+      "person": "宝玉",
+      "action": "被袭人完成互动：「品茗」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:29",
+      "day": 1,
+      "hour": 8,
+      "minute": 29,
+      "type": "ai:routine_completed",
+      "person": "麝月",
+      "action": "作息完成：早餐 via=kitchen",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:29",
+      "day": 1,
+      "hour": 8,
+      "minute": 29,
+      "type": "furniture:use_started",
+      "person": "麝月",
+      "action": "开始用家具：厨房灶台 / prepare_meal",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:34",
+      "day": 1,
+      "hour": 8,
+      "minute": 34,
+      "type": "furniture:complete",
+      "person": "麝月",
+      "action": "完成用家具：厨房灶台 / prepare_meal",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:45",
+      "day": 1,
+      "hour": 8,
+      "minute": 45,
+      "type": "queue:add",
+      "person": "宝玉",
+      "action": "行动入队：💬 打趣·晴雯",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:45",
+      "day": 1,
+      "hour": 8,
+      "minute": 45,
+      "type": "ai:decision",
+      "person": "宝玉",
+      "action": "AI选择：打趣·晴雯 [int:301:qingwen] provider=social routine=breakfast",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:51",
+      "day": 1,
+      "hour": 8,
+      "minute": 51,
+      "type": "ai:daily_social_count",
+      "person": "宝玉",
+      "action": "AI每日主动社交计数：晴雯 1/10",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:51",
+      "day": 1,
+      "hour": 8,
+      "minute": 51,
+      "type": "interaction:started",
+      "person": "宝玉",
+      "action": "开始互动：与晴雯「打趣」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:51",
+      "day": 1,
+      "hour": 8,
+      "minute": 51,
+      "type": "interaction:started",
+      "person": "晴雯",
+      "action": "被宝玉发起互动：「打趣」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:58",
+      "day": 1,
+      "hour": 8,
+      "minute": 58,
+      "type": "relation:axis_change",
+      "person": "宝玉",
+      "action": "关系轴变化：affection 41.96→50.18（+8.22）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:58",
+      "day": 1,
+      "hour": 8,
+      "minute": 58,
+      "type": "relation:axis_change",
+      "person": "晴雯",
+      "action": "关系轴变化：affection 41.96→50.18（+8.22）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:58",
+      "day": 1,
+      "hour": 8,
+      "minute": 58,
+      "type": "relation:change",
+      "person": "宝玉",
+      "action": "综合关系变化：35→39（朋友/友好）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:58",
+      "day": 1,
+      "hour": 8,
+      "minute": 58,
+      "type": "relation:change",
+      "person": "晴雯",
+      "action": "综合关系变化：35→39（朋友/友好）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:58",
+      "day": 1,
+      "hour": 8,
+      "minute": 58,
+      "type": "relation:axis_change",
+      "person": "宝玉",
+      "action": "关系轴变化：friendship 21→22.64（+1.64）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:58",
+      "day": 1,
+      "hour": 8,
+      "minute": 58,
+      "type": "relation:axis_change",
+      "person": "晴雯",
+      "action": "关系轴变化：friendship 21→22.64（+1.64）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:58",
+      "day": 1,
+      "hour": 8,
+      "minute": 58,
+      "type": "ai:social_target_cooldown",
+      "person": "宝玉",
+      "action": "AI目标频控：晴雯 75分钟",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:58",
+      "day": 1,
+      "hour": 8,
+      "minute": 58,
+      "type": "interaction:complete",
+      "person": "宝玉",
+      "action": "完成互动：与晴雯「打趣」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:58",
+      "day": 1,
+      "hour": 8,
+      "minute": 58,
+      "type": "interaction:complete",
+      "person": "晴雯",
+      "action": "被宝玉完成互动：「打趣」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "quest:issued",
+      "person": "晴雯",
+      "action": "任务下发：跑腿买办",
+      "issuer": "袭人"
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "quest:issued",
+      "person": "袭人",
+      "action": "下发任务给晴雯：跑腿买办",
+      "issuer": "袭人"
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "quest:accepted",
+      "person": "晴雯",
+      "action": "接受任务：跑腿买办",
+      "issuer": "袭人"
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "quest:accepted",
+      "person": "袭人",
+      "action": "接受任务：跑腿买办",
+      "issuer": "袭人"
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "queue:add",
+      "person": "袭人",
+      "action": "行动入队：💬 寒暄·麝月",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "ai:decision",
+      "person": "袭人",
+      "action": "AI选择：寒暄·麝月 [int:101:sheyue] provider=social",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "queue:add",
+      "person": "晴雯",
+      "action": "行动入队：💬 闲谈·宝玉",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "ai:daily_social_count",
+      "person": "晴雯",
+      "action": "AI每日主动社交计数：宝玉 1/10",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "interaction:started",
+      "person": "晴雯",
+      "action": "开始互动：与宝玉「闲谈」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "interaction:started",
+      "person": "宝玉",
+      "action": "被晴雯发起互动：「闲谈」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "ai:decision",
+      "person": "晴雯",
+      "action": "AI选择：闲谈·宝玉 [int:102:baoyu] provider=social",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "queue:add",
+      "person": "麝月",
+      "action": "行动入队：🤝 品茗·晴雯",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "ai:decision",
+      "person": "麝月",
+      "action": "AI选择：品茗·晴雯 [int:104:qingwen] provider=social",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:01",
+      "day": 1,
+      "hour": 9,
+      "minute": 1,
+      "type": "ai:decision",
+      "person": "晴雯",
+      "action": "AI选择：前往大观楼·沁芳庭 [quest-scene:4:3] provider=quest",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:01",
+      "day": 1,
+      "hour": 9,
+      "minute": 1,
+      "type": "queue:add",
+      "person": "麝月",
+      "action": "行动入队：🍶 在酒案",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:01",
+      "day": 1,
+      "hour": 9,
+      "minute": 1,
+      "type": "ai:decision",
+      "person": "麝月",
+      "action": "AI选择：酒案·使用酒案 [furn:4004:default_use] provider=furniture routine=skill-routine_study-18",
+      "issuer": ""
+    }
+  ],
+  "perPersonDay": {
+    "1|袭人": {
+      "total": 44,
+      "tasks": 24,
+      "furniture": 0,
+      "interactions": 4,
+      "blocked": 0,
+      "decisions": 2,
+      "samples": [
+        " 08:03 开始任务：晨起理妆",
+        " 08:15 行动入队：🤝 品茗·宝玉",
+        " 08:15 AI选择：品茗·宝玉 [int:104:baoyu] provider=social routine=followRotation:follow:baoyu:xiren:day_follow:1:2002",
+        " 08:15 被宝玉发起互动：「调侃」",
+        " 08:16 AI每日主动社交计数：宝玉 1/10"
+      ]
+    },
+    "1|宝玉": {
+      "total": 31,
+      "tasks": 0,
+      "furniture": 2,
+      "interactions": 8,
+      "blocked": 0,
+      "decisions": 2,
+      "samples": [
+        " 08:03 作息完成：晨起梳洗 via=wardrobe",
+        " 08:03 开始用家具：梳洗妆台 / tidy_dress",
+        " 08:08 完成用家具：梳洗妆台 / tidy_dress",
+        " 08:15 行动入队：💬 调侃·袭人",
+        " 08:15 AI选择：调侃·袭人 [int:302:xiren] provider=social routine=breakfast"
+      ]
+    },
+    "1|麝月": {
+      "total": 16,
+      "tasks": 0,
+      "furniture": 4,
+      "interactions": 1,
+      "blocked": 0,
+      "decisions": 4,
+      "samples": [
+        " 08:08 作息完成：晨起梳洗 via=bath",
+        " 08:08 开始用家具：浴盆 / default_use",
+        " 08:13 完成用家具：浴盆 / default_use",
+        " 08:15 行动入队：💬 问安·宝玉",
+        " 08:15 AI选择：问安·宝玉 [int:103:baoyu] provider=social routine=breakfast"
+      ]
+    },
+    "1|晴雯": {
+      "total": 15,
+      "tasks": 2,
+      "furniture": 2,
+      "interactions": 3,
+      "blocked": 0,
+      "decisions": 2,
+      "samples": [
+        " 08:15 作息完成：早餐 via=meal",
+        " 08:15 开始用家具：饭桌 / complain_food",
+        " 08:17 完成用家具：饭桌 / complain_food",
+        " 08:51 被宝玉发起互动：「打趣」",
+        " 08:58 关系轴变化：affection 41.96→50.18（+8.22）"
+      ]
+    }
+  },
+  "actionCounts": {
+    "袭人|开始任务：晨起理妆": 1,
+    "袭人|任务进度：晨起理妆 1/20": 1,
+    "宝玉|作息完成：晨起梳洗 via=wardrobe": 1,
+    "宝玉|开始用家具：梳洗妆台 / tidy_dress": 1,
+    "袭人|任务进度：晨起理妆 2/20": 1,
+    "袭人|任务进度：晨起理妆 3/20": 1,
+    "袭人|任务进度：晨起理妆 4/20": 1,
+    "袭人|任务进度：晨起理妆 5/20": 1,
+    "袭人|任务进度：晨起理妆 6/20": 1,
+    "宝玉|完成用家具：梳洗妆台 / tidy_dress": 1,
+    "麝月|作息完成：晨起梳洗 via=bath": 1,
+    "麝月|开始用家具：浴盆 / default_use": 1,
+    "袭人|任务进度：晨起理妆 7/20": 1,
+    "袭人|任务进度：晨起理妆 8/20": 1,
+    "袭人|任务进度：晨起理妆 9/20": 1,
+    "袭人|任务进度：晨起理妆 10/20": 1,
+    "袭人|任务进度：晨起理妆 11/20": 1,
+    "麝月|完成用家具：浴盆 / default_use": 1,
+    "袭人|任务进度：晨起理妆 12/20": 1,
+    "袭人|任务进度：晨起理妆 13/20": 1,
+    "宝玉|行动入队：💬 调侃·袭人": 1,
+    "宝玉|AI选择：调侃·袭人 [int:302:xiren] provider=social routine=breakfast": 1,
+    "袭人|行动入队：🤝 品茗·宝玉": 1,
+    "袭人|AI选择：品茗·宝玉 [int:104:baoyu] provider=social routine=followRotation:follow:baoyu:xiren:day_follow:1:2002": 1,
+    "麝月|行动入队：💬 问安·宝玉": 1,
+    "麝月|AI选择：问安·宝玉 [int:103:baoyu] provider=social routine=breakfast": 1,
+    "宝玉|AI每日主动社交计数：袭人 1/10": 1,
+    "宝玉|开始互动：与袭人「调侃」": 1,
+    "袭人|被宝玉发起互动：「调侃」": 1,
+    "晴雯|作息完成：早餐 via=meal": 1,
+    "晴雯|开始用家具：饭桌 / complain_food": 1,
+    "麝月|AI每日主动社交计数：宝玉 1/10": 1,
+    "麝月|开始互动：与宝玉「问安」": 1,
+    "宝玉|被麝月发起互动：「问安」": 1,
+    "袭人|任务进度：晨起理妆 14/20": 1,
+    "袭人|AI每日主动社交计数：宝玉 1/10": 1,
+    "袭人|作息完成：随侍左右 via=xujiu": 1,
+    "袭人|开始互动：与宝玉「品茗」": 1,
+    "宝玉|被袭人发起互动：「品茗」": 1,
+    "袭人|任务进度：晨起理妆 15/20": 1,
+    "麝月|行动入队：🔥 备膳": 1,
+    "麝月|AI选择：厨房灶台·备膳 [furn:4009:prepare_meal] provider=furniture routine=breakfast": 1,
+    "晴雯|完成用家具：饭桌 / complain_food": 1,
+    "袭人|任务进度：晨起理妆 16/20": 1,
+    "袭人|任务进度：晨起理妆 17/20": 1,
+    "袭人|任务进度：晨起理妆 18/20": 1,
+    "袭人|任务进度：晨起理妆 19/20": 1,
+    "袭人|任务进度：晨起理妆 20/20": 1,
+    "袭人|关系轴变化：affection 51.99→53.7（+1.71） · 晨起理妆": 1,
+    "宝玉|关系轴变化：affection 51.99→53.7（+1.71） · 晨起理妆": 1,
+    "袭人|关系轴变化：friendship 26→26.51（+0.51） · 晨起理妆": 1,
+    "宝玉|关系轴变化：friendship 26→26.51（+0.51） · 晨起理妆": 1,
+    "袭人|完成任务：晨起理妆": 1,
+    "宝玉|关系轴变化：affection 53.7→59.97（+6.27）": 1,
+    "袭人|关系轴变化：affection 53.7→59.97（+6.27）": 1,
+    "宝玉|综合关系变化：44→47（好友/亲密）": 1,
+    "袭人|综合关系变化：44→47（好友/亲密）": 1,
+    "宝玉|关系轴变化：friendship 26.51→28.08（+1.57）": 1,
+    "袭人|关系轴变化：friendship 26.51→28.08（+1.57）": 1,
+    "宝玉|AI目标频控：袭人 75分钟": 1,
+    "宝玉|完成互动：与袭人「调侃」": 1,
+    "袭人|被宝玉完成互动：「调侃」": 1,
+    "袭人|关系轴变化：affection 59.96→63.38（+3.42）": 1,
+    "宝玉|关系轴变化：affection 59.96→63.38（+3.42）": 1,
+    "袭人|综合关系变化：47→49（好友/亲密）": 1,
+    "宝玉|综合关系变化：47→49（好友/亲密）": 1,
+    "袭人|关系轴变化：trust 41.99→45.41（+3.42）": 1,
+    "宝玉|关系轴变化：trust 41.99→45.41（+3.42）": 1,
+    "袭人|关系轴变化：friendship 28.08→31.5（+3.42）": 1,
+    "宝玉|关系轴变化：friendship 28.08→31.5（+3.42）": 1,
+    "袭人|AI目标频控：宝玉 75分钟": 1,
+    "袭人|完成互动：与宝玉「品茗」": 1,
+    "宝玉|被袭人完成互动：「品茗」": 1,
+    "麝月|作息完成：早餐 via=kitchen": 1,
+    "麝月|开始用家具：厨房灶台 / prepare_meal": 1,
+    "麝月|完成用家具：厨房灶台 / prepare_meal": 1,
+    "宝玉|行动入队：💬 打趣·晴雯": 1,
+    "宝玉|AI选择：打趣·晴雯 [int:301:qingwen] provider=social routine=breakfast": 1,
+    "宝玉|AI每日主动社交计数：晴雯 1/10": 1,
+    "宝玉|开始互动：与晴雯「打趣」": 1,
+    "晴雯|被宝玉发起互动：「打趣」": 1,
+    "宝玉|关系轴变化：affection 41.96→50.18（+8.22）": 1,
+    "晴雯|关系轴变化：affection 41.96→50.18（+8.22）": 1,
+    "宝玉|综合关系变化：35→39（朋友/友好）": 1,
+    "晴雯|综合关系变化：35→39（朋友/友好）": 1,
+    "宝玉|关系轴变化：friendship 21→22.64（+1.64）": 1,
+    "晴雯|关系轴变化：friendship 21→22.64（+1.64）": 1,
+    "宝玉|AI目标频控：晴雯 75分钟": 1,
+    "宝玉|完成互动：与晴雯「打趣」": 1,
+    "晴雯|被宝玉完成互动：「打趣」": 1,
+    "晴雯|任务下发：跑腿买办": 1,
+    "袭人|下发任务给晴雯：跑腿买办": 1,
+    "晴雯|接受任务：跑腿买办": 1,
+    "袭人|接受任务：跑腿买办": 1,
+    "袭人|行动入队：💬 寒暄·麝月": 1,
+    "袭人|AI选择：寒暄·麝月 [int:101:sheyue] provider=social": 1,
+    "晴雯|行动入队：💬 闲谈·宝玉": 1,
+    "晴雯|AI每日主动社交计数：宝玉 1/10": 1,
+    "晴雯|开始互动：与宝玉「闲谈」": 1,
+    "宝玉|被晴雯发起互动：「闲谈」": 1,
+    "晴雯|AI选择：闲谈·宝玉 [int:102:baoyu] provider=social": 1,
+    "麝月|行动入队：🤝 品茗·晴雯": 1,
+    "麝月|AI选择：品茗·晴雯 [int:104:qingwen] provider=social": 1,
+    "晴雯|AI选择：前往大观楼·沁芳庭 [quest-scene:4:3] provider=quest": 1,
+    "麝月|行动入队：🍶 在酒案": 1,
+    "麝月|AI选择：酒案·使用酒案 [furn:4004:default_use] provider=furniture routine=skill-routine_study-18": 1
+  },
+  "rawCounts": {
+    "quest:issued": 2,
+    "quest:accepted": 2,
+    "quest:blocked": 5,
+    "servant:follow_state": 2,
+    "log:add": 173,
+    "state:add": 40,
+    "character:effect": 43,
+    "time:tick": 61,
+    "queue:add": 46,
+    "ai:decision": 47,
+    "ai:routine_completed": 22,
+    "furniture:use_started": 27,
+    "scene:enter:allowed": 23,
+    "scene:entered": 23,
+    "quest:candidate": 66,
+    "furniture:released": 29,
+    "furniture:complete": 21,
+    "ai:state": 88,
+    "quest:started": 1,
+    "quest:progress": 21,
+    "need:band_changed": 42,
+    "furniture:reaction": 4,
+    "invitation:sent": 1,
+    "access:granted": 1,
+    "invitation:accepted": 1,
+    "relation:axis_change": 15,
+    "ai:daily_social_count": 11,
+    "interaction:started": 11,
+    "state:remove": 18,
+    "interaction:effects": 6,
+    "emotion:resisted": 2,
+    "observer:triggered": 1,
+    "observer:executed": 1,
+    "trait:competition": 1,
+    "ai:social_target_cooldown": 6,
+    "interaction:complete": 6,
+    "quest:completed": 1,
+    "reputation_domain:change": 3,
+    "reputation:change": 1,
+    "relation:change": 4,
+    "interaction:state": 2,
+    "need:combination_triggered": 1,
+    "family:fund_changed": 1,
+    "economy:quest_cost": 1,
+    "time:hour": 1
+  },
+  "problems": [],
+  "repeated": [],
+  "finalChars": [
+    {
+      "id": "baoyu",
+      "name": "贾宝玉",
+      "short": "宝玉",
+      "sceneId": 4,
+      "statusText": "闲庭漫步",
+      "actionType": "",
+      "queue": [],
+      "needs": {
+        "hunger": 64.69519999999973,
+        "energy": 65.73312000000017,
+        "fun": 80.77106666666663,
+        "hygiene": 99.54826666666668,
+        "social": 100,
+        "mood": 97.36005907484525
+      },
+      "aiState": "IDLE",
+      "skills": [
+        "move",
+        "talk",
+        "poetry"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "poetry": 3,
+        "affairs": 1.3,
+        "insight": 1.2,
+        "subtlety": 1.2
+      }
+    },
+    {
+      "id": "xiren",
+      "name": "花袭人",
+      "short": "袭人",
+      "sceneId": 4,
+      "statusText": "去找麝月·寒暄",
+      "actionType": "move",
+      "queue": [
+        "💬 寒暄·麝月"
+      ],
+      "needs": {
+        "hunger": 69.46632000000025,
+        "energy": 74.5889904000003,
+        "fun": 66.62981666666674,
+        "hygiene": 79.6132500000002,
+        "social": 100,
+        "mood": 96.68329822266877
+      },
+      "aiState": "EXECUTING",
+      "skills": [
+        "move",
+        "talk",
+        "serve",
+        "craft"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "serve": 1,
+        "craft": 1
+      }
+    },
+    {
+      "id": "qingwen",
+      "name": "晴雯",
+      "short": "晴雯",
+      "sceneId": 4,
+      "statusText": "闲庭漫步",
+      "actionType": "",
+      "queue": [],
+      "needs": {
+        "hunger": 78.80707999999981,
+        "energy": 55.609628800000046,
+        "fun": 62.02500000000005,
+        "hygiene": 71.50912500000001,
+        "social": 100,
+        "mood": 81.39926085217667
+      },
+      "aiState": "EXECUTING",
+      "skills": [
+        "move",
+        "talk"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1
+      }
+    },
+    {
+      "id": "sheyue",
+      "name": "麝月",
+      "short": "麝月",
+      "sceneId": 4,
+      "statusText": "行走中",
+      "actionType": "move",
+      "queue": [
+        "🍶 在酒案"
+      ],
+      "needs": {
+        "hunger": 98.81282500000006,
+        "energy": 64.55878176000027,
+        "fun": 47.15400000000008,
+        "hygiene": 109.68453333333345,
+        "social": 85,
+        "mood": 77.82349999999985
+      },
+      "aiState": "EXECUTING",
+      "skills": [
+        "move",
+        "talk",
+        "serve"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "serve": 1,
+        "affairs": 1.5,
+        "diligence": 1.4
+      }
+    }
+  ],
+  "initialSkills": [
+    {
+      "id": "baoyu",
+      "name": "宝玉",
+      "skills": [
+        "move",
+        "talk",
+        "poetry"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "poetry": 3
+      }
+    },
+    {
+      "id": "xiren",
+      "name": "袭人",
+      "skills": [
+        "move",
+        "talk",
+        "serve",
+        "craft"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "serve": 1,
+        "craft": 1
+      }
+    },
+    {
+      "id": "qingwen",
+      "name": "晴雯",
+      "skills": [
+        "move",
+        "talk"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1
+      }
+    },
+    {
+      "id": "sheyue",
+      "name": "麝月",
+      "skills": [
+        "move",
+        "talk",
+        "serve"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "serve": 1
+      }
+    }
+  ],
+  "finalSkills": [
+    {
+      "id": "baoyu",
+      "name": "宝玉",
+      "skills": [
+        "move",
+        "talk",
+        "poetry"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "poetry": 3,
+        "affairs": 1.3,
+        "insight": 1.2,
+        "subtlety": 1.2
+      }
+    },
+    {
+      "id": "xiren",
+      "name": "袭人",
+      "skills": [
+        "move",
+        "talk",
+        "serve",
+        "craft"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "serve": 1,
+        "craft": 1
+      }
+    },
+    {
+      "id": "qingwen",
+      "name": "晴雯",
+      "skills": [
+        "move",
+        "talk"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1
+      }
+    },
+    {
+      "id": "sheyue",
+      "name": "麝月",
+      "skills": [
+        "move",
+        "talk",
+        "serve"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "serve": 1,
+        "affairs": 1.5,
+        "diligence": 1.4
+      }
+    }
+  ],
+  "initialRelations": {
+    "baoyu|daiyu": {
+      "affection": 72,
+      "trust": 58,
+      "friendship": 36,
+      "submission": {
+        "daiyu": 0,
+        "baoyu": 0
+      },
+      "initType": "恋人",
+      "note": "木石前盟，初见如故",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|xiren": {
+      "affection": 52,
+      "trust": 42,
+      "friendship": 26,
+      "submission": {
+        "baoyu": -40,
+        "xiren": 40
+      },
+      "initType": "主仆",
+      "note": "贴身大丫鬟，情分深厚",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baochai|baoyu": {
+      "affection": 48,
+      "trust": 38,
+      "friendship": 24,
+      "submission": {
+        "baoyu": 0,
+        "baochai": 0
+      },
+      "initType": "朋友",
+      "note": "金玉良缘，礼数周全",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|qingwen": {
+      "affection": 42,
+      "trust": 34,
+      "friendship": 21,
+      "submission": {
+        "baoyu": -60,
+        "qingwen": 60
+      },
+      "initType": "主仆",
+      "note": "撕扇补裘，心高气傲",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|sheyue": {
+      "affection": 44,
+      "trust": 35,
+      "friendship": 22,
+      "submission": {
+        "baoyu": -60,
+        "sheyue": 60
+      },
+      "initType": "主仆",
+      "note": "稳妥周全，默默护持",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|tanchun": {
+      "affection": 58,
+      "trust": 46,
+      "friendship": 29,
+      "submission": {
+        "baoyu": -20,
+        "tanchun": 20
+      },
+      "initType": "兄妹",
+      "note": "同府兄妹，才志相赏",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|jiamu": {
+      "affection": 82,
+      "trust": 66,
+      "friendship": 41,
+      "submission": {
+        "baoyu": 40,
+        "jiamu": -40
+      },
+      "initType": "祖孙",
+      "note": "贾母最疼爱的孙子",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|jiazheng": {
+      "affection": 38,
+      "trust": 30,
+      "friendship": 19,
+      "submission": {
+        "baoyu": 20,
+        "jiazheng": -20
+      },
+      "initType": "父子",
+      "note": "严父望子成龙，宝玉避之",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|wangfuren": {
+      "affection": 42,
+      "trust": 34,
+      "friendship": 21,
+      "submission": {
+        "baoyu": 20,
+        "wangfuren": -20
+      },
+      "initType": "母子",
+      "note": "王夫人偏疼宝玉",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "daiyu|xiren": {
+      "affection": 36,
+      "trust": 29,
+      "friendship": 18,
+      "submission": {
+        "daiyu": -40,
+        "xiren": 40
+      },
+      "initType": "朋友",
+      "note": "日常照拂",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "daiyu|qingwen": {
+      "affection": 22,
+      "trust": 18,
+      "friendship": 11,
+      "submission": {
+        "daiyu": -60,
+        "qingwen": 60
+      },
+      "initType": "朋友",
+      "note": "晴为黛影，略存芥蒂",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|xifeng": {
+      "affection": 50,
+      "trust": 40,
+      "friendship": 25,
+      "submission": {
+        "xifeng": 0,
+        "baoyu": 0
+      },
+      "initType": "叔嫂",
+      "note": "常照拂宝玉",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "qingwen|xiren": {
+      "affection": 12,
+      "trust": 10,
+      "friendship": 6,
+      "submission": {
+        "xiren": -20,
+        "qingwen": 20
+      },
+      "initType": "同事",
+      "note": "同侍宝玉，性情各异",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "sheyue|xiren": {
+      "affection": 28,
+      "trust": 22,
+      "friendship": 14,
+      "submission": {
+        "xiren": -20,
+        "sheyue": 20
+      },
+      "initType": "同事",
+      "note": "怡红院同事，互为补佐",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "qingwen|sheyue": {
+      "affection": 20,
+      "trust": 16,
+      "friendship": 10,
+      "submission": {
+        "qingwen": 0,
+        "sheyue": 0
+      },
+      "initType": "同事",
+      "note": "晴雯爽利，麝月稳当",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|zijuan": {
+      "affection": 32,
+      "trust": 26,
+      "friendship": 16,
+      "submission": {
+        "baoyu": -40,
+        "zijuan": 40
+      },
+      "initType": "朋友",
+      "note": "因黛玉而熟",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|yinger": {
+      "affection": 28,
+      "trust": 22,
+      "friendship": 14,
+      "submission": {
+        "baoyu": -60,
+        "yinger": 60
+      },
+      "initType": "朋友",
+      "note": "偶至蘅芜苑相识",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    }
+  },
+  "finalRelations": {
+    "baoyu|daiyu": {
+      "affection": 71.95750000000004,
+      "trust": 57.98724999999994,
+      "friendship": 35.99574999999986,
+      "submission": {
+        "daiyu": 0,
+        "baoyu": 0
+      },
+      "initType": "恋人",
+      "note": "木石前盟，初见如故",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|xiren": {
+      "affection": 63.35925425099142,
+      "trust": 45.40777627529735,
+      "friendship": 31.497096426103383,
+      "submission": {
+        "baoyu": -40,
+        "xiren": 40
+      },
+      "initType": "主仆",
+      "note": "贴身大丫鬟，情分深厚",
+      "lastInteract": 1949,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baochai|baoyu": {
+      "affection": 47.95750000000004,
+      "trust": 37.98724999999994,
+      "friendship": 23.99575000000004,
+      "submission": {
+        "baoyu": 0,
+        "baochai": 0
+      },
+      "initType": "朋友",
+      "note": "金玉良缘，礼数周全",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|qingwen": {
+      "affection": 50.17880426088225,
+      "trust": 33.98724999999994,
+      "friendship": 22.640010852176484,
+      "submission": {
+        "baoyu": -60,
+        "qingwen": 60
+      },
+      "initType": "主仆",
+      "note": "撕扇补裘，心高气傲",
+      "lastInteract": 1978,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|sheyue": {
+      "affection": 43.95750000000004,
+      "trust": 34.98724999999994,
+      "friendship": 21.99575000000004,
+      "submission": {
+        "baoyu": -60,
+        "sheyue": 60
+      },
+      "initType": "主仆",
+      "note": "稳妥周全，默默护持",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|tanchun": {
+      "affection": 57.95750000000004,
+      "trust": 45.98724999999994,
+      "friendship": 28.99575000000004,
+      "submission": {
+        "baoyu": -20,
+        "tanchun": 20
+      },
+      "initType": "兄妹",
+      "note": "同府兄妹，才志相赏",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|jiamu": {
+      "affection": 81.95750000000004,
+      "trust": 65.9872500000003,
+      "friendship": 40.99574999999986,
+      "submission": {
+        "baoyu": 40,
+        "jiamu": -40
+      },
+      "initType": "祖孙",
+      "note": "贾母最疼爱的孙子",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|jiazheng": {
+      "affection": 37.95750000000004,
+      "trust": 29.98724999999994,
+      "friendship": 18.99575000000004,
+      "submission": {
+        "baoyu": 20,
+        "jiazheng": -20
+      },
+      "initType": "父子",
+      "note": "严父望子成龙，宝玉避之",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|wangfuren": {
+      "affection": 41.95750000000004,
+      "trust": 33.98724999999994,
+      "friendship": 20.99575000000004,
+      "submission": {
+        "baoyu": 20,
+        "wangfuren": -20
+      },
+      "initType": "母子",
+      "note": "王夫人偏疼宝玉",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "daiyu|xiren": {
+      "affection": 35.95750000000004,
+      "trust": 28.98724999999994,
+      "friendship": 17.99575000000004,
+      "submission": {
+        "daiyu": -40,
+        "xiren": 40
+      },
+      "initType": "朋友",
+      "note": "日常照拂",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "daiyu|qingwen": {
+      "affection": 21.95750000000004,
+      "trust": 17.98724999999994,
+      "friendship": 10.99575000000004,
+      "submission": {
+        "daiyu": -60,
+        "qingwen": 60
+      },
+      "initType": "朋友",
+      "note": "晴为黛影，略存芥蒂",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|xifeng": {
+      "affection": 49.95750000000004,
+      "trust": 39.98724999999994,
+      "friendship": 24.99575000000004,
+      "submission": {
+        "xifeng": 0,
+        "baoyu": 0
+      },
+      "initType": "叔嫂",
+      "note": "常照拂宝玉",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "qingwen|xiren": {
+      "affection": 11.957500000000039,
+      "trust": 9.98725000000003,
+      "friendship": 5.995749999999995,
+      "submission": {
+        "xiren": -20,
+        "qingwen": 20
+      },
+      "initType": "同事",
+      "note": "同侍宝玉，性情各异",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "sheyue|xiren": {
+      "affection": 27.95750000000004,
+      "trust": 21.98724999999994,
+      "friendship": 13.99575000000004,
+      "submission": {
+        "xiren": -20,
+        "sheyue": 20
+      },
+      "initType": "同事",
+      "note": "怡红院同事，互为补佐",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "qingwen|sheyue": {
+      "affection": 19.95750000000004,
+      "trust": 15.98725000000003,
+      "friendship": 9.99575000000004,
+      "submission": {
+        "qingwen": 0,
+        "sheyue": 0
+      },
+      "initType": "同事",
+      "note": "晴雯爽利，麝月稳当",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|zijuan": {
+      "affection": 31.95750000000004,
+      "trust": 25.98724999999994,
+      "friendship": 15.99575000000004,
+      "submission": {
+        "baoyu": -40,
+        "zijuan": 40
+      },
+      "initType": "朋友",
+      "note": "因黛玉而熟",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|yinger": {
+      "affection": 27.95750000000004,
+      "trust": 21.98724999999994,
+      "friendship": 13.99575000000004,
+      "submission": {
+        "baoyu": -60,
+        "yinger": 60
+      },
+      "initType": "朋友",
+      "note": "偶至蘅芜苑相识",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    }
+  },
+  "finalFamilies": [
+    {
+      "id": 1,
+      "name": "怡红院",
+      "fund": 520,
+      "memberIds": [
+        "baoyu",
+        "xiren",
+        "qingwen",
+        "sheyue"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "潇湘馆",
+      "fund": 280,
+      "memberIds": [
+        "daiyu",
+        "zijuan",
+        "xueyan"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "蘅芜苑",
+      "fund": 380,
+      "memberIds": [
+        "baochai",
+        "yinger"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "荣禧堂",
+      "fund": 1200,
+      "memberIds": [
+        "jiazheng",
+        "wangfuren",
+        "jiamu",
+        "jiashe",
+        "xiangyun"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "秋爽斋",
+      "fund": 320,
+      "memberIds": [
+        "tanchun"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "宁国府",
+      "fund": 680,
+      "memberIds": [
+        "jiazhen",
+        "jiarong"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "协理院",
+      "fund": 450,
+      "memberIds": [
+        "xifeng",
+        "jialian",
+        "laiwang"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "刘家庄",
+      "fund": 40,
+      "memberIds": [
+        "liulaolao"
+      ]
+    }
+  ]
+}

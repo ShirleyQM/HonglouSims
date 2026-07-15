@@ -1,0 +1,353 @@
+{"kind":"deck","id":"pr/h2dx7t","name":"Deck"}
+{"kind":"layout","layoutId":"6cbd2f07-4598-4088-89ac-3d2f0f67c743","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"20bf42f2-f64e-4b0e-aa3c-0df13cbaa602","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/eno5pd","slide":1,"title":"大观园模拟","textShapes":7}
+{"kind":"shape","id":"sh/cj6tovah","slide":1,"bbox":[696,42,544,486]}
+{"kind":"textbox","id":"sh/54zidony","slide":1,"text":"大观园模拟","textPreview":"大观园模拟","textChars":5,"textLines":1,"bbox":[64,76,560,70]}
+{"kind":"textbox","id":"sh/upwb2hwf","slide":1,"text":"礼法与情分驱动的群像模拟游戏","textPreview":"礼法与情分驱动的群像模拟游戏","textChars":14,"textLines":1,"bbox":[68,154,610,40]}
+{"kind":"textbox","id":"sh/nap4r65w","slide":1,"text":"玩家玩的不是“古代版生活模拟”这个外壳，而是一座会评价人、牵制人、反噬人的府。","textPreview":"玩家玩的不是“古代版生活模拟”这个外壳，而是一座会评价人、牵制人、反噬人的府。","textChars":39,"textLines":1,"bbox":[70,236,570,118]}
+{"kind":"shape","id":"sh/cvixczed","slide":1,"bbox":[70,394,560,90]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":1,"text":"一句话定位","textPreview":"一句话定位","textChars":5,"textLines":1,"bbox":[94,414,150,24]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":1,"text":"在中国古代共同体里，调度人、事、名分和人情，观察每个选择如何改变命运。","textPreview":"在中国古代共同体里，调度人、事、名分和人情，观察每个选择如何改变命运。","textChars":35,"textLines":1,"bbox":[94,444,500,32]}
+{"kind":"textbox","id":"sh/jm1cfa9w","slide":1,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/b6xkf6dc","slide":1,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"image","id":"im/e9cvixcz","slide":1,"name":"","geometry":"roundRect","alt":"潇湘馆场景","bbox":[720,64,496,440]}
+{"kind":"notes","id":"nt/eno5pd","slide":1,"text":""}
+{"kind":"slide","id":"sl/8i3alv","slide":2,"title":"WHAT MAKES IT DIFFERENT","textShapes":14}
+{"kind":"textbox","id":"sh/lwval87e","slide":2,"text":"WHAT MAKES IT DIFFERENT","textPreview":"WHAT MAKES IT DIFFERENT","textChars":23,"textLines":1,"bbox":[64,42,360,24]}
+{"kind":"textbox","id":"sh/e9cvixcz","slide":2,"text":"核心不是古风外皮，而是“分寸感”","textPreview":"核心不是古风外皮，而是“分寸感”","textChars":16,"textLines":1,"bbox":[64,74,900,76]}
+{"kind":"textbox","id":"sh/3q5o7qpg","slide":2,"text":"现代生活模拟问“我想做什么”；大观园模拟还要问“我该不该、能不能、别人怎么看”。","textPreview":"现代生活模拟问“我想做什么”；大观园模拟还要问“我该不该、能不能、别人怎么看”。","textChars":40,"textLines":1,"bbox":[66,148,900,48]}
+{"kind":"shape","id":"sh/w3m94fu1","slide":2,"bbox":[64,186,1152,0]}
+{"kind":"shape","id":"sh/loj2t83i","slide":2,"bbox":[72,238,250,246]}
+{"kind":"textbox","id":"sh/ex0nuxc3","slide":2,"text":"想做","textPreview":"想做","textChars":2,"textLines":1,"bbox":[94,256,206,32]}
+{"kind":"textbox","id":"sh/3itgfmlk","slide":2,"text":"角色有需求、性格、心绪和欲望，会想吃、想歇、想见人、想写诗、想逃开人群。","textPreview":"角色有需求、性格、心绪和欲望，会想吃、想歇、想见人、想写诗、想逃开人群。","textChars":36,"textLines":1,"bbox":[94,296,206,174]}
+{"kind":"shape","id":"sh/szqtcj6t","slide":2,"bbox":[360,238,250,246]}
+{"kind":"textbox","id":"sh/lkjm1cfa","slide":2,"text":"该做","textPreview":"该做","textChars":2,"textLines":1,"bbox":[382,256,206,32]}
+{"kind":"textbox","id":"sh/hcrmhk3q","slide":2,"text":"身份和职责把人放进秩序：主子可传令，仆从要随侍，晚辈要守礼。","textPreview":"身份和职责把人放进秩序：主子可传令，仆从要随侍，晚辈要守礼。","textChars":30,"textLines":1,"bbox":[382,296,206,174]}
+{"kind":"shape","id":"sh/orytsvu9","slide":2,"bbox":[648,238,250,246]}
+{"kind":"textbox","id":"sh/z61032ls","slide":2,"text":"敢做","textPreview":"敢做","textChars":2,"textLines":1,"bbox":[670,256,206,32]}
+{"kind":"textbox","id":"sh/al87ed8b","slide":2,"text":"关系、见证者、场景和性格决定一个动作是体面、亲近、逾矩，还是冒犯。","textPreview":"关系、见证者、场景和性格决定一个动作是体面、亲近、逾矩，还是冒犯。","textChars":33,"textLines":1,"bbox":[670,296,206,174]}
+{"kind":"shape","id":"sh/h0fepkzu","slide":2,"bbox":[936,238,250,246]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":2,"text":"做完之后","textPreview":"做完之后","textChars":4,"textLines":1,"bbox":[958,256,206,32]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":2,"text":"任务质量、关系轴、状态、秩序和气泡回流，形成下一次选择的处境。","textPreview":"任务质量、关系轴、状态、秩序和气泡回流，形成下一次选择的处境。","textChars":31,"textLines":1,"bbox":[958,296,206,174]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":2,"text":"这就是红楼味：不是更多动作，而是每个动作都有名分和后果。","textPreview":"这就是红楼味：不是更多动作，而是每个动作都有名分和后果。","textChars":28,"textLines":1,"bbox":[86,546,1040,50]}
+{"kind":"textbox","id":"sh/hwfyxobm","slide":2,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/obm58z25","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"notes","id":"nt/8i3alv","slide":2,"text":""}
+{"kind":"slide","id":"sl/wcm8c4","slide":3,"title":"THE TENSION","textShapes":22}
+{"kind":"textbox","id":"sh/6hcrmhk3","slide":3,"text":"THE TENSION","textPreview":"THE TENSION","textChars":11,"textLines":1,"bbox":[64,42,360,24]}
+{"kind":"textbox","id":"sh/d8v6psfi","slide":3,"text":"一座府本身就是戏剧机器","textPreview":"一座府本身就是戏剧机器","textChars":11,"textLines":1,"bbox":[64,74,900,76]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":3,"text":"玩家不是在照看孤立小人，而是在管理一张会变热、会结怨、会传话的关系网。","textPreview":"玩家不是在照看孤立小人，而是在管理一张会变热、会结怨、会传话的关系网。","textChars":35,"textLines":1,"bbox":[66,148,900,48]}
+{"kind":"shape","id":"sh/vahoza1g","slide":3,"bbox":[64,186,1152,0]}
+{"kind":"shape","id":"sh/6tovahoz","slide":3,"bbox":[96,238,300,96]}
+{"kind":"textbox","id":"sh/dg7adsji","slide":3,"text":"规矩限制","textPreview":"规矩限制","textChars":4,"textLines":1,"bbox":[118,256,150,24]}
+{"kind":"textbox","id":"sh/ovahoza1","slide":3,"text":"身份、场景、长幼、主仆边界给行为加压力","textPreview":"身份、场景、长幼、主仆边界给行为加压力","textChars":19,"textLines":1,"bbox":[118,288,242,34]}
+{"kind":"textbox","id":"sh/vmtwra5g","slide":3,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[414,269,36,30]}
+{"kind":"shape","id":"sh/61032lsz","slide":3,"bbox":[466,238,300,96]}
+{"kind":"textbox","id":"sh/wval87ed","slide":3,"text":"人情推动","textPreview":"人情推动","textChars":4,"textLines":1,"bbox":[488,256,150,24]}
+{"kind":"textbox","id":"sh/pg3ex0nu","slide":3,"text":"偏爱、怜惜、亏欠、思念让角色想靠近","textPreview":"偏爱、怜惜、亏欠、思念让角色想靠近","textChars":17,"textLines":1,"bbox":[488,288,242,34]}
+{"kind":"textbox","id":"sh/epkzupwb","slide":3,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[784,269,36,30]}
+{"kind":"shape","id":"sh/7adsji5s","slide":3,"bbox":[836,238,300,96]}
+{"kind":"textbox","id":"sh/w7mp0bi9","slide":3,"text":"行动发生","textPreview":"行动发生","textChars":4,"textLines":1,"bbox":[858,256,150,24]}
+{"kind":"textbox","id":"sh/psfil0rq","slide":3,"text":"传令、照拂、争执、请安、写诗、饮酒","textPreview":"传令、照拂、争执、请安、写诗、饮酒","textChars":17,"textLines":1,"bbox":[858,288,242,34]}
+{"kind":"textbox","id":"sh/e1w7mp0b","slide":3,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[1154,269,36,30]}
+{"kind":"shape","id":"sh/7mp0bi9s","slide":3,"bbox":[96,388,300,96]}
+{"kind":"textbox","id":"sh/wfyxobm5","slide":3,"text":"旁人反应","textPreview":"旁人反应","textChars":4,"textLines":1,"bbox":[118,406,150,24]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":3,"text":"被看见、被误会、被护短、被告状","textPreview":"被看见、被误会、被护短、被告状","textChars":15,"textLines":1,"bbox":[118,438,242,34]}
+{"kind":"textbox","id":"sh/pwb2hwfy","slide":3,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[414,419,36,30]}
+{"kind":"shape","id":"sh/0bi9s36h","slide":3,"bbox":[466,388,300,96]}
+{"kind":"textbox","id":"sh/7qpg3ex0","slide":3,"text":"关系改写","textPreview":"关系改写","textChars":4,"textLines":1,"bbox":[488,406,150,24]}
+{"kind":"textbox","id":"sh/i5sneloj","slide":3,"text":"信任、友谊、姻缘、服从/体恤重新分布","textPreview":"信任、友谊、姻缘、服从/体恤重新分布","textChars":18,"textLines":1,"bbox":[488,438,242,34]}
+{"kind":"textbox","id":"sh/p4r65wju","slide":3,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[784,419,36,30]}
+{"kind":"shape","id":"sh/wjudg7ad","slide":3,"bbox":[836,388,300,96]}
+{"kind":"textbox","id":"sh/7y1kre1w","slide":3,"text":"新处境","textPreview":"新处境","textChars":3,"textLines":1,"bbox":[858,406,150,24]}
+{"kind":"textbox","id":"sh/ed8v6psf","slide":3,"text":"下一次更敢、更怕、更怨，或更亲近","textPreview":"下一次更敢、更怕、更怨，或更亲近","textChars":16,"textLines":1,"bbox":[858,438,242,34]}
+{"kind":"textbox","id":"sh/p8nqxs72","slide":3,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/0nuxc3yl","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"notes","id":"nt/wcm8c4","slide":3,"text":""}
+{"kind":"slide","id":"sl/2q78pu","slide":4,"title":"PLAYABLE SCENE","textShapes":12}
+{"kind":"textbox","id":"sh/58z25kb6","slide":4,"text":"PLAYABLE SCENE","textPreview":"PLAYABLE SCENE","textChars":14,"textLines":1,"bbox":[64,42,360,24]}
+{"kind":"textbox","id":"sh/yhgn29gr","slide":4,"text":"第一局就用“黛玉入府”把系统推到玩家面前","textPreview":"第一局就用“黛玉入府”把系统推到玩家面前","textChars":20,"textLines":1,"bbox":[64,74,900,76]}
+{"kind":"textbox","id":"sh/n29gr2p8","slide":4,"text":"这不是教程剧情，而是一个高密度局面：每个人都知道自己该站在哪里，却不一定知道该怎么相处。","textPreview":"这不是教程剧情，而是一个高密度局面：每个人都知道自己该站在哪里，却不一定知道该怎么相处。","textChars":44,"textLines":1,"bbox":[66,148,900,48]}
+{"kind":"shape","id":"sh/gbq1oryt","slide":4,"bbox":[64,186,1152,0]}
+{"kind":"shape","id":"sh/y90je9cv","slide":4,"bbox":[354,226,250,220]}
+{"kind":"textbox","id":"sh/nuxc3ylc","slide":4,"text":"谁先见她","textPreview":"谁先见她","textChars":4,"textLines":1,"bbox":[376,244,206,32]}
+{"kind":"textbox","id":"sh/cbulwval","slide":4,"text":"贾母疼惜，王夫人审视，凤姐周全，宝玉好奇。顺序、称呼、场合都会产生礼法解释。","textPreview":"贾母疼惜，王夫人审视，凤姐周全，宝玉好奇。顺序、称呼、场合都会产生礼法解释。","textChars":38,"textLines":1,"bbox":[376,284,206,148]}
+{"kind":"shape","id":"sh/5sneloj2","slide":4,"bbox":[640,226,250,220]}
+{"kind":"textbox","id":"sh/tcj6tova","slide":4,"text":"谁来安置","textPreview":"谁来安置","textChars":4,"textLines":1,"bbox":[662,244,206,32]}
+{"kind":"textbox","id":"sh/0rqd4vmt","slide":4,"text":"传令把“安排住处、通报、取物、随侍”变成任务。谁下令、谁执行、做得好不好都会留下记录。","textPreview":"传令把“安排住处、通报、取物、随侍”变成任务。谁下令、谁执行、做得好不好都会留下记录。","textChars":43,"textLines":1,"bbox":[662,284,206,148]}
+{"kind":"shape","id":"sh/b6xkf6dc","slide":4,"bbox":[926,226,250,220]}
+{"kind":"textbox","id":"sh/il0rqd4v","slide":4,"text":"谁照顾她","textPreview":"谁照顾她","textChars":4,"textLines":1,"bbox":[948,244,206,32]}
+{"kind":"textbox","id":"sh/t47y1kre","slide":4,"text":"紫鹃的贴身照拂需要服从与体恤支撑；合礼照顾和逾矩亲近要被系统分开。","textPreview":"紫鹃的贴身照拂需要服从与体恤支撑；合礼照顾和逾矩亲近要被系统分开。","textChars":33,"textLines":1,"bbox":[948,284,206,148]}
+{"kind":"textbox","id":"sh/0je9cvix","slide":4,"text":"玩家一开始就能理解：我不是在摆家具，我在安排一个新来的女孩如何被这座府接住。","textPreview":"玩家一开始就能理解：我不是在摆家具，我在安排一个新来的女孩如何被这座府接住。","textChars":38,"textLines":1,"bbox":[354,504,760,56]}
+{"kind":"textbox","id":"sh/byhgn29g","slide":4,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/idonyd0z","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"image","id":"im/wra5gbq1","slide":4,"name":"","geometry":"roundRect","alt":"林黛玉立绘","bbox":[80,210,220,380]}
+{"kind":"notes","id":"nt/2q78pu","slide":4,"text":""}
+{"kind":"slide","id":"sl/5e4hdr","slide":5,"title":"PLAYER VERBS","textShapes":17}
+{"kind":"textbox","id":"sh/ytsvu9kn","slide":5,"text":"PLAYER VERBS","textPreview":"PLAYER VERBS","textChars":12,"textLines":1,"bbox":[64,42,360,24]}
+{"kind":"textbox","id":"sh/5kb6xkf6","slide":5,"text":"玩家的操作应该像管一座府，而不是点一排按钮","textPreview":"玩家的操作应该像管一座府，而不是点一排按钮","textChars":21,"textLines":1,"bbox":[64,74,900,76]}
+{"kind":"textbox","id":"sh/czed8v6p","slide":5,"text":"每个操作都要能回到“人情、名分、后果”。","textPreview":"每个操作都要能回到“人情、名分、后果”。","textChars":20,"textLines":1,"bbox":[66,148,900,48]}
+{"kind":"shape","id":"sh/nqxs72x4","slide":5,"bbox":[64,186,1152,0]}
+{"kind":"shape","id":"sh/u54zidon","slide":5,"bbox":[76,226,326,106]}
+{"kind":"textbox","id":"sh/5sneloj2","slide":5,"text":"安排","textPreview":"安排","textChars":2,"textLines":1,"bbox":[100,244,90,32]}
+{"kind":"textbox","id":"sh/cbulwval","slide":5,"text":"给人物排起居、分配住处和日常职责。","textPreview":"给人物排起居、分配住处和日常职责。","textChars":17,"textLines":1,"bbox":[194,248,176,56]}
+{"kind":"shape","id":"sh/nuxc3ylc","slide":5,"bbox":[458,226,326,106]}
+{"kind":"textbox","id":"sh/y90je9cv","slide":5,"text":"传令","textPreview":"传令","textChars":2,"textLines":1,"bbox":[482,244,90,32]}
+{"kind":"textbox","id":"sh/oza1gvy9","slide":5,"text":"让合适的人去做合适的事，并承担做砸后的管理责任。","textPreview":"让合适的人去做合适的事，并承担做砸后的管理责任。","textChars":24,"textLines":1,"bbox":[576,248,176,56]}
+{"kind":"shape","id":"sh/hk3q5o7q","slide":5,"bbox":[840,226,326,106]}
+{"kind":"textbox","id":"sh/6xkf6dcb","slide":5,"text":"照拂","textPreview":"照拂","textChars":2,"textLines":1,"bbox":[864,244,90,32]}
+{"kind":"textbox","id":"sh/zed8v6ps","slide":5,"text":"照顾需求和心绪，也处理越界、亏欠和偏爱。","textPreview":"照顾需求和心绪，也处理越界、亏欠和偏爱。","textChars":20,"textLines":1,"bbox":[958,248,176,56]}
+{"kind":"shape","id":"sh/obm58z25","slide":5,"bbox":[76,376,326,106]}
+{"kind":"textbox","id":"sh/hwfyxobm","slide":5,"text":"劝止","textPreview":"劝止","textChars":2,"textLines":1,"bbox":[100,394,90,32]}
+{"kind":"textbox","id":"sh/65wjudg7","slide":5,"text":"拦住不合时宜的靠近、争执、醉酒和冒犯。","textPreview":"拦住不合时宜的靠近、争执、醉酒和冒犯。","textChars":19,"textLines":1,"bbox":[194,398,176,56]}
+{"kind":"shape","id":"sh/zqtcj6to","slide":5,"bbox":[458,376,326,106]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":5,"text":"赏罚","textPreview":"赏罚","textChars":2,"textLines":1,"bbox":[482,394,90,32]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":5,"text":"宽恕、训斥、扣月银、补做，改变服从和体恤。","textPreview":"宽恕、训斥、扣月银、补做，改变服从和体恤。","textChars":21,"textLines":1,"bbox":[576,398,176,56]}
+{"kind":"shape","id":"sh/54zidony","slide":5,"bbox":[840,376,326,106]}
+{"kind":"textbox","id":"sh/cj6tovah","slide":5,"text":"复盘","textPreview":"复盘","textChars":2,"textLines":1,"bbox":[864,394,90,32]}
+{"kind":"textbox","id":"sh/nyd0z610","slide":5,"text":"看日志、关系变化、技能成长和秩序后果。","textPreview":"看日志、关系变化、技能成长和秩序后果。","textChars":19,"textLines":1,"bbox":[958,398,176,56]}
+{"kind":"textbox","id":"sh/udg7adsj","slide":5,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"notes","id":"nt/5e4hdr","slide":5,"text":""}
+{"kind":"slide","id":"sl/zjv0v4","slide":6,"title":"CHARACTER MODEL","textShapes":13}
+{"kind":"textbox","id":"sh/y1kre1w7","slide":6,"text":"CHARACTER MODEL","textPreview":"CHARACTER MODEL","textChars":15,"textLines":1,"bbox":[64,42,360,24]}
+{"kind":"textbox","id":"sh/9s36hcrm","slide":6,"text":"人物不是属性面板，而是“处境中的人”","textPreview":"人物不是属性面板，而是“处境中的人”","textChars":18,"textLines":1,"bbox":[64,74,900,76]}
+{"kind":"textbox","id":"sh/g7adsji5","slide":6,"text":"同一个行为，在黛玉、紫鹃、宝玉身上应该有不同意味。","textPreview":"同一个行为，在黛玉、紫鹃、宝玉身上应该有不同意味。","textChars":25,"textLines":1,"bbox":[66,148,900,48]}
+{"kind":"shape","id":"sh/rytsvu9k","slide":6,"bbox":[64,186,1152,0]}
+{"kind":"shape","id":"sh/r65wjudg","slide":6,"bbox":[80,476,190,112]}
+{"kind":"textbox","id":"sh/ylc7u54z","slide":6,"text":"黛玉","textPreview":"黛玉","textChars":2,"textLines":1,"bbox":[102,494,146,32]}
+{"kind":"textbox","id":"sh/g7adsji5","slide":6,"text":"寄居、自尊、敏感、才情高。玩家要照顾的不只是需求，而是“怕亏欠、怕被轻看”的处境。","textPreview":"寄居、自尊、敏感、才情高。玩家要照顾的不只是需求，而是“怕亏欠、怕被轻看”的处境。","textChars":41,"textLines":1,"bbox":[102,534,146,40]}
+{"kind":"shape","id":"sh/9s36hcrm","slide":6,"bbox":[302,476,190,112]}
+{"kind":"textbox","id":"sh/y1kre1w7","slide":6,"text":"紫鹃","textPreview":"紫鹃","textChars":2,"textLines":1,"bbox":[324,494,146,32]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":6,"text":"贴身侍女，忠心和分寸并存。她的好玩点是照拂尺度、职责质量和长期主仆关系。","textPreview":"贴身侍女，忠心和分寸并存。她的好玩点是照拂尺度、职责质量和长期主仆关系。","textChars":36,"textLines":1,"bbox":[324,534,146,40]}
+{"kind":"shape","id":"sh/gfmlkjm1","slide":6,"bbox":[524,476,190,112]}
+{"kind":"textbox","id":"sh/90je9cvi","slide":6,"text":"宝玉","textPreview":"宝玉","textChars":2,"textLines":1,"bbox":[546,494,146,32]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":6,"text":"身份给他通行证，性情让他越界。玩家会看到亲近、任性和礼法压力互相拉扯。","textPreview":"身份给他通行证，性情让他越界。玩家会看到亲近、任性和礼法压力互相拉扯。","textChars":35,"textLines":1,"bbox":[546,534,146,40]}
+{"kind":"shape","id":"sh/rytsvu9k","slide":6,"bbox":[780,236,370,268]}
+{"kind":"textbox","id":"sh/gr2p8nqx","slide":6,"text":"人物公式","textPreview":"人物公式","textChars":4,"textLines":1,"bbox":[814,266,160,32]}
+{"kind":"textbox","id":"sh/9cvixcze","slide":6,"text":"基础需求\n+ 性情/习惯/处世\n+ 身份与名分\n+ 当前关系\n+ 状态与记忆\n= 当下会做什么、为什么这么做","textPreview":"基础需求 | + 性情/习惯/处世 | + 身份与名分 | + 当前关系 | + 状态与记忆 | = 当下会做什么、为什么这么做","textChars":54,"textLines":6,"bbox":[814,310,286,150]}
+{"kind":"textbox","id":"sh/tovahoza","slide":6,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/032lszqt","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"image","id":"im/neloj2t8","slide":6,"name":"","geometry":"roundRect","alt":"黛玉头像","bbox":[80,230,190,230]}
+{"kind":"image","id":"im/czed8v6p","slide":6,"name":"","geometry":"roundRect","alt":"紫鹃头像","bbox":[302,230,190,230]}
+{"kind":"image","id":"im/5kb6xkf6","slide":6,"name":"","geometry":"roundRect","alt":"宝玉头像","bbox":[524,230,190,230]}
+{"kind":"notes","id":"nt/zjv0v4","slide":6,"text":""}
+{"kind":"slide","id":"sl/axflgz","slide":7,"title":"RELATION MODEL","textShapes":18}
+{"kind":"textbox","id":"sh/oj2t83it","slide":7,"text":"RELATION MODEL","textPreview":"RELATION MODEL","textChars":14,"textLines":1,"bbox":[64,42,360,24]}
+{"kind":"textbox","id":"sh/vy90je9c","slide":7,"text":"关系不是好感条，而是四种不同的社会力","textPreview":"关系不是好感条，而是四种不同的社会力","textChars":18,"textLines":1,"bbox":[64,74,900,76]}
+{"kind":"textbox","id":"sh/6dcbulwv","slide":7,"text":"数值的意义来自身份语境：同样的亲近，在朋友、主仆、亲缘里不是一回事。","textPreview":"数值的意义来自身份语境：同样的亲近，在朋友、主仆、亲缘里不是一回事。","textChars":34,"textLines":1,"bbox":[66,148,900,48]}
+{"kind":"shape","id":"sh/dsji5sne","slide":7,"bbox":[64,186,1152,0]}
+{"kind":"shape","id":"sh/o7qpg3ex","slide":7,"bbox":[82,238,482,104]}
+{"kind":"textbox","id":"sh/vmtwra5g","slide":7,"text":"友谊","textPreview":"友谊","textChars":2,"textLines":1,"bbox":[106,256,170,30]}
+{"kind":"textbox","id":"sh/61032lsz","slide":7,"text":"共同经历、陪伴和熟悉感","textPreview":"共同经历、陪伴和熟悉感","textChars":11,"textLines":1,"bbox":[282,258,230,24]}
+{"kind":"textbox","id":"sh/dg7adsji","slide":7,"text":"谁愿意靠近谁","textPreview":"谁愿意靠近谁","textChars":6,"textLines":1,"bbox":[282,292,230,24]}
+{"kind":"shape","id":"sh/ovahoza1","slide":7,"bbox":[630,238,482,104]}
+{"kind":"textbox","id":"sh/mtwra5gb","slide":7,"text":"姻缘 / 好感","textPreview":"姻缘 / 好感","textChars":7,"textLines":1,"bbox":[654,256,170,30]}
+{"kind":"textbox","id":"sh/fepkzupw","slide":7,"text":"偏爱、吸引、厌恶和情分","textPreview":"偏爱、吸引、厌恶和情分","textChars":11,"textLines":1,"bbox":[830,258,230,24]}
+{"kind":"textbox","id":"sh/4zidonyd","slide":7,"text":"谁会被谁牵动","textPreview":"谁会被谁牵动","textChars":6,"textLines":1,"bbox":[830,292,230,24]}
+{"kind":"shape","id":"sh/xkf6dcbu","slide":7,"bbox":[82,388,482,104]}
+{"kind":"textbox","id":"sh/mlkjm1cf","slide":7,"text":"信任","textPreview":"信任","textChars":2,"textLines":1,"bbox":[106,406,170,30]}
+{"kind":"textbox","id":"sh/f6dcbulw","slide":7,"text":"可靠、嘴严、公平、能否托付","textPreview":"可靠、嘴严、公平、能否托付","textChars":13,"textLines":1,"bbox":[282,408,230,24]}
+{"kind":"textbox","id":"sh/4r65wjud","slide":7,"text":"谁敢把事情交给谁","textPreview":"谁敢把事情交给谁","textChars":8,"textLines":1,"bbox":[282,442,230,24]}
+{"kind":"shape","id":"sh/xc3ylc7u","slide":7,"bbox":[630,388,482,104]}
+{"kind":"textbox","id":"sh/m94fu18j","slide":7,"text":"第四轴","textPreview":"第四轴","textChars":3,"textLines":1,"bbox":[654,406,170,30]}
+{"kind":"textbox","id":"sh/fu18jqh0","slide":7,"text":"服从/体恤，孝道/慈爱","textPreview":"服从/体恤，孝道/慈爱","textChars":11,"textLines":1,"bbox":[830,408,230,24]}
+{"kind":"textbox","id":"sh/7qpg3ex0","slide":7,"text":"谁有资格照拂、传令、宽恕或责罚","textPreview":"谁有资格照拂、传令、宽恕或责罚","textChars":15,"textLines":1,"bbox":[830,442,230,24]}
+{"kind":"textbox","id":"sh/i5sneloj","slide":7,"text":"所以“紫鹃拍背安慰黛玉”可以是合礼照拂；“亲手背”仍可能逾矩。差别不在按钮名，而在名分、接触和第四轴。","textPreview":"所以“紫鹃拍背安慰黛玉”可以是合礼照拂；“亲手背”仍可能逾矩。差别不在按钮名，而在名分、接触和第四轴。","textChars":51,"textLines":1,"bbox":[96,558,1020,52]}
+{"kind":"textbox","id":"sh/pwb2hwfy","slide":7,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/0bi9s36h","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"notes","id":"nt/axflgz","slide":7,"text":""}
+{"kind":"slide","id":"sl/jzkmj4","slide":8,"title":"COMMAND AND ORDER","textShapes":12}
+{"kind":"textbox","id":"sh/wfyxobm5","slide":8,"text":"COMMAND AND ORDER","textPreview":"COMMAND AND ORDER","textChars":17,"textLines":1,"bbox":[64,42,360,24]}
+{"kind":"textbox","id":"sh/7u54zido","slide":8,"text":"传令把关系网变成可玩的管理系统","textPreview":"传令把关系网变成可玩的管理系统","textChars":15,"textLines":1,"bbox":[64,74,900,76]}
+{"kind":"textbox","id":"sh/ed8bat47","slide":8,"text":"玩家不是单纯命令 NPC，而是在承担“谁有资格让谁做什么”的后果。","textPreview":"玩家不是单纯命令 NPC，而是在承担“谁有资格让谁做什么”的后果。","textChars":33,"textLines":1,"bbox":[66,148,900,48]}
+{"kind":"shape","id":"sh/lc7u54zi","slide":8,"bbox":[64,186,1152,0]}
+{"kind":"shape","id":"sh/wra5gbq1","slide":8,"bbox":[90,246,300,182]}
+{"kind":"textbox","id":"sh/36hcrmhk","slide":8,"text":"下令前","textPreview":"下令前","textChars":3,"textLines":1,"bbox":[112,264,256,32]}
+{"kind":"textbox","id":"sh/eloj2t83","slide":8,"text":"系统判断身份、直属关系、职责内外、场景权限、服从、信任和目标负担。","textPreview":"系统判断身份、直属关系、职责内外、场景权限、服从、信任和目标负担。","textChars":33,"textLines":1,"bbox":[112,304,256,110]}
+{"kind":"shape","id":"sh/pg3ex0nu","slide":8,"bbox":[490,246,300,182]}
+{"kind":"textbox","id":"sh/wval87ed","slide":8,"text":"执行中","textPreview":"执行中","textChars":3,"textLines":1,"bbox":[512,264,256,32]}
+{"kind":"textbox","id":"sh/6hcrmhk3","slide":8,"text":"任务进入队列，AI 去找目标、用家具、跟随、停留或互动推进进度。","textPreview":"任务进入队列，AI 去找目标、用家具、跟随、停留或互动推进进度。","textChars":32,"textLines":1,"bbox":[512,304,256,110]}
+{"kind":"shape","id":"sh/z25kb6xk","slide":8,"bbox":[890,246,300,182]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":8,"text":"失败后","textPreview":"失败后","textChars":3,"textLines":1,"bbox":[912,264,256,32]}
+{"kind":"textbox","id":"sh/d8v6psfi","slide":8,"text":"质量失败只轻罚；训斥、宽恕、扣月银、补做等重后果交给玩家处置。","textPreview":"质量失败只轻罚；训斥、宽恕、扣月银、补做等重后果交给玩家处置。","textChars":31,"textLines":1,"bbox":[912,304,256,110]}
+{"kind":"shape","id":"sh/6tovahoz","slide":8,"bbox":[405,336,58,0]}
+{"kind":"shape","id":"sh/vahoza1g","slide":8,"bbox":[805,336,58,0]}
+{"kind":"textbox","id":"sh/ovahoza1","slide":8,"text":"好玩的不是“任务列表”，而是：你怎么对待一个没办好差事的人，会改变她以后怎么服你、怨你、亲你。","textPreview":"好玩的不是“任务列表”，而是：你怎么对待一个没办好差事的人，会改变她以后怎么服你、怨你、亲你。","textChars":47,"textLines":1,"bbox":[120,518,1010,60]}
+{"kind":"textbox","id":"sh/dg7adsji","slide":8,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/61032lsz","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"notes","id":"nt/jzkmj4","slide":8,"text":""}
+{"kind":"slide","id":"sl/0i7scd","slide":9,"title":"DRAMA EXAMPLES","textShapes":17}
+{"kind":"textbox","id":"sh/gvy90je9","slide":9,"text":"DRAMA EXAMPLES","textPreview":"DRAMA EXAMPLES","textChars":14,"textLines":1,"bbox":[64,42,360,24]}
+{"kind":"textbox","id":"sh/ra5gbq1o","slide":9,"text":"同一套系统应该自然长出小戏","textPreview":"同一套系统应该自然长出小戏","textChars":13,"textLines":1,"bbox":[64,74,900,76]}
+{"kind":"textbox","id":"sh/2p8nqxs7","slide":9,"text":"不是写死剧情，而是给角色、场景、身份和后果足够多的碰撞面。","textPreview":"不是写死剧情，而是给角色、场景、身份和后果足够多的碰撞面。","textChars":29,"textLines":1,"bbox":[66,148,900,48]}
+{"kind":"shape","id":"sh/94fu18jq","slide":9,"bbox":[64,186,1152,0]}
+{"kind":"shape","id":"sh/kjm1cfa9","slide":9,"bbox":[76,228,350,150]}
+{"kind":"textbox","id":"sh/r2p8nqxs","slide":9,"text":"贴身照拂","textPreview":"贴身照拂","textChars":4,"textLines":1,"bbox":[98,246,306,32]}
+{"kind":"textbox","id":"sh/2hwfyxob","slide":9,"text":"紫鹃见黛玉心绪低，主动安慰或拍背。服从与体恤足够高时，这不是暧昧，而是合礼侍奉。","textPreview":"紫鹃见黛玉心绪低，主动安慰或拍背。服从与体恤足够高时，这不是暧昧，而是合礼侍奉。","textChars":40,"textLines":1,"bbox":[98,286,306,78]}
+{"kind":"shape","id":"sh/9w3m94fu","slide":9,"bbox":[466,228,350,150]}
+{"kind":"textbox","id":"sh/kb6xkf6d","slide":9,"text":"越界靠近","textPreview":"越界靠近","textChars":4,"textLines":1,"bbox":[488,246,306,32]}
+{"kind":"textbox","id":"sh/2p8nqxs7","slide":9,"text":"宝玉想亲近黛玉，但场景公开、见证者多、身份边界强。玩家可以放任、劝止或制造更合适的场合。","textPreview":"宝玉想亲近黛玉，但场景公开、见证者多、身份边界强。玩家可以放任、劝止或制造更合适的场合。","textChars":44,"textLines":1,"bbox":[488,286,306,78]}
+{"kind":"shape","id":"sh/ra5gbq1o","slide":9,"bbox":[856,228,350,150]}
+{"kind":"textbox","id":"sh/gvy90je9","slide":9,"text":"差事办砸","textPreview":"差事办砸","textChars":4,"textLines":1,"bbox":[878,246,306,32]}
+{"kind":"textbox","id":"sh/9gr2p8nq","slide":9,"text":"丫鬟传话失败。玩家宽恕会涨体恤，训斥会涨法度，扣罚会带来积怨。","textPreview":"丫鬟传话失败。玩家宽恕会涨体恤，训斥会涨法度，扣罚会带来积怨。","textChars":31,"textLines":1,"bbox":[878,286,306,78]}
+{"kind":"shape","id":"sh/2hwfyxob","slide":9,"bbox":[76,418,350,150]}
+{"kind":"textbox","id":"sh/r2p8nqxs","slide":9,"text":"醉酒失态","textPreview":"醉酒失态","textChars":4,"textLines":1,"bbox":[98,436,306,32]}
+{"kind":"textbox","id":"sh/kjm1cfa9","slide":9,"text":"饮酒不是一喝就醉，而是酒量、性格、场景、心绪共同决定小酌、失意独酌还是酩酊失仪。","textPreview":"饮酒不是一喝就醉，而是酒量、性格、场景、心绪共同决定小酌、失意独酌还是酩酊失仪。","textChars":40,"textLines":1,"bbox":[98,476,306,78]}
+{"kind":"shape","id":"sh/94fu18jq","slide":9,"bbox":[466,418,350,150]}
+{"kind":"textbox","id":"sh/25kb6xkf","slide":9,"text":"诗社分寸","textPreview":"诗社分寸","textChars":4,"textLines":1,"bbox":[488,436,306,32]}
+{"kind":"textbox","id":"sh/rqd4vmtw","slide":9,"text":"写诗不是技能按钮，而会牵动才名、嫉妒、知己、旁观评价和自尊。","textPreview":"写诗不是技能按钮，而会牵动才名、嫉妒、知己、旁观评价和自尊。","textChars":30,"textLines":1,"bbox":[488,476,306,78]}
+{"kind":"shape","id":"sh/jm1cfa9w","slide":9,"bbox":[856,418,350,150]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":9,"text":"秩序反噬","textPreview":"秩序反噬","textChars":4,"textLines":1,"bbox":[878,436,306,32]}
+{"kind":"textbox","id":"sh/1orytsvu","slide":9,"text":"管事分配不公、跨院传令、频繁责罚，会让法度、人心、体面、腐败开始失衡。","textPreview":"管事分配不公、跨院传令、频繁责罚，会让法度、人心、体面、腐败开始失衡。","textChars":35,"textLines":1,"bbox":[878,476,306,78]}
+{"kind":"textbox","id":"sh/c7u54zid","slide":9,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/judg7ads","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"notes","id":"nt/0i7scd","slide":9,"text":""}
+{"kind":"slide","id":"sl/79s2q9","slide":10,"title":"AI DIRECTION","textShapes":12}
+{"kind":"textbox","id":"sh/vmtwra5g","slide":10,"text":"AI DIRECTION","textPreview":"AI DIRECTION","textChars":12,"textLines":1,"bbox":[64,42,360,24]}
+{"kind":"textbox","id":"sh/o7qpg3ex","slide":10,"text":"AI 的目标不是聪明到看不懂，而是每一步都能解释","textPreview":"AI 的目标不是聪明到看不懂，而是每一步都能解释","textChars":24,"textLines":1,"bbox":[64,74,900,76]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":10,"text":"最终可以接 LLM，但输入输出必须和规则系统一致，玩家要能知道它为什么这么做。","textPreview":"最终可以接 LLM，但输入输出必须和规则系统一致，玩家要能知道它为什么这么做。","textChars":39,"textLines":1,"bbox":[66,148,900,48]}
+{"kind":"shape","id":"sh/6dcbulwv","slide":10,"bbox":[64,186,1152,0]}
+{"kind":"shape","id":"sh/vy90je9c","slide":10,"bbox":[96,244,1088,210]}
+{"kind":"textbox","id":"sh/oj2t83it","slide":10,"text":"统一输入","textPreview":"统一输入","textChars":4,"textLines":1,"bbox":[132,272,160,28]}
+{"kind":"textbox","id":"sh/d4vmtwra","slide":10,"text":"人物状态、需求、性格、关系四轴、身份礼法、场景、任务、记忆、见证者","textPreview":"人物状态、需求、性格、关系四轴、身份礼法、场景、任务、记忆、见证者","textChars":33,"textLines":1,"bbox":[300,274,780,28]}
+{"kind":"shape","id":"sh/6hcrmhk3","slide":10,"bbox":[132,326,980,0]}
+{"kind":"textbox","id":"sh/z25kb6xk","slide":10,"text":"统一处理","textPreview":"统一处理","textChars":4,"textLines":1,"bbox":[132,354,160,28]}
+{"kind":"textbox","id":"sh/vy90je9c","slide":10,"text":"今天用 Utility AI 和规则公式，未来可换成本地 LLM / Generative Agent","textPreview":"今天用 Utility AI 和规则公式，未来可换成本地 LLM / Generative Agent","textChars":51,"textLines":1,"bbox":[300,356,780,28]}
+{"kind":"shape","id":"sh/6dcbulwv","slide":10,"bbox":[132,408,980,0]}
+{"kind":"textbox","id":"sh/d4vmtwra","slide":10,"text":"统一输出","textPreview":"统一输出","textChars":4,"textLines":1,"bbox":[132,430,160,28]}
+{"kind":"textbox","id":"sh/oj2t83it","slide":10,"text":"候选动作、意愿强度、风险解释、失败预期、气泡文案、埋点日志","textPreview":"候选动作、意愿强度、风险解释、失败预期、气泡文案、埋点日志","textChars":29,"textLines":1,"bbox":[300,432,780,28]}
+{"kind":"textbox","id":"sh/vmtwra5g","slide":10,"text":"玩家看到的是角色的分寸，不是后台算法的随机。","textPreview":"玩家看到的是角色的分寸，不是后台算法的随机。","textChars":22,"textLines":1,"bbox":[118,530,980,42]}
+{"kind":"textbox","id":"sh/61032lsz","slide":10,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"notes","id":"nt/79s2q9","slide":10,"text":""}
+{"kind":"slide","id":"sl/5s9e3k","slide":11,"title":"IMPLEMENTATION PROOF","textShapes":18}
+{"kind":"textbox","id":"sh/qpg3ex0n","slide":11,"text":"IMPLEMENTATION PROOF","textPreview":"IMPLEMENTATION PROOF","textChars":20,"textLines":1,"bbox":[64,42,360,24]}
+{"kind":"textbox","id":"sh/xczed8v6","slide":11,"text":"当前 Demo 已经有能支撑这套体验的骨架","textPreview":"当前 Demo 已经有能支撑这套体验的骨架","textChars":21,"textLines":1,"bbox":[64,74,900,76]}
+{"kind":"textbox","id":"sh/8v6psfil","slide":11,"text":"这页只讲证据，不把工程清单当卖点。","textPreview":"这页只讲证据，不把工程清单当卖点。","textChars":17,"textLines":1,"bbox":[66,148,900,48]}
+{"kind":"shape","id":"sh/fyxobm58","slide":11,"bbox":[64,186,1152,0]}
+{"kind":"shape","id":"sh/qd4vmtwr","slide":11,"bbox":[82,236,320,106]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":11,"text":"人物与需求","textPreview":"人物与需求","textChars":5,"textLines":1,"bbox":[104,254,276,32]}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":11,"text":"六需求、状态、性格、专属性格、健康、声望、技能。","textPreview":"六需求、状态、性格、专属性格、健康、声望、技能。","textChars":24,"textLines":1,"bbox":[104,294,276,34]}
+{"kind":"shape","id":"sh/fmlkjm1c","slide":11,"bbox":[454,236,320,106]}
+{"kind":"textbox","id":"sh/q1orytsv","slide":11,"text":"关系与礼法","textPreview":"关系与礼法","textChars":5,"textLines":1,"bbox":[476,254,276,32]}
+{"kind":"textbox","id":"sh/4nap4r65","slide":11,"text":"四轴关系、第四轴语义、互动意愿、逾矩风险、合礼标签。","textPreview":"四轴关系、第四轴语义、互动意愿、逾矩风险、合礼标签。","textChars":26,"textLines":1,"bbox":[476,294,276,34]}
+{"kind":"shape","id":"sh/t83itgfm","slide":11,"bbox":[826,236,320,106]}
+{"kind":"textbox","id":"sh/mhk3q5o7","slide":11,"text":"传令与任务","textPreview":"传令与任务","textChars":5,"textLines":1,"bbox":[848,254,276,32]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":11,"text":"点名/群体传令、当值入口、质量、失败处置、经济提示。","textPreview":"点名/群体传令、当值入口、质量、失败处置、经济提示。","textChars":26,"textLines":1,"bbox":[848,294,276,34]}
+{"kind":"shape","id":"sh/4byhgn29","slide":11,"bbox":[82,382,320,106]}
+{"kind":"textbox","id":"sh/twra5gbq","slide":11,"text":"起居与家具","textPreview":"起居与家具","textChars":5,"textLines":1,"bbox":[104,400,276,32]}
+{"kind":"textbox","id":"sh/m58z25kb","slide":11,"text":"48刻起居、家具多动作、AI候选、技能和状态结算。","textPreview":"48刻起居、家具多动作、AI候选、技能和状态结算。","textChars":25,"textLines":1,"bbox":[104,440,276,34]}
+{"kind":"shape","id":"sh/bq1oryts","slide":11,"bbox":[454,382,320,106]}
+{"kind":"textbox","id":"sh/47y1kre1","slide":11,"text":"秩序册","textPreview":"秩序册","textChars":3,"textLines":1,"bbox":[476,400,276,32]}
+{"kind":"textbox","id":"sh/tsvu9kni","slide":11,"text":"身份谱、血缘谱、事务归口、管事评估、顶部入口。","textPreview":"身份谱、血缘谱、事务归口、管事评估、顶部入口。","textChars":23,"textLines":1,"bbox":[476,440,276,34]}
+{"kind":"shape","id":"sh/xkf6dcbu","slide":11,"bbox":[826,382,320,106]}
+{"kind":"textbox","id":"sh/4zidonyd","slide":11,"text":"埋点与模拟","textPreview":"埋点与模拟","textChars":5,"textLines":1,"bbox":[848,400,276,32]}
+{"kind":"textbox","id":"sh/fepkzupw","slide":11,"text":"行动、AI、任务、关系、技能、秩序均可跑日志复盘。","textPreview":"行动、AI、任务、关系、技能、秩序均可跑日志复盘。","textChars":25,"textLines":1,"bbox":[848,440,276,34]}
+{"kind":"textbox","id":"sh/mtwra5gb","slide":11,"text":"下一步不是继续堆系统名，而是把这些骨架压进一个 15-30 分钟的高密度可玩局。","textPreview":"下一步不是继续堆系统名，而是把这些骨架压进一个 15-30 分钟的高密度可玩局。","textChars":40,"textLines":1,"bbox":[92,558,1000,42]}
+{"kind":"textbox","id":"sh/xc3ylc7u","slide":11,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/4r65wjud","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"notes","id":"nt/5s9e3k","slide":11,"text":""}
+{"kind":"slide","id":"sl/iwvxi8","slide":12,"title":"BUSINESS MOAT","textShapes":12}
+{"kind":"textbox","id":"sh/j2t83itg","slide":12,"text":"BUSINESS MOAT","textPreview":"BUSINESS MOAT","textChars":13,"textLines":1,"bbox":[64,42,360,24]}
+{"kind":"textbox","id":"sh/8nqxs72x","slide":12,"text":"我们不靠画面和家具数量正面硬拼","textPreview":"我们不靠画面和家具数量正面硬拼","textChars":15,"textLines":1,"bbox":[64,74,900,76]}
+{"kind":"textbox","id":"sh/18jqh0fe","slide":12,"text":"护城河来自一套可迁移的古代共同体模拟框架。","textPreview":"护城河来自一套可迁移的古代共同体模拟框架。","textChars":21,"textLines":1,"bbox":[66,148,900,48]}
+{"kind":"shape","id":"sh/q5o7qpg3","slide":12,"bbox":[64,186,1152,0]}
+{"kind":"shape","id":"sh/jqh0fepk","slide":12,"bbox":[90,244,300,190]}
+{"kind":"textbox","id":"sh/8bat47y1","slide":12,"text":"竞品强项","textPreview":"竞品强项","textChars":4,"textLines":1,"bbox":[112,262,256,32]}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":12,"text":"现代生活、建造、动画、美术资源、易理解的消费场景。","textPreview":"现代生活、建造、动画、美术资源、易理解的消费场景。","textChars":25,"textLines":1,"bbox":[112,302,256,118]}
+{"kind":"shape","id":"sh/uxc3ylc7","slide":12,"bbox":[490,244,300,190]}
+{"kind":"textbox","id":"sh/ji5snelo","slide":12,"text":"我们的差异","textPreview":"我们的差异","textChars":5,"textLines":1,"bbox":[512,262,256,32]}
+{"kind":"textbox","id":"sh/vu9knih4","slide":12,"text":"名分、传令、礼法、第四轴、秩序、人情债和群像反应。","textPreview":"名分、传令、礼法、第四轴、秩序、人情债和群像反应。","textChars":25,"textLines":1,"bbox":[512,302,256,118]}
+{"kind":"shape","id":"sh/29gr2p8n","slide":12,"bbox":[890,244,300,190]}
+{"kind":"textbox","id":"sh/d0z61032","slide":12,"text":"可迁移资产","textPreview":"可迁移资产","textChars":5,"textLines":1,"bbox":[912,262,256,32]}
+{"kind":"textbox","id":"sh/kf6dcbul","slide":12,"text":"贾府跑通后，可迁移到皇宫、官署、门派、市井、宅斗、书院。","textPreview":"贾府跑通后，可迁移到皇宫、官署、门派、市井、宅斗、书院。","textChars":28,"textLines":1,"bbox":[912,302,256,118]}
+{"kind":"textbox","id":"sh/v6psfil0","slide":12,"text":"资料片卖的不是一批新家具，而是一套新的权力场：谁能命令谁、谁要守什么规矩、谁会欠谁人情。","textPreview":"资料片卖的不是一批新家具，而是一套新的权力场：谁能命令谁、谁要守什么规矩、谁会欠谁人情。","textChars":44,"textLines":1,"bbox":[120,520,1020,58]}
+{"kind":"textbox","id":"sh/2lszqtcj","slide":12,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/d8bat47y","slide":12,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"notes","id":"nt/iwvxi8","slide":12,"text":""}
+{"kind":"slide","id":"sl/yxnt5g","slide":13,"title":"DEMO PLAN","textShapes":24}
+{"kind":"textbox","id":"sh/nuxc3ylc","slide":13,"text":"DEMO PLAN","textPreview":"DEMO PLAN","textChars":9,"textLines":1,"bbox":[64,42,360,24]}
+{"kind":"textbox","id":"sh/gbq1oryt","slide":13,"text":"首个可试玩版本应该收敛到“林黛玉入府”","textPreview":"首个可试玩版本应该收敛到“林黛玉入府”","textChars":19,"textLines":1,"bbox":[64,74,900,76]}
+{"kind":"textbox","id":"sh/5wjudg7a","slide":13,"text":"目标不是做完整红楼，而是让玩家在半小时内感到这套系统有戏。","textPreview":"目标不是做完整红楼，而是让玩家在半小时内感到这套系统有戏。","textChars":29,"textLines":1,"bbox":[66,148,900,48]}
+{"kind":"shape","id":"sh/yhgn29gr","slide":13,"bbox":[64,186,1152,0]}
+{"kind":"shape","id":"sh/n29gr2p8","slide":13,"bbox":[82,260,150,190]}
+{"kind":"textbox","id":"sh/gn29gr2p","slide":13,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[100,280,36,30]}
+{"kind":"textbox","id":"sh/58z25kb6","slide":13,"text":"入府","textPreview":"入府","textChars":2,"textLines":1,"bbox":[100,322,100,28]}
+{"kind":"textbox","id":"sh/ytsvu9kn","slide":13,"text":"到达贾府，身份和场景权限开始生效。","textPreview":"到达贾府，身份和场景权限开始生效。","textChars":17,"textLines":1,"bbox":[100,366,112,62]}
+{"kind":"shape","id":"sh/neloj2t8","slide":13,"bbox":[270,260,150,190]}
+{"kind":"textbox","id":"sh/nap4r65w","slide":13,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[288,280,36,30]}
+{"kind":"textbox","id":"sh/upwb2hwf","slide":13,"text":"通传","textPreview":"通传","textChars":2,"textLines":1,"bbox":[288,322,100,28]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":13,"text":"谁去通报、谁来迎、谁被跳过。","textPreview":"谁去通报、谁来迎、谁被跳过。","textChars":14,"textLines":1,"bbox":[288,366,112,62]}
+{"kind":"shape","id":"sh/cvixczed","slide":13,"bbox":[458,260,150,190]}
+{"kind":"textbox","id":"sh/nyd0z610","slide":13,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[476,280,36,30]}
+{"kind":"textbox","id":"sh/udg7adsj","slide":13,"text":"见礼","textPreview":"见礼","textChars":2,"textLines":1,"bbox":[476,322,100,28]}
+{"kind":"textbox","id":"sh/54zidony","slide":13,"text":"见贾母、王夫人、凤姐、宝玉，关系轴变化。","textPreview":"见贾母、王夫人、凤姐、宝玉，关系轴变化。","textChars":20,"textLines":1,"bbox":[476,366,112,62]}
+{"kind":"shape","id":"sh/cj6tovah","slide":13,"bbox":[646,260,150,190]}
+{"kind":"textbox","id":"sh/judg7ads","slide":13,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[664,280,36,30]}
+{"kind":"textbox","id":"sh/u9knih4b","slide":13,"text":"安置","textPreview":"安置","textChars":2,"textLines":1,"bbox":[664,322,100,28]}
+{"kind":"textbox","id":"sh/2hwfyxob","slide":13,"text":"安排住处、随侍、取物和初始日课。","textPreview":"安排住处、随侍、取物和初始日课。","textChars":16,"textLines":1,"bbox":[664,366,112,62]}
+{"kind":"shape","id":"sh/r2p8nqxs","slide":13,"bbox":[834,260,150,190]}
+{"kind":"textbox","id":"sh/kjm1cfa9","slide":13,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[852,280,36,30]}
+{"kind":"textbox","id":"sh/94fu18jq","slide":13,"text":"照拂","textPreview":"照拂","textChars":2,"textLines":1,"bbox":[852,322,100,28]}
+{"kind":"textbox","id":"sh/2p8nqxs7","slide":13,"text":"紫鹃/雪雁处理需求、心绪和分寸。","textPreview":"紫鹃/雪雁处理需求、心绪和分寸。","textChars":16,"textLines":1,"bbox":[852,366,112,62]}
+{"kind":"shape","id":"sh/ra5gbq1o","slide":13,"bbox":[1022,260,150,190]}
+{"kind":"textbox","id":"sh/gvy90je9","slide":13,"text":"6","textPreview":"6","textChars":1,"textLines":1,"bbox":[1040,280,36,30]}
+{"kind":"textbox","id":"sh/9gr2p8nq","slide":13,"text":"复盘","textPreview":"复盘","textChars":2,"textLines":1,"bbox":[1040,322,100,28]}
+{"kind":"textbox","id":"sh/2t83itgf","slide":13,"text":"看关系、任务质量、秩序和气泡日志。","textPreview":"看关系、任务质量、秩序和气泡日志。","textChars":17,"textLines":1,"bbox":[1040,366,112,62]}
+{"kind":"textbox","id":"sh/re1w7mp0","slide":13,"text":"验收标准：玩家能说出“我刚才的安排让谁体面、谁受委屈、谁更亲近或更疏远”。","textPreview":"验收标准：玩家能说出“我刚才的安排让谁体面、谁受委屈、谁更亲近或更疏远”。","textChars":37,"textLines":1,"bbox":[96,528,1000,44]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":13,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":13,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"notes","id":"nt/yxnt5g","slide":13,"text":""}
+{"kind":"slide","id":"sl/9jpc6v","slide":14,"title":"COMMERCIAL PATH","textShapes":14}
+{"kind":"textbox","id":"sh/87ed8bat","slide":14,"text":"COMMERCIAL PATH","textPreview":"COMMERCIAL PATH","textChars":15,"textLines":1,"bbox":[64,42,360,24]}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":14,"text":"商业化应卖世界、场景和创作空间","textPreview":"商业化应卖世界、场景和创作空间","textChars":15,"textLines":1,"bbox":[64,74,900,76]}
+{"kind":"textbox","id":"sh/q1orytsv","slide":14,"text":"不要把核心沉浸拆成数值付费。","textPreview":"不要把核心沉浸拆成数值付费。","textChars":14,"textLines":1,"bbox":[66,148,900,48]}
+{"kind":"shape","id":"sh/1gvy90je","slide":14,"bbox":[64,186,1152,0]}
+{"kind":"shape","id":"sh/8z25kb6x","slide":14,"bbox":[78,244,250,212]}
+{"kind":"textbox","id":"sh/je9cvixc","slide":14,"text":"抢先体验","textPreview":"抢先体验","textChars":4,"textLines":1,"bbox":[100,262,206,32]}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":14,"text":"先用贾府 Demo 验证玩家是否理解并喜欢“礼法人情管理”。","textPreview":"先用贾府 Demo 验证玩家是否理解并喜欢“礼法人情管理”。","textChars":30,"textLines":1,"bbox":[100,302,206,140]}
+{"kind":"shape","id":"sh/xczed8v6","slide":14,"bbox":[366,244,250,212]}
+{"kind":"textbox","id":"sh/8v6psfil","slide":14,"text":"买断本体","textPreview":"买断本体","textChars":4,"textLines":1,"bbox":[388,262,206,32]}
+{"kind":"textbox","id":"sh/yhgn29gr","slide":14,"text":"完整贾府生活模拟，含核心人物、任务、关系和秩序系统。","textPreview":"完整贾府生活模拟，含核心人物、任务、关系和秩序系统。","textChars":26,"textLines":1,"bbox":[388,302,206,140]}
+{"kind":"shape","id":"sh/n29gr2p8","slide":14,"bbox":[654,244,250,212]}
+{"kind":"textbox","id":"sh/gn29gr2p","slide":14,"text":"资料片","textPreview":"资料片","textChars":3,"textLines":1,"bbox":[676,262,206,32]}
+{"kind":"textbox","id":"sh/58z25kb6","slide":14,"text":"皇宫、官署、门派、市井、节气民俗、诗社宴饮等权力场包。","textPreview":"皇宫、官署、门派、市井、节气民俗、诗社宴饮等权力场包。","textChars":27,"textLines":1,"bbox":[676,302,206,140]}
+{"kind":"shape","id":"sh/y90je9cv","slide":14,"bbox":[942,244,250,212]}
+{"kind":"textbox","id":"sh/nuxc3ylc","slide":14,"text":"创作生态","textPreview":"创作生态","textChars":4,"textLines":1,"bbox":[964,262,206,32]}
+{"kind":"textbox","id":"sh/gbq1oryt","slide":14,"text":"开放人物、院落、任务、互动文案和规则模板，走 Mod/UGC。","textPreview":"开放人物、院落、任务、互动文案和规则模板，走 Mod/UGC。","textChars":31,"textLines":1,"bbox":[964,302,206,140]}
+{"kind":"textbox","id":"sh/5wjudg7a","slide":14,"text":"长期想象力：每个 DLC 都不是换皮地图，而是一种新的社会规则。","textPreview":"长期想象力：每个 DLC 都不是换皮地图，而是一种新的社会规则。","textChars":32,"textLines":1,"bbox":[118,530,960,42]}
+{"kind":"textbox","id":"sh/u54zidon","slide":14,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/nqxs72x4","slide":14,"text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"notes","id":"nt/9jpc6v","slide":14,"text":""}
+{"kind":"slide","id":"sl/zjti4v","slide":15,"title":"RISKS","textShapes":13}
+{"kind":"textbox","id":"sh/pkzupwb2","slide":15,"text":"RISKS","textPreview":"RISKS","textChars":5,"textLines":1,"bbox":[64,42,360,24]}
+{"kind":"textbox","id":"sh/itgfmlkj","slide":15,"text":"最大的风险不是系统不够多，而是戏剧性不够集中","textPreview":"最大的风险不是系统不够多，而是戏剧性不够集中","textChars":22,"textLines":1,"bbox":[64,74,900,76]}
+{"kind":"textbox","id":"sh/7ed8bat4","slide":15,"text":"后续工作要围绕“玩家能不能感到人情后果”来排优先级。","textPreview":"后续工作要围绕“玩家能不能感到人情后果”来排优先级。","textChars":26,"textLines":1,"bbox":[66,148,900,48]}
+{"kind":"shape","id":"sh/0nuxc3yl","slide":15,"bbox":[64,186,1152,0]}
+{"kind":"shape","id":"sh/p8nqxs72","slide":15,"bbox":[90,240,330,160]}
+{"kind":"textbox","id":"sh/ih4byhgn","slide":15,"text":"风险一：功能散","textPreview":"风险一：功能散","textChars":7,"textLines":1,"bbox":[112,258,286,32]}
+{"kind":"textbox","id":"sh/72x4nap4","slide":15,"text":"模块很多，但如果没有一个局面把它们串起来，玩家只会看到复杂 UI。","textPreview":"模块很多，但如果没有一个局面把它们串起来，玩家只会看到复杂 UI。","textChars":33,"textLines":1,"bbox":[112,298,286,88]}
+{"kind":"shape","id":"sh/wjudg7ad","slide":15,"bbox":[475,240,330,160]}
+{"kind":"textbox","id":"sh/p4r65wju","slide":15,"text":"风险二：美术压力","textPreview":"风险二：美术压力","textChars":8,"textLines":1,"bbox":[497,258,286,32]}
+{"kind":"textbox","id":"sh/lwval87e","slide":15,"text":"生活模拟天然吃动画和资源；短期应让 2D 视角服务系统验证。","textPreview":"生活模拟天然吃动画和资源；短期应让 2D 视角服务系统验证。","textChars":30,"textLines":1,"bbox":[497,298,286,88]}
+{"kind":"shape","id":"sh/wb2hwfyx","slide":15,"bbox":[860,240,330,160]}
+{"kind":"textbox","id":"sh/3q5o7qpg","slide":15,"text":"风险三：AI 难控","textPreview":"风险三：AI 难控","textChars":9,"textLines":1,"bbox":[882,258,286,32]}
+{"kind":"textbox","id":"sh/e9cvixcz","slide":15,"text":"NPC 太随机会像坏掉，太听话会无聊；需要起居、意愿公式和气泡解释共同控场。","textPreview":"NPC 太随机会像坏掉，太听话会无聊；需要起居、意愿公式和气泡解释共同控场。","textChars":38,"textLines":1,"bbox":[882,298,286,88]}
+{"kind":"shape","id":"sh/loj2t83i","slide":15,"bbox":[210,458,860,116]}
+{"kind":"textbox","id":"sh/w3m94fu1","slide":15,"text":"当前对策","textPreview":"当前对策","textChars":4,"textLines":1,"bbox":[232,476,816,32]}
+{"kind":"textbox","id":"sh/3itgfmlk","slide":15,"text":"用黛玉入府作为高密度 demo；用埋点和多日模拟检查人物是否有“人味”；用后台配置降低扩内容成本。","textPreview":"用黛玉入府作为高密度 demo；用埋点和多日模拟检查人物是否有“人味”；用后台配置降低扩内容成本。","textChars":49,"textLines":1,"bbox":[232,516,816,44]}
+{"kind":"textbox","id":"sh/ex0nuxc3","slide":15,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/lkjm1cfa","slide":15,"text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"notes","id":"nt/zjti4v","slide":15,"text":""}
+{"kind":"slide","id":"sl/om0jvw","slide":16,"title":"下一步只做一件事","textShapes":7}
+{"kind":"textbox","id":"sh/hgn29gr2","slide":16,"text":"下一步只做一件事","textPreview":"下一步只做一件事","textChars":8,"textLines":1,"bbox":[80,92,640,56]}
+{"kind":"textbox","id":"sh/ap4r65wj","slide":16,"text":"把“黛玉入府”做成一个能让玩家记住的局。","textPreview":"把“黛玉入府”做成一个能让玩家记住的局。","textChars":20,"textLines":1,"bbox":[82,170,900,44]}
+{"kind":"shape","id":"sh/za1gvy90","slide":16,"bbox":[86,266,1090,248]}
+{"kind":"textbox","id":"sh/s36hcrmh","slide":16,"text":"Demo 成功的信号","textPreview":"Demo 成功的信号","textChars":10,"textLines":1,"bbox":[126,304,240,30]}
+{"kind":"textbox","id":"sh/hoza1gvy","slide":16,"text":"玩家不是说“功能很多”，而是说：\n\n“我刚才怕黛玉受委屈，所以让紫鹃去照顾她；但又担心太亲近被旁人看作逾矩。后来我宽恕了紫鹃一次，她对黛玉更服帖，可院里的规矩也松了一点。”","textPreview":"玩家不是说“功能很多”，而是说： |  | “我刚才怕黛玉受委屈，所以让紫鹃去照顾她；但又担心太亲近被旁人看作逾矩。后来我宽恕了紫鹃一次，她对黛玉更服帖，可院里的规矩也松了一点。”","textChars":86,"textLines":3,"bbox":[126,352,960,112]}
+{"kind":"textbox","id":"sh/a1gvy90j","slide":16,"text":"这句话出现，游戏就真的站住了。","textPreview":"这句话出现，游戏就真的站住了。","textChars":15,"textLines":1,"bbox":[126,552,820,46]}
+{"kind":"textbox","id":"sh/zidonyd0","slide":16,"text":"大观园模拟 · 商业计划抓魂重写版","textPreview":"大观园模拟 · 商业计划抓魂重写版","textChars":17,"textLines":1,"bbox":[64,684,360,18]}
+{"kind":"textbox","id":"sh/s72x4nap","slide":16,"text":"16","textPreview":"16","textChars":2,"textLines":1,"bbox":[1174,682,40,18]}
+{"kind":"notes","id":"nt/om0jvw","slide":16,"text":""}

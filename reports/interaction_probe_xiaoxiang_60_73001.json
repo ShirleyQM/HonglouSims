@@ -1,0 +1,1107 @@
+{
+  "outFile": "/Users/bytedance/Desktop/myCursor/game/reports/interaction_probe_xiaoxiang_60_73001.md",
+  "jsonOutFile": "/Users/bytedance/Desktop/myCursor/game/reports/interaction_probe_xiaoxiang_60_73001.json",
+  "targetIds": [
+    "daiyu",
+    "zijuan",
+    "xueyan"
+  ],
+  "targetNames": [
+    "黛玉",
+    "紫鹃",
+    "雪雁"
+  ],
+  "startDay": 1,
+  "endBeforeDay": 8,
+  "seed": 73001,
+  "rows": [
+    {
+      "time": "第01日 08:04",
+      "day": 1,
+      "hour": 8,
+      "minute": 4,
+      "type": "ai:routine_completed",
+      "person": "黛玉",
+      "action": "作息完成：晨起梳洗 via=wardrobe",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:04",
+      "day": 1,
+      "hour": 8,
+      "minute": 4,
+      "type": "furniture:use_started",
+      "person": "黛玉",
+      "action": "开始用家具：梳洗妆台 / tidy_dress",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:07",
+      "day": 1,
+      "hour": 8,
+      "minute": 7,
+      "type": "furniture:use_started",
+      "person": "紫鹃",
+      "action": "开始用家具：浴盆 / default_use",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:09",
+      "day": 1,
+      "hour": 8,
+      "minute": 9,
+      "type": "furniture:complete",
+      "person": "黛玉",
+      "action": "完成用家具：梳洗妆台 / tidy_dress",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:09",
+      "day": 1,
+      "hour": 8,
+      "minute": 9,
+      "type": "ai:routine_completed",
+      "person": "雪雁",
+      "action": "作息完成：早餐 via=meal",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:09",
+      "day": 1,
+      "hour": 8,
+      "minute": 9,
+      "type": "furniture:use_started",
+      "person": "雪雁",
+      "action": "开始用家具：饭桌 / eat_alone",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:11",
+      "day": 1,
+      "hour": 8,
+      "minute": 11,
+      "type": "furniture:complete",
+      "person": "紫鹃",
+      "action": "完成用家具：浴盆 / default_use",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:13",
+      "day": 1,
+      "hour": 8,
+      "minute": 13,
+      "type": "furniture:complete",
+      "person": "雪雁",
+      "action": "完成用家具：饭桌 / eat_alone",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "queue:add",
+      "person": "黛玉",
+      "action": "行动入队：🤝 对弈·雪雁",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "ai:decision",
+      "person": "黛玉",
+      "action": "AI选择：对弈·雪雁 [int:202:xueyan] provider=social routine=breakfast",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "queue:add",
+      "person": "紫鹃",
+      "action": "行动入队：🤝 拍背·黛玉",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:15",
+      "day": 1,
+      "hour": 8,
+      "minute": 15,
+      "type": "ai:decision",
+      "person": "紫鹃",
+      "action": "AI选择：拍背·黛玉 [int:721:daiyu] provider=social routine=followRotation:follow:daiyu:zijuan:day_follow:1:3005",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:16",
+      "day": 1,
+      "hour": 8,
+      "minute": 16,
+      "type": "queue:add",
+      "person": "黛玉",
+      "action": "行动入队：🪑 静坐复盘",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:16",
+      "day": 1,
+      "hour": 8,
+      "minute": 16,
+      "type": "ai:decision",
+      "person": "黛玉",
+      "action": "AI选择：石凳·静坐复盘 [furn:3004:rest_and_review] provider=furniture routine=breakfast",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:axis_change",
+      "person": "紫鹃",
+      "action": "关系轴变化：affection 61.99→47.27（-14.72） · 逾矩败露",
+      "issuer": "interaction-risk:721"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:axis_change",
+      "person": "黛玉",
+      "action": "关系轴变化：affection 61.99→47.27（-14.72） · 逾矩败露",
+      "issuer": "interaction-risk:721"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:change",
+      "person": "紫鹃",
+      "action": "综合关系变化：52→45（好友/亲密）",
+      "issuer": "interaction-risk:721"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:change",
+      "person": "黛玉",
+      "action": "综合关系变化：52→45（好友/亲密）",
+      "issuer": "interaction-risk:721"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:axis_change",
+      "person": "紫鹃",
+      "action": "关系轴变化：trust 50→38.5（-11.5） · 逾矩败露",
+      "issuer": "interaction-risk:721"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:axis_change",
+      "person": "黛玉",
+      "action": "关系轴变化：trust 50→38.5（-11.5） · 逾矩败露",
+      "issuer": "interaction-risk:721"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:change",
+      "person": "紫鹃",
+      "action": "综合关系变化：45→41（好友/亲密）",
+      "issuer": "interaction-risk:721"
+    },
+    {
+      "time": "第01日 08:22",
+      "day": 1,
+      "hour": 8,
+      "minute": 22,
+      "type": "relation:change",
+      "person": "黛玉",
+      "action": "综合关系变化：45→41（好友/亲密）",
+      "issuer": "interaction-risk:721"
+    },
+    {
+      "time": "第01日 08:30",
+      "day": 1,
+      "hour": 8,
+      "minute": 30,
+      "type": "queue:add",
+      "person": "雪雁",
+      "action": "行动入队：👘 理妆整衣",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:30",
+      "day": 1,
+      "hour": 8,
+      "minute": 30,
+      "type": "ai:decision",
+      "person": "雪雁",
+      "action": "AI选择：梳洗妆台·理妆整衣 [furn:1008:tidy_dress] provider=furniture routine=morning_hygiene",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:31",
+      "day": 1,
+      "hour": 8,
+      "minute": 31,
+      "type": "ai:routine_completed",
+      "person": "雪雁",
+      "action": "作息完成：晨起梳洗 via=wardrobe",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:31",
+      "day": 1,
+      "hour": 8,
+      "minute": 31,
+      "type": "furniture:use_started",
+      "person": "雪雁",
+      "action": "开始用家具：梳洗妆台 / tidy_dress",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:32",
+      "day": 1,
+      "hour": 8,
+      "minute": 32,
+      "type": "queue:add",
+      "person": "黛玉",
+      "action": "行动入队：📚 抄写诗文",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:32",
+      "day": 1,
+      "hour": 8,
+      "minute": 32,
+      "type": "ai:decision",
+      "person": "黛玉",
+      "action": "AI选择：红木书案·抄写诗文 [furn:7002:copy_poetry] provider=furniture routine=breakfast",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:35",
+      "day": 1,
+      "hour": 8,
+      "minute": 35,
+      "type": "furniture:complete",
+      "person": "雪雁",
+      "action": "完成用家具：梳洗妆台 / tidy_dress",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:40",
+      "day": 1,
+      "hour": 8,
+      "minute": 40,
+      "type": "queue:add",
+      "person": "黛玉",
+      "action": "行动入队：📚 翻旧例",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:40",
+      "day": 1,
+      "hour": 8,
+      "minute": 40,
+      "type": "ai:decision",
+      "person": "黛玉",
+      "action": "AI选择：红木书案·翻旧例 [furn:1002:read_ritual_cases] provider=furniture routine=breakfast",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:51",
+      "day": 1,
+      "hour": 8,
+      "minute": 51,
+      "type": "interaction:started",
+      "person": "雪雁",
+      "action": "被刘姥姥发起互动：「寒暄」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:55",
+      "day": 1,
+      "hour": 8,
+      "minute": 55,
+      "type": "furniture:use_started",
+      "person": "黛玉",
+      "action": "开始用家具：红木书案 / read_ritual_cases",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:58",
+      "day": 1,
+      "hour": 8,
+      "minute": 58,
+      "type": "relation:axis_change",
+      "person": "雪雁",
+      "action": "关系轴变化：affection 0→2.6（+2.6）",
+      "issuer": "relation"
+    },
+    {
+      "time": "第01日 08:58",
+      "day": 1,
+      "hour": 8,
+      "minute": 58,
+      "type": "interaction:complete",
+      "person": "雪雁",
+      "action": "被刘姥姥完成互动：「寒暄」",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "queue:add",
+      "person": "紫鹃",
+      "action": "行动入队：🍚 挑食抱怨",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "furniture:use_started",
+      "person": "紫鹃",
+      "action": "开始用家具：饭桌 / complain_food",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "ai:decision",
+      "person": "紫鹃",
+      "action": "AI选择：饭桌·挑食抱怨 [furn:1007:complain_food] provider=furniture",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "queue:add",
+      "person": "雪雁",
+      "action": "行动入队：🤝 拍背·黛玉",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 09:00",
+      "day": 1,
+      "hour": 9,
+      "minute": 0,
+      "type": "ai:decision",
+      "person": "雪雁",
+      "action": "AI选择：拍背·黛玉 [int:721:daiyu] provider=social",
+      "issuer": ""
+    }
+  ],
+  "perPersonDay": {
+    "1|黛玉": {
+      "total": 16,
+      "tasks": 0,
+      "furniture": 3,
+      "interactions": 0,
+      "blocked": 0,
+      "decisions": 4,
+      "samples": [
+        " 08:04 作息完成：晨起梳洗 via=wardrobe",
+        " 08:04 开始用家具：梳洗妆台 / tidy_dress",
+        " 08:09 完成用家具：梳洗妆台 / tidy_dress",
+        " 08:15 行动入队：🤝 对弈·雪雁",
+        " 08:15 AI选择：对弈·雪雁 [int:202:xueyan] provider=social routine=breakfast"
+      ]
+    },
+    "1|紫鹃": {
+      "total": 11,
+      "tasks": 0,
+      "furniture": 3,
+      "interactions": 0,
+      "blocked": 0,
+      "decisions": 2,
+      "samples": [
+        " 08:07 开始用家具：浴盆 / default_use",
+        " 08:11 完成用家具：浴盆 / default_use",
+        " 08:15 行动入队：🤝 拍背·黛玉",
+        " 08:15 AI选择：拍背·黛玉 [int:721:daiyu] provider=social routine=followRotation:follow:daiyu:zijuan:day_follow:1:3005",
+        " 08:22 关系轴变化：affection 61.99→47.27（-14.72） · 逾矩败露"
+      ]
+    },
+    "1|雪雁": {
+      "total": 13,
+      "tasks": 0,
+      "furniture": 4,
+      "interactions": 2,
+      "blocked": 0,
+      "decisions": 2,
+      "samples": [
+        " 08:09 作息完成：早餐 via=meal",
+        " 08:09 开始用家具：饭桌 / eat_alone",
+        " 08:13 完成用家具：饭桌 / eat_alone",
+        " 08:30 行动入队：👘 理妆整衣",
+        " 08:30 AI选择：梳洗妆台·理妆整衣 [furn:1008:tidy_dress] provider=furniture routine=morning_hygiene"
+      ]
+    }
+  },
+  "actionCounts": {
+    "黛玉|作息完成：晨起梳洗 via=wardrobe": 1,
+    "黛玉|开始用家具：梳洗妆台 / tidy_dress": 1,
+    "紫鹃|开始用家具：浴盆 / default_use": 1,
+    "黛玉|完成用家具：梳洗妆台 / tidy_dress": 1,
+    "雪雁|作息完成：早餐 via=meal": 1,
+    "雪雁|开始用家具：饭桌 / eat_alone": 1,
+    "紫鹃|完成用家具：浴盆 / default_use": 1,
+    "雪雁|完成用家具：饭桌 / eat_alone": 1,
+    "黛玉|行动入队：🤝 对弈·雪雁": 1,
+    "黛玉|AI选择：对弈·雪雁 [int:202:xueyan] provider=social routine=breakfast": 1,
+    "紫鹃|行动入队：🤝 拍背·黛玉": 1,
+    "紫鹃|AI选择：拍背·黛玉 [int:721:daiyu] provider=social routine=followRotation:follow:daiyu:zijuan:day_follow:1:3005": 1,
+    "黛玉|行动入队：🪑 静坐复盘": 1,
+    "黛玉|AI选择：石凳·静坐复盘 [furn:3004:rest_and_review] provider=furniture routine=breakfast": 1,
+    "紫鹃|关系轴变化：affection 61.99→47.27（-14.72） · 逾矩败露": 1,
+    "黛玉|关系轴变化：affection 61.99→47.27（-14.72） · 逾矩败露": 1,
+    "紫鹃|综合关系变化：52→45（好友/亲密）": 1,
+    "黛玉|综合关系变化：52→45（好友/亲密）": 1,
+    "紫鹃|关系轴变化：trust 50→38.5（-11.5） · 逾矩败露": 1,
+    "黛玉|关系轴变化：trust 50→38.5（-11.5） · 逾矩败露": 1,
+    "紫鹃|综合关系变化：45→41（好友/亲密）": 1,
+    "黛玉|综合关系变化：45→41（好友/亲密）": 1,
+    "雪雁|行动入队：👘 理妆整衣": 1,
+    "雪雁|AI选择：梳洗妆台·理妆整衣 [furn:1008:tidy_dress] provider=furniture routine=morning_hygiene": 1,
+    "雪雁|作息完成：晨起梳洗 via=wardrobe": 1,
+    "雪雁|开始用家具：梳洗妆台 / tidy_dress": 1,
+    "黛玉|行动入队：📚 抄写诗文": 1,
+    "黛玉|AI选择：红木书案·抄写诗文 [furn:7002:copy_poetry] provider=furniture routine=breakfast": 1,
+    "雪雁|完成用家具：梳洗妆台 / tidy_dress": 1,
+    "黛玉|行动入队：📚 翻旧例": 1,
+    "黛玉|AI选择：红木书案·翻旧例 [furn:1002:read_ritual_cases] provider=furniture routine=breakfast": 1,
+    "雪雁|被刘姥姥发起互动：「寒暄」": 1,
+    "黛玉|开始用家具：红木书案 / read_ritual_cases": 1,
+    "雪雁|关系轴变化：affection 0→2.6（+2.6）": 1,
+    "雪雁|被刘姥姥完成互动：「寒暄」": 1,
+    "紫鹃|行动入队：🍚 挑食抱怨": 1,
+    "紫鹃|开始用家具：饭桌 / complain_food": 1,
+    "紫鹃|AI选择：饭桌·挑食抱怨 [furn:1007:complain_food] provider=furniture": 1,
+    "雪雁|行动入队：🤝 拍背·黛玉": 1,
+    "雪雁|AI选择：拍背·黛玉 [int:721:daiyu] provider=social": 1
+  },
+  "rawCounts": {
+    "quest:issued": 4,
+    "quest:accepted": 4,
+    "quest:blocked": 5,
+    "servant:follow_state": 2,
+    "log:add": 216,
+    "state:add": 49,
+    "character:effect": 51,
+    "time:tick": 61,
+    "queue:add": 49,
+    "ai:decision": 49,
+    "ai:routine_completed": 27,
+    "furniture:use_started": 30,
+    "scene:enter:allowed": 30,
+    "scene:entered": 30,
+    "quest:candidate": 76,
+    "quest:started": 2,
+    "quest:progress": 22,
+    "need:band_changed": 50,
+    "furniture:complete": 23,
+    "furniture:released": 28,
+    "ai:state": 115,
+    "ai:daily_social_count": 15,
+    "interaction:started": 15,
+    "furniture:reaction": 6,
+    "relation:axis_change": 23,
+    "interaction:effects": 10,
+    "ai:social_target_cooldown": 10,
+    "interaction:complete": 10,
+    "interaction:awkward_started": 2,
+    "state:remove": 19,
+    "quest:completed": 2,
+    "reputation_domain:change": 3,
+    "reputation:change": 1,
+    "relation:change": 7,
+    "interaction:risky_fail": 1,
+    "observer:triggered": 1,
+    "observer:executed": 1,
+    "need:critical": 1,
+    "interaction:awkward_ended": 1,
+    "interaction:state": 2,
+    "emotion:resisted": 2,
+    "trait:competition": 1,
+    "invitation:sent": 1,
+    "access:granted": 1,
+    "invitation:declined": 1,
+    "lifePath:storyNode": 2,
+    "need:combination_triggered": 1,
+    "family:fund_changed": 1,
+    "economy:quest_cost": 1,
+    "time:hour": 1,
+    "money:change": 1
+  },
+  "problems": [
+    "第1日 黛玉 没有记录到社交完成事件，日常仍偏“自己找家具/任务”。",
+    "第1日 紫鹃 没有记录到社交完成事件，日常仍偏“自己找家具/任务”。"
+  ],
+  "repeated": [],
+  "finalChars": [
+    {
+      "id": "daiyu",
+      "name": "林黛玉",
+      "short": "黛玉",
+      "sceneId": 1,
+      "statusText": "翻旧例…",
+      "actionType": "furniture",
+      "queue": [
+        "📚 翻旧例"
+      ],
+      "needs": {
+        "hunger": 58.926536000000176,
+        "energy": 43.864062500000145,
+        "fun": 83.65250000000017,
+        "hygiene": 99.45819999999974,
+        "social": 85,
+        "mood": 23.826000000000107
+      },
+      "aiState": "EXECUTING",
+      "skills": [
+        "move",
+        "talk",
+        "poetry"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "poetry": 3,
+        "affairs": 1.3,
+        "insight": 1.2,
+        "subtlety": 1.2
+      }
+    },
+    {
+      "id": "zijuan",
+      "name": "紫鹃",
+      "short": "紫鹃",
+      "sceneId": 1,
+      "statusText": "挑食抱怨…",
+      "actionType": "furniture",
+      "queue": [
+        "🍚 挑食抱怨"
+      ],
+      "needs": {
+        "hunger": 73.84400000000014,
+        "energy": 60.28640000000001,
+        "fun": 49.88949999999992,
+        "hygiene": 109.68908333333351,
+        "social": 85,
+        "mood": 46.839000000000034
+      },
+      "aiState": "EXECUTING",
+      "skills": [
+        "move",
+        "talk",
+        "serve"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "serve": 1
+      }
+    },
+    {
+      "id": "xueyan",
+      "name": "雪雁",
+      "short": "雪雁",
+      "sceneId": 1,
+      "statusText": "去找黛玉·拍背",
+      "actionType": "move",
+      "queue": [
+        "🤝 拍背·黛玉"
+      ],
+      "needs": {
+        "hunger": 105.81296250000001,
+        "energy": 57.94396139999999,
+        "fun": 57.75600000000016,
+        "hygiene": 99.81135,
+        "social": 100,
+        "mood": 77.79050000000025
+      },
+      "aiState": "EXECUTING",
+      "skills": [
+        "move",
+        "talk",
+        "serve"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "serve": 1,
+        "affairs": 1.3,
+        "insight": 1.2,
+        "subtlety": 1.2
+      }
+    }
+  ],
+  "initialSkills": [
+    {
+      "id": "daiyu",
+      "name": "黛玉",
+      "skills": [
+        "move",
+        "talk",
+        "poetry"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "poetry": 3
+      }
+    },
+    {
+      "id": "zijuan",
+      "name": "紫鹃",
+      "skills": [
+        "move",
+        "talk",
+        "serve"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "serve": 1
+      }
+    },
+    {
+      "id": "xueyan",
+      "name": "雪雁",
+      "skills": [
+        "move",
+        "talk",
+        "serve"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "serve": 1
+      }
+    }
+  ],
+  "finalSkills": [
+    {
+      "id": "daiyu",
+      "name": "黛玉",
+      "skills": [
+        "move",
+        "talk",
+        "poetry"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "poetry": 3,
+        "affairs": 1.3,
+        "insight": 1.2,
+        "subtlety": 1.2
+      }
+    },
+    {
+      "id": "zijuan",
+      "name": "紫鹃",
+      "skills": [
+        "move",
+        "talk",
+        "serve"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "serve": 1
+      }
+    },
+    {
+      "id": "xueyan",
+      "name": "雪雁",
+      "skills": [
+        "move",
+        "talk",
+        "serve"
+      ],
+      "skillLevels": {
+        "move": 1,
+        "talk": 1,
+        "serve": 1,
+        "affairs": 1.3,
+        "insight": 1.2,
+        "subtlety": 1.2
+      }
+    }
+  ],
+  "initialRelations": {
+    "baoyu|daiyu": {
+      "affection": 72,
+      "trust": 58,
+      "friendship": 36,
+      "submission": {
+        "daiyu": 0,
+        "baoyu": 0
+      },
+      "initType": "恋人",
+      "note": "木石前盟，初见如故",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baochai|daiyu": {
+      "affection": 18,
+      "trust": 14,
+      "friendship": 9,
+      "submission": {
+        "daiyu": 0,
+        "baochai": 0
+      },
+      "initType": "朋友",
+      "note": "客居同园，才貌相忌",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "daiyu|xiren": {
+      "affection": 36,
+      "trust": 29,
+      "friendship": 18,
+      "submission": {
+        "daiyu": -40,
+        "xiren": 40
+      },
+      "initType": "朋友",
+      "note": "日常照拂",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "daiyu|zijuan": {
+      "affection": 62,
+      "trust": 50,
+      "friendship": 31,
+      "submission": {
+        "daiyu": -40,
+        "zijuan": 40
+      },
+      "initType": "主仆",
+      "note": "紫鹃誓心，情同姐妹",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "daiyu|xueyan": {
+      "affection": 46,
+      "trust": 37,
+      "friendship": 23,
+      "submission": {
+        "daiyu": -60,
+        "xueyan": 60
+      },
+      "initType": "主仆",
+      "note": "雪雁年幼，随黛玉南下",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "daiyu|jiamu": {
+      "affection": 76,
+      "trust": 61,
+      "friendship": 38,
+      "submission": {
+        "daiyu": 40,
+        "jiamu": -40
+      },
+      "initType": "祖孙",
+      "note": "贾母疼外孙女",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "daiyu|qingwen": {
+      "affection": 22,
+      "trust": 18,
+      "friendship": 11,
+      "submission": {
+        "daiyu": -60,
+        "qingwen": 60
+      },
+      "initType": "朋友",
+      "note": "晴为黛影，略存芥蒂",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "xueyan|zijuan": {
+      "affection": 30,
+      "trust": 24,
+      "friendship": 15,
+      "submission": {
+        "zijuan": -20,
+        "xueyan": 20
+      },
+      "initType": "同事",
+      "note": "同随黛玉",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|zijuan": {
+      "affection": 32,
+      "trust": 26,
+      "friendship": 16,
+      "submission": {
+        "baoyu": -40,
+        "zijuan": 40
+      },
+      "initType": "朋友",
+      "note": "因黛玉而熟",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    }
+  },
+  "finalRelations": {
+    "baoyu|daiyu": {
+      "affection": 71.95750000000004,
+      "trust": 57.98724999999994,
+      "friendship": 35.99574999999986,
+      "submission": {
+        "daiyu": 0,
+        "baoyu": 0
+      },
+      "initType": "恋人",
+      "note": "木石前盟，初见如故",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baochai|daiyu": {
+      "affection": 17.95750000000004,
+      "trust": 13.98725000000003,
+      "friendship": 8.99575000000004,
+      "submission": {
+        "daiyu": 0,
+        "baochai": 0
+      },
+      "initType": "朋友",
+      "note": "客居同园，才貌相忌",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "daiyu|xiren": {
+      "affection": 35.95750000000004,
+      "trust": 28.98724999999994,
+      "friendship": 17.99575000000004,
+      "submission": {
+        "daiyu": -40,
+        "xiren": 40
+      },
+      "initType": "朋友",
+      "note": "日常照拂",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "daiyu|zijuan": {
+      "affection": 47.23750000000004,
+      "trust": 38.48724999999994,
+      "friendship": 30.99575000000004,
+      "submission": {
+        "daiyu": -40,
+        "zijuan": 40
+      },
+      "initType": "主仆",
+      "note": "紫鹃誓心，情同姐妹",
+      "lastInteract": 1942,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "daiyu|xueyan": {
+      "affection": 45.95750000000004,
+      "trust": 36.98724999999994,
+      "friendship": 22.99575000000004,
+      "submission": {
+        "daiyu": -60,
+        "xueyan": 60
+      },
+      "initType": "主仆",
+      "note": "雪雁年幼，随黛玉南下",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "daiyu|jiamu": {
+      "affection": 75.95750000000004,
+      "trust": 60.98724999999994,
+      "friendship": 37.99574999999986,
+      "submission": {
+        "daiyu": 40,
+        "jiamu": -40
+      },
+      "initType": "祖孙",
+      "note": "贾母疼外孙女",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "daiyu|qingwen": {
+      "affection": 21.95750000000004,
+      "trust": 17.98724999999994,
+      "friendship": 10.99575000000004,
+      "submission": {
+        "daiyu": -60,
+        "qingwen": 60
+      },
+      "initType": "朋友",
+      "note": "晴为黛影，略存芥蒂",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "xueyan|zijuan": {
+      "affection": 29.95750000000004,
+      "trust": 23.98724999999994,
+      "friendship": 14.99575000000004,
+      "submission": {
+        "zijuan": -20,
+        "xueyan": 20
+      },
+      "initType": "同事",
+      "note": "同随黛玉",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "baoyu|zijuan": {
+      "affection": 31.95750000000004,
+      "trust": 25.98724999999994,
+      "friendship": 15.99575000000004,
+      "submission": {
+        "baoyu": -40,
+        "zijuan": 40
+      },
+      "initType": "朋友",
+      "note": "因黛玉而熟",
+      "lastInteract": 1920,
+      "memoryIds": [],
+      "thresholdEvents": []
+    },
+    "liulaolao|xueyan": {
+      "affection": 2.5975,
+      "trust": 0,
+      "friendship": 0,
+      "submission": {
+        "liulaolao": 20,
+        "xueyan": -20
+      },
+      "initType": "陌生人",
+      "note": "",
+      "lastInteract": 1978,
+      "memoryIds": [],
+      "thresholdEvents": []
+    }
+  },
+  "finalFamilies": [
+    {
+      "id": 1,
+      "name": "怡红院",
+      "fund": 520,
+      "memberIds": [
+        "baoyu",
+        "xiren",
+        "qingwen",
+        "sheyue"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "潇湘馆",
+      "fund": 280,
+      "memberIds": [
+        "daiyu",
+        "zijuan",
+        "xueyan"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "蘅芜苑",
+      "fund": 380,
+      "memberIds": [
+        "baochai",
+        "yinger"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "荣禧堂",
+      "fund": 1200,
+      "memberIds": [
+        "jiazheng",
+        "wangfuren",
+        "jiamu",
+        "jiashe",
+        "xiangyun"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "秋爽斋",
+      "fund": 320,
+      "memberIds": [
+        "tanchun"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "宁国府",
+      "fund": 680,
+      "memberIds": [
+        "jiazhen",
+        "jiarong"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "协理院",
+      "fund": 450,
+      "memberIds": [
+        "xifeng",
+        "jialian",
+        "laiwang"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "刘家庄",
+      "fund": 40,
+      "memberIds": [
+        "liulaolao"
+      ]
+    }
+  ]
+}

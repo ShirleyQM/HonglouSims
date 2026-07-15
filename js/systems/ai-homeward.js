@@ -12,6 +12,7 @@ const AiHomeward = (() => {
 
   function getHomeSceneId(c) {
     if (!c) return 3;
+    if (typeof ResidenceSystem !== 'undefined') return ResidenceSystem.getHomeSceneId(c, c.sceneId || 3);
     const fam = FamilySystem?.findFamilyOfChar?.(c.id);
     return fam?.residenceSceneId ?? c.sceneId ?? 3;
   }
@@ -141,15 +142,17 @@ const AiHomeward = (() => {
     const homeId = getHomeSceneId(c);
     const out = [];
     const homeN = Math.round(1 + hw * 3);
-    for (let i = 0; i < homeN; i++) {
-      const cell = randomCellInScene(homeId, c.id, accessible);
-      if (!cell) continue;
-      out.push({
-        key: `w:home:${cell.col},${cell.row}`, kind: 'wander',
-        gridCol: cell.col, gridRow: cell.row,
-        tags: ['outdoor'], baseWeight: 0.35 + hw * 0.4,
-        label: '居家闲步',
-      });
+    if (getScene(homeId)) {
+      for (let i = 0; i < homeN; i++) {
+        const cell = randomCellInScene(homeId, c.id, accessible);
+        if (!cell) continue;
+        out.push({
+          key: `w:home:${cell.col},${cell.row}`, kind: 'wander',
+          gridCol: cell.col, gridRow: cell.row,
+          tags: ['outdoor'], baseWeight: 0.35 + hw * 0.4,
+          label: '居家闲步',
+        });
+      }
     }
     const pubN = Math.round(1 + outgoing * 2);
     for (let i = 0; i < pubN; i++) {

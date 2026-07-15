@@ -77,9 +77,52 @@ const CharacterEffectSystem = (() => {
     if (!c || !effect.skill) return { changed: 0 };
     c.skillLevels ||= {};
     const old = c.skillLevels[effect.skill] || 1;
-    const next = Math.max(0, old + (effect.delta || 0));
+    const delta = effect.delta || 0;
+    const next = Math.max(0, old + delta);
+    const levelOld = Math.floor(old);
+    const levelNew = Math.floor(next);
+    const label = CONFIG.skillDefs?.[effect.skill]?.name || effect.skill;
     c.skillLevels[effect.skill] = next;
-    return { charId: c.id, skill: effect.skill, old, value: next, changed: next - old };
+    if (next !== old) {
+      const gameStamp = typeof getGameTimestamp === 'function'
+        ? getGameTimestamp()
+        : ((typeof gameDay !== 'undefined' ? gameDay : 0) * 1440
+          + (typeof gameHour !== 'undefined' ? gameHour : 0) * 60
+          + (typeof gameMinute !== 'undefined' ? gameMinute : 0));
+      c.skillRecentGains ||= [];
+      c.skillRecentGains.unshift({
+        skill: effect.skill,
+        label,
+        delta: next - old,
+        old,
+        value: next,
+        levelOld,
+        levelNew,
+        gameStamp,
+        expiresAt: gameStamp + 180,
+      });
+      c.skillRecentGains = c.skillRecentGains.slice(0, 8);
+      if (levelNew > levelOld) {
+        c.skillLevelBubbles ||= [];
+        c.skillLevelBubbles.unshift({
+          text: `${label} ↑ Lv${levelNew}`,
+          startedAt: typeof performance !== 'undefined' ? performance.now() : Date.now(),
+          durationMs: 2800,
+        });
+        c.skillLevelBubbles = c.skillLevelBubbles.slice(0, 3);
+      }
+    }
+    return {
+      charId: c.id,
+      skill: effect.skill,
+      label,
+      old,
+      value: next,
+      levelOld,
+      levelNew,
+      leveledUp: levelNew > levelOld,
+      changed: next - old,
+    };
   }
 
   function apply(effect, context = {}) {
@@ -153,6 +196,13 @@ const CharacterEffectSystem = (() => {
     if (!result) result = { skipped: true, reason: 'unsupported_or_missing_target' };
     if (typeof uiDirty !== 'undefined') uiDirty = true;
     record(effect, result, context);
+    if (effect.type === 'skillXp' && result?.changed) {
+      EventBus.emit('skill:changed', {
+        ...result,
+        source: context.source || effect.source || 'unknown',
+        reason: context.reason || effect.reason || '',
+      });
+    }
     return result;
   }
 

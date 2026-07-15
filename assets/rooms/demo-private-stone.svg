@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="700" viewBox="0 0 1400 700">
+  <defs>
+    <pattern id="stone" width="70" height="70" patternUnits="userSpaceOnUse">
+      <rect width="70" height="70" fill="#6f7466"/>
+      <path d="M0 0H70M0 35H70M0 70H70M0 0V70M35 0V70M70 0V70" stroke="#4c524a" stroke-width="2" opacity=".45"/>
+      <path d="M8 18h15M47 51h12M24 60h18" stroke="#8b8f7e" stroke-width="2" opacity=".35"/>
+    </pattern>
+    <pattern id="wood" width="90" height="44" patternUnits="userSpaceOnUse">
+      <rect width="90" height="44" fill="#70482f"/>
+      <path d="M0 0H90M0 22H90M0 44H90" stroke="#4a2f21" stroke-width="2" opacity=".65"/>
+      <path d="M12 9c18 6 34-6 52 2M8 31c21-8 39 7 66-1" fill="none" stroke="#9a6540" stroke-width="2" opacity=".38"/>
+    </pattern>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#17110d" flood-opacity=".28"/>
+    </filter>
+  </defs>
+  <rect width="1400" height="700" fill="#2f3f32"/>
+  <rect x="34" y="34" width="1332" height="632" fill="#52643d"/>
+  <path d="M70 620C210 520 230 390 390 338C560 282 650 354 790 270C930 184 1050 198 1294 98" fill="none" stroke="#858873" stroke-width="78" stroke-linecap="round" opacity=".85"/>
+  <path d="M70 620C210 520 230 390 390 338C560 282 650 354 790 270C930 184 1050 198 1294 98" fill="none" stroke="#b6ab8e" stroke-width="50" stroke-linecap="round"/>
+  <rect x="118" y="110" width="378" height="226" fill="url(#wood)" filter="url(#softShadow)"/>
+  <rect x="502" y="92" width="416" height="284" fill="url(#stone)" filter="url(#softShadow)"/>
+  <rect x="936" y="320" width="330" height="214" fill="url(#wood)" filter="url(#softShadow)"/>
+  <g fill="none" stroke="#3a241d" stroke-width="16" stroke-linecap="square">
+    <path d="M118 110H496V336H118Z"/>
+    <path d="M502 92H918V376H502Z"/>
+    <path d="M936 320H1266V534H936Z"/>
+  </g>
+  <g fill="none" stroke="#d1c0a2" stroke-width="8" opacity=".9">
+    <path d="M128 120H486V326H128Z"/>
+    <path d="M512 102H908V366H512Z"/>
+    <path d="M946 330H1256V524H946Z"/>
+  </g>
+  <ellipse cx="1054" cy="152" rx="190" ry="86" fill="#28505a" opacity=".92"/>
+  <path d="M890 162c96-44 215-54 330 3" fill="none" stroke="#7f8170" stroke-width="24" stroke-linecap="round"/>
+  <g fill="#394734" opacity=".95">
+    <circle cx="210" cy="500" r="70"/>
+    <circle cx="286" cy="542" r="50"/>
+    <circle cx="1140" cy="592" r="80"/>
+    <circle cx="1238" cy="598" r="48"/>
+  </g>
+  <g fill="#6c6f5f">
+    <ellipse cx="846" cy="534" rx="38" ry="24"/>
+    <ellipse cx="792" cy="560" rx="26" ry="18"/>
+    <ellipse cx="1152" cy="240" rx="44" ry="30"/>
+    <ellipse cx="1214" cy="224" rx="28" ry="20"/>
+  </g>
+  <g stroke="#24351f" stroke-width="8" stroke-linecap="round">
+    <path d="M278 184c-28 44-30 88-24 140"/>
+    <path d="M300 174c-8 52 2 108 20 150"/>
+    <path d="M322 186c22 48 22 90 10 132"/>
+    <path d="M1120 410c-36 48-44 96-40 154"/>
+    <path d="M1152 398c-4 66 14 118 36 158"/>
+  </g>
+  <rect x="20" y="20" width="1360" height="660" fill="none" stroke="#2b2520" stroke-width="28"/>
+  <rect x="46" y="46" width="1308" height="608" fill="none" stroke="#d1b6a2" stroke-width="12" opacity=".82"/>
+</svg>

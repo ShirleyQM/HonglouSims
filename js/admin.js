@@ -611,6 +611,11 @@ function relationPanelConfigForAdmin() {
     familyRelations: cur.familyRelations?.length ? cur.familyRelations : def.familyRelations || [],
     quadrantLabels: { ...(def.quadrantLabels || {}), ...(cur.quadrantLabels || {}) },
     summaryLabels: { ...(def.summaryLabels || {}), ...(cur.summaryLabels || {}) },
+    affectionVisibility: {
+      ...(def.affectionVisibility || {}),
+      ...(cur.affectionVisibility || {}),
+      hiddenInitTypes: cur.affectionVisibility?.hiddenInitTypes || def.affectionVisibility?.hiddenInitTypes || ['父子', '父女', '母子', '母女', '祖孙', '兄弟', '兄妹', '姐妹', '姐弟'],
+    },
     axisStageLabels: {
       ...(def.axisStageLabels || {}),
       ...(cur.axisStageLabels || {}),
@@ -643,6 +648,40 @@ function relationAxisAdminRows() {
     { key: 'affection', title: '姻缘', en: 'Affinity', range: '实际值 -100～100；阶段开端 -100～100', note: '情感倾向，变化快；显示在关系图右上；底层轴名 affection' },
     { key: 'trust', title: '信任', en: 'Trust', range: '实际值 -100～100；阶段开端 -100～100', note: '可靠感，积累慢、崩塌快；显示在关系图左下' },
   ];
+}
+
+function relationAffinityVisibilityOptions() {
+  return [
+    { id: 'lineal', label: '直系', types: ['父子', '父女', '母子', '母女', '祖孙'], note: '父母子女、祖孙等，默认不显示姻缘。' },
+    { id: 'siblings', label: '兄弟姐妹', types: ['兄弟', '兄妹', '姐妹', '姐弟'], note: '同辈手足，默认不显示姻缘。' },
+    { id: 'closeCollateral', label: '近旁系', types: ['叔侄', '姑侄', '舅甥', '姨甥'], note: '叔侄、姑侄等近旁系，按需要关闭。' },
+    { id: 'inLaws', label: '姻亲', types: ['婆媳', '翁媳', '叔嫂', '妯娌', '连襟'], note: '婚姻带来的亲属关系，按需要关闭。' },
+    { id: 'relatives', label: '泛亲戚', types: ['亲戚'], note: '泛亲戚默认开放，避免误伤表亲和剧情关系。' },
+  ];
+}
+
+function renderAffinityVisibilityControls(cfg, editing) {
+  const disabled = relationLabelInputAttrs(editing);
+  const hidden = new Set(cfg.affectionVisibility?.hiddenInitTypes || []);
+  return `<div class="relation-affinity-visibility">
+    <div class="relation-affinity-title">
+      <b>姻缘可见范围</b>
+      <small>控制哪些名分关系不显示“姻缘”象限；不清空底层 affection 数值。默认关闭直系 + 兄弟姐妹，表亲/恋人等仍开放。</small>
+    </div>
+    <div class="relation-affinity-options">
+      ${relationAffinityVisibilityOptions().map(opt => {
+        const checked = opt.types.every(type => hidden.has(type));
+        return `<label title="${escapeHtml(opt.note)}">
+          <input type="checkbox" data-rel-affinity-group="${escapeHtml(opt.id)}" data-types="${escapeHtml(opt.types.join(','))}" ${checked ? 'checked' : ''}${disabled}>
+          <span>${escapeHtml(opt.label)}</span>
+        </label>`;
+      }).join('')}
+    </div>
+    <div class="cfg-field" style="margin-top:6px">
+      <label style="font-size:10px;color:var(--jn-text-soft)">额外关闭名分（逗号分隔）</label>
+      <input data-rel-affinity-extra value="${adminAttr((cfg.affectionVisibility?.hiddenInitTypes || []).filter(type => !relationAffinityVisibilityOptions().some(opt => opt.types.includes(type))).join(', '))}" placeholder="例如：远亲, 族亲"${disabled}>
+    </div>
+  </div>`;
 }
 
 function relationLabelInputAttrs(editing) {
@@ -713,6 +752,7 @@ function renderRelationQuadrantModule(q, stages, editing) {
 
     ${relationAxisAdminRows().map(axis => `<div class="relation-axis-block">
       <div class="relation-axis-title"><b>【${escapeHtml(axis.title)}${escapeHtml(axis.en)}】</b><small>${escapeHtml(axis.range)}，${escapeHtml(axis.note)}</small></div>
+      ${axis.key === 'affection' ? renderAffinityVisibilityControls({ affectionVisibility: relationPanelConfigForAdmin().affectionVisibility }, editing) : ''}
       <div class="admin-v2-table-wrap" style="max-height:190px">
         <table class="admin-v2-table relation-label-table compact">
           <thead><tr><th style="width:76px">开端</th><th style="width:86px">区间</th><th style="width:120px">标签名</th><th style="width:120px">关系名</th><th>表现说明</th><th>可用互动示例</th></tr></thead>
@@ -5375,6 +5415,19 @@ function adminCollectRelationLabelsFromForm() {
   document.querySelectorAll('[data-rel-label]').forEach(input => {
     draft.quadrantLabels[input.dataset.relLabel] = input.value.trim();
   });
+
+  const hiddenTypes = new Set();
+  document.querySelectorAll('[data-rel-affinity-group]').forEach(input => {
+    if (!input.checked) return;
+    String(input.dataset.types || '').split(',').map(s => s.trim()).filter(Boolean).forEach(type => hiddenTypes.add(type));
+  });
+  const extraAffinity = document.querySelector('[data-rel-affinity-extra]')?.value || '';
+  extraAffinity.split(/[，,]/).map(s => s.trim()).filter(Boolean).forEach(type => hiddenTypes.add(type));
+  draft.affectionVisibility = {
+    ...(draft.affectionVisibility || {}),
+    hiddenInitTypes: Array.from(hiddenTypes),
+    note: '这些名分关系默认不显示姻缘轴；底层 affection 仍保留为亲近/疼爱数值。',
+  };
 
   const stageRows = {};
   document.querySelectorAll('[data-rel-stage-axis]').forEach(input => {

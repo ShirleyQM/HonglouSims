@@ -38,6 +38,9 @@
     },
     "sheyue": {
       "src": "assets/全身立绘/processed/sheyue_avatar.webp"
+    },
+    "baoyu": {
+      "src": "assets/全身立绘/processed/baoyu_avatar.webp"
     }
   },
   "animations": {
@@ -404,6 +407,12 @@
     "qinkeqing": {
       "portrait": "assets/lihui/processed/qinkeqing_portrait.webp",
       "hud": "assets/lihui/processed/qinkeqing_hud.webp"
+    },
+    "baoyu": {
+      "portrait": "assets/全身立绘/processed/baoyu_portrait.webp",
+      "hud": "assets/全身立绘/processed/baoyu_hud.webp",
+      "fullBody": "assets/全身立绘/processed/baoyu_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/baoyu_fullbody_hud.webp"
     }
   },
   "roomBackgrounds": {
@@ -412,10 +421,60 @@
       "fit": "cover",
       "dim": 0.02
     },
+    "2": {
+      "src": "assets/rooms/蘅芜苑-open-top-v1.png",
+      "fit": "cover",
+      "dim": 0.02
+    },
+    "3": {
+      "src": "assets/rooms/沁芳庭-open-top-v1.png",
+      "fit": "cover",
+      "dim": 0.02
+    },
     "4": {
       "src": "assets/rooms/怡红院-open-top-v1.png",
       "fit": "cover",
       "dim": 0.02
+    },
+    "5": {
+      "src": "assets/rooms/荣禧堂-open-top-v1.png",
+      "fit": "cover",
+      "dim": 0.02
+    },
+    "7": {
+      "src": "assets/rooms/秋爽斋-open-top-v1.png",
+      "fit": "cover",
+      "dim": 0.02
+    },
+    "9": {
+      "src": "assets/rooms/暖香坞-v1.png",
+      "fit": "cover",
+      "dim": 0
+    },
+    "10": {
+      "src": "assets/rooms/大观园游廊-横向-v1.png",
+      "fit": "cover",
+      "dim": 0
+    },
+    "11": {
+      "src": "assets/rooms/大观园游廊-横向-v1.png",
+      "fit": "cover",
+      "dim": 0
+    },
+    "12": {
+      "src": "assets/rooms/大观园游廊-纵向-v1.png",
+      "fit": "cover",
+      "dim": 0
+    },
+    "13": {
+      "src": "assets/rooms/大观园游廊-纵向-v1.png",
+      "fit": "cover",
+      "dim": 0
+    },
+    "14": {
+      "src": "assets/rooms/潇怡竹林-v1.png",
+      "fit": "cover",
+      "dim": 0
     }
   }
 }

@@ -1,0 +1,292 @@
+{
+  "outFile": "/Users/bytedance/Desktop/myCursor/game/reports/tmp_xiaoxiang_sanity.md",
+  "jsonOutFile": "/Users/bytedance/Desktop/myCursor/game/reports/tmp_xiaoxiang_sanity.json",
+  "targetIds": [
+    "daiyu",
+    "zijuan",
+    "xueyan"
+  ],
+  "targetNames": [
+    "黛玉",
+    "紫鹃",
+    "雪雁"
+  ],
+  "startDay": 1,
+  "endBeforeDay": 8,
+  "seed": 61617,
+  "rows": [
+    {
+      "time": "第01日 08:04",
+      "day": 1,
+      "hour": 8,
+      "minute": 4,
+      "type": "ai:routine_completed",
+      "person": "黛玉",
+      "action": "作息完成：晨起梳洗 via=wardrobe",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:04",
+      "day": 1,
+      "hour": 8,
+      "minute": 4,
+      "type": "furniture:use_started",
+      "person": "黛玉",
+      "action": "开始用家具：梳洗妆台 / tidy_dress",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:07",
+      "day": 1,
+      "hour": 8,
+      "minute": 7,
+      "type": "furniture:use_started",
+      "person": "紫鹃",
+      "action": "开始用家具：浴盆 / default_use",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:09",
+      "day": 1,
+      "hour": 8,
+      "minute": 9,
+      "type": "furniture:complete",
+      "person": "黛玉",
+      "action": "完成用家具：梳洗妆台 / tidy_dress",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:09",
+      "day": 1,
+      "hour": 8,
+      "minute": 9,
+      "type": "ai:routine_completed",
+      "person": "雪雁",
+      "action": "作息完成：早餐 via=meal",
+      "issuer": ""
+    },
+    {
+      "time": "第01日 08:09",
+      "day": 1,
+      "hour": 8,
+      "minute": 9,
+      "type": "furniture:use_started",
+      "person": "雪雁",
+      "action": "开始用家具：饭桌 / eat_alone",
+      "issuer": ""
+    }
+  ],
+  "perPersonDay": {
+    "1|黛玉": {
+      "total": 3,
+      "tasks": 0,
+      "furniture": 2,
+      "interactions": 0,
+      "blocked": 0,
+      "decisions": 0,
+      "samples": [
+        " 08:04 作息完成：晨起梳洗 via=wardrobe",
+        " 08:04 开始用家具：梳洗妆台 / tidy_dress",
+        " 08:09 完成用家具：梳洗妆台 / tidy_dress"
+      ]
+    },
+    "1|紫鹃": {
+      "total": 1,
+      "tasks": 0,
+      "furniture": 1,
+      "interactions": 0,
+      "blocked": 0,
+      "decisions": 0,
+      "samples": [
+        " 08:07 开始用家具：浴盆 / default_use"
+      ]
+    },
+    "1|雪雁": {
+      "total": 2,
+      "tasks": 0,
+      "furniture": 1,
+      "interactions": 0,
+      "blocked": 0,
+      "decisions": 0,
+      "samples": [
+        " 08:09 作息完成：早餐 via=meal",
+        " 08:09 开始用家具：饭桌 / eat_alone"
+      ]
+    }
+  },
+  "actionCounts": {
+    "黛玉|作息完成：晨起梳洗 via=wardrobe": 1,
+    "黛玉|开始用家具：梳洗妆台 / tidy_dress": 1,
+    "紫鹃|开始用家具：浴盆 / default_use": 1,
+    "黛玉|完成用家具：梳洗妆台 / tidy_dress": 1,
+    "雪雁|作息完成：早餐 via=meal": 1,
+    "雪雁|开始用家具：饭桌 / eat_alone": 1
+  },
+  "rawCounts": {
+    "quest:issued": 1,
+    "quest:accepted": 1,
+    "quest:blocked": 3,
+    "servant:follow_state": 1,
+    "log:add": 32,
+    "state:add": 6,
+    "character:effect": 7,
+    "time:tick": 10,
+    "queue:add": 5,
+    "ai:decision": 5,
+    "ai:routine_completed": 9,
+    "furniture:use_started": 10,
+    "quest:candidate": 9,
+    "need:band_changed": 5,
+    "furniture:reaction": 2,
+    "furniture:complete": 7,
+    "furniture:released": 9,
+    "ai:state": 8,
+    "scene:enter:allowed": 2,
+    "scene:entered": 2
+  },
+  "problems": [
+    "第1日 黛玉 没有记录到社交完成事件，日常仍偏“自己找家具/任务”。",
+    "第1日 紫鹃 没有记录到社交完成事件，日常仍偏“自己找家具/任务”。",
+    "第1日 雪雁 没有记录到社交完成事件，日常仍偏“自己找家具/任务”。"
+  ],
+  "repeated": [],
+  "finalChars": [
+    {
+      "id": "daiyu",
+      "name": "林黛玉",
+      "short": "黛玉",
+      "sceneId": 1,
+      "statusText": "闲庭漫步",
+      "actionType": "",
+      "queue": [],
+      "needs": {
+        "hunger": 61.45762400000003,
+        "energy": 48.917187500000026,
+        "fun": 71.12700000000005,
+        "hygiene": 99.9874,
+        "social": 85,
+        "mood": 74.97550000000003
+      },
+      "aiState": "IDLE"
+    },
+    {
+      "id": "zijuan",
+      "name": "紫鹃",
+      "short": "紫鹃",
+      "sceneId": 1,
+      "statusText": "使用浴盆…",
+      "actionType": "furniture",
+      "queue": [
+        "🛁 在浴盆"
+      ],
+      "needs": {
+        "hunger": 67.53992000000002,
+        "energy": 61.6976,
+        "fun": 51.594999999999985,
+        "hygiene": 107.27450000000002,
+        "social": 85,
+        "mood": 74.95500000000004
+      },
+      "aiState": "EXECUTING"
+    },
+    {
+      "id": "xueyan",
+      "name": "雪雁",
+      "short": "雪雁",
+      "sceneId": 1,
+      "statusText": "独自用膳…",
+      "actionType": "furniture",
+      "queue": [
+        "🍚 独自用膳"
+      ],
+      "needs": {
+        "hunger": 79.9308,
+        "energy": 59.65350000000001,
+        "fun": 54.60400000000003,
+        "hygiene": 73.91915,
+        "social": 85,
+        "mood": 74.96000000000004
+      },
+      "aiState": "EXECUTING"
+    }
+  ],
+  "finalFamilies": [
+    {
+      "id": 1,
+      "name": "怡红院",
+      "fund": 520,
+      "memberIds": [
+        "baoyu",
+        "xiren",
+        "qingwen",
+        "sheyue"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "潇湘馆",
+      "fund": 280,
+      "memberIds": [
+        "daiyu",
+        "zijuan",
+        "xueyan"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "蘅芜苑",
+      "fund": 380,
+      "memberIds": [
+        "baochai",
+        "yinger"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "荣禧堂",
+      "fund": 1200,
+      "memberIds": [
+        "jiazheng",
+        "wangfuren",
+        "jiamu",
+        "jiashe",
+        "xiangyun"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "秋爽斋",
+      "fund": 320,
+      "memberIds": [
+        "tanchun"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "宁国府",
+      "fund": 680,
+      "memberIds": [
+        "jiazhen",
+        "jiarong"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "协理院",
+      "fund": 450,
+      "memberIds": [
+        "xifeng",
+        "jialian",
+        "laiwang"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "刘家庄",
+      "fund": 40,
+      "memberIds": [
+        "liulaolao"
+      ]
+    }
+  ]
+}

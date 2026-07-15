@@ -12,9 +12,11 @@ Use the project pipeline instead of hand-editing generated images.
 1. Work from the game repo root, normally `/Users/bytedance/Desktop/myCursor/game`.
 2. Put incoming character art in `assets/全身立绘/` at the top level. Leave `assets/全身立绘/其他/` untouched unless the user explicitly asks to process it.
 3. Match filenames to known character names, such as `晴雯.png`, `紫鹃.png`, `袭人.png`, `迎春.png`, `雪雁.png`, `麝月.png`. If a new name does not map to a character id, patch `NAME_TO_ID` in `scripts/process_full_body_portraits.py` before running.
+   - Filenames may also start with a known character name plus a variant note, for example `黛玉紫色2改手.png`.
    - If both a clearer bust and a complete full-body source exist, name them with `半身` and `全身`, for example `黛玉半身.png` and `黛玉全身.png`.
    - The `半身` source drives `avatar`/`hud`/`portrait`; the `全身` source drives `fullBody`/`fullBodyHud`.
-   - If duplicate full-body sources exist, names containing `高清`, `hd`, or `highres` are preferred, then larger pixel area wins.
+   - If a dedicated headshot exists, name it with `头像`, for example `麝月头像.png`; it drives only `avatar` and keeps the character's existing `portrait`/`hud`/`fullBody` sources.
+   - If duplicate full-body sources exist, names containing `改手`, `最终`, or `定稿` are preferred over `高清`, `hd`, or `highres`; larger pixel area wins after those markers.
 4. Run the one-command pipeline:
 
 ```bash
@@ -33,6 +35,8 @@ The project script `scripts/process_full_body_portraits.py`:
 
 - removes connected white/paper backgrounds from source images;
 - supports separate bust and full-body source images for the same character;
+- supports dedicated `头像` source images for avatar-only replacement;
+- supports character-name-prefixed variant files and source-specific white-background thresholds for tricky white garments;
 - normalizes semi-body `portrait`/`hud` crops to end slightly below the waist;
 - creates transparent WebP assets:
   - `*_avatar.webp` at `192x192`;
@@ -56,6 +60,7 @@ Check:
 - white background is gone;
 - feet, hair, sleeves, fans, and long hems are not cut off in `portrait`;
 - when `半身` and `全身` sources are both present, `portrait`/`hud` should use the clearer bust while `fullBody` should use the complete full-body source;
+- when a `头像` source is present, `avatar` should use that headshot while the other portrait variants remain unchanged;
 - `portrait`/`hud` are useful semi-body crops ending around slightly below the waist, while `fullBody` remains complete head-to-foot art;
 - `avatar` shows face plus enough shoulder/upper body, not only a large head;
 - no obvious white fringe remains around hair or clothes;

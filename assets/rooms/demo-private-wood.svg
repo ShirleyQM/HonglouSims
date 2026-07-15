@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000">
+  <defs>
+    <pattern id="plank" width="96" height="56" patternUnits="userSpaceOnUse">
+      <rect width="96" height="56" fill="#7b4f34"/>
+      <path d="M0 0H96M0 28H96M0 56H96" stroke="#4a2e1e" stroke-width="2"/>
+      <path d="M18 13c22 8 38-7 60 2M10 42c18-8 38 6 72-2" fill="none" stroke="#a7744d" stroke-width="2" opacity=".42"/>
+    </pattern>
+    <pattern id="tile" width="70" height="70" patternUnits="userSpaceOnUse">
+      <rect width="70" height="70" fill="#9a8e72"/>
+      <path d="M0 0H70M0 35H70M0 70H70M0 0V70M35 0V70M70 0V70" stroke="#6d6553" stroke-width="2" opacity=".5"/>
+    </pattern>
+  </defs>
+  <rect width="1400" height="1000" fill="#40533a"/>
+  <rect x="70" y="70" width="1260" height="860" fill="#55704c"/>
+  <rect x="164" y="126" width="1072" height="468" fill="url(#plank)"/>
+  <rect x="218" y="620" width="350" height="210" fill="url(#plank)"/>
+  <rect x="832" y="620" width="350" height="210" fill="url(#plank)"/>
+  <rect x="568" y="594" width="264" height="296" fill="url(#tile)"/>
+  <g fill="none" stroke="#3b241b" stroke-width="18">
+    <path d="M164 126H1236V594H164Z"/>
+    <path d="M218 620H568V830H218Z"/>
+    <path d="M832 620H1182V830H832Z"/>
+  </g>
+  <g fill="none" stroke="#d8c2a8" stroke-width="8" opacity=".85">
+    <path d="M178 140H1222V580H178Z"/>
+    <path d="M232 634H554V816H232Z"/>
+    <path d="M846 634H1168V816H846Z"/>
+  </g>
+  <path d="M700 594V910" stroke="#c5b191" stroke-width="64" opacity=".72"/>
+  <path d="M266 724C420 648 522 660 674 756C816 846 952 846 1134 714" fill="none" stroke="#b9ad93" stroke-width="48" stroke-linecap="round"/>
+  <g fill="#2f4630">
+    <circle cx="180" cy="770" r="72"/>
+    <circle cx="1246" cy="760" r="78"/>
+    <circle cx="1060" cy="232" r="54"/>
+    <circle cx="316" cy="258" r="48"/>
+  </g>
+  <ellipse cx="702" cy="768" rx="108" ry="42" fill="#2e5c62" opacity=".88"/>
+  <rect x="34" y="34" width="1332" height="932" fill="none" stroke="#26211d" stroke-width="32"/>
+  <rect x="64" y="64" width="1272" height="872" fill="none" stroke="#d7bfa4" stroke-width="12" opacity=".85"/>
+</svg>

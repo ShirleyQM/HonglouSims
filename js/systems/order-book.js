@@ -74,7 +74,7 @@ const OrderBookSystem = (() => {
       ?? c.skillLevels?.[skillId]
       ?? 0;
     const n = Number(raw) || 0;
-    return Math.max(0, Math.min(100, n <= 10 ? n * 20 : n));
+    return Math.max(0, Math.min(100, n <= 10 ? n * 10 : n));
   }
 
   function positionAffairs(charId) {
@@ -132,6 +132,13 @@ const OrderBookSystem = (() => {
       subtlety: '分寸',
       adaptability: '机变',
     }[skillId] || skillId;
+  }
+
+  function managementSkillIds() {
+    return Array.from(new Set(
+      Object.values(AFFAIR_SKILL_WEIGHTS)
+        .flatMap(weights => Object.keys(weights || {}))
+    ));
   }
 
   function affairLabel(affairId) {
@@ -313,7 +320,6 @@ const OrderBookSystem = (() => {
           <h3>${escapeHtml(scene.name || '贾府')}秩序</h3>
           <p>身份礼法、职业职责、事务归口、第四轴关系与技能适配的统一入口。当前版本只读展示，不直接改 AI 结算。</p>
         </div>
-        <button class="sys-btn" onclick="document.getElementById('panel-overlay').classList.remove('open')">关闭</button>
       </div>
       <div class="order-metrics">${orderMetrics().map(buildMetricCard).join('')}</div>
       <div class="order-grid">
@@ -327,7 +333,7 @@ const OrderBookSystem = (() => {
           </div>
         </section>
         <section class="order-section">
-          <h4>人岗适配</h4>
+          <h4>人物管理技能</h4>
           <div class="order-fit-grid">${buildBestFitRows()}</div>
         </section>
         <section class="order-section order-wide">
@@ -348,6 +354,9 @@ const OrderBookSystem = (() => {
             </table>
           </div>
         </section>
+      </div>
+      <div class="panel-footer-actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+        <button class="sys-btn" onclick="document.getElementById('panel-overlay').classList.remove('open')">关闭</button>
       </div>
     </div>`;
   }
@@ -485,6 +494,9 @@ const OrderBookSystem = (() => {
     bindPanel,
     getAffairAssignee,
     getAffairControllers,
+    managementSkillIds,
+    skillName,
+    skillValue,
     estimateAffairFit,
     describeOrderFit,
     inferAffairFromTemplate,

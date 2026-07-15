@@ -123,6 +123,51 @@ const InteractionSocialSystem = (() => {
     return ['恋人', '夫妻'].includes(ri.initType) || ri.score >= 80;
   }
 
+  function servantAxisContext(initiator, target) {
+    const hrel = IdentityProtocolSystem?.getHierarchyRelation?.(initiator.id, target.id);
+    if (hrel !== 'servant_to_master' && hrel !== 'master_to_servant') return null;
+    const servant = hrel === 'servant_to_master' ? initiator : target;
+    const master = hrel === 'servant_to_master' ? target : initiator;
+    const submission = typeof getRelationAxis === 'function'
+      ? getRelationAxis(servant.id, master.id, 'submission')
+      : 0;
+    const masterAxis = typeof getRelationAxis === 'function'
+      ? getRelationAxis(master.id, servant.id, 'submission')
+      : 0;
+    // 主子对仆从的“体恤”沿用第四轴反向值：越负表示越体恤。
+    const compassion = Math.max(0, -masterAxis);
+    const trust = typeof getRelationAxis === 'function'
+      ? getRelationAxis(master.id, servant.id, 'trust')
+      : 0;
+    return { hrel, servant, master, submission, compassion, trust };
+  }
+
+  function servantAxisRelief(initiator, target, tpl, riskHint = '') {
+    const ctx = servantAxisContext(initiator, target);
+    if (!ctx) return null;
+    const category = tpl?.category || '';
+    const contact = tpl?.contact_type || 'none';
+    const allowedCategory = ['weijie', 'lundao', 'xujiu'].includes(category);
+    const allowedContact = ['none', 'touch', 'massage'].includes(contact);
+    if (!allowedCategory || !allowedContact) return null;
+    if (tpl?.is_risky && !['weijie', 'lundao'].includes(category)) return null;
+    const needsTouch = contact === 'touch' || contact === 'massage';
+    const minSubmission = needsTouch ? 35 : 25;
+    const minCompassion = needsTouch ? 25 : 15;
+    const ok = ctx.submission >= minSubmission && ctx.compassion >= minCompassion;
+    if (!ok) return {
+      ok: false,
+      reason: `主仆第四轴不足：服从${Math.round(ctx.submission)}/${minSubmission}，体恤${Math.round(ctx.compassion)}/${minCompassion}`,
+      ...ctx,
+    };
+    return {
+      ok: true,
+      reason: `主仆第四轴：服从${Math.round(ctx.submission)} / 体恤${Math.round(ctx.compassion)}，贴身照拂合礼`,
+      originalRiskHint: riskHint,
+      ...ctx,
+    };
+  }
+
   function resolveRisk(initiator, target, tpl) {
     const protocol = typeof SocialContextSystem === 'object' && SocialContextSystem
       && typeof SocialContextSystem.evaluateProtocol === 'function'
@@ -156,6 +201,16 @@ const InteractionSocialSystem = (() => {
         isRisky = true;
         riskHint = cr.reason || '逾矩有风险';
       }
+    }
+
+    const axisRelief = servantAxisRelief(initiator, target, tpl, riskHint);
+    if (axisRelief?.ok) {
+      return {
+        isRisky: false,
+        successRate: 1,
+        riskHint: axisRelief.reason,
+        servantAxisRelief: axisRelief,
+      };
     }
 
     if (!isRisky) return { isRisky: false, successRate: 1, riskHint: '' };

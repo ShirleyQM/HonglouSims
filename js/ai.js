@@ -2225,6 +2225,10 @@ function ensureBuiltinCandidateProviders() {
           && inst.sceneId === ((typeof AiHomeward !== 'undefined') ? AiHomeward.getHomeSceneId(c) : c.sceneId);
         for (const action of getFurnitureActions(tpl)) {
           ctx.check('furniture');
+          if (typeof ActivityPackSystem !== 'undefined' && !ActivityPackSystem.isAiAllowed(action)) {
+            ctx.reject('furniture', 'activity_ai_disabled');
+            continue;
+          }
           const chk = canUseFurniture(c, inst, action);
           if (chk !== true && chk !== '已满') { ctx.reject('furniture', String(chk || 'unusable')); continue; }
           if (NeedAdaptationSystem?.wouldAiRefuse?.(c, tpl, action)) { ctx.reject('furniture', 'trait_refuse_predicted'); continue; }
@@ -2460,6 +2464,9 @@ function validateCandidateBeforeQueue(c, cand) {
   if (cand.kind === 'furniture') {
     const inst = getInstance(cand.instanceId);
     if (!inst) return { ok: false, reason: '家具不存在' };
+    if (typeof ActivityPackSystem !== 'undefined' && !ActivityPackSystem.isAiAllowed(cand.furnitureAction)) {
+      return { ok: false, reason: '该活动不允许自主执行' };
+    }
     const chk = canUseFurniture(c, inst, cand.furnitureAction || null);
     if (chk !== true && chk !== '已满') return { ok: false, reason: chk || '不可使用家具' };
   }
@@ -2609,6 +2616,7 @@ function findUrgentCandidate(c, needKey) {
     if (!aiCanUseScene(c, inst.sceneId)) return;
     const tpl = getTemplate(inst.templateId);
     for (const action of getFurnitureActions(tpl)) {
+      if (typeof ActivityPackSystem !== 'undefined' && !ActivityPackSystem.isAiAllowed(action)) continue;
       const restoresNeed = (action.needRestores || tpl.needRestores || []).some(nr => nr.need === needKey);
       const actionTags = action.tags || [];
       const catMatch = (URGENT_FURN_CATEGORIES[needKey] || []).includes(action.category || tpl.category)
@@ -3088,6 +3096,15 @@ function migrateConfig(cfg) {
       furnitureInstances: JSON.parse(JSON.stringify(DEFAULT_CONFIG.furnitureInstances)),
     });
   }
+  for (const defScene of DEFAULT_CONFIG.scenes || []) {
+    if (defScene.hidePlaque == null && defScene.hideTitle == null) continue;
+    const scene = (cfg.scenes || []).find(row => row.id === defScene.id);
+    if (!scene) continue;
+    if (defScene.hidePlaque != null && scene.hidePlaque == null) scene.hidePlaque = defScene.hidePlaque;
+    if (defScene.hideTitle != null && scene.hideTitle == null) scene.hideTitle = defScene.hideTitle;
+  }
+  cfg.scenes = (cfg.scenes || []).filter(scene => scene.id !== 6 && scene.name !== '稻香村');
+  cfg.furnitureInstances = (cfg.furnitureInstances || []).filter(inst => inst.sceneId !== 6 && !(inst.instanceId >= 6000 && inst.instanceId < 7000));
   cfg.needDefs = cfg.needDefs || [];
   const legacyNeedLabels = {
     hunger: { labels: ['饥'], names: ['饥饿'] },
@@ -3327,12 +3344,26 @@ function migrateConfig(cfg) {
         cfg.familyConfig.families.push(JSON.parse(JSON.stringify(df)));
       }
     }
+    for (const df of defFc.families || []) {
+      const cur = cfg.familyConfig.families.find(f => f.id === df.id);
+      if (!cur) continue;
+      if (df.residenceKind) cur.residenceKind = df.residenceKind;
+      if ('residenceSceneId' in df) cur.residenceSceneId = df.residenceSceneId;
+      if (df.residenceLabel) cur.residenceLabel = df.residenceLabel;
+      if (df.activitySceneId != null) cur.activitySceneId = df.activitySceneId;
+      if (df.activityLabel) cur.activityLabel = df.activityLabel;
+    }
   }
   for (const dc of DEFAULT_CONFIG.characters || []) {
     const cur = cfg.characters?.find(ch => ch.id === dc.id);
     if (!cur) continue;
     if (cur.homewardness == null && dc.homewardness != null) cur.homewardness = dc.homewardness;
     if (!cur.shortComment && dc.shortComment) cur.shortComment = dc.shortComment;
+    if (cur.sceneId === 6 || !cfg.scenes?.some(scene => scene.id === cur.sceneId)) {
+      cur.sceneId = dc.sceneId;
+      cur.gridCol = dc.gridCol;
+      cur.gridRow = dc.gridRow;
+    }
   }
   if (!cfg.questConfig) cfg.questConfig = DEFAULT_CONFIG.questConfig;
   else {

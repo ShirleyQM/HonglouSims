@@ -360,6 +360,9 @@ function makeMoveItem(col, row) {
 }
 
 function getFurnitureActions(tpl) {
+  if (typeof ActivityPackSystem !== 'undefined' && ActivityPackSystem?.getFurnitureActions) {
+    return ActivityPackSystem.getFurnitureActions(tpl);
+  }
   if (tpl?.actions?.length) return tpl.actions;
   return [{
     id: 'default_use',
@@ -384,6 +387,7 @@ function makeFurnitureItem(inst, action = null) {
     sceneId: inst.sceneId, gridCol: entry.col, gridRow: entry.row,
     instanceId: inst.instanceId, templateId: inst.templateId,
     furnitureAction: act, actionId: act?.id || 'default_use',
+    activityId: act?.activityId || '',
     remaining: act?.duration ?? tpl.duration,
   };
 }

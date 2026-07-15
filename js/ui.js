@@ -283,6 +283,7 @@ function buildColCurrentChar() {
           <div class="state-tags hud-state-tags" id="hud-state-tags">${states || '<span class="tag state neutral">无状态</span>'}</div>
           <button type="button" class="hud-state-more" id="hud-state-more" aria-label="展开状态标签">${hudStateTagsExpanded ? '⌃' : '⌄'}</button>
         </div>
+        ${hudSkillSummaryHtml(c)}
       </div>
     </div>`;
   const newDetail = container.querySelector('.current-char-details');
@@ -290,6 +291,14 @@ function buildColCurrentChar() {
   const stateTags = container.querySelector('#hud-state-tags');
   const stateRow = container.querySelector('#hud-state-row');
   const stateMore = container.querySelector('#hud-state-more');
+  const charArt = container.querySelector('.current-char-art');
+  if (charArt) {
+    charArt.setAttribute('role', 'button');
+    charArt.setAttribute('tabindex', '0');
+    charArt.setAttribute('aria-label', `回到${c.short}`);
+    charArt.onclick = focusSelectedCharacter;
+    charArt.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); focusSelectedCharacter(); } };
+  }
   if (stateTags && stateRow) {
     const updateStateOverflow = () => {
       const overflow = stateTags.scrollHeight > stateTags.clientHeight + 1;
@@ -308,6 +317,43 @@ function buildColCurrentChar() {
       buildUI();
     };
   }
+}
+
+function hudSkillSummaryHtml(c) {
+  const fromChar = [...(c.skills || []), ...Object.keys(c.skillLevels || {})];
+  const stamp = typeof getGameTimestamp === 'function'
+    ? getGameTimestamp()
+    : ((typeof gameDay !== 'undefined' ? gameDay : 0) * 1440
+      + (typeof gameHour !== 'undefined' ? gameHour : 0) * 60
+      + (typeof gameMinute !== 'undefined' ? gameMinute : 0));
+  const freshGains = (c.skillRecentGains || []).filter(row => !row.expiresAt || row.expiresAt >= stamp);
+  if (c.skillRecentGains?.length !== freshGains.length) c.skillRecentGains = freshGains;
+  const gainBySkill = new Map();
+  freshGains.forEach(row => {
+    if (!row.skill) return;
+    const old = gainBySkill.get(row.skill) || { delta: 0, latest: row };
+    gainBySkill.set(row.skill, { delta: old.delta + (Number(row.delta) || 0), latest: row });
+  });
+  const ids = Array.from(new Set([
+    ...freshGains.map(row => row.skill).filter(Boolean),
+    ...fromChar,
+  ])).filter(id => CONFIG.skillDefs?.[id]).slice(0, 5);
+  if (!ids.length) return '';
+  const deltaText = delta => {
+    const fixed = Math.abs(delta) < 1 ? Number(delta).toFixed(2) : Number(delta).toFixed(1);
+    return `${delta >= 0 ? '+' : ''}${fixed.replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')}`;
+  };
+  const chips = ids.map(id => {
+    const def = CONFIG.skillDefs[id] || {};
+    const raw = c.skillLevels?.[id] ?? (id === 'poetry' ? 3 : 1);
+    const lv = Math.max(0, Math.floor(Number(raw) || 0));
+    const gain = gainBySkill.get(id);
+    const gainHtml = gain ? `<em>${escapeHtml(deltaText(gain.delta))}</em>` : '';
+    return `<span class="hud-skill-chip${gain ? ' gain' : ''}" title="${escapeAttr(def.desc || id)}">
+      <b>${escapeHtml(def.name || id)}</b><span>Lv${lv}</span>${gainHtml}
+    </span>`;
+  }).join('');
+  return `<div class="hud-skill-row" title="最近行动带来的技能增长">${chips}</div>`;
 }
 
 function buildColFamily() {
@@ -357,33 +403,87 @@ function buildColFamily() {
   });
 }
 
-function skillLevelDisplay(lv) {
-  const n = Number.isFinite(lv) ? lv : 0;
-  return Number.isInteger(n) ? String(n) : n.toFixed(1).replace(/\.0$/, '');
+function normalizeSkillProficiency(raw) {
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return 0;
+  const value = n <= 10 ? n * 10 : n;
+  return Math.max(0, Math.min(100, value));
 }
 
-function skillProgressPct(lv) {
-  const n = Number.isFinite(lv) ? lv : 0;
-  return Math.max(0, Math.min(100, (n / 5) * 100));
+function skillProficiencyValue(c, sid) {
+  const raw = c.skillValues?.[sid]
+    ?? c.skillProficiency?.[sid]
+    ?? c.skillLevels?.[sid]
+    ?? getSkillLevel(c, sid);
+  return normalizeSkillProficiency(raw);
+}
+
+function skillLevelDisplayFromProficiency(value) {
+  const lv = Math.max(0, Math.min(10, Math.floor((Number(value) || 0) / 10)));
+  return `Lv${lv}`;
+}
+
+function skillProgressPct(value) {
+  const n = Math.max(0, Math.min(100, Number(value) || 0));
+  return n % 10 * 10;
 }
 
 function skillRowHtml(c, sid) {
-  const lv = getSkillLevel(c, sid);
+  const value = skillProficiencyValue(c, sid);
   const ok = canUseSkill(c, sid);
   const def = CONFIG.skillDefs[sid] || {};
   const name = def.name || sid;
-  const title = [def.desc, ok ? '' : '当前状态不可用'].filter(Boolean).join(' · ');
+  const title = [def.desc, `熟练度 ${Math.round(value)}/100`, ok ? '' : '当前状态不可用'].filter(Boolean).join(' · ');
   return `<div class="skill-row${ok ? '' : ' blocked'}" title="${escapeHtml(title)}">
     <span class="sk-name">${escapeHtml(name)}</span>
-    <span class="sk-lv">lv${skillLevelDisplay(lv)}</span>
-    <span class="sk-xp"><span class="sk-xp-fill" style="display:block;width:${skillProgressPct(lv)}%"></span></span>
+    <span class="sk-lv">${skillLevelDisplayFromProficiency(value)}</span>
+    <span class="sk-xp"><span class="sk-xp-fill" style="display:block;width:${skillProgressPct(value)}%"></span></span>
   </div>`;
+}
+
+function managementSkillIdsSet() {
+  return new Set(OrderBookSystem?.managementSkillIds?.() || []);
+}
+
+function managementSkillValue(c, sid) {
+  if (OrderBookSystem?.skillValue) return OrderBookSystem.skillValue(c, sid);
+  const raw = c.skillValues?.[sid] ?? c.skillProficiency?.[sid] ?? c.skillLevels?.[sid] ?? 0;
+  return normalizeSkillProficiency(raw);
+}
+
+function managementSkillRowHtml(c, sid) {
+  const value = managementSkillValue(c, sid);
+  const def = CONFIG.skillDefs[sid] || {};
+  const name = OrderBookSystem?.skillName?.(sid) || def.name || sid;
+  const title = [name, skillLevelDisplayFromProficiency(value), `熟练度 ${Math.round(value)}/100`, def.desc || '秩序面板人物管理技能'].filter(Boolean).join(' · ');
+  return `<div class="skill-row management" title="${escapeHtml(title)}">
+    <span class="sk-name">${escapeHtml(name)}</span>
+    <span class="sk-lv">${skillLevelDisplayFromProficiency(value)}</span>
+    <span class="sk-xp"><span class="sk-xp-fill" style="display:block;width:${skillProgressPct(value)}%"></span></span>
+  </div>`;
+}
+
+function panelFooterActionsHtml(extra = '', includeDefaultClose = true) {
+  return `<div class="panel-footer-actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+    ${extra}
+    ${includeDefaultClose ? '<button class="sys-btn" onclick="document.getElementById(\'panel-overlay\').classList.remove(\'open\')">关闭</button>' : ''}
+  </div>`;
+}
+
+function skillIdsForCharacter(c, options = {}) {
+  const def = getCharDef(c.id) || {};
+  const management = options.includeManagement
+    ? (OrderBookSystem?.managementSkillIds?.() || [])
+    : [];
+  const ids = options.includeRuntime
+    ? [...(def.skills || []), ...(c.skills || []), ...Object.keys(c.skillLevels || {}), ...management]
+    : [...(def.skills || []), ...management];
+  return Array.from(new Set(ids)).filter(id => CONFIG.skillDefs?.[id]);
 }
 
 function buildColSkills() {
   const c = CHARS[selectedIdx];
-  const def = getCharDef(c.id);
-  const skills = (def.skills || []).slice(0, 4);
+  const skills = skillIdsForCharacter(c).slice(0, 4);
   const rows = skills.map(sid => skillRowHtml(c, sid)).join('');
   document.getElementById('col-skill').innerHTML = `
     <div class="col-head"><span>技能</span>
@@ -703,9 +803,7 @@ function buildCommandPanel() {
         <button class="sys-btn primary" id="gi-confirm" ${items.length ? '' : 'disabled'}>发布群体传令</button>
       </section>
     </div>
-    <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
-      <button class="sys-btn" id="gi-cancel">取消</button>
-    </div>`;
+    ${panelFooterActionsHtml('<button class="sys-btn" id="gi-cancel">关闭</button>', false)}`;
 }
 
 function bindCommandPanelEvents() {
@@ -963,13 +1061,21 @@ function buildProfileOverviewBlock(c, repExplain) {
     const tagsHtml = vals.slice(0, 4).map(v => `<i>${escapeHtml(v)}</i>`).join('') || '<em>未配置</em>';
     return `<div class="profile-trait-line"><b>${escapeHtml(cat)}</b><span class="profile-trait-tags">${tagsHtml}</span></div>`;
   }).join('');
+  const basicItems = [
+    ['性别', c.gender || '未设'],
+    ['年龄', c.age == null ? '未设' : `${c.age}岁`],
+    ['家庭', family?.name || '未入家庭'],
+    ['身份', role || rankLabel],
+    ['职业', stage?.title || path?.name || '暂无'],
+    ['声望', Math.round(c.reputation || repExplain?.total || 0)],
+  ].map(([label, value]) => `<span><b>${escapeHtml(label)}</b><em>${escapeHtml(String(value))}</em></span>`).join('');
   const tags = [
     rankLabel,
     role ? `${family?.name || '家庭'} · ${role}` : family?.name || '未入家庭',
     path?.name || '未择职业',
-    repExplain?.best ? `${repExplain.best.label}${repExplain.best.value}` : '',
   ].filter(Boolean).map(t => `<span>${escapeHtml(t)}</span>`).join('');
   return `<section class="profile-cover">
+    <button type="button" class="profile-edit-btn" id="profile-edit-character">编辑</button>
     <button type="button" class="profile-cover-art${fullBody ? ' clickable' : ''}" ${fullBody ? `data-profile-full-body="${escapeHtml(c.id)}" title="查看全身图"` : ''}>
       ${portrait ? `<img src="${escapeHtml(portrait)}" alt="${escapeHtml(c.name || '')}" loading="lazy" decoding="async">` : `<div class="profile-cover-fallback" style="background:${escapeHtml(c.color || '#c8d8c0')}">${escapeHtml(c.short || c.name?.slice(0, 1) || '人')}</div>`}
       ${fullBody ? '<span class="profile-cover-art-hint">全身</span>' : ''}
@@ -978,6 +1084,7 @@ function buildProfileOverviewBlock(c, repExplain) {
       <div class="profile-cover-kicker">人物档案</div>
       <div class="profile-cover-name">${escapeHtml(c.name || '未名')}</div>
       <p class="profile-cover-desc">${escapeHtml(c.shortComment || c.personality || '身份、职业、需求与声望会在这里汇总展示。')}</p>
+      <div class="profile-basic-mini">${basicItems}</div>
       <div class="profile-cover-tags">${tags}</div>
     </div>
     <div class="profile-trait-panel">
@@ -1086,7 +1193,7 @@ function buildProfileStatusBlock(c) {
       </div>
     </div>
     <div class="profile-need-ribbon">
-      <div class="profile-need-head"><span>当前状态</span><b>${escapeHtml(c.statusText || '闲庭漫步')}</b></div>
+      <div class="profile-need-head"><span>当前状态</span></div>
       <div class="profile-need-line">${needs}</div>
       <div class="profile-status-strip">${states || '<span>无状态</span>'}</div>
     </div>
@@ -1185,17 +1292,217 @@ function buildProfileCareerBlock(c) {
 }
 
 function buildProfileReputationBlock(c, repExplain) {
-  const colors = ['#caa04f', '#83ad72', '#67aeb0', '#8d78ad', '#c97d83'];
-  const rows = profileReputationSummary(c, repExplain).map((row, i) => {
-    const max = 1000;
+  const summary = profileReputationSummary(c, repExplain);
+  const overall = summary[0] || { label: '声望', value: Math.round(c.reputation || repExplain?.total || 0), sub: '总体' };
+  const dims = summary.slice(1, 5);
+  const max = 1000;
+  const center = 50;
+  const radius = 36;
+  const axisPoints = [
+    [50, 10],
+    [90, 50],
+    [50, 90],
+    [10, 50],
+  ];
+  const valuePoints = dims.map((row, i) => {
+    const ratio = Math.max(0, Math.min(1, row.value / max));
+    const [x, y] = axisPoints[i];
+    return [
+      center + (x - center) * ratio,
+      center + (y - center) * ratio,
+    ];
+  });
+  const polygon = valuePoints.map(p => p.map(n => Number(n).toFixed(1)).join(',')).join(' ');
+  const dimHtml = dims.map((row, i) => {
     const pct = Math.max(0, Math.min(100, row.value / max * 100));
-    return `<div class="profile-rep-tile">
-      <div class="profile-card-label">${escapeHtml(row.label)}</div>
-      <div class="profile-card-value">${escapeHtml(row.value)}</div>
-      <div class="profile-rep-track"><span style="width:${pct}%;background:${colors[i % colors.length]}"></span></div>
-      <div class="profile-card-sub">${escapeHtml(row.sub)}</div>
-    </div>`;
+    return `<span class="profile-radar-dim" title="${escapeHtml(row.label)}：${escapeHtml(row.value)}｜${escapeHtml(row.sub)}">
+      <i style="height:${pct}%"></i><b>${escapeHtml(row.label)}</b><em>${escapeHtml(row.value)}</em>
+    </span>`;
   }).join('');
+  return `<section class="profile-section">
+    <div class="profile-stat-grid">
+      <div class="profile-stat-card">
+        <h4>声望</h4>
+        <div class="profile-radar-card" title="综合声望：${escapeHtml(overall.value)}｜${escapeHtml(overall.sub)}">
+          <svg class="profile-radar-svg" viewBox="0 0 100 100" aria-label="声望雷达图">
+            <polygon class="profile-radar-grid" points="50,10 90,50 50,90 10,50"></polygon>
+            <polygon class="profile-radar-grid inner" points="50,30 70,50 50,70 30,50"></polygon>
+            <line x1="50" y1="10" x2="50" y2="90"></line>
+            <line x1="10" y1="50" x2="90" y2="50"></line>
+            <polygon class="profile-radar-shape" points="${escapeHtml(polygon)}"></polygon>
+          </svg>
+          <div class="profile-radar-center"><b>${escapeHtml(overall.value)}</b><span>总声望</span></div>
+        </div>
+        <div class="profile-radar-dims">${dimHtml}</div>
+        <button type="button" class="profile-card-full" data-profile-full="reputation">完整版</button>
+      </div>
+      <div class="profile-stat-card">
+        <h4>血缘</h4>
+        ${buildProfileTreeIframe(c, 'kinship')}
+        <button type="button" class="profile-card-full" data-profile-full="kinship">完整版</button>
+      </div>
+      <div class="profile-stat-card">
+        <h4>身份</h4>
+        ${buildProfileTreeIframe(c, 'identity')}
+        <button type="button" class="profile-card-full" data-profile-full="identity">完整版</button>
+      </div>
+    </div>
+  </section>`;
+}
+
+function buildProfileTreeIframe(c, mode) {
+  const params = new URLSearchParams({
+    embed: '1',
+    mini: '1',
+    mode,
+    focus: c.id || '',
+  });
+  return `<iframe class="profile-tree-frame" src="jiafu-order.html?${escapeHtml(params.toString())}" title="${mode === 'identity' ? '身份谱' : '血缘谱'}"></iframe>`;
+}
+
+function profileOrderMeta() {
+  return window.JIAFU_ORDER_METADATA || {};
+}
+
+function profileTreePersonName(id) {
+  const ch = CHARS.find(x => x.id === id);
+  return ch?.name || profileOrderMeta().sourceGenealogy?.nameMap?.[id] || id;
+}
+
+function profileTreeNodeRole(node, mode) {
+  if (!node) return '';
+  if (mode === 'identity') {
+    const label = profileOrderMeta().identityLevelRights?.find(row => row.level === node.rank)?.label || `位阶${node.rank ?? '?'}`;
+    return [node.familyRole, label].filter(Boolean).join(' · ');
+  }
+  return node.level || '';
+}
+
+function profileTreePreview(c, mode) {
+  const meta = profileOrderMeta();
+  const tree = meta.treeDefs?.[mode];
+  const nodeMap = tree?.nodes || {};
+  const current = nodeMap[c.id];
+  if (!tree || !current) {
+    return profileRuntimeTreeFallback(c, mode);
+  }
+  const connected = (tree.edges || []).filter(edge => edge.from === c.id || edge.to === c.id);
+  const ids = new Set([c.id]);
+  connected.forEach(edge => { ids.add(edge.from); ids.add(edge.to); });
+  if (ids.size < 4) {
+    Object.values(nodeMap)
+      .filter(node => mode === 'identity' ? node.rank === current.rank : node.level === current.level)
+      .slice(0, 4)
+      .forEach(node => ids.add(node.id));
+  }
+  const visibleIds = Array.from(ids).slice(0, 8);
+  if (!visibleIds.includes(c.id)) visibleIds.unshift(c.id);
+  const nodes = visibleIds.map(id => nodeMap[id]).filter(Boolean);
+  const edges = (tree.edges || []).filter(edge => visibleIds.includes(edge.from) && visibleIds.includes(edge.to));
+  const centers = nodes.map(node => ({ id: node.id, x: node.x + 66, y: node.y + 41 }));
+  const minX = Math.min(...centers.map(p => p.x));
+  const maxX = Math.max(...centers.map(p => p.x));
+  const minY = Math.min(...centers.map(p => p.y));
+  const maxY = Math.max(...centers.map(p => p.y));
+  const width = 100;
+  const height = 100;
+  const pad = 12;
+  const pointFor = node => {
+    const cx = node.x + 66;
+    const cy = node.y + 41;
+    const x = pad + (maxX === minX ? .5 : (cx - minX) / (maxX - minX)) * (width - pad * 2);
+    const y = pad + (maxY === minY ? .5 : (cy - minY) / (maxY - minY)) * (height - pad * 2);
+    return { x, y };
+  };
+  const positions = Object.fromEntries(nodes.map(node => [node.id, pointFor(node)]));
+  const edgeHtml = edges.map(edge => {
+    const from = positions[edge.from];
+    const to = positions[edge.to];
+    if (!from || !to) return '';
+    const midX = (from.x + to.x) / 2;
+    const midY = (from.y + to.y) / 2;
+    const d = `M ${from.x} ${from.y} Q ${midX} ${midY - 7} ${to.x} ${to.y}`;
+    const label = mode === 'kinship' && edge.label
+      ? `<text x="${midX}" y="${midY - 3}" text-anchor="middle">${escapeHtml(edge.label)}</text>`
+      : '';
+    return `<path d="${d}"></path>${label}`;
+  }).join('');
+  const nodeHtml = nodes
+    .sort((a, b) => (positions[a.id].y - positions[b.id].y) || (positions[a.id].x - positions[b.id].x))
+    .map(node => {
+      const p = positions[node.id];
+      const active = node.id === c.id ? ' active' : '';
+      return `<span class="profile-tree-node${active}" style="left:${p.x}%;top:${p.y}%">
+        <b>${escapeHtml(profileTreePersonName(node.id))}</b>
+        <em>${escapeHtml(profileTreeNodeRole(node, mode))}</em>
+      </span>`;
+    }).join('');
+  return `<div class="profile-tree-mini ${mode}">
+    <svg viewBox="0 0 ${width} ${height}" aria-hidden="true">${edgeHtml}</svg>
+    ${nodeHtml}
+  </div>`;
+}
+
+function profileRuntimeTreeFallback(c, mode) {
+  const family = FamilySystem?.findFamilyOfChar?.(c.id);
+  const candidates = mode === 'identity'
+    ? [...CHARS].sort((a, b) => (IdentityProtocolSystem?.getCharRank?.(a.id) ?? a.socialRank ?? 9) - (IdentityProtocolSystem?.getCharRank?.(b.id) ?? b.socialRank ?? 9))
+    : CHARS.filter(row => family && FamilySystem?.findFamilyOfChar?.(row.id)?.id === family.id);
+  const nodes = [c, ...candidates.filter(row => row.id !== c.id)].slice(0, 6);
+  if (!nodes.length) {
+    const text = mode === 'identity' ? '身份谱暂无此人' : '血缘谱暂无此人';
+    return `<div class="profile-tree-empty">${escapeHtml(text)}</div>`;
+  }
+  const html = nodes.map(row => {
+    const rank = IdentityProtocolSystem?.getCharRank?.(row.id) ?? row.socialRank ?? 2;
+    const rankLabel = IdentityProtocolSystem?.rankLabel?.(rank) || `位阶${rank}`;
+    const rowFamily = FamilySystem?.findFamilyOfChar?.(row.id);
+    const role = rowFamily ? FamilySystem.getCharRole(row.id, rowFamily.id) : '';
+    const active = row.id === c.id ? ' active' : '';
+    return `<span class="profile-tree-fallback-node${active}">
+      <b>${escapeHtml(row.name || row.id)}</b>
+      <em>${escapeHtml(mode === 'identity' ? [role, rankLabel].filter(Boolean).join(' · ') : role || rowFamily?.name || '未入家庭')}</em>
+    </span>`;
+  }).join('');
+  return `<div class="profile-tree-fallback ${mode}">${html}</div>`;
+}
+
+function buildProfileTreePreviewBlock(c) {
+  return `<div class="profile-tree-stack">
+    <div class="profile-tree-title"><span>血缘谱</span><em>名分关系</em></div>
+    ${profileTreePreview(c, 'kinship')}
+    <div class="profile-tree-title"><span>身份谱</span><em>位阶与管辖</em></div>
+    ${profileTreePreview(c, 'identity')}
+  </div>`;
+}
+
+function buildJiafuOrderEmbedPanel(options = {}) {
+  const params = new URLSearchParams({ embed: '1' });
+  if (options.mode) params.set('mode', options.mode);
+  if (options.focus) params.set('focus', options.focus);
+  const backButton = options.backToProfile
+    ? '<button class="sys-btn" id="profile-back-to-dossier">返回人物</button>'
+    : '';
+  return `<div class="jiafu-order-embed">
+    <div class="jiafu-order-embed-head">
+      <div>
+        <h3>贾府秩序</h3>
+        <p>血缘、身份、事务、技能的完整秩序册。</p>
+      </div>
+    </div>
+    <iframe class="jiafu-order-frame" src="jiafu-order.html?${escapeHtml(params.toString())}" title="贾府秩序"></iframe>
+    ${panelFooterActionsHtml(backButton)}
+  </div>`;
+}
+
+function openJiafuOrderPanel(options = {}) {
+  openPanel(buildJiafuOrderEmbedPanel(options));
+  document.getElementById('panel-content')?.classList.add('jiafu-order-panel-box');
+  const back = document.getElementById('profile-back-to-dossier');
+  if (back) back.onclick = () => openCharacterProfilePanel();
+}
+
+function buildProfileReputationFullPanel(c, repExplain) {
   const logRows = (repExplain?.log || []).map(row => `
     <tr>
       <td>第${escapeHtml(row.day ?? '?')}日</td>
@@ -1203,15 +1510,83 @@ function buildProfileReputationBlock(c, repExplain) {
       <td style="color:${row.delta >= 0 ? 'var(--jn-green-deep)' : 'var(--jn-red-bright)'}">${row.delta > 0 ? '+' : ''}${escapeHtml(row.delta || 0)}</td>
       <td>${escapeHtml(row.reason || row.source || '—')}</td>
     </tr>`).join('');
-  return `<section class="profile-section">
-    <h4>声望</h4>
-    <div class="profile-two-col profile-reputation-layout">
-      <div class="profile-reputation-grid">${rows}</div>
-      <div class="profile-table-wrap" style="max-height:190px">
+  return `<div class="profile-panel">
+    <h3>${escapeHtml(c.name || '人物')} · 声望完整版</h3>
+    <section class="profile-section">
+      <div class="profile-reputation-grid profile-reputation-bars">${profileReputationSummary(c, repExplain).map((row, i) => {
+        const colors = ['#caa04f', '#83ad72', '#67aeb0', '#8d78ad', '#c97d83'];
+        const pct = Math.max(0, Math.min(100, row.value / 1000 * 100));
+        return `<div class="profile-rep-column">
+          <div class="profile-rep-column-track"><span style="height:${pct}%;background:${colors[i % colors.length]}"></span></div>
+          <b>${escapeHtml(row.label)}</b><em>${escapeHtml(row.value)}</em><small>${escapeHtml(row.sub)}</small>
+        </div>`;
+      }).join('')}</div>
+    </section>
+    <section class="profile-section">
+      <h4>近期变化</h4>
+      <div class="profile-table-wrap" style="max-height:260px">
         <table class="profile-table">
           <thead><tr><th>日期</th><th>领域</th><th>变化</th><th>原因</th></tr></thead>
           <tbody>${logRows || '<tr><td colspan="4" class="profile-empty">暂无变化记录</td></tr>'}</tbody>
         </table>
+      </div>
+    </section>
+    <div class="profile-actions">
+      <button class="sys-btn" id="profile-back-to-dossier">返回人物</button>
+      <button class="sys-btn" onclick="document.getElementById('panel-overlay').classList.remove('open')">关闭</button>
+    </div>
+  </div>`;
+}
+
+function buildProfileSkillsBlock(c) {
+  const ids = skillIdsForCharacter(c, { includeManagement: true });
+  const managementSet = managementSkillIdsSet();
+  const rows = ids.map(id => {
+    const def = CONFIG.skillDefs[id] || {};
+    const isManagement = managementSet.has(id);
+    const value = isManagement ? managementSkillValue(c, id) : skillProficiencyValue(c, id);
+    const ok = isManagement || canUseSkill(c, id);
+    const pct = skillProgressPct(value);
+    const shown = skillLevelDisplayFromProficiency(value);
+    const detail = [
+      OrderBookSystem?.skillName?.(id) || def.name || id,
+      shown,
+      `熟练度 ${Math.round(value)}/100`,
+      def.desc || def.description || '',
+      ok ? '' : '当前状态不可用',
+    ].filter(Boolean).join('｜');
+    return `<div class="profile-skill-card${ok ? '' : ' blocked'}" title="${escapeHtml(detail)}">
+      <div class="profile-skill-pillar"><i style="height:${pct}%"></i></div>
+      <div class="profile-skill-top"><b>${escapeHtml(OrderBookSystem?.skillName?.(id) || def.name || id)}</b><span>${escapeHtml(shown)}</span></div>
+    </div>`;
+  }).join('');
+  return `<section class="profile-section profile-skills-section">
+    <h4>技能</h4>
+    <div class="profile-skill-row">${rows || '<div class="profile-empty">暂无技能记录</div>'}</div>
+    <button type="button" class="profile-card-full profile-skill-full" id="profile-open-skill-full">完整版</button>
+  </section>`;
+}
+
+function buildProfileFutureBlock(c) {
+  const path = c.lifePath ? LifePathSystem?.getPath?.(c.lifePath) : null;
+  const stage = c.currentStage ? LifePathSystem?.getStage?.(c.currentStage) : null;
+  const dream = profileDreamInfo(c);
+  const pct = dream.progress == null ? null : Math.max(0, Math.min(100, Number(dream.progress) || 0));
+  return `<section class="profile-section">
+    <h4>职业路径 / 梦想</h4>
+    <div class="profile-two-col profile-future-row">
+      <div class="profile-path-card">
+        <div class="profile-card-label">职业路径</div>
+        <div class="profile-path-title">${escapeHtml(path?.name || '未择路')}</div>
+        <div class="profile-path-meta">${escapeHtml(stage?.title || '暂无阶段')}${stage?.rankOverride != null ? ` · 身份位阶 ${stage.rankOverride}` : ''}</div>
+        <div class="profile-path-desc">${escapeHtml(path?.description || '职业系统后续继续接入。')}</div>
+      </div>
+      <div class="profile-path-card">
+        <div class="profile-card-label">梦想</div>
+        <div class="profile-path-title">${escapeHtml(dream.title)}</div>
+        <div class="profile-path-meta">${escapeHtml(dream.condition)}</div>
+        <div class="profile-path-desc">${escapeHtml(dream.desc)}</div>
+        ${pct == null ? '' : `<div class="profile-dream-progress"><span style="width:${pct}%"></span></div>`}
       </div>
     </div>
   </section>`;
@@ -1252,23 +1627,53 @@ function buildCharacterProfilePanel() {
   LifePathSystem?.initChar?.(c);
   ReputationDomainSystem?.initChar?.(c);
   const repExplain = ReputationDomainSystem?.explain?.(c.id);
-  return `<div class="profile-panel">
-    ${buildProfileOverviewBlock(c, repExplain)}
-    ${buildProfileStatusBlock(c)}
-    ${buildProfileBasicsBlock(c, repExplain)}
-    ${buildProfileReputationBlock(c, repExplain)}
-    ${buildProfileDreamBlock(c)}
-    ${buildProfileCareerBlock(c)}
-    <div class="profile-actions">
-      <button class="sys-btn" id="profile-open-relations">关系网络</button>
-      <button class="sys-btn" id="profile-open-life-path">路径详情</button>
-      <button class="sys-btn" onclick="document.getElementById('panel-overlay').classList.remove('open')">关闭</button>
+  return `<div class="profile-panel profile-compact-panel">
+    <section class="profile-compact-top">
+      <div class="profile-compact-main">
+        ${buildProfileOverviewBlock(c, repExplain)}
+        ${buildProfileStatusBlock(c)}
+      </div>
+      ${buildProfileFutureBlock(c)}
+    </section>
+    <div class="profile-compact-bottom">
+      ${buildProfileSkillsBlock(c)}
+      ${buildProfileReputationBlock(c, repExplain)}
     </div>
+    ${panelFooterActionsHtml()}
   </div>`;
+}
+
+function openProfileAdminCharacterEditor() {
+  const c = CHARS[selectedIdx];
+  if (!c) return;
+  document.getElementById('panel-overlay')?.classList.remove('open');
+  if (typeof adminSelectCharById === 'function') {
+    adminSelectCharById(c.id);
+  } else if (typeof adminSelChar !== 'undefined') {
+    const idx = CONFIG.characters.findIndex(row => row.id === c.id);
+    if (idx >= 0) adminSelChar = idx;
+  }
+  if (typeof adminMode !== 'undefined') adminMode = 'v2';
+  if (typeof adminV2Section !== 'undefined') adminV2Section = 'characterEditor';
+  if (typeof adminV2CharacterEditing !== 'undefined') adminV2CharacterEditing = true;
+  if (typeof openAdmin === 'function') openAdmin();
+}
+
+function openProfileSkillPanel() {
+  openPanel(`<div class="profile-panel profile-skill-full-wrapper">
+    ${buildSkillPanel({ hideClose: true })}
+    ${panelFooterActionsHtml('<button class="sys-btn" id="profile-back-to-dossier">返回人物</button>')}
+  </div>`);
+  const back = document.getElementById('profile-back-to-dossier');
+  if (back) back.onclick = () => openCharacterProfilePanel();
 }
 
 function openCharacterProfilePanel() {
   openPanel(buildCharacterProfilePanel());
+  const editBtn = document.getElementById('profile-edit-character');
+  if (editBtn) editBtn.onclick = openProfileAdminCharacterEditor;
+  const skillFullBtn = document.getElementById('profile-open-skill-full');
+  if (skillFullBtn) skillFullBtn.onclick = () => openProfileSkillPanel();
   const btn = document.getElementById('profile-open-life-path');
   if (btn) btn.onclick = () => LifePathSystem?.openPathPanel?.();
   const relBtn = document.getElementById('profile-open-relations');
@@ -1280,6 +1685,25 @@ function openCharacterProfilePanel() {
     const back = document.getElementById('profile-back-to-dossier');
     if (back) back.onclick = () => openCharacterProfilePanel();
   };
+  document.querySelectorAll('[data-profile-full]').forEach(btn => {
+    btn.onclick = () => {
+      const c = CHARS[selectedIdx];
+      if (btn.dataset.profileFull === 'reputation') {
+        const repExplain = ReputationDomainSystem?.explain?.(c.id);
+        openPanel(buildProfileReputationFullPanel(c, repExplain));
+        const back = document.getElementById('profile-back-to-dossier');
+        if (back) back.onclick = () => openCharacterProfilePanel();
+        return;
+      }
+      if (btn.dataset.profileFull === 'kinship' || btn.dataset.profileFull === 'identity') {
+        openJiafuOrderPanel({
+          mode: btn.dataset.profileFull === 'identity' ? 'identity' : 'kinship',
+          focus: c.id,
+          backToProfile: true,
+        });
+      }
+    };
+  });
 }
 
 function initLogSidebar() {
@@ -1315,7 +1739,7 @@ function buildActionQueue() {
   const panel = document.getElementById('action-queue-panel');
   if (panel) panel.classList.toggle('is-empty', !displayQueue.length);
   if (!displayQueue.length) {
-    el.innerHTML = '<span class="aq-empty">暂无排队行动，点击家具/地面/人物添加</span>';
+    el.innerHTML = '<span class="aq-empty">暂无排队行动</span>';
     return;
   }
   el.innerHTML = slice.map((item, i) => {
@@ -1425,6 +1849,17 @@ function isFilialCareRelation(initType = '') {
   return ['父子', '父女', '母子', '母女', '祖孙'].includes(initType);
 }
 
+function isRelationLinealKinship(initType = '') {
+  return ['父子', '父女', '母子', '母女', '祖孙'].includes(initType);
+}
+
+function relationShouldHideAffectionAxis(ri) {
+  if (!ri?.initType) return false;
+  const cfg = relationPanelConfig().affectionVisibility || {};
+  const hidden = cfg.hiddenInitTypes || ['父子', '父女', '母子', '母女', '祖孙', '兄弟', '兄妹', '姐妹', '姐弟'];
+  return hidden.includes(ri.initType);
+}
+
 function isYoungerOrLower(c, t) {
   const rankC = CONFIG.characters?.find(x => x.id === c.id)?.socialRank ?? 2;
   const rankT = CONFIG.characters?.find(x => x.id === t.id)?.socialRank ?? 2;
@@ -1498,6 +1933,7 @@ function relationFourthAxis(ri, c, t) {
 function relationAxisDisplayModel(ri, c, t) {
   const labels = relationPanelConfig().quadrantLabels || {};
   const serviceAxis = relationFourthAxis(ri, c, t);
+  const hideAffection = relationShouldHideAffectionAxis(ri);
   return [
     {
       key: 'friendship',
@@ -1513,13 +1949,14 @@ function relationAxisDisplayModel(ri, c, t) {
     {
       key: 'affection',
       baselineKey: 'affection',
-      label: labels.affinity || '姻缘',
-      stage: ri.axisStages.affection,
+      label: hideAffection ? '' : (labels.affinity || '姻缘'),
+      stage: hideAffection ? { label: '' } : ri.axisStages.affection,
       color: 'var(--jn-red-deep)',
       value: ri.affection || 0,
       start: 0,
       end: 90,
-      active: true,
+      active: !hideAffection,
+      hiddenReason: hideAffection ? '直系亲属默认隐藏姻缘轴' : '',
     },
     {
       key: 'trust',
@@ -1540,9 +1977,10 @@ function relationStageDisplay(stage) {
   return stage?.label || '';
 }
 
-function relationCenterLabel(ri) {
+function relationCenterLabel(ri, c, t) {
+  const hideAffection = relationShouldHideAffectionAxis(ri);
   const candidates = [
-    { priority: 3, value: ri.affection ?? 0, label: relationStageDisplay(ri.axisStages.affection) },
+    { priority: 3, value: hideAffection ? -999 : (ri.affection ?? 0), label: hideAffection ? '' : relationStageDisplay(ri.axisStages.affection) },
     { priority: 2, value: ri.friendship ?? 0, label: relationStageDisplay(ri.axisStages.friendship) },
     { priority: 1, value: ri.score ?? 0, label: ri.typeLabel || getRelationTypeLabel?.(ri.score) },
   ].sort((a, b) => (b.value - a.value) || (b.priority - a.priority));
@@ -1560,7 +1998,7 @@ function relationSummaryText(ri, c, t) {
   const axes = relationAxisDisplayModel(ri, c, t);
   const items = [
     [axes[0].label, relationSummaryStageName(axes[0].stage)],
-    [axes[1].label, relationSummaryStageName(axes[1].stage)],
+    [axes[1].label, axes[1].active ? relationSummaryStageName(axes[1].stage) : ''],
     [axes[2].label, relationSummaryStageName(axes[2].stage)],
     [axes[3].label, axes[3].active ? relationSummaryStageName(axes[3].stage) : ''],
     ['综合关系', ri.compositeLabel || ''],
@@ -1615,7 +2053,7 @@ function relationArcChart(ri, c, t) {
       <rect x="${cx - scoreR}" y="${scoreFillY.toFixed(1)}" width="${scoreR * 2}" height="${scoreFillH.toFixed(1)}" fill="${scoreFillColor}" clip-path="url(#${clipId})"/>
       <line x1="${cx - scoreR + 3}" y1="${cy}" x2="${cx + scoreR - 3}" y2="${cy}" stroke="rgba(107,90,76,.22)" stroke-width="1"/>
       <circle cx="${cx}" cy="${cy}" r="${scoreR}" fill="none" stroke="rgba(107,90,76,.28)" stroke-width="1"/>
-      <text x="${cx}" y="${cy - 5}" text-anchor="middle" fill="var(--jn-heading)" font-size="12" font-weight="700">${escapeHtml(relationCenterLabel(ri))}</text>
+      <text x="${cx}" y="${cy - 5}" text-anchor="middle" fill="var(--jn-heading)" font-size="12" font-weight="700">${escapeHtml(relationCenterLabel(ri, c, t))}</text>
       <text x="${cx}" y="${cy + 10}" text-anchor="middle" fill="${ri.score >= 0 ? 'var(--jn-gold)' : 'var(--jn-blue-deep)'}" font-size="10">${scoreStr}</text>
     </svg>
   </div>`;
@@ -1626,8 +2064,11 @@ function buildRelationsPanel() {
   const others = CHARS.filter(x => x.id !== c.id);
   const configured = others.filter(t => hasConfiguredRelation(c.id, t.id) || getRelationValue(c.id, t.id) !== 0);
   const list = configured.length ? configured : others;
+  const hiddenAffinityTypes = relationPanelConfig().affectionVisibility?.hiddenInitTypes || [];
   return `<h3>${c.name} · 关系网络</h3>` +
-    `<p style="font-size:10px;color:var(--jn-text-soft);margin:-2px 0 8px">每张卡展示友谊、姻缘、信任与第四象限；主仆显示服从/体恤，亲缘显示孝道/慈爱，其他先空着。</p>
+    `<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin:-2px 0 8px;flex-wrap:wrap">
+      <p style="font-size:10px;color:var(--jn-text-soft);margin:0">每张卡展示友谊、姻缘、信任与第四象限；姻缘可见范围由后台【关系标签】-【姻缘 Affinity】配置。当前关闭：${escapeHtml(hiddenAffinityTypes.join('、') || '无')}</p>
+    </div>
     <div class="rel-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;align-items:start">` +
     list.map(t => {
       const ri = getRelationInfo(c.id, t.id);
@@ -1645,8 +2086,8 @@ function buildRelationsPanel() {
       </div>`;
     }).join('') +
     `</div>
-    <p style="margin-top:8px;font-size:10px;color:var(--jn-text-soft)">好感·信任·友谊三轴构成综合分；服从为方向性轴，由身份差值初始化，不参与综合分。</p>
-    <button class="sys-btn" style="margin-top:8px" onclick="document.getElementById('panel-overlay').classList.remove('open')">关闭</button>`;
+    <p style="margin-top:8px;font-size:10px;color:var(--jn-text-soft)">好感·信任·友谊三轴构成综合分；服从为方向性轴，由身份差值初始化，不参与综合分。后台关闭的是“姻缘展示语义”，不清空底层好感数值。</p>
+    ${panelFooterActionsHtml()}`;
 }
 
 function formatFurnitureActionEffects(action) {
@@ -1722,16 +2163,30 @@ function buildMessagePanel() {
     <button class="sys-btn" style="margin-top:8px" onclick="document.getElementById('panel-overlay').classList.remove('open')">关闭</button>`;
 }
 
-function buildSkillPanel() {
+function buildSkillPanel(options = {}) {
   const c = CHARS[selectedIdx], def = getCharDef(c.id);
-  const skills = def.skills || [];
+  const baseSkills = skillIdsForCharacter(c);
+  const managementSkills = (OrderBookSystem?.managementSkillIds?.() || [])
+    .filter(id => CONFIG.skillDefs?.[id]);
+  const skills = [...baseSkills, ...managementSkills];
   const rows = skills.map(sid => skillRowHtml(c, sid)).join('');
+  const baseRows = baseSkills.map(sid => skillRowHtml(c, sid)).join('');
+  const managementRows = managementSkills.map(sid => managementSkillRowHtml(c, sid)).join('');
   return `<h3>${c.name} · 技能</h3>
     <div class="skill-panel-list" style="max-height:calc(70vh - 150px);min-height:0;overflow-y:auto;padding-right:4px">
-      ${rows || '<p style="color:var(--jn-text-soft)">暂无技能</p>'}
+      ${rows ? `
+        <section class="skill-panel-section">
+          <h4 style="font-size:12px;color:var(--jn-heading);margin:0 0 6px">人物技能</h4>
+          ${baseRows || '<p style="color:var(--jn-text-soft)">暂无人物技能</p>'}
+        </section>
+        <section class="skill-panel-section" style="margin-top:10px">
+          <h4 style="font-size:12px;color:var(--jn-heading);margin:0 0 6px">人物管理技能</h4>
+          ${managementRows || '<p style="color:var(--jn-text-soft)">暂无额外管理技能</p>'}
+        </section>
+      ` : '<p style="color:var(--jn-text-soft)">暂无技能</p>'}
     </div>
     <div style="margin-top:10px;font-size:11px;color:var(--jn-text-soft)"><b>性格</b><br>${escapeHtml(def.personality || '')}</div>
-    <button class="sys-btn" style="margin-top:8px" onclick="document.getElementById('panel-overlay').classList.remove('open')">关闭</button>`;
+    ${options.hideClose ? '' : panelFooterActionsHtml()}`;
 }
 
 function routineClockLabel(minute) {
@@ -2073,7 +2528,7 @@ function buildRoutinePanel() {
 
 function openPanel(html) {
   const panel = document.getElementById('panel-content');
-  panel.classList.remove('routine-panel-box', 'order-book-panel-box');
+  panel.classList.remove('routine-panel-box', 'order-book-panel-box', 'jiafu-order-panel-box');
   panel.innerHTML = html;
   document.getElementById('panel-overlay').classList.add('open');
 }
@@ -3250,22 +3705,25 @@ function renderImCategories() {
     const subCenterSlot = Math.floor(subVisibleCount / 2);
     const subMenu = active ? Array.from({ length: subVisibleCount }, (_, slotIdx) => {
       const itemIdx = imWrapIndex(imMenuSubIndex + slotIdx - subCenterSlot, subTotal);
-      const { tpl, ok, reason, risky, riskHint } = group.items[itemIdx];
+      const { tpl, ok, reason, risky, riskHint, riskMeta } = group.items[itemIdx];
       const disabled = ok === false || ok === 0;
       const hasLlm = !disabled && initiator && target
         && InteractionLlmSystem?.shouldUse?.(initiator, target, tpl);
       const isRisky = !disabled && !!risky;
+      const isAxisSafe = !disabled && !!riskMeta?.servantAxisRelief?.ok;
       const pos = subPositions[slotIdx] || { x: IM_CYCLE_L2_RADIUS, y: 0, scale: 1 };
       const isSubActive = slotIdx === subCenterSlot;
-      const optCls = `${isSubActive ? ' sub-active' : ''}${disabled ? ' disabled' : ''}${hasLlm ? ' im-llm-opt' : ''}`;
+      const optCls = `${isSubActive ? ' sub-active' : ''}${disabled ? ' disabled' : ''}${hasLlm ? ' im-llm-opt' : ''}${isAxisSafe ? ' im-axis-safe' : ''}`;
       let hint = disabled ? reason : tpl.name;
       if (!disabled && hasLlm) hint += ' · 模型生成对白';
+      if (!disabled && !isRisky && riskHint) hint = `${tpl.name} · ${riskHint}`;
       if (isRisky && riskHint) hint = `${tpl.name} · ⚠ ${riskHint}`;
       return `<button type="button" class="sub-menu-item${optCls}"
         onpointerdown="handleInteractionMenuSectorClick(event)"
         data-iid="${tpl.id}" data-sub-index="${itemIdx}" data-sub-active="${isSubActive ? '1' : '0'}"
         style="left:${pos.x}px;top:${pos.y}px;transform:translate(-50%, -50%) scale(${pos.scale});${imSpriteStyle(itemIdx, 'right', 36)}" title="${escapeAttr(hint)}">
         ${escapeHtml(tpl.name)}
+        ${isAxisSafe ? '<span class="im-axis-badge">合礼</span>' : ''}
         ${disabled ? `<span class="im-reason">${escapeHtml(reason || '不可用')}</span>` : ''}
       </button>`;
     }).join('') : '';
@@ -3636,10 +4094,10 @@ document.getElementById('btn-rel').onclick = () => openPanel(buildRelationsPanel
 document.getElementById('btn-profile').onclick = () => openCharacterProfilePanel();
 document.getElementById('btn-routine').onclick = () => openRoutinePanel();
 document.getElementById('btn-msg').onclick = () => toggleLogDrawer();
-document.getElementById('btn-order').onclick = () => OrderBookSystem?.openPanel?.();
+document.getElementById('btn-order').onclick = () => openJiafuOrderPanel();
 document.getElementById('btn-bag').onclick = () => {
   setMoreShortcutsOpen(false);
-  openPanel(`<h3>背包</h3><p style="color:var(--jn-text-soft)">暂未开放</p><button class="sys-btn" onclick="document.getElementById('panel-overlay').classList.remove('open')">关闭</button>`);
+  openPanel(`<h3>背包</h3><p style="color:var(--jn-text-soft)">暂未开放</p>${panelFooterActionsHtml()}`);
 };
 document.getElementById('btn-skill-panel').onclick = () => {
   setMoreShortcutsOpen(false);
@@ -3660,11 +4118,11 @@ document.addEventListener('keydown', e => {
   if (k === 'p') { openCharacterProfilePanel(); return; }
   if (k === 'q') { openRoutinePanel(); return; }
   if (k === 'm') { toggleLogDrawer(); return; }
-  if (k === 'y') { OrderBookSystem?.openPanel?.(); return; }
+  if (k === 'y') { openJiafuOrderPanel(); return; }
   if (k === 'k') { openPanel(buildSkillPanel()); return; }
   if (k === 'v') { openSavePanel(); return; }
   if (k === 'b') {
-    openPanel('<h3>背包</h3><p style="color:var(--jn-text-soft)">暂未开放</p><button class="sys-btn" onclick="document.getElementById(\'panel-overlay\').classList.remove(\'open\')">关闭</button>');
+    openPanel(`<h3>背包</h3><p style="color:var(--jn-text-soft)">暂未开放</p>${panelFooterActionsHtml()}`);
     return;
   }
   if (k === 'h') { openPanel(buildHelpPanel()); return; }
