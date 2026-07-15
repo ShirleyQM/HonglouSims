@@ -1,9 +1,9 @@
 # 配置体检
 
-- Started: 2026-07-15T08:25:12.969Z
-- Finished: 2026-07-15T08:25:12.977Z
-- Result: FAIL
-- Counts: PASS 54 / WARN 0 / FAIL 1
+- Started: 2026-07-15T13:37:54.429Z
+- Finished: 2026-07-15T13:37:54.438Z
+- Result: PASS
+- Counts: PASS 55 / WARN 0 / FAIL 0
 
 | Status | Check | Details |
 | --- | --- | --- |
@@ -18,9 +18,9 @@
 | PASS | 关键文件存在：js/systems/relation.js | {} |
 | PASS | 关键文件存在：prd/系统架构依赖图.md | {} |
 | PASS | 关键文件存在：prd/持续更新_03任务.md | {} |
-| FAIL | 关键文件存在：prd/持续更新_23传令与上下级管理面板.md | {} |
+| PASS | 关键文件存在：prd/持续更新_25传令与上下级管理面板.md | {} |
 | PASS | 关键文件存在：prd/持续更新_22人物作息.md | {} |
-| PASS | index.html 注册了前台脚本 | {"count":51} |
+| PASS | index.html 注册了前台脚本 | {"count":52} |
 | PASS | config.js 在 quest.js 之前加载 | {} |
 | PASS | quest.js 在 quest-issue.js 之前加载 | {} |
 | PASS | servant-relations.js 在 ai.js 之前加载 | {} |

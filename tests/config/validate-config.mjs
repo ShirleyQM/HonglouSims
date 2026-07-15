@@ -14,7 +14,7 @@ const requiredFiles = [
   'js/systems/relation.js',
   'prd/系统架构依赖图.md',
   'prd/持续更新_03任务.md',
-  'prd/持续更新_23传令与上下级管理面板.md',
+  'prd/持续更新_25传令与上下级管理面板.md',
   'prd/持续更新_22人物作息.md',
 ];
 
