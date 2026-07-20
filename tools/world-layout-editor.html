@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HonglouSims · 世界布局编辑器</title>
+  <style>
+    :root {
+      --page: #e8e2d2;
+      --panel: #f8f4e8;
+      --panel-2: #efe4c9;
+      --line: #b8aa8e;
+      --text: #3d3028;
+      --muted: #756957;
+      --gold: #b58b3b;
+      --red: #a65d5d;
+      --green: #5d7f59;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: var(--page); color: var(--text); font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+    body { display: grid; grid-template-columns: minmax(760px, 1fr) 390px; gap: 10px; padding: 10px; }
+    main { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+    #toolbar, section { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 9px; }
+    #toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    #stageWrap { flex: 1; min-height: 0; border: 1px solid var(--line); border-radius: 8px; background: #cfc6b3; padding: 8px; overflow: hidden; }
+    #stage { width: 100%; height: 100%; display: block; border: 1px solid #8a7b65; background: #eadfbe; cursor: default; }
+    aside { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+    h1, h2 { margin: 0 0 8px; font-size: 16px; color: #563a2e; }
+    h2 { font-size: 13px; }
+    .row { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; }
+    .row:last-child { margin-bottom: 0; }
+    button, select, input {
+      border: 1px solid var(--line);
+      background: #fffaf0;
+      color: var(--text);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font: inherit;
+      font-size: 12px;
+    }
+    button { cursor: pointer; }
+    button.primary { background: #ead7a7; border-color: var(--gold); }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    label { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+    input[type="number"] { width: 76px; }
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      flex: 1;
+      resize: none;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #1f1c18;
+      color: #f5ecd7;
+      padding: 8px;
+      font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .muted { color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border: 1px solid rgba(184,170,142,.75); border-radius: 999px; background: rgba(255,250,240,.58); font-size: 11px; color: var(--muted); }
+    .warn { color: var(--red); }
+    .ok { color: var(--green); }
+    .scene-list { max-height: 210px; overflow: auto; border: 1px solid rgba(184,170,142,.75); border-radius: 6px; background: rgba(255,250,240,.5); }
+    .scene-row {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) 72px;
+      gap: 6px;
+      align-items: center;
+      padding: 6px;
+      border-bottom: 1px solid rgba(184,170,142,.45);
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .scene-row:last-child { border-bottom: 0; }
+    .scene-row.active { background: #ead7a7; }
+    .scene-row b { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 600; }
+    .scene-row span { color: var(--muted); font-size: 11px; text-align: right; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .field { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--muted); }
+    .field input { width: 100%; }
+    .stats { display: flex; flex-wrap: wrap; gap: 6px; }
+    .output { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    @media (max-width: 1100px) {
+      body { grid-template-columns: 1fr; overflow: auto; height: auto; }
+      #stageWrap { height: 66vh; }
+      aside { min-height: 820px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div id="toolbar">
+      <button id="fitBtn">适配视图</button>
+      <button id="undoBtn">撤销</button>
+      <button id="resetBtn">重置</button>
+      <label><input id="snapToggle" type="checkbox" checked>吸附整格</label>
+      <label><input id="overlapToggle" type="checkbox" checked>禁止重叠</label>
+      <label><input id="bgToggle" type="checkbox" checked>显示底图</label>
+      <label><input id="gridToggle" type="checkbox" checked>显示网格</label>
+      <span class="pill" id="cursorInfo">拖动场景，拖边或角点缩放</span>
+    </div>
+    <div id="stageWrap">
+      <canvas id="stage" width="1200" height="820"></canvas>
+    </div>
+  </main>
+
+  <aside>
+    <section>
+      <h1>世界布局编辑器</h1>
+      <div class="muted">拖动场景可改 <code>originCol/originRow</code>，拖边或角点可改 <code>cols/rows</code>。导出时会按比例迁移家具、人物坐标，并重采样 walkMask。</div>
+    </section>
+
+    <section>
+      <h2>场景</h2>
+      <div class="row">
+        <label>选择 <select id="sceneSelect"></select></label>
+      </div>
+      <div class="scene-list" id="sceneList"></div>
+    </section>
+
+    <section>
+      <h2>选中场景</h2>
+      <div class="grid">
+        <label class="field">originCol <input id="originColInput" type="number" step="1"></label>
+        <label class="field">originRow <input id="originRowInput" type="number" step="1"></label>
+        <label class="field">cols <input id="colsInput" type="number" min="1" step="1"></label>
+        <label class="field">rows <input id="rowsInput" type="number" min="1" step="1"></label>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button id="applyInputsBtn" class="primary">应用数值</button>
+        <button id="copySceneBtn">复制场景片段</button>
+      </div>
+      <div class="stats" id="selectedStats"></div>
+    </section>
+
+    <section>
+      <h2>校验</h2>
+      <div id="validation" class="muted"></div>
+    </section>
+
+    <section class="output">
+      <h2>导出</h2>
+      <div class="row">
+        <button id="exportBtn" class="primary">生成迁移配置</button>
+        <button id="copyBtn">复制</button>
+      </div>
+      <textarea id="output" spellcheck="false"></textarea>
+    </section>
+  </aside>
+
+  <script src="../js/config.js"></script>
+  <script>
+    const CELL = 32;
+    const MIN_SCENE_COLS = 2;
+    const MIN_SCENE_ROWS = 2;
+    const canvas = document.getElementById('stage');
+    const ctx = canvas.getContext('2d');
+    const originalConfig = structuredClone(DEFAULT_CONFIG);
+    const originalScenes = new Map(originalConfig.scenes.map(sc => [sc.id, structuredClone(sc)]));
+    let scenes = structuredClone(originalConfig.scenes);
+    let selectedId = scenes[0]?.id || 0;
+    let images = new Map();
+    let view = { scale: 1, ox: 24, oy: 24 };
+    let drag = null;
+    let history = [];
+
+    const els = {
+      sceneSelect: document.getElementById('sceneSelect'),
+      sceneList: document.getElementById('sceneList'),
+      originCol: document.getElementById('originColInput'),
+      originRow: document.getElementById('originRowInput'),
+      cols: document.getElementById('colsInput'),
+      rows: document.getElementById('rowsInput'),
+      selectedStats: document.getElementById('selectedStats'),
+      validation: document.getElementById('validation'),
+      output: document.getElementById('output'),
+      cursorInfo: document.getElementById('cursorInfo'),
+      snap: document.getElementById('snapToggle'),
+      preventOverlap: document.getElementById('overlapToggle'),
+      showBg: document.getElementById('bgToggle'),
+      showGrid: document.getElementById('gridToggle'),
+    };
+
+    function selectedScene() {
+      return scenes.find(sc => sc.id === selectedId) || scenes[0];
+    }
+
+    function worldBounds(list = scenes) {
+      let minCol = Infinity, minRow = Infinity, maxCol = -Infinity, maxRow = -Infinity;
+      list.forEach(sc => {
+        minCol = Math.min(minCol, sc.originCol);
+        minRow = Math.min(minRow, sc.originRow);
+        maxCol = Math.max(maxCol, sc.originCol + sc.cols);
+        maxRow = Math.max(maxRow, sc.originRow + sc.rows);
+      });
+      if (!Number.isFinite(minCol)) return { minCol: 0, minRow: 0, maxCol: 1, maxRow: 1, cols: 1, rows: 1 };
+      return { minCol, minRow, maxCol, maxRow, cols: maxCol - minCol, rows: maxRow - minRow };
+    }
+
+    function fitView() {
+      resizeCanvas();
+      const b = worldBounds();
+      const pad = 34;
+      const sx = (canvas.width - pad * 2) / Math.max(1, b.cols * CELL);
+      const sy = (canvas.height - pad * 2) / Math.max(1, b.rows * CELL);
+      view.scale = Math.max(0.18, Math.min(sx, sy));
+      view.ox = pad - b.minCol * CELL * view.scale;
+      view.oy = pad - b.minRow * CELL * view.scale;
+      draw();
+    }
+
+    function resizeCanvas() {
+      const r = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.max(320, Math.round(r.width * dpr));
+      const h = Math.max(240, Math.round(r.height * dpr));
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+      }
+    }
+
+    function worldToScreen(col, row) {
+      return { x: col * CELL * view.scale + view.ox, y: row * CELL * view.scale + view.oy };
+    }
+
+    function screenToWorld(x, y) {
+      return { col: (x - view.ox) / (CELL * view.scale), row: (y - view.oy) / (CELL * view.scale) };
+    }
+
+    function sceneRect(sc) {
+      const p = worldToScreen(sc.originCol, sc.originRow);
+      return { x: p.x, y: p.y, w: sc.cols * CELL * view.scale, h: sc.rows * CELL * view.scale };
+    }
+
+    function sceneColor(sc) {
+      if (sc.isTransition) return '#9b8b76';
+      if (String(sc.ground || '').startsWith('grass')) return '#718c62';
+      if (sc.ground === 'wood') return '#80583a';
+      return sc.bg || '#cbbb91';
+    }
+
+    function draw() {
+      resizeCanvas();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      grad.addColorStop(0, '#f2ead2');
+      grad.addColorStop(1, '#d7c49a');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      if (els.showGrid.checked) drawWorldGrid();
+      scenes.filter(sc => sc.id !== selectedId).forEach(sc => drawScene(sc, false));
+      const active = selectedScene();
+      if (active) drawScene(active, true);
+      drawLegend();
+    }
+
+    function drawWorldGrid() {
+      const b = worldBounds();
+      const step = CELL * view.scale;
+      if (step < 7) return;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(94,78,58,.16)';
+      ctx.lineWidth = 1;
+      for (let c = Math.floor(b.minCol) - 1; c <= Math.ceil(b.maxCol) + 1; c++) {
+        const x = worldToScreen(c, 0).x;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let r = Math.floor(b.minRow) - 1; r <= Math.ceil(b.maxRow) + 1; r++) {
+        const y = worldToScreen(0, r).y;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawScene(sc, active) {
+      const r = sceneRect(sc);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(r.x, r.y, r.w, r.h);
+      ctx.clip();
+      const img = images.get(sc.id);
+      if (els.showBg.checked && img?.complete && img.naturalWidth) {
+        ctx.drawImage(img, r.x, r.y, r.w, r.h);
+        if (sc.isTransition) {
+          ctx.fillStyle = 'rgba(95,78,55,.18)';
+          ctx.fillRect(r.x, r.y, r.w, r.h);
+        }
+      } else {
+        ctx.fillStyle = sceneColor(sc);
+        ctx.fillRect(r.x, r.y, r.w, r.h);
+      }
+      ctx.restore();
+
+      ctx.lineWidth = active ? 3 : 1.5;
+      ctx.strokeStyle = active ? '#fff0a8' : 'rgba(68,55,43,.72)';
+      ctx.strokeRect(r.x, r.y, r.w, r.h);
+      if (active) {
+        ctx.strokeStyle = '#8e5043';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(r.x + 4, r.y + 4, Math.max(1, r.w - 8), Math.max(1, r.h - 8));
+        drawHandles(r);
+      }
+
+      ctx.fillStyle = active ? 'rgba(61,48,40,.78)' : 'rgba(61,48,40,.58)';
+      ctx.fillRect(r.x + 5, r.y + 5, Math.min(r.w - 10, 142), 23);
+      ctx.fillStyle = '#fff8df';
+      ctx.font = `${active ? 13 : 12}px "PingFang SC", "Microsoft YaHei", sans-serif`;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${sc.name} ${sc.cols}x${sc.rows}`, r.x + 12, r.y + 17);
+    }
+
+    function drawHandles(r) {
+      const pts = handlePoints(r);
+      ctx.fillStyle = '#fff7cf';
+      ctx.strokeStyle = '#7b513a';
+      Object.values(pts).forEach(p => {
+        ctx.fillRect(p.x - 4, p.y - 4, 8, 8);
+        ctx.strokeRect(p.x - 4, p.y - 4, 8, 8);
+      });
+    }
+
+    function handlePoints(r) {
+      const cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+      return {
+        nw: { x: r.x, y: r.y }, n: { x: cx, y: r.y }, ne: { x: r.x + r.w, y: r.y },
+        e: { x: r.x + r.w, y: cy }, se: { x: r.x + r.w, y: r.y + r.h },
+        s: { x: cx, y: r.y + r.h }, sw: { x: r.x, y: r.y + r.h }, w: { x: r.x, y: cy },
+      };
+    }
+
+    function drawLegend() {
+      const b = worldBounds();
+      ctx.fillStyle = 'rgba(255,250,240,.78)';
+      ctx.strokeStyle = 'rgba(107,90,76,.45)';
+      ctx.fillRect(12, canvas.height - 38, 260, 25);
+      ctx.strokeRect(12, canvas.height - 38, 260, 25);
+      ctx.fillStyle = '#4a3728';
+      ctx.font = '12px ui-monospace, Menlo, monospace';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`world ${b.cols}x${b.rows} cells · scene count ${scenes.length}`, 22, canvas.height - 25);
+    }
+
+    function hitTest(x, y) {
+      const active = selectedScene();
+      const activeHit = active ? hitTestScene(active, x, y) : null;
+      if (activeHit) return activeHit;
+      for (let i = scenes.length - 1; i >= 0; i--) {
+        const sc = scenes[i];
+        if (sc.id === selectedId) continue;
+        const hit = hitTestScene(sc, x, y);
+        if (hit) return hit;
+      }
+      return null;
+    }
+
+    function hitTestScene(sc, x, y) {
+      const r = sceneRect(sc);
+      const near = 9;
+      if (x < r.x - near || x > r.x + r.w + near || y < r.y - near || y > r.y + r.h + near) return null;
+      const handles = handlePoints(r);
+      for (const [name, p] of Object.entries(handles)) {
+        if (Math.abs(x - p.x) <= near && Math.abs(y - p.y) <= near) return { scene: sc, mode: 'resize', handle: name };
+      }
+      if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) return { scene: sc, mode: 'move' };
+      return null;
+    }
+
+    function pushHistory() {
+      history.push(structuredClone(scenes));
+      if (history.length > 40) history.shift();
+    }
+
+    function shouldCheckOverlap(a, b) {
+      return !a?.isTransition && !b?.isTransition;
+    }
+
+    function overlapsAny(candidate, sceneId, list = scenes) {
+      return list.some(sc => sc.id !== sceneId
+        && shouldCheckOverlap(candidate, sc)
+        && candidate.originCol < sc.originCol + sc.cols
+        && candidate.originCol + candidate.cols > sc.originCol
+        && candidate.originRow < sc.originRow + sc.rows
+        && candidate.originRow + candidate.rows > sc.originRow);
+    }
+
+    function snapValue(v) {
+      return els.snap.checked ? Math.round(v) : Math.round(v * 10) / 10;
+    }
+
+    function clampScene(next, base) {
+      const out = { ...base, ...next };
+      out.cols = Math.max(MIN_SCENE_COLS, Math.round(out.cols));
+      out.rows = Math.max(MIN_SCENE_ROWS, Math.round(out.rows));
+      out.originCol = Math.round(out.originCol);
+      out.originRow = Math.round(out.originRow);
+      return out;
+    }
+
+    function applyScene(candidate, options = {}) {
+      const idx = scenes.findIndex(sc => sc.id === candidate.id);
+      if (idx < 0) return false;
+      const next = clampScene(candidate, scenes[idx]);
+      if (els.preventOverlap.checked && !options.force && overlapsAny(next, next.id)) return false;
+      scenes[idx] = next;
+      selectedId = next.id;
+      syncUi();
+      draw();
+      return true;
+    }
+
+    function updateDrag(e) {
+      if (!drag) return;
+      const p = eventPoint(e);
+      const cur = screenToWorld(p.x, p.y);
+      const dx = snapValue(cur.col - drag.startWorld.col);
+      const dy = snapValue(cur.row - drag.startWorld.row);
+      const s = drag.startScene;
+      let next = { ...s };
+      if (drag.mode === 'move') {
+        next.originCol = s.originCol + dx;
+        next.originRow = s.originRow + dy;
+      } else {
+        const h = drag.handle;
+        if (h.includes('w')) {
+          next.originCol = s.originCol + dx;
+          next.cols = s.cols - dx;
+        }
+        if (h.includes('e')) next.cols = s.cols + dx;
+        if (h.includes('n')) {
+          next.originRow = s.originRow + dy;
+          next.rows = s.rows - dy;
+        }
+        if (h.includes('s')) next.rows = s.rows + dy;
+      }
+      applyScene(next);
+    }
+
+    function eventPoint(e) {
+      const r = canvas.getBoundingClientRect();
+      const dpr = canvas.width / Math.max(1, r.width);
+      return { x: (e.clientX - r.left) * dpr, y: (e.clientY - r.top) * dpr };
+    }
+
+    function cursorForHit(hit) {
+      if (!hit) return 'default';
+      if (hit.mode === 'move') return 'move';
+      const h = hit.handle;
+      if (h === 'n' || h === 's') return 'ns-resize';
+      if (h === 'e' || h === 'w') return 'ew-resize';
+      if (h === 'nw' || h === 'se') return 'nwse-resize';
+      return 'nesw-resize';
+    }
+
+    function syncUi() {
+      const sc = selectedScene();
+      if (!sc) return;
+      els.sceneSelect.value = String(sc.id);
+      els.originCol.value = sc.originCol;
+      els.originRow.value = sc.originRow;
+      els.cols.value = sc.cols;
+      els.rows.value = sc.rows;
+      renderSceneList();
+      validate();
+    }
+
+    function renderSceneList() {
+      els.sceneList.innerHTML = scenes.map(sc => `
+        <div class="scene-row${sc.id === selectedId ? ' active' : ''}" data-scene-id="${sc.id}">
+          <em>#${sc.id}</em>
+          <b>${escapeHtml(sc.name || '未名')}</b>
+          <span>${sc.originCol},${sc.originRow} · ${sc.cols}x${sc.rows}</span>
+        </div>
+      `).join('');
+      els.selectedStats.innerHTML = selectedStats();
+    }
+
+    function selectedStats() {
+      const sc = selectedScene();
+      if (!sc) return '';
+      const orig = originalScenes.get(sc.id);
+      const scaleX = orig ? sc.cols / orig.cols : 1;
+      const scaleY = orig ? sc.rows / orig.rows : 1;
+      const furn = (originalConfig.furnitureInstances || []).filter(row => row.sceneId === sc.id).length;
+      const chars = (originalConfig.characters || []).filter(row => row.sceneId === sc.id).length;
+      const mask = Array.isArray(sc.walkMask) ? `${sc.walkMask[0]?.length || 0}x${sc.walkMask.length}` : '无';
+      return [
+        `<span class="pill">缩放 ${scaleX.toFixed(2)}x / ${scaleY.toFixed(2)}y</span>`,
+        `<span class="pill">家具 ${furn}</span>`,
+        `<span class="pill">人物 ${chars}</span>`,
+        `<span class="pill">mask ${mask}</span>`,
+      ].join('');
+    }
+
+    function validate() {
+      const issues = [];
+      scenes.forEach(sc => {
+        if (sc.cols < MIN_SCENE_COLS || sc.rows < MIN_SCENE_ROWS) issues.push(`${sc.name} 尺寸过小`);
+        if (Array.isArray(sc.walkMask)) {
+          const badRows = sc.walkMask.filter(row => row.length !== originalScenes.get(sc.id)?.cols);
+          if (badRows.length) issues.push(`${sc.name} 原 walkMask 行宽不一致`);
+        }
+      });
+      for (let i = 0; i < scenes.length; i++) {
+        for (let j = i + 1; j < scenes.length; j++) {
+          if (overlapsAny(scenes[i], scenes[i].id, [scenes[j]])) issues.push(`${scenes[i].name} 与 ${scenes[j].name} 重叠`);
+        }
+      }
+      const moved = scenes.filter(sc => {
+        const old = originalScenes.get(sc.id);
+        return old && (old.originCol !== sc.originCol || old.originRow !== sc.originRow || old.cols !== sc.cols || old.rows !== sc.rows);
+      }).length;
+      const status = issues.length
+        ? issues.map(s => `<div class="warn">· ${escapeHtml(s)}</div>`).join('')
+        : `<div class="ok">暂无明显布局问题。已改动 ${moved} 个场景。</div>`;
+      els.validation.innerHTML = status;
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    }
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function migrateCell(sceneId, col, row) {
+      const old = originalScenes.get(sceneId);
+      const next = scenes.find(sc => sc.id === sceneId);
+      if (!old || !next || col == null || row == null) return { col, row };
+      const nx = clamp((col - old.originCol + 0.5) / Math.max(1, old.cols), 0, 0.999999);
+      const ny = clamp((row - old.originRow + 0.5) / Math.max(1, old.rows), 0, 0.999999);
+      return {
+        col: next.originCol + clamp(Math.floor(nx * next.cols), 0, next.cols - 1),
+        row: next.originRow + clamp(Math.floor(ny * next.rows), 0, next.rows - 1),
+      };
+    }
+
+    function resampleMask(mask, newCols, newRows) {
+      if (!Array.isArray(mask) || !mask.length) return mask;
+      const oldRows = mask.length;
+      const oldCols = Math.max(...mask.map(row => row.length));
+      const out = [];
+      for (let r = 0; r < newRows; r++) {
+        const srcR = clamp(Math.floor((r + 0.5) * oldRows / newRows), 0, oldRows - 1);
+        let line = '';
+        for (let c = 0; c < newCols; c++) {
+          const srcC = clamp(Math.floor((c + 0.5) * oldCols / newCols), 0, oldCols - 1);
+          line += mask[srcR]?.[srcC] || '#';
+        }
+        out.push(line);
+      }
+      return out;
+    }
+
+    function migrateFinePlacement(fp, nextScene) {
+      const fineScale = fp.fineScale || 1;
+      const x = Number(fp.x ?? 0);
+      const y = Number(fp.y ?? 0);
+      const w = Number(fp.w ?? 0);
+      const h = Number(fp.h ?? 0);
+      return {
+        ...fp,
+        fineCol: Math.round(x * nextScene.cols * fineScale),
+        fineRow: Math.round(y * nextScene.rows * fineScale),
+        fineW: Math.max(1, Math.round(w * nextScene.cols * fineScale)),
+        fineH: Math.max(1, Math.round(h * nextScene.rows * fineScale)),
+      };
+    }
+
+    function migratedScenes() {
+      return scenes.map(sc => {
+        const next = structuredClone(sc);
+        if (Array.isArray(next.walkMask)) next.walkMask = resampleMask(originalScenes.get(sc.id)?.walkMask || next.walkMask, next.cols, next.rows);
+        if (Array.isArray(next.furnitureFinePlacements)) {
+          next.furnitureFinePlacements = (originalScenes.get(sc.id)?.furnitureFinePlacements || next.furnitureFinePlacements)
+            .map(fp => migrateFinePlacement(fp, next));
+        }
+        return next;
+      });
+    }
+
+    function migratedFurnitureInstances() {
+      return (originalConfig.furnitureInstances || []).map(inst => {
+        const p = migrateCell(inst.sceneId, inst.anchorCol, inst.anchorRow);
+        return { ...inst, anchorCol: p.col, anchorRow: p.row };
+      });
+    }
+
+    function migratedCharacters() {
+      return (originalConfig.characters || []).map(ch => {
+        const p = migrateCell(ch.sceneId, ch.gridCol, ch.gridRow);
+        return { ...ch, gridCol: p.col, gridRow: p.row };
+      });
+    }
+
+    function exportConfig() {
+      const payload = {
+        note: '由 tools/world-layout-editor.html 生成。建议先备份 js/config.js，再替换 DEFAULT_CONFIG 对应字段。',
+        scenes: migratedScenes(),
+        furnitureInstances: migratedFurnitureInstances(),
+        characters: migratedCharacters(),
+      };
+      els.output.value = `// World layout migration patch\n${jsObject(payload)}`;
+    }
+
+    function jsObject(value, indent = 0) {
+      const pad = '  '.repeat(indent);
+      const next = '  '.repeat(indent + 1);
+      if (Array.isArray(value)) {
+        if (!value.length) return '[]';
+        return `[\n${value.map(v => `${next}${jsObject(v, indent + 1)}`).join(',\n')}\n${pad}]`;
+      }
+      if (value && typeof value === 'object') {
+        const entries = Object.entries(value).filter(([, v]) => v !== undefined);
+        if (!entries.length) return '{}';
+        return `{\n${entries.map(([k, v]) => `${next}${safeKey(k)}: ${jsObject(v, indent + 1)}`).join(',\n')}\n${pad}}`;
+      }
+      return JSON.stringify(value);
+    }
+
+    function safeKey(k) {
+      return /^[A-Za-z_$][\w$]*$/.test(k) ? k : JSON.stringify(k);
+    }
+
+    function copyText(text) {
+      navigator.clipboard?.writeText(text).catch(() => {});
+    }
+
+    async function loadManifestImages() {
+      try {
+        const res = await fetch('../assets/manifest.json');
+        const manifest = await res.json();
+        Object.entries(manifest.roomBackgrounds || {}).forEach(([id, def]) => {
+          if (!def?.src) return;
+          const img = new Image();
+          img.onload = draw;
+          img.src = '../' + def.src;
+          images.set(Number(id), img);
+        });
+      } catch (e) {
+        console.warn('manifest load failed', e);
+      }
+    }
+
+    function setupUi() {
+      els.sceneSelect.innerHTML = scenes.map(sc => `<option value="${sc.id}">#${sc.id} ${escapeHtml(sc.name)}</option>`).join('');
+      els.sceneSelect.addEventListener('change', () => { selectedId = +els.sceneSelect.value; syncUi(); draw(); });
+      els.sceneList.addEventListener('click', e => {
+        const row = e.target.closest('[data-scene-id]');
+        if (!row) return;
+        selectedId = +row.dataset.sceneId;
+        syncUi();
+        draw();
+      });
+      document.getElementById('applyInputsBtn').addEventListener('click', () => {
+        const sc = selectedScene();
+        pushHistory();
+        applyScene({
+          ...sc,
+          originCol: +els.originCol.value,
+          originRow: +els.originRow.value,
+          cols: +els.cols.value,
+          rows: +els.rows.value,
+        }, { force: !els.preventOverlap.checked });
+      });
+      document.getElementById('fitBtn').addEventListener('click', fitView);
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        pushHistory();
+        scenes = structuredClone(originalConfig.scenes);
+        selectedId = scenes[0]?.id || 0;
+        fitView();
+        syncUi();
+      });
+      document.getElementById('undoBtn').addEventListener('click', () => {
+        const prev = history.pop();
+        if (!prev) return;
+        scenes = prev;
+        if (!scenes.some(sc => sc.id === selectedId)) selectedId = scenes[0]?.id || 0;
+        syncUi();
+        draw();
+      });
+      document.getElementById('exportBtn').addEventListener('click', exportConfig);
+      document.getElementById('copyBtn').addEventListener('click', () => copyText(els.output.value));
+      document.getElementById('copySceneBtn').addEventListener('click', () => {
+        const sc = migratedScenes().find(row => row.id === selectedId);
+        copyText(jsObject(sc));
+      });
+      [els.snap, els.preventOverlap, els.showBg, els.showGrid].forEach(el => el.addEventListener('change', draw));
+      window.addEventListener('resize', () => { fitView(); });
+    }
+
+    canvas.addEventListener('pointerdown', e => {
+      const p = eventPoint(e);
+      const hit = hitTest(p.x, p.y);
+      if (!hit) return;
+      pushHistory();
+      selectedId = hit.scene.id;
+      const w = screenToWorld(p.x, p.y);
+      drag = {
+        mode: hit.mode,
+        handle: hit.handle || '',
+        startWorld: w,
+        startScene: structuredClone(hit.scene),
+      };
+      canvas.setPointerCapture(e.pointerId);
+      syncUi();
+      draw();
+    });
+
+    canvas.addEventListener('pointermove', e => {
+      const p = eventPoint(e);
+      if (drag) {
+        updateDrag(e);
+        return;
+      }
+      const hit = hitTest(p.x, p.y);
+      canvas.style.cursor = cursorForHit(hit);
+      const w = screenToWorld(p.x, p.y);
+      els.cursorInfo.textContent = `col ${Math.floor(w.col)}, row ${Math.floor(w.row)}${hit ? ` · ${hit.scene.name}` : ''}`;
+    });
+
+    canvas.addEventListener('pointerup', e => {
+      drag = null;
+      if (canvas.hasPointerCapture?.(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+    });
+
+    canvas.addEventListener('pointercancel', e => {
+      drag = null;
+      if (canvas.hasPointerCapture?.(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+    });
+
+    setupUi();
+    loadManifestImages();
+    fitView();
+    syncUi();
+  </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 /* ═══════════════════ DEFAULT CONFIG ═══════════════════ */
 const DEFAULT_CONFIG = {
+  worldLayoutVersion: 3,
   needDefs: [
     { key: 'hunger', name: '饥饿', label: '饥饿', summary: '进食与饱足程度', color: '#c45c26', defaultGrow: 1, defaultDecay: 1,
       stateBands: [
@@ -253,6 +254,8 @@ const DEFAULT_CONFIG = {
     randomPerturbMin: 0.8,
     randomPerturbMax: 1.2,
     candidatePoolSize: 5,
+    controlledRoutineEnabled: true,
+    controlledRoutineCooldownMinutes: 8,
     fastChannelNeeds: ['hunger', 'energy', 'hygiene'],
     demandBaseWeights: { hunger: 1.2, energy: 1.1, hygiene: 0.7, fun: 0.6, social: 1.5, mood: 0.9 },
     routineGridConfig: {
@@ -1253,7 +1256,7 @@ const DEFAULT_CONFIG = {
       gengzhi: '耿直', duoyi: '多疑', qingxin: '轻信', haosheng: '好胜', qianrang: '谦让',
       shouli: '守礼', renxing: '任性', duanfang: '端方', fangdan: '放诞',
       jinshen: '谨慎', chongdong: '冲动', zhongming: '重名', buji: '不羁',
-      tanzui: '贪嘴', shaochi: '少食', shishui: '嗜睡', aijie: '爱洁', lata: '邋遢', haodong: '好动',
+      tanzui: '贪嘴', shaochi: '少食', shishui: '嗜睡', shaomian: '少眠', aijie: '爱洁', lata: '邋遢', haodong: '好动',
       xijing: '喜静', shoushi: '守时', tuoyan: '拖延', sanman: '散漫', guihua: '规划',
       jianren: '坚韧', cuiruo: '脆弱', pianzhi: '偏执', yuanrong: '圆融',
       xurong: '虚荣', pushi: '朴实', zhouquan: '周全', zisi: '自私',
@@ -1290,7 +1293,8 @@ const DEFAULT_CONFIG = {
       shaochi: { label: '少食', oppositeTrait: 'tanzui', category: '习惯', description: '胃口小，对吃食兴趣有限。', effectExamples: ['主动进食只恢复1-10点', '饥饿衰退更慢', 'NPC饱时可能拒绝进食'], effects: { actionWeights: { hunger: 0.7, meal: 0.55, kitchen: 0.6 }, needCoeffs: { hunger: { decay: 0.62 } }, furnitureNeeds: { hunger: { categories: ['meal', 'snack', 'kitchen', 'table'], restoreRange: [1, 10], aiRefusalChance: 0.7, refusalAboveRatio: 0.55, refusalText: '没什么胃口，不想再吃了' } } } },
       haoyin: { label: '好饮', oppositeTrait: 'shenyin', category: '习惯', description: '爱热闹、爱酒食，酒桌上更容易起兴。', effectExamples: ['酒案/宴饮/行酒令权重提高', '酒量经验略高', '低心绪时更可能独酌'], effects: { actionWeights: { wine: 1.45, banquet: 1.2, social: 1.06 }, stateChance: { tipsySocial: 1.1 }, skillGrowth: { jiuliang: 1.12 } } },
       shenyin: { label: '慎饮', oppositeTrait: 'haoyin', category: '习惯', description: '对饮酒克制，重体面和清醒。', effectExamples: ['高剂量饮酒权重降低', '更倾向茶饭闲谈', '醉酒持续略短'], effects: { actionWeights: { wine: 0.45, banquet: 0.85, table: 1.08 }, stateDuration: { drunk: 0.85, tipsySocial: 0.9 } } },
-      shishui: { label: '嗜睡', oppositeTrait: null, category: '习惯', description: '爱睡觉，起床困难。', effectExamples: ['精力消耗更快', '可睡到精力上限的110%'], effects: { actionWeights: { sleep: 1.65, energy: 1.4, movement: 0.85 }, needCoeffs: { energy: { decay: 1.2 } }, schedule: { sleepWeightMultiplier: 1.25, wakeEnergyRatioBonus: 0.08 }, furnitureNeeds: { energy: { categories: ['bed', 'rest'], capMultiplier: 1.1, adaptationMultiplier: 1.5 } } } },
+      shishui: { label: '嗜睡', oppositeTrait: 'shaomian', category: '习惯', description: '爱睡觉，起床困难。', effectExamples: ['精力消耗更快', '可睡到精力上限的110%'], effects: { actionWeights: { sleep: 1.65, energy: 1.4, movement: 0.85 }, needCoeffs: { energy: { decay: 1.2 } }, schedule: { sleepWeightMultiplier: 1.25, wakeEnergyRatioBonus: 0.08 }, furnitureNeeds: { energy: { categories: ['bed', 'rest'], capMultiplier: 1.1, adaptationMultiplier: 1.5 } } } },
+      shaomian: { label: '少眠', oppositeTrait: 'shishui', category: '习惯', description: '睡得少，醒得早，不愿把时辰都耗在床榻上。', effectExamples: ['睡眠行动权重降低', '精力衰退略慢但睡眠恢复上限不突破', '清晨事务权重略高'], effects: { actionWeights: { sleep: 0.62, energy: 0.82, task: 1.08, morning: 1.12 }, needCoeffs: { energy: { decay: 0.92 } }, schedule: { sleepWeightMultiplier: 0.72, wakeEnergyRatioBonus: -0.04, morningFocusMultiplier: 1.12 }, furnitureNeeds: { energy: { categories: ['bed', 'rest'], capMultiplier: 1, restoreMultiplier: 0.9, aiRefusalChance: 0.35, refusalAboveRatio: 0.62, refusalText: '眼下还不困，不必躺着。' } } } },
       aijie: { label: '爱洁', oppositeTrait: 'lata', category: '习惯', description: '受不了一点脏乱。', effectExamples: ['卫生需求阈值提高', '可梳洗到洁净上限的110%'], effects: { actionWeights: { hygiene: 1.7, bath: 1.55, wash: 1.5 }, needThresholds: { hygiene: 0.65 }, schedule: { hygieneWeightMultiplier: 1.25 }, furnitureNeeds: { hygiene: { categories: ['bath', 'wash', 'wardrobe'], capMultiplier: 1.1, adaptationMultiplier: 1.5 } } } },
       lata: { label: '邋遢', oppositeTrait: 'aijie', category: '习惯', description: '不拘小节，对脏乱容忍度高。', effectExamples: ['卫生需求阈值降低', 'NPC较干净时可能拒绝梳洗'], effects: { actionWeights: { hygiene: 0.45, bath: 0.5, seat: 1.25, energy: 1.15 }, needThresholds: { hygiene: 0.2 }, schedule: { hygieneWeightMultiplier: 0.65 }, furnitureNeeds: { hygiene: { categories: ['bath', 'wash', 'wardrobe'], restoreMultiplier: 0.65, aiRefusalChance: 0.45, refusalAboveRatio: 0.6, refusalText: '还干净着呢，不必折腾' } } } },
       haodong: { label: '好动', oppositeTrait: 'xijing', category: '习惯', description: '坐不住，喜欢四处走动。', effectExamples: ['户外活动权重增加'], effects: { actionWeights: { movement: 1.45, outdoor: 1.4, seat: 0.65, sleep: 0.8 }, movement: { speedMultiplier: 1.08 } } },
@@ -1345,6 +1349,7 @@ const DEFAULT_CONFIG = {
       buji: { action: ['由他人说去，我自有我的活法。', '名声不过是旁人口舌，何必太放在心上。'] },
       tanzui: { action: ['像是闻见点心香了……', '先寻些好吃的，旁的稍后再说。'], spend: ['这点心瞧着精致，少不得尝尝。'] },
       shishui: { action: ['眼皮又沉了，再歇一会儿罢。', '天大的事，也等睡醒再说。'] },
+      shaomian: { action: ['醒都醒了，不如早些把事理了。', '这会儿躺着也睡不踏实。'], decline: ['眼下并不困，先不歇了。'] },
       aijie: { action: ['这里沾了灰，实在叫人难受。', '先收拾干净，心里才安稳。'] },
       lata: { action: ['乱便乱些，也不碍什么。', '何必收拾得那样齐整。'] },
       haodong: { action: ['坐不住了，出去走走才好。', '总待在一处，骨头都懒了。'] },
@@ -3930,153 +3935,1642 @@ const DEFAULT_CONFIG = {
     },
   },
   scenes: [
-    /* 西南 */ { id: 1, name: '潇湘馆', sceneType: 'private', ownerFamilyId: 2, ownerCharacterId: 0, isTransition: false,
-      originCol: 2, originRow: 27, cols: 28, rows: 20, bg: '#3d2b1f', bgAlt: '#362618', ground: 'wood',
-      walkMask: [
-        '#############DD#############',
-        '#############DD#############',
-        '#########,,,DD,,#.....######',
-        '#########,,,DD,,##....######',
-        '#####..#####,,,,####...#####',
-        '####...##wwwwwwwwwwww....###',
-        '###..#.#wwwwwwwwwwwwww,,,###',
-        '###..~.#wwwwwwwwwwwwww,,,,##',
-        '#.~~~..#wwwwwwwwwwwwww,,,,,#',
-        '#.~~~..##w##wwwww#DDww,,,,,#',
-        '#.~~~..www###DD###DDww,,,,,#',
-        '#..~~..wwww##DD#wwwwwDD,,,,#',
-        '##.~~...,,,,,,,,,,,,,#DD..##',
-        '##.~~...,,,,,,,,,,,###DD..##',
-        '##..~....,,,,,,,,,####....##',
-        '##.......,,,,,,,,#####....##',
-        '###......,,,,,,,,#####..####',
-        '####.....,,,,,,,,###########',
-        '#############DD#############',
-        '#############DD#############',
+      {
+          "id": 1,
+          "name": "潇湘馆",
+          "sceneType": "private",
+          "ownerFamilyId": 2,
+          "ownerCharacterId": 0,
+          "isTransition": false,
+          "layoutVersion": 2,
+          "originCol": 0,
+          "originRow": 39,
+          "cols": 28,
+          "rows": 20,
+          "bg": "#3d2b1f",
+          "bgAlt": "#362618",
+          "ground": "wood",
+          "walkMask": [
+              "#############DD#############",
+              "#############DD#############",
+              "#########,,,DD,,#.....######",
+              "#########,,,DD,,##....######",
+              "#####..#####,,,,####...#####",
+              "####...##wwwwwwwwwwww....###",
+              "###..#.#wwwwwwwwwwwwww,,,###",
+              "###..~.#wwwwwwwwwwwwww,,,,##",
+              "#.~~~..#wwwwwwwwwwwwww,,,,,#",
+              "#.~~~..##w##wwwww#DDww,,,,,#",
+              "#.~~~..www###DD###DDww,,,,,#",
+              "#..~~..wwww##DD#wwwwwDD,,,,#",
+              "##.~~...,,,,,,,,,,,,,#DD..##",
+              "##.~~...,,,,,,,,,,,###DD..##",
+              "##..~....,,,,,,,,,####....##",
+              "##.......,,,,,,,,#####....##",
+              "###......,,,,,,,,#####..####",
+              "####.....,,,,,,,,###########",
+              "#############DD#############",
+              "#############DD#############"
+          ],
+          "furnitureFinePlacements": [
+              {
+                  "instanceId": 1003,
+                  "sceneId": 1,
+                  "templateId": 301,
+                  "name": "浴盆",
+                  "fineScale": 2,
+                  "fineCol": 37,
+                  "fineRow": 14,
+                  "fineW": 4,
+                  "fineH": 4,
+                  "x": 0.6607,
+                  "y": 0.35,
+                  "w": 0.0714,
+                  "h": 0.1
+              },
+              {
+                  "instanceId": 1009,
+                  "sceneId": 1,
+                  "templateId": 211,
+                  "name": "竹榻",
+                  "fineScale": 2,
+                  "fineCol": 44,
+                  "fineRow": 17,
+                  "fineW": 2,
+                  "fineH": 3,
+                  "x": 0.7857,
+                  "y": 0.425,
+                  "w": 0.0357,
+                  "h": 0.075
+              },
+              {
+                  "instanceId": 1006,
+                  "sceneId": 1,
+                  "templateId": 601,
+                  "name": "琴台",
+                  "fineScale": 2,
+                  "fineCol": 47,
+                  "fineRow": 20,
+                  "fineW": 1,
+                  "fineH": 3,
+                  "x": 0.8393,
+                  "y": 0.5,
+                  "w": 0.0179,
+                  "h": 0.075
+              },
+              {
+                  "instanceId": 1011,
+                  "sceneId": 1,
+                  "templateId": 111,
+                  "name": "点心案",
+                  "fineScale": 2,
+                  "fineCol": 19,
+                  "fineRow": 16,
+                  "fineW": 3,
+                  "fineH": 2,
+                  "x": 0.3393,
+                  "y": 0.4,
+                  "w": 0.0536,
+                  "h": 0.05
+              },
+              {
+                  "instanceId": 1007,
+                  "sceneId": 1,
+                  "templateId": 110,
+                  "name": "饭桌",
+                  "fineScale": 2,
+                  "fineCol": 26,
+                  "fineRow": 15,
+                  "fineW": 4,
+                  "fineH": 2,
+                  "x": 0.4643,
+                  "y": 0.375,
+                  "w": 0.0714,
+                  "h": 0.05
+              },
+              {
+                  "instanceId": 1004,
+                  "sceneId": 1,
+                  "templateId": 401,
+                  "name": "茶案",
+                  "fineScale": 2,
+                  "fineCol": 44,
+                  "fineRow": 13,
+                  "fineW": 3,
+                  "fineH": 2,
+                  "x": 0.7857,
+                  "y": 0.325,
+                  "w": 0.0536,
+                  "h": 0.05
+              },
+              {
+                  "instanceId": 1005,
+                  "sceneId": 1,
+                  "templateId": 501,
+                  "name": "酒案",
+                  "fineScale": 2,
+                  "fineCol": 34,
+                  "fineRow": 25,
+                  "fineW": 3,
+                  "fineH": 2,
+                  "x": 0.6071,
+                  "y": 0.625,
+                  "w": 0.0536,
+                  "h": 0.05
+              },
+              {
+                  "instanceId": 10002,
+                  "sceneId": 1,
+                  "templateId": 201,
+                  "name": "雕花木床",
+                  "fineScale": 2,
+                  "fineCol": 18,
+                  "fineRow": 10,
+                  "fineW": 3,
+                  "fineH": 4,
+                  "x": 0.3214,
+                  "y": 0.25,
+                  "w": 0.0536,
+                  "h": 0.1,
+                  "backgroundEmbedded": true
+              },
+              {
+                  "instanceId": 10003,
+                  "sceneId": 1,
+                  "templateId": 101,
+                  "name": "红木书案",
+                  "fineScale": 2,
+                  "fineCol": 35,
+                  "fineRow": 11,
+                  "fineW": 5,
+                  "fineH": 2,
+                  "x": 0.625,
+                  "y": 0.275,
+                  "w": 0.0893,
+                  "h": 0.05,
+                  "backgroundEmbedded": true
+              },
+              {
+                  "instanceId": 10004,
+                  "sceneId": 1,
+                  "templateId": 113,
+                  "name": "樟木案几",
+                  "fineScale": 2,
+                  "fineCol": 26,
+                  "fineRow": 11,
+                  "fineW": 3,
+                  "fineH": 2,
+                  "x": 0.4643,
+                  "y": 0.275,
+                  "w": 0.0536,
+                  "h": 0.05,
+                  "backgroundEmbedded": true
+              },
+              {
+                  "instanceId": 10005,
+                  "sceneId": 1,
+                  "templateId": 312,
+                  "name": "梳洗妆台",
+                  "fineScale": 2,
+                  "fineCol": 14,
+                  "fineRow": 12,
+                  "fineW": 2,
+                  "fineH": 4,
+                  "x": 0.25,
+                  "y": 0.3,
+                  "w": 0.0357,
+                  "h": 0.1,
+                  "backgroundEmbedded": true
+              }
+          ],
+          "occlusionPolygons": [
+              [
+                  [
+                      0.5336,
+                      0.4466
+                  ],
+                  [
+                      0.5707,
+                      0.4466
+                  ],
+                  [
+                      0.5707,
+                      0.4779
+                  ],
+                  [
+                      0.5336,
+                      0.4779
+                  ]
+              ],
+              [
+                  [
+                      0.5233,
+                      0.4236
+                  ],
+                  [
+                      0.5353,
+                      0.4236
+                  ],
+                  [
+                      0.5353,
+                      0.4466
+                  ],
+                  [
+                      0.5233,
+                      0.4466
+                  ]
+              ],
+              [
+                  [
+                      0.5336,
+                      0.4466
+                  ],
+                  [
+                      0.5802,
+                      0.4466
+                  ],
+                  [
+                      0.5802,
+                      0.4791
+                  ],
+                  [
+                      0.5336,
+                      0.4791
+                  ]
+              ],
+              [
+                  [
+                      0.5216,
+                      0.4212
+                  ],
+                  [
+                      0.6293,
+                      0.4212
+                  ],
+                  [
+                      0.6293,
+                      0.4828
+                  ],
+                  [
+                      0.5216,
+                      0.4828
+                  ]
+              ],
+              [
+                  [
+                      0.3948,
+                      0.4224
+                  ],
+                  [
+                      0.4491,
+                      0.4224
+                  ],
+                  [
+                      0.4491,
+                      0.4779
+                  ],
+                  [
+                      0.3948,
+                      0.4779
+                  ]
+              ],
+              [
+                  [
+                      0.2552,
+                      0.1991
+                  ],
+                  [
+                      0.7362,
+                      0.1991
+                  ],
+                  [
+                      0.7362,
+                      0.2897
+                  ],
+                  [
+                      0.2552,
+                      0.2897
+                  ]
+              ],
+              [
+                  [
+                      0.7017,
+                      0.455
+                  ],
+                  [
+                      0.7526,
+                      0.455
+                  ],
+                  [
+                      0.7526,
+                      0.4936
+                  ],
+                  [
+                      0.7017,
+                      0.4936
+                  ]
+              ],
+              [
+                  [
+                      0.7353,
+                      0.2474
+                  ],
+                  [
+                      0.8681,
+                      0.2474
+                  ],
+                  [
+                      0.8681,
+                      0.3295
+                  ],
+                  [
+                      0.7353,
+                      0.3295
+                  ]
+              ],
+              [
+                  [
+                      0.2517,
+                      0.4466
+                  ],
+                  [
+                      0.3155,
+                      0.4466
+                  ],
+                  [
+                      0.3155,
+                      0.496
+                  ],
+                  [
+                      0.2517,
+                      0.496
+                  ]
+              ],
+              [
+                  [
+                      0.3517,
+                      0.4574
+                  ],
+                  [
+                      0.4198,
+                      0.4574
+                  ],
+                  [
+                      0.4198,
+                      0.5033
+                  ],
+                  [
+                      0.3517,
+                      0.5033
+                  ]
+              ]
+          ]
+      },
+      {
+          "id": 2,
+          "name": "蘅芜苑",
+          "sceneType": "private",
+          "ownerFamilyId": 3,
+          "ownerCharacterId": 0,
+          "isTransition": false,
+          "layoutVersion": 3,
+          "originCol": 0,
+          "originRow": 0,
+          "cols": 23,
+          "rows": 15,
+          "bg": "#d4bf8c",
+          "bgAlt": "#c5ae7a",
+          "ground": "stone_irregular"
+      },
+      {
+          "id": 3,
+          "name": "大观楼·沁芳庭",
+          "sceneType": "public",
+          "ownerFamilyId": 0,
+          "ownerCharacterId": 0,
+          "isTransition": false,
+          "openEdges": true,
+          "layoutVersion": 3,
+          "originCol": 29,
+          "originRow": 18,
+          "cols": 24,
+          "rows": 17,
+          "bg": "#3a4a32",
+          "bgAlt": "#334028",
+          "ground": "grass_mottled",
+          "walkMask": [
+              "###......DDDDD####,,,,,,",
+              "###..######..,,##,,##,,,",
+              "###...####....,,,,,###,,",
+              "#########,....,,,,######",
+              ".####,,,##,,,,,.,#######",
+              ".,,,.,,,,,,,,,..,,,####D",
+              ",,,,######......,,,,,,,D",
+              "..................####,D",
+              "....####....,,,,....###.",
+              ".#######,,,#,,,,..#.....",
+              ".######,,,,,,,,..#######",
+              "...###.,,,DDDD#..#####..",
+              "####....#####....#####..",
+              "###..#####.......####...",
+              "###.####.....######.....",
+              "######.....#######......",
+              "...#..###.######........"
+          ],
+          "furnitureFinePlacements": [
+              {
+                  "instanceId": 3007,
+                  "sceneId": 3,
+                  "templateId": 211,
+                  "name": "竹榻",
+                  "fineScale": 2,
+                  "fineCol": 6,
+                  "fineRow": 3,
+                  "fineW": 4,
+                  "fineH": 2,
+                  "x": 0.125,
+                  "y": 0.0882,
+                  "w": 0.0833,
+                  "h": 0.0588
+              },
+              {
+                  "instanceId": 3001,
+                  "sceneId": 3,
+                  "templateId": 701,
+                  "name": "花圃",
+                  "fineScale": 2,
+                  "fineCol": 16,
+                  "fineRow": 10,
+                  "fineW": 4,
+                  "fineH": 2,
+                  "x": 0.3333,
+                  "y": 0.2941,
+                  "w": 0.0833,
+                  "h": 0.0588
+              },
+              {
+                  "instanceId": 3002,
+                  "sceneId": 3,
+                  "templateId": 701,
+                  "name": "花圃",
+                  "fineScale": 2,
+                  "fineCol": 31,
+                  "fineRow": 3,
+                  "fineW": 4,
+                  "fineH": 2,
+                  "x": 0.6458,
+                  "y": 0.0882,
+                  "w": 0.0833,
+                  "h": 0.0588
+              },
+              {
+                  "instanceId": 3003,
+                  "sceneId": 3,
+                  "templateId": 801,
+                  "name": "凉亭",
+                  "fineScale": 2,
+                  "fineCol": 21,
+                  "fineRow": 3,
+                  "fineW": 6,
+                  "fineH": 4,
+                  "x": 0.4375,
+                  "y": 0.0882,
+                  "w": 0.125,
+                  "h": 0.1176,
+                  "backgroundEmbedded": true
+              },
+              {
+                  "instanceId": 3006,
+                  "sceneId": 3,
+                  "templateId": 110,
+                  "name": "饭桌",
+                  "fineScale": 2,
+                  "fineCol": 22,
+                  "fineRow": 8,
+                  "fineW": 4,
+                  "fineH": 2,
+                  "x": 0.4583,
+                  "y": 0.2353,
+                  "w": 0.0833,
+                  "h": 0.0588
+              },
+              {
+                  "instanceId": 3010,
+                  "sceneId": 3,
+                  "templateId": 111,
+                  "name": "点心案",
+                  "fineScale": 2,
+                  "fineCol": 36,
+                  "fineRow": 2,
+                  "fineW": 2,
+                  "fineH": 2,
+                  "x": 0.75,
+                  "y": 0.0588,
+                  "w": 0.0417,
+                  "h": 0.0588
+              },
+              {
+                  "instanceId": 3008,
+                  "sceneId": 3,
+                  "templateId": 311,
+                  "name": "铜面盆",
+                  "fineScale": 2,
+                  "fineCol": 32,
+                  "fineRow": 12,
+                  "fineW": 2,
+                  "fineH": 2,
+                  "x": 0.6667,
+                  "y": 0.3529,
+                  "w": 0.0417,
+                  "h": 0.0588
+              },
+              {
+                  "instanceId": 3004,
+                  "sceneId": 3,
+                  "templateId": 901,
+                  "name": "石凳",
+                  "fineScale": 2,
+                  "fineCol": 20,
+                  "fineRow": 15,
+                  "fineW": 2,
+                  "fineH": 2,
+                  "x": 0.4167,
+                  "y": 0.4412,
+                  "w": 0.0417,
+                  "h": 0.0588
+              },
+              {
+                  "instanceId": 3005,
+                  "sceneId": 3,
+                  "templateId": 901,
+                  "name": "石凳",
+                  "fineScale": 2,
+                  "fineCol": 29,
+                  "fineRow": 9,
+                  "fineW": 2,
+                  "fineH": 2,
+                  "x": 0.6042,
+                  "y": 0.2647,
+                  "w": 0.0417,
+                  "h": 0.0588
+              },
+              {
+                  "instanceId": 3009,
+                  "sceneId": 3,
+                  "templateId": 902,
+                  "name": "轿凳歇脚",
+                  "fineScale": 2,
+                  "fineCol": 31,
+                  "fineRow": 16,
+                  "fineW": 3,
+                  "fineH": 2,
+                  "x": 0.6458,
+                  "y": 0.4706,
+                  "w": 0.0625,
+                  "h": 0.0588
+              },
+              {
+                  "instanceId": 3011,
+                  "sceneId": 3,
+                  "templateId": 113,
+                  "name": "樟木案几",
+                  "fineScale": 2,
+                  "fineCol": 30,
+                  "fineRow": 18,
+                  "fineW": 4,
+                  "fineH": 2,
+                  "x": 0.625,
+                  "y": 0.5294,
+                  "w": 0.0833,
+                  "h": 0.0588
+              },
+              {
+                  "instanceId": 3012,
+                  "sceneId": 3,
+                  "templateId": 1001,
+                  "name": "棋桌",
+                  "fineScale": 2,
+                  "fineCol": 32,
+                  "fineRow": 6,
+                  "fineW": 4,
+                  "fineH": 2,
+                  "x": 0.6667,
+                  "y": 0.1765,
+                  "w": 0.0833,
+                  "h": 0.0588
+              }
+          ],
+          "occlusionPolygons": [
+              [
+                  [
+                      0.4437,
+                      0.1059
+                  ],
+                  [
+                      0.4742,
+                      0.1149
+                  ],
+                  [
+                      0.5,
+                      0.0982
+                  ],
+                  [
+                      0.5,
+                      0.0723
+                  ],
+                  [
+                      0.5092,
+                      0.0749
+                  ],
+                  [
+                      0.5101,
+                      0.1072
+                  ],
+                  [
+                      0.5424,
+                      0.1149
+                  ],
+                  [
+                      0.5655,
+                      0.1098
+                  ],
+                  [
+                      0.56,
+                      0.1653
+                  ],
+                  [
+                      0.571,
+                      0.1627
+                  ],
+                  [
+                      0.5683,
+                      0.1782
+                  ],
+                  [
+                      0.5489,
+                      0.1989
+                  ],
+                  [
+                      0.548,
+                      0.2208
+                  ],
+                  [
+                      0.5572,
+                      0.2312
+                  ],
+                  [
+                      0.5609,
+                      0.3074
+                  ],
+                  [
+                      0.5563,
+                      0.319
+                  ],
+                  [
+                      0.5341,
+                      0.319
+                  ],
+                  [
+                      0.5286,
+                      0.3306
+                  ],
+                  [
+                      0.4751,
+                      0.3306
+                  ],
+                  [
+                      0.464,
+                      0.3164
+                  ],
+                  [
+                      0.4428,
+                      0.3061
+                  ],
+                  [
+                      0.4511,
+                      0.2467
+                  ],
+                  [
+                      0.4622,
+                      0.226
+                  ],
+                  [
+                      0.4585,
+                      0.1963
+                  ],
+                  [
+                      0.4382,
+                      0.1847
+                  ],
+                  [
+                      0.4299,
+                      0.1576
+                  ],
+                  [
+                      0.4456,
+                      0.1601
+                  ],
+                  [
+                      0.4456,
+                      0.124
+                  ],
+                  [
+                      0.4428,
+                      0.1033
+                  ]
+              ],
+              [
+                  [
+                      0.4696,
+                      0.6122
+                  ],
+                  [
+                      0.488,
+                      0.6238
+                  ],
+                  [
+                      0.5037,
+                      0.6186
+                  ],
+                  [
+                      0.5387,
+                      0.5954
+                  ],
+                  [
+                      0.5609,
+                      0.6018
+                  ],
+                  [
+                      0.5849,
+                      0.6199
+                  ],
+                  [
+                      0.6052,
+                      0.6122
+                  ],
+                  [
+                      0.6052,
+                      0.6238
+                  ],
+                  [
+                      0.5858,
+                      0.6509
+                  ],
+                  [
+                      0.5932,
+                      0.6974
+                  ],
+                  [
+                      0.5701,
+                      0.7245
+                  ],
+                  [
+                      0.571,
+                      0.7439
+                  ],
+                  [
+                      0.5185,
+                      0.74
+                  ],
+                  [
+                      0.5074,
+                      0.7233
+                  ],
+                  [
+                      0.4917,
+                      0.709
+                  ],
+                  [
+                      0.4668,
+                      0.7039
+                  ],
+                  [
+                      0.4659,
+                      0.6096
+                  ]
+              ],
+              [
+                  [
+                      0.1725,
+                      0.5024
+                  ],
+                  [
+                      0.2463,
+                      0.4404
+                  ],
+                  [
+                      0.2943,
+                      0.4391
+                  ],
+                  [
+                      0.357,
+                      0.483
+                  ],
+                  [
+                      0.3644,
+                      0.4998
+                  ],
+                  [
+                      0.4133,
+                      0.536
+                  ],
+                  [
+                      0.4465,
+                      0.5489
+                  ],
+                  [
+                      0.4437,
+                      0.6328
+                  ],
+                  [
+                      0.1568,
+                      0.6897
+                  ],
+                  [
+                      0.0498,
+                      0.6664
+                  ],
+                  [
+                      0.0277,
+                      0.5644
+                  ],
+                  [
+                      0.0443,
+                      0.5321
+                  ],
+                  [
+                      0.0793,
+                      0.5205
+                  ],
+                  [
+                      0.1181,
+                      0.5205
+                  ],
+                  [
+                      0.1587,
+                      0.5205
+                  ],
+                  [
+                      0.1716,
+                      0.505
+                  ]
+              ]
+          ]
+      },
+      {
+      "id": 4,
+      "name": "怡红院",
+      "sceneType": "private",
+      "ownerFamilyId": 1,
+      "ownerCharacterId": 0,
+      "isTransition": false,
+      "layoutVersion": 1,
+      "originCol": 36,
+      "originRow": 36,
+      "cols": 33,
+      "rows": 23,
+      "bg": "#4a3028",
+      "bgAlt": "#422820",
+      "ground": "wood",
+      "walkMask": [
+          "###############DDD###############",
+          "###############DDD###############",
+          "########,,,####,,,##~~~~~~#,,,###",
+          "####,,,.#,,,,,,,,,.~~~~~~~#,,,###",
+          "####,,,.#,,,,,,,,,.~~~~~~~##,,###",
+          "####,.,##,,,,,,,,,,,,,,,,,,,,,,##",
+          "##..,.,ww......DDD...w,,ww.,##=##",
+          "##..,.,ww............w,,w#####=##",
+          "##...,,ww............w,,www...=##",
+          "##...,,ww............w,,wDDw..=##",
+          "##.==,,ww............w,,,DDw..=##",
+          "##.==,www###........##,,,,,w..=##",
+          "##.==,www###........##,,,,,w..=##",
+          "###==,,wwwww##DDDD##,,,,,,,w..=##",
+          "###=....,,,,,,,,,,,..,,,##..##=##",
+          "###=.,,....,,,,,,,,.,,,,###.##=##",
+          "###=.,,,.....,,,,,,...,,....##=##",
+          "###=.###....,,,,,,,,..,,,,.###=##",
+          "###=.####,,,,,,DDD,,,,,,,.####=##",
+          "###=D#######,,,DDD,,,,,,,.####D##",
+          "###DD##########DDD############D##",
+          "###,,##########DDD############,##",
+          ",,,,,,,,,,,,,,DDDD,,,,,,,,,,,,,,,"
       ],
-      furnitureFinePlacements: [
-        { instanceId: 1001, sceneId: 1, templateId: 201, name: '雕花木床', fineScale: 4, fineCol: 35, fineRow: 19, fineW: 8, fineH: 9, x: 0.3125, y: 0.2375, w: 0.0714, h: 0.1125 },
-        { instanceId: 1002, sceneId: 1, templateId: 101, name: '红木书案', fineScale: 4, fineCol: 71, fineRow: 22, fineW: 8, fineH: 4, x: 0.6339, y: 0.2750, w: 0.0714, h: 0.0500 },
-        { instanceId: 1012, sceneId: 1, templateId: 113, name: '樟木案几', fineScale: 4, fineCol: 52, fineRow: 23, fineW: 7, fineH: 3, x: 0.4643, y: 0.2875, w: 0.0625, h: 0.0375 },
-        { instanceId: 1003, sceneId: 1, templateId: 301, name: '浴盆', fineScale: 4, fineCol: 75, fineRow: 28, fineW: 8, fineH: 8, x: 0.6696, y: 0.3500, w: 0.0714, h: 0.1000 },
-        { instanceId: 1009, sceneId: 1, templateId: 211, name: '竹榻', fineScale: 4, fineCol: 88, fineRow: 33, fineW: 3, fineH: 6, x: 0.7857, y: 0.4125, w: 0.0268, h: 0.0750 },
-        { instanceId: 1006, sceneId: 1, templateId: 601, name: '琴台', fineScale: 4, fineCol: 94, fineRow: 40, fineW: 2, fineH: 6, x: 0.8393, y: 0.5000, w: 0.0179, h: 0.0750 },
-        { instanceId: 1011, sceneId: 1, templateId: 111, name: '点心案', fineScale: 4, fineCol: 32, fineRow: 32, fineW: 5, fineH: 3, x: 0.2857, y: 0.4000, w: 0.0446, h: 0.0375 },
-        { instanceId: 1007, sceneId: 1, templateId: 110, name: '饭桌', fineScale: 4, fineCol: 52, fineRow: 30, fineW: 7, fineH: 3, x: 0.4643, y: 0.3750, w: 0.0625, h: 0.0375 },
-        { instanceId: 1004, sceneId: 1, templateId: 401, name: '茶案', fineScale: 4, fineCol: 88, fineRow: 27, fineW: 5, fineH: 3, x: 0.7857, y: 0.3375, w: 0.0446, h: 0.0375 },
-        { instanceId: 1005, sceneId: 1, templateId: 501, name: '酒案', fineScale: 4, fineCol: 67, fineRow: 50, fineW: 6, fineH: 3, x: 0.5982, y: 0.6250, w: 0.0536, h: 0.0375 },
-        { instanceId: 1008, sceneId: 1, templateId: 312, name: '梳洗妆台', fineScale: 4, fineCol: 41, fineRow: 30, fineW: 3, fineH: 6, x: 0.3661, y: 0.3750, w: 0.0268, h: 0.0750 },
+      "furnitureFinePlacements": [
+          {
+              "instanceId": 4005,
+              "sceneId": 4,
+              "templateId": 301,
+              "name": "浴盆",
+              "fineScale": 2,
+              "fineCol": 8,
+              "fineRow": 26,
+              "fineW": 5,
+              "fineH": 5,
+              "x": 0.1212,
+              "y": 0.5652,
+              "w": 0.0758,
+              "h": 0.1087
+          },
+          {
+              "instanceId": 4008,
+              "sceneId": 4,
+              "templateId": 211,
+              "name": "竹榻",
+              "fineScale": 2,
+              "fineCol": 24,
+              "fineRow": 7,
+              "fineW": 5,
+              "fineH": 3,
+              "x": 0.3636,
+              "y": 0.1522,
+              "w": 0.0758,
+              "h": 0.0652
+          },
+          {
+              "instanceId": 4011,
+              "sceneId": 4,
+              "templateId": 1002,
+              "name": "针线篮",
+              "fineScale": 2,
+              "fineCol": 52,
+              "fineRow": 21,
+              "fineW": 3,
+              "fineH": 3,
+              "x": 0.7879,
+              "y": 0.4565,
+              "w": 0.0455,
+              "h": 0.0652
+          },
+          {
+              "instanceId": 10006,
+              "sceneId": 4,
+              "templateId": 201,
+              "name": "雕花木床",
+              "fineScale": 2,
+              "fineCol": 56,
+              "fineRow": 17,
+              "fineW": 3,
+              "fineH": 8,
+              "x": 0.8485,
+              "y": 0.3696,
+              "w": 0.0455,
+              "h": 0.1739,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10007,
+              "sceneId": 4,
+              "templateId": 1008,
+              "name": "屏风帘后",
+              "fineScale": 2,
+              "fineCol": 52,
+              "fineRow": 18,
+              "fineW": 4,
+              "fineH": 3,
+              "x": 0.7879,
+              "y": 0.3913,
+              "w": 0.0606,
+              "h": 0.0652,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10008,
+              "sceneId": 4,
+              "templateId": 312,
+              "name": "梳洗妆台",
+              "fineScale": 2,
+              "fineCol": 50,
+              "fineRow": 17,
+              "fineW": 2,
+              "fineH": 3,
+              "x": 0.7576,
+              "y": 0.3696,
+              "w": 0.0303,
+              "h": 0.0652,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10009,
+              "sceneId": 4,
+              "templateId": 201,
+              "name": "雕花木床",
+              "fineScale": 2,
+              "fineCol": 52,
+              "fineRow": 13,
+              "fineW": 4,
+              "fineH": 4,
+              "x": 0.7879,
+              "y": 0.2826,
+              "w": 0.0606,
+              "h": 0.087,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10010,
+              "sceneId": 4,
+              "templateId": 110,
+              "name": "饭桌",
+              "fineScale": 2,
+              "fineCol": 31,
+              "fineRow": 19,
+              "fineW": 3,
+              "fineH": 3,
+              "x": 0.4697,
+              "y": 0.413,
+              "w": 0.0455,
+              "h": 0.0652,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10011,
+              "sceneId": 4,
+              "templateId": 111,
+              "name": "点心案",
+              "fineScale": 2,
+              "fineCol": 31,
+              "fineRow": 16,
+              "fineW": 4,
+              "fineH": 1,
+              "x": 0.4697,
+              "y": 0.3478,
+              "w": 0.0606,
+              "h": 0.0217,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10012,
+              "sceneId": 4,
+              "templateId": 601,
+              "name": "琴台",
+              "fineScale": 2,
+              "fineCol": 45,
+              "fineRow": 17,
+              "fineW": 1,
+              "fineH": 5,
+              "x": 0.6818,
+              "y": 0.3696,
+              "w": 0.0152,
+              "h": 0.1087,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10013,
+              "sceneId": 4,
+              "templateId": 101,
+              "name": "红木书案",
+              "fineScale": 2,
+              "fineCol": 18,
+              "fineRow": 16,
+              "fineW": 2,
+              "fineH": 6,
+              "x": 0.2727,
+              "y": 0.3478,
+              "w": 0.0303,
+              "h": 0.1304,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10014,
+              "sceneId": 4,
+              "templateId": 701,
+              "name": "花圃",
+              "fineScale": 2,
+              "fineCol": 19,
+              "fineRow": 34,
+              "fineW": 7,
+              "fineH": 4,
+              "x": 0.2879,
+              "y": 0.7391,
+              "w": 0.1061,
+              "h": 0.087,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10015,
+              "sceneId": 4,
+              "templateId": 501,
+              "name": "酒案",
+              "fineScale": 2,
+              "fineCol": 6,
+              "fineRow": 13,
+              "fineW": 1,
+              "fineH": 5,
+              "x": 0.0909,
+              "y": 0.2826,
+              "w": 0.0152,
+              "h": 0.1087,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10016,
+              "sceneId": 4,
+              "templateId": 1004,
+              "name": "对牌匣",
+              "fineScale": 2,
+              "fineCol": 15,
+              "fineRow": 6,
+              "fineW": 1,
+              "fineH": 3,
+              "x": 0.2273,
+              "y": 0.1304,
+              "w": 0.0152,
+              "h": 0.0652,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10017,
+              "sceneId": 4,
+              "templateId": 1007,
+              "name": "药炉",
+              "fineScale": 2,
+              "fineCol": 7,
+              "fineRow": 16,
+              "fineW": 2,
+              "fineH": 2,
+              "x": 0.1061,
+              "y": 0.3478,
+              "w": 0.0303,
+              "h": 0.0435,
+              "backgroundEmbedded": true
+          }
       ],
-      occlusionPolygons: [
-        [[0.5336, 0.4466], [0.5707, 0.4466], [0.5707, 0.4779], [0.5336, 0.4779]],
-        [[0.5233, 0.4236], [0.5353, 0.4236], [0.5353, 0.4466], [0.5233, 0.4466]],
-        [[0.5336, 0.4466], [0.5802, 0.4466], [0.5802, 0.4791], [0.5336, 0.4791]],
-        [[0.5216, 0.4212], [0.6293, 0.4212], [0.6293, 0.4828], [0.5216, 0.4828]],
-        [[0.3948, 0.4224], [0.4491, 0.4224], [0.4491, 0.4779], [0.3948, 0.4779]],
-        [[0.2552, 0.1991], [0.7362, 0.1991], [0.7362, 0.2897], [0.2552, 0.2897]],
-        [[0.7017, 0.4550], [0.7526, 0.4550], [0.7526, 0.4936], [0.7017, 0.4936]],
-        [[0.7353, 0.2474], [0.8681, 0.2474], [0.8681, 0.3295], [0.7353, 0.3295]],
-        [[0.2517, 0.4466], [0.3155, 0.4466], [0.3155, 0.4960], [0.2517, 0.4960]],
-        [[0.3517, 0.4574], [0.4198, 0.4574], [0.4198, 0.5033], [0.3517, 0.5033]],
-      ] },
-    /* 西北 */ { id: 2, name: '蘅芜苑', sceneType: 'private', ownerFamilyId: 3, ownerCharacterId: 0, isTransition: false,
-      originCol: 2, originRow: 0, cols: 14, rows: 7, bg: '#2f3a2f', bgAlt: '#283528', ground: 'stone_irregular' },
-    /* 中心庭 */ { id: 3, name: '大观楼·沁芳庭', sceneType: 'public', ownerFamilyId: 0, ownerCharacterId: 0, isTransition: false, openEdges: true,
-      originCol: 16, originRow: 11, cols: 24, rows: 12, bg: '#3a4a32', bgAlt: '#334028', ground: 'grass_mottled' },
-    /* 东南 */ { id: 4, name: '怡红院', sceneType: 'private', ownerFamilyId: 1, ownerCharacterId: 0, isTransition: false,
-      originCol: 38, originRow: 27, cols: 28, rows: 20, bg: '#4a3028', bgAlt: '#422820', ground: 'wood',
-      walkMask: [
-        '#############DD#############',
-        '#############DD#############',
-        '###....,,,,##,,##~~~~~######',
-        '###,,,.#,,,,,,,.~~~~~~######',
-        '###,.,##,,,,,,,,.~~~...#####',
-        '##.,.,ww.....DD...w,ww..####',
-        '##.,.,ww..........w,w#######',
-        '##..,,ww..........w,www...##',
-        '##..,,ww..........w,wDDw..##',
-        '##..,,ww..........w,,DDw..##',
-        '##..,www##.......##,,,,w..##',
-        '##..,,wwww##DDD##,,,,,,w..##',
-        '##..DD,,,,,,,,,,DD,,##..####',
-        '##..,,,DD,,,,,,,D,,,###.####',
-        '##..,,,DDD,,,,,,,,D,....####',
-        '###...,DD,,,,,,,,DD,,,.#####',
-        '####..,,,,,,,DD,,,,,,.######',
-        '#############DD#############',
-        '#############DD#############',
-        '############DDD#############',
+      "occlusionPolygons": []
+  },
+      {
+          "id": 5,
+          "name": "荣禧堂",
+          "sceneType": "ritual",
+          "ownerFamilyId": 4,
+          "ownerCharacterId": 0,
+          "isTransition": false,
+          "layoutVersion": 3,
+          "originCol": 23,
+          "originRow": 0,
+          "cols": 38,
+          "rows": 17,
+          "bg": "#d2b879",
+          "bgAlt": "#bf9f65",
+          "ground": "stone_pebble"
+      },
+      {
+      "id": 7,
+      "name": "秋爽斋",
+      "sceneType": "private",
+      "ownerFamilyId": 4,
+      "ownerCharacterId": 0,
+      "isTransition": false,
+      "layoutVersion": 2,
+      "originCol": 0,
+      "originRow": 18,
+      "cols": 27,
+      "rows": 17,
+      "bg": "#3a3528",
+      "bgAlt": "#322f22",
+      "ground": "wood",
+      "walkMask": [
+          "############DDD############",
+          "##,###,#####DDD############",
+          "##,##,,##,,,,,#######,#####",
+          "#,,,,,,,,,,,.........,.####",
+          "#,#.....................###",
+          "#,,.....................###",
+          "#,,.....................###",
+          "#,#......................##",
+          "#,#......................##",
+          "#,#......................##",
+          "#,#......................##",
+          "#,#......................##",
+          "#,.......................##",
+          "##.......................##",
+          "##DD.......DDDD........DD##",
+          ",,DD,,,,,,,,DDD,,,,,,,,DD,,",
+          ",,DD,,,,,,,,DDD,,,,,,,,,D,,"
       ],
-      furnitureFinePlacements: [
-        { instanceId: 4001, sceneId: 4, templateId: 201, name: '雕花木床', fineScale: 4, fineCol: 32, fineRow: 24, fineW: 8, fineH: 8, x: 0.2857, y: 0.3000, w: 0.0714, h: 0.1000 },
-        { instanceId: 4002, sceneId: 4, templateId: 101, name: '红木书案', fineScale: 4, fineCol: 44, fineRow: 24, fineW: 8, fineH: 4, x: 0.3929, y: 0.3000, w: 0.0714, h: 0.0500 },
-        { instanceId: 4010, sceneId: 4, templateId: 113, name: '樟木案几', fineScale: 4, fineCol: 84, fineRow: 28, fineW: 8, fineH: 4, x: 0.7500, y: 0.3500, w: 0.0714, h: 0.0500 },
-        { instanceId: 4005, sceneId: 4, templateId: 301, name: '浴盆', fineScale: 4, fineCol: 64, fineRow: 24, fineW: 8, fineH: 8, x: 0.5714, y: 0.3000, w: 0.0714, h: 0.1000 },
-        { instanceId: 4007, sceneId: 4, templateId: 312, name: '梳洗妆台', fineScale: 4, fineCol: 55, fineRow: 28, fineW: 8, fineH: 4, x: 0.4911, y: 0.3500, w: 0.0714, h: 0.0500 },
-        { instanceId: 4008, sceneId: 4, templateId: 211, name: '竹榻', fineScale: 4, fineCol: 40, fineRow: 40, fineW: 8, fineH: 4, x: 0.3571, y: 0.5000, w: 0.0714, h: 0.0500 },
-        { instanceId: 4009, sceneId: 4, templateId: 112, name: '厨房灶台', fineScale: 4, fineCol: 16, fineRow: 22, fineW: 8, fineH: 8, x: 0.1429, y: 0.2750, w: 0.0714, h: 0.1000 },
-        { instanceId: 4006, sceneId: 4, templateId: 110, name: '饭桌', fineScale: 4, fineCol: 28, fineRow: 32, fineW: 8, fineH: 4, x: 0.2500, y: 0.4000, w: 0.0714, h: 0.0500 },
-        { instanceId: 4003, sceneId: 4, templateId: 401, name: '茶案', fineScale: 4, fineCol: 52, fineRow: 32, fineW: 8, fineH: 4, x: 0.4643, y: 0.4000, w: 0.0714, h: 0.0500 },
-        { instanceId: 4004, sceneId: 4, templateId: 501, name: '酒案', fineScale: 4, fineCol: 44, fineRow: 32, fineW: 8, fineH: 4, x: 0.3929, y: 0.4000, w: 0.0714, h: 0.0500 },
-        { instanceId: 4011, sceneId: 4, templateId: 1002, name: '针线篮', fineScale: 4, fineCol: 68, fineRow: 36, fineW: 4, fineH: 4, x: 0.6071, y: 0.4500, w: 0.0357, h: 0.0500 },
-        { instanceId: 4012, sceneId: 4, templateId: 1008, name: '屏风帘后', fineScale: 4, fineCol: 20, fineRow: 40, fineW: 4, fineH: 4, x: 0.1786, y: 0.5000, w: 0.0357, h: 0.0500 },
-      ] },
-    /* 正北 */ { id: 5, name: '荣禧堂', sceneType: 'ritual', ownerFamilyId: 4, ownerCharacterId: 0, isTransition: false,
-      originCol: 18, originRow: 0, cols: 20, rows: 7, bg: '#3a2a22', bgAlt: '#322018', ground: 'stone_pebble' },
-    /* 正西 */ { id: 7, name: '秋爽斋', sceneType: 'private', ownerFamilyId: 4, ownerCharacterId: 0, isTransition: false,
-      originCol: 2, originRow: 11, cols: 12, rows: 11, bg: '#3a3528', bgAlt: '#322f22', ground: 'wood' },
-    /* 北偏西 */ { id: 9, name: '暖香坞', sceneType: 'private', ownerFamilyId: 0, ownerCharacterId: 0, isTransition: false,
-      originCol: 40, originRow: 0, cols: 10, rows: 7, bg: '#4a3828', bgAlt: '#403020', ground: 'wood' },
-    /* 游廊甬道（全格可行走；连接格须在场景范围内才生效） */ { id: 10, name: '北游廊', sceneType: 'public', ownerFamilyId: 0, ownerCharacterId: 0, isTransition: true,
-      originCol: 0, originRow: 7, cols: 56, rows: 4, bg: '#4a4038', bgAlt: '#423830', ground: 'stone_herringbone' },
-    { id: 11, name: '南游廊', sceneType: 'public', ownerFamilyId: 0, ownerCharacterId: 0, isTransition: true,
-      originCol: 0, originRow: 23, cols: 56, rows: 4, bg: '#4a4038', bgAlt: '#423830', ground: 'stone_herringbone' },
-    { id: 12, name: '西游廊', sceneType: 'public', ownerFamilyId: 0, ownerCharacterId: 0, isTransition: true,
-      originCol: 14, originRow: 12, cols: 2, rows: 15, bg: '#4a4038', bgAlt: '#423830', ground: 'stone_herringbone' },
-    { id: 13, name: '东航廊', sceneType: 'public', ownerFamilyId: 0, ownerCharacterId: 0, isTransition: true,
-      originCol: 40, originRow: 12, cols: 2, rows: 15, bg: '#4a4038', bgAlt: '#423830', ground: 'stone_herringbone' },
-    { id: 14, name: '潇怡竹林', sceneType: 'public', ownerFamilyId: 0, ownerCharacterId: 0, isTransition: false, hidePlaque: true,
-      originCol: 30, originRow: 27, cols: 8, rows: 20, bg: '#2f4a32', bgAlt: '#243d28', ground: 'grass_lush',
-      walkMask: [
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-        '########',
-      ] },
+      "furnitureFinePlacements": [
+          {
+              "instanceId": 10018,
+              "sceneId": 7,
+              "templateId": 201,
+              "name": "雕花木床",
+              "fineScale": 2,
+              "fineCol": 39,
+              "fineRow": 8,
+              "fineW": 7,
+              "fineH": 7,
+              "x": 0.7222,
+              "y": 0.2353,
+              "w": 0.1296,
+              "h": 0.2059,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10019,
+              "sceneId": 7,
+              "templateId": 312,
+              "name": "梳洗妆台",
+              "fineScale": 2,
+              "fineCol": 37,
+              "fineRow": 17,
+              "fineW": 5,
+              "fineH": 2,
+              "x": 0.6852,
+              "y": 0.5,
+              "w": 0.0926,
+              "h": 0.0588,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10020,
+              "sceneId": 7,
+              "templateId": 1002,
+              "name": "针线篮",
+              "fineScale": 2,
+              "fineCol": 45,
+              "fineRow": 16,
+              "fineW": 2,
+              "fineH": 3,
+              "x": 0.8333,
+              "y": 0.4706,
+              "w": 0.037,
+              "h": 0.0882,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10021,
+              "sceneId": 7,
+              "templateId": 101,
+              "name": "红木书案",
+              "fineScale": 2,
+              "fineCol": 23,
+              "fineRow": 16,
+              "fineW": 8,
+              "fineH": 2,
+              "x": 0.4259,
+              "y": 0.4706,
+              "w": 0.1481,
+              "h": 0.0588,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10022,
+              "sceneId": 7,
+              "templateId": 110,
+              "name": "饭桌",
+              "fineScale": 2,
+              "fineCol": 12,
+              "fineRow": 15,
+              "fineW": 2,
+              "fineH": 3,
+              "x": 0.2222,
+              "y": 0.4412,
+              "w": 0.037,
+              "h": 0.0882,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10023,
+              "sceneId": 7,
+              "templateId": 701,
+              "name": "花圃",
+              "fineScale": 2,
+              "fineCol": 8,
+              "fineRow": 22,
+              "fineW": 6,
+              "fineH": 5,
+              "x": 0.1481,
+              "y": 0.6471,
+              "w": 0.1111,
+              "h": 0.1471,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10024,
+              "sceneId": 7,
+              "templateId": 1003,
+              "name": "账桌算盘",
+              "fineScale": 2,
+              "fineCol": 21,
+              "fineRow": 14,
+              "fineW": 2,
+              "fineH": 2,
+              "x": 0.3889,
+              "y": 0.4118,
+              "w": 0.037,
+              "h": 0.0588,
+              "backgroundEmbedded": true
+          },
+          {
+              "instanceId": 10025,
+              "sceneId": 7,
+              "templateId": 111,
+              "name": "点心案",
+              "fineScale": 2,
+              "fineCol": 32,
+              "fineRow": 11,
+              "fineW": 1,
+              "fineH": 3,
+              "x": 0.5926,
+              "y": 0.3235,
+              "w": 0.0185,
+              "h": 0.0882,
+              "backgroundEmbedded": true
+          }
+      ],
+      "occlusionPolygons": []
+  },
+      {
+          "id": 9,
+          "name": "暖香坞",
+          "sceneType": "private",
+          "ownerFamilyId": 0,
+          "ownerCharacterId": 0,
+          "isTransition": false,
+          "layoutVersion": 3,
+          "originCol": 61,
+          "originRow": 3,
+          "cols": 15,
+          "rows": 11,
+          "bg": "#d7bf84",
+          "bgAlt": "#c3a56d",
+          "ground": "wood"
+      },
+      {
+          "id": 10,
+          "name": "北游廊",
+          "sceneType": "public",
+          "ownerFamilyId": 0,
+          "ownerCharacterId": 0,
+          "isTransition": true,
+          "layoutVersion": 2,
+          "originCol": 0,
+          "originRow": 14,
+          "cols": 85,
+          "rows": 4,
+          "bg": "#4a4038",
+          "bgAlt": "#423830",
+          "ground": "stone_herringbone"
+      },
+      {
+          "id": 11,
+          "name": "南游廊",
+          "sceneType": "public",
+          "ownerFamilyId": 0,
+          "ownerCharacterId": 0,
+          "isTransition": true,
+          "layoutVersion": 2,
+          "originCol": 0,
+          "originRow": 35,
+          "cols": 71,
+          "rows": 4,
+          "bg": "#4a4038",
+          "bgAlt": "#423830",
+          "ground": "stone_herringbone"
+      },
+      {
+          "id": 12,
+          "name": "西游廊",
+          "sceneType": "public",
+          "ownerFamilyId": 0,
+          "ownerCharacterId": 0,
+          "isTransition": true,
+          "layoutVersion": 2,
+          "originCol": 27,
+          "originRow": 18,
+          "cols": 2,
+          "rows": 21,
+          "bg": "#d9c58f",
+          "bgAlt": "#cdb77f",
+          "ground": "stone_herringbone"
+      },
+      {
+          "id": 13,
+          "name": "东游廊",
+          "sceneType": "public",
+          "ownerFamilyId": 0,
+          "ownerCharacterId": 0,
+          "isTransition": true,
+          "layoutVersion": 3,
+          "originCol": 53,
+          "originRow": 18,
+          "cols": 2,
+          "rows": 21,
+          "bg": "#d9c58f",
+          "bgAlt": "#cdb77f",
+          "ground": "stone_herringbone"
+      },
+      {
+          "id": 14,
+          "name": "潇怡竹林",
+          "sceneType": "public",
+          "ownerFamilyId": 0,
+          "ownerCharacterId": 0,
+          "isTransition": false,
+          "hidePlaque": true,
+          "layoutVersion": 1,
+          "originCol": 28,
+          "originRow": 39,
+          "cols": 8,
+          "rows": 20,
+          "bg": "#2f4a32",
+          "bgAlt": "#243d28",
+          "ground": "grass_lush",
+          "walkMask": [
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########",
+              "########"
+          ]
+      }
   ],
   connections: [
-    /* 北院南缘 → 北游廊（门在院落底边 row 6） */ { col: 8, row: 6, type: 'gate' }, { col: 9, row: 6, type: 'gate' },
-    { col: 26, row: 6, type: 'gate' }, { col: 27, row: 6, type: 'gate' },
-    { col: 44, row: 6, type: 'gate' }, { col: 45, row: 6, type: 'gate' },
-    { col: 50, row: 6, type: 'gate' }, { col: 51, row: 6, type: 'gate' },
-    /* 大观楼北口 */ { col: 26, row: 11, type: 'gate' }, { col: 27, row: 11, type: 'gate' },
-    { col: 28, row: 11, type: 'gate' }, { col: 29, row: 11, type: 'gate' },
-    /* 大观楼南口 */ { col: 26, row: 22, type: 'gate' }, { col: 27, row: 22, type: 'gate' },
-    { col: 28, row: 22, type: 'gate' }, { col: 29, row: 22, type: 'gate' },
-    /* 大观楼西口 */ { col: 16, row: 16, type: 'gate' }, { col: 16, row: 17, type: 'gate' },
-    /* 大观楼东口 */ { col: 39, row: 16, type: 'gate' }, { col: 39, row: 17, type: 'gate' },
-    /* 秋爽斋东/南门 */ { col: 13, row: 16, type: 'gate' }, { col: 13, row: 17, type: 'gate' },
-    { col: 8, row: 21, type: 'gate' }, { col: 9, row: 21, type: 'gate' },
-    /* 南院北缘 → 南游廊（门在院落顶边 row 27） */ { col: 15, row: 27, type: 'gate' }, { col: 16, row: 27, type: 'gate' },
-    { col: 15, row: 46, type: 'gate' }, { col: 16, row: 46, type: 'gate' },
-    { col: 51, row: 27, type: 'gate' }, { col: 52, row: 27, type: 'gate' },
-    { col: 50, row: 46, type: 'gate' }, { col: 51, row: 46, type: 'gate' }, { col: 52, row: 46, type: 'gate' },
+      {
+          "col": 65,
+          "row": 13,
+          "type": "gate"
+      },
+      {
+          "col": 66,
+          "row": 13,
+          "type": "gate"
+      },
+      {
+          "col": 70,
+          "row": 13,
+          "type": "gate"
+      },
+      {
+          "col": 71,
+          "row": 13,
+          "type": "gate"
+      },
+      {
+          "col": 9,
+          "row": 14,
+          "type": "gate"
+      },
+      {
+          "col": 10,
+          "row": 14,
+          "type": "gate"
+      },
+      {
+          "col": 37,
+          "row": 16,
+          "type": "gate"
+      },
+      {
+          "col": 39,
+          "row": 16,
+          "type": "gate"
+      },
+      {
+          "col": 12,
+          "row": 18,
+          "type": "gate"
+      },
+      {
+          "col": 13,
+          "row": 18,
+          "type": "gate"
+      },
+      {
+          "col": 14,
+          "row": 18,
+          "type": "gate"
+      },
+      {
+          "col": 38,
+          "row": 18,
+          "type": "gate"
+      },
+      {
+          "col": 39,
+          "row": 18,
+          "type": "gate"
+      },
+      {
+          "col": 40,
+          "row": 18,
+          "type": "gate"
+      },
+      {
+          "col": 41,
+          "row": 18,
+          "type": "gate"
+      },
+      {
+          "col": 42,
+          "row": 18,
+          "type": "gate"
+      },
+      {
+          "col": 52,
+          "row": 23,
+          "type": "gate"
+      },
+      {
+          "col": 52,
+          "row": 24,
+          "type": "gate"
+      },
+      {
+          "col": 52,
+          "row": 25,
+          "type": "gate"
+      },
+      {
+          "col": 2,
+          "row": 34,
+          "type": "gate"
+      },
+      {
+          "col": 3,
+          "row": 34,
+          "type": "gate"
+      },
+      {
+          "col": 12,
+          "row": 34,
+          "type": "gate"
+      },
+      {
+          "col": 13,
+          "row": 34,
+          "type": "gate"
+      },
+      {
+          "col": 14,
+          "row": 34,
+          "type": "gate"
+      },
+      {
+          "col": 24,
+          "row": 34,
+          "type": "gate"
+      },
+      {
+          "col": 51,
+          "row": 36,
+          "type": "gate"
+      },
+      {
+          "col": 53,
+          "row": 36,
+          "type": "gate"
+      },
+      {
+          "col": 13,
+          "row": 39,
+          "type": "gate"
+      },
+      {
+          "col": 14,
+          "row": 39,
+          "type": "gate"
+      },
+      {
+          "col": 13,
+          "row": 58,
+          "type": "gate"
+      },
+      {
+          "col": 14,
+          "row": 58,
+          "type": "gate"
+      },
+      {
+          "col": 50,
+          "row": 58,
+          "type": "gate"
+      },
+      {
+          "col": 51,
+          "row": 58,
+          "type": "gate"
+      },
+      {
+          "col": 53,
+          "row": 58,
+          "type": "gate"
+      }
   ],
   furnitureConfig: {
     lifeLineName: '生活类目',
@@ -4282,404 +5776,1831 @@ const DEFAULT_CONFIG = {
       ] },
   },
   furnitureInstances: [
-    /* 潇湘馆 */ { instanceId: 1001, sceneId: 1, templateId: 201, anchorCol: 11, anchorRow: 32 },
-    { instanceId: 1002, sceneId: 1, templateId: 101, anchorCol: 20, anchorRow: 33 },
-    { instanceId: 1012, sceneId: 1, templateId: 113, anchorCol: 15, anchorRow: 33 },
-    { instanceId: 1003, sceneId: 1, templateId: 301, anchorCol: 21, anchorRow: 34 },
-    { instanceId: 1009, sceneId: 1, templateId: 211, anchorCol: 24, anchorRow: 35 },
-    { instanceId: 1006, sceneId: 1, templateId: 601, anchorCol: 26, anchorRow: 37 },
-    { instanceId: 1011, sceneId: 1, templateId: 111, anchorCol: 10, anchorRow: 35 },
-    { instanceId: 1007, sceneId: 1, templateId: 110, anchorCol: 15, anchorRow: 35 },
-    { instanceId: 1004, sceneId: 1, templateId: 401, anchorCol: 24, anchorRow: 34 },
-    { instanceId: 1005, sceneId: 1, templateId: 501, anchorCol: 19, anchorRow: 40 },
-    { instanceId: 1008, sceneId: 1, templateId: 312, anchorCol: 12, anchorRow: 35 },
-    /* 蘅芜苑 */ { instanceId: 2001, sceneId: 2, templateId: 201, anchorCol: 4, anchorRow: 2 },
-    { instanceId: 2002, sceneId: 2, templateId: 101, anchorCol: 6, anchorRow: 2 },
-    { instanceId: 2010, sceneId: 2, templateId: 113, anchorCol: 8, anchorRow: 2 },
-    { instanceId: 2004, sceneId: 2, templateId: 301, anchorCol: 10, anchorRow: 2 },
-    { instanceId: 2008, sceneId: 2, templateId: 311, anchorCol: 12, anchorRow: 3 },
-    { instanceId: 2009, sceneId: 2, templateId: 211, anchorCol: 12, anchorRow: 4 },
-    { instanceId: 2006, sceneId: 2, templateId: 112, anchorCol: 4, anchorRow: 5 },
-    { instanceId: 2005, sceneId: 2, templateId: 110, anchorCol: 6, anchorRow: 5 },
-    { instanceId: 2003, sceneId: 2, templateId: 401, anchorCol: 9, anchorRow: 5 },
-    { instanceId: 2007, sceneId: 2, templateId: 312, anchorCol: 11, anchorRow: 5 },
-    /* 大观楼·沁芳庭 */ { instanceId: 3007, sceneId: 3, templateId: 211, anchorCol: 18, anchorRow: 13 },
-    { instanceId: 3001, sceneId: 3, templateId: 701, anchorCol: 20, anchorRow: 16 },
-    { instanceId: 3002, sceneId: 3, templateId: 701, anchorCol: 32, anchorRow: 16 },
-    { instanceId: 3003, sceneId: 3, templateId: 801, anchorCol: 34, anchorRow: 13 },
-    { instanceId: 3006, sceneId: 3, templateId: 110, anchorCol: 28, anchorRow: 18 },
-    { instanceId: 3010, sceneId: 3, templateId: 111, anchorCol: 18, anchorRow: 20 },
-    { instanceId: 3008, sceneId: 3, templateId: 311, anchorCol: 36, anchorRow: 13 },
-    { instanceId: 3004, sceneId: 3, templateId: 901, anchorCol: 28, anchorRow: 21 },
-    { instanceId: 3005, sceneId: 3, templateId: 901, anchorCol: 34, anchorRow: 21 },
-    { instanceId: 3009, sceneId: 3, templateId: 902, anchorCol: 22, anchorRow: 21 },
-    { instanceId: 3011, sceneId: 3, templateId: 113, anchorCol: 24, anchorRow: 18 },
-    { instanceId: 3012, sceneId: 3, templateId: 1001, anchorCol: 24, anchorRow: 16 },
-    /* 怡红院 */ { instanceId: 4001, sceneId: 4, templateId: 201, anchorCol: 46, anchorRow: 33 },
-    { instanceId: 4002, sceneId: 4, templateId: 101, anchorCol: 49, anchorRow: 33 },
-    { instanceId: 4010, sceneId: 4, templateId: 113, anchorCol: 59, anchorRow: 34 },
-    { instanceId: 4005, sceneId: 4, templateId: 301, anchorCol: 54, anchorRow: 33 },
-    { instanceId: 4007, sceneId: 4, templateId: 312, anchorCol: 52, anchorRow: 34 },
-    { instanceId: 4008, sceneId: 4, templateId: 211, anchorCol: 48, anchorRow: 37 },
-    { instanceId: 4009, sceneId: 4, templateId: 112, anchorCol: 42, anchorRow: 33 },
-    { instanceId: 4006, sceneId: 4, templateId: 110, anchorCol: 45, anchorRow: 35 },
-    { instanceId: 4003, sceneId: 4, templateId: 401, anchorCol: 51, anchorRow: 35 },
-    { instanceId: 4004, sceneId: 4, templateId: 501, anchorCol: 49, anchorRow: 35 },
-    { instanceId: 4011, sceneId: 4, templateId: 1002, anchorCol: 55, anchorRow: 36 },
-    { instanceId: 4012, sceneId: 4, templateId: 1008, anchorCol: 43, anchorRow: 37 },
-    /* 荣禧堂 */ { instanceId: 5004, sceneId: 5, templateId: 201, anchorCol: 22, anchorRow: 2 },
-    { instanceId: 5003, sceneId: 5, templateId: 101, anchorCol: 24, anchorRow: 2 },
-    { instanceId: 5009, sceneId: 5, templateId: 113, anchorCol: 26, anchorRow: 2 },
-    { instanceId: 5006, sceneId: 5, templateId: 110, anchorCol: 28, anchorRow: 2 },
-    { instanceId: 5011, sceneId: 5, templateId: 1004, anchorCol: 30, anchorRow: 2 },
-    { instanceId: 5005, sceneId: 5, templateId: 301, anchorCol: 32, anchorRow: 2 },
-    { instanceId: 5012, sceneId: 5, templateId: 1006, anchorCol: 34, anchorRow: 2 },
-    { instanceId: 5001, sceneId: 5, templateId: 801, anchorCol: 20, anchorRow: 3 },
-    { instanceId: 5002, sceneId: 5, templateId: 401, anchorCol: 26, anchorRow: 4 },
-    { instanceId: 5010, sceneId: 5, templateId: 1003, anchorCol: 30, anchorRow: 4 },
-    { instanceId: 5008, sceneId: 5, templateId: 311, anchorCol: 34, anchorRow: 4 },
-    { instanceId: 5007, sceneId: 5, templateId: 902, anchorCol: 22, anchorRow: 5 },
-    /* 秋爽斋 */ { instanceId: 7001, sceneId: 7, templateId: 201, anchorCol: 4, anchorRow: 13 },
-    { instanceId: 7002, sceneId: 7, templateId: 101, anchorCol: 6, anchorRow: 13 },
-    { instanceId: 7003, sceneId: 7, templateId: 401, anchorCol: 9, anchorRow: 18 },
-    /* 暖香坞 */ { instanceId: 9001, sceneId: 9, templateId: 201, anchorCol: 42, anchorRow: 2 },
-    { instanceId: 9002, sceneId: 9, templateId: 101, anchorCol: 44, anchorRow: 2 },
-    { instanceId: 9003, sceneId: 9, templateId: 401, anchorCol: 46, anchorRow: 4 },
-    /* 北游廊 */ { instanceId: 10001, sceneId: 10, templateId: 1005, anchorCol: 2, anchorRow: 8 },
+      {
+          "instanceId": 1003,
+          "sceneId": 1,
+          "templateId": 301,
+          "anchorCol": 19,
+          "anchorRow": 46
+      },
+      {
+          "instanceId": 1004,
+          "sceneId": 1,
+          "templateId": 401,
+          "anchorCol": 22,
+          "anchorRow": 46
+      },
+      {
+          "instanceId": 1005,
+          "sceneId": 1,
+          "templateId": 501,
+          "anchorCol": 17,
+          "anchorRow": 52
+      },
+      {
+          "instanceId": 1006,
+          "sceneId": 1,
+          "templateId": 601,
+          "anchorCol": 24,
+          "anchorRow": 49
+      },
+      {
+          "instanceId": 1007,
+          "sceneId": 1,
+          "templateId": 110,
+          "anchorCol": 13,
+          "anchorRow": 47
+      },
+      {
+          "instanceId": 1009,
+          "sceneId": 1,
+          "templateId": 211,
+          "anchorCol": 22,
+          "anchorRow": 48
+      },
+      {
+          "instanceId": 1011,
+          "sceneId": 1,
+          "templateId": 111,
+          "anchorCol": 10,
+          "anchorRow": 47
+      },
+      {
+          "instanceId": 10002,
+          "sceneId": 1,
+          "templateId": 201,
+          "anchorCol": 9,
+          "anchorRow": 44,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10003,
+          "sceneId": 1,
+          "templateId": 101,
+          "anchorCol": 18,
+          "anchorRow": 45,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10004,
+          "sceneId": 1,
+          "templateId": 113,
+          "anchorCol": 13,
+          "anchorRow": 45,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10005,
+          "sceneId": 1,
+          "templateId": 312,
+          "anchorCol": 7,
+          "anchorRow": 45,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 2001,
+          "sceneId": 2,
+          "templateId": 201,
+          "anchorCol": 3,
+          "anchorRow": 3
+      },
+      {
+          "instanceId": 2002,
+          "sceneId": 2,
+          "templateId": 101,
+          "anchorCol": 6,
+          "anchorRow": 3
+      },
+      {
+          "instanceId": 2003,
+          "sceneId": 2,
+          "templateId": 401,
+          "anchorCol": 10,
+          "anchorRow": 7
+      },
+      {
+          "instanceId": 2004,
+          "sceneId": 2,
+          "templateId": 301,
+          "anchorCol": 12,
+          "anchorRow": 3
+      },
+      {
+          "instanceId": 2005,
+          "sceneId": 2,
+          "templateId": 110,
+          "anchorCol": 6,
+          "anchorRow": 7
+      },
+      {
+          "instanceId": 2006,
+          "sceneId": 2,
+          "templateId": 112,
+          "anchorCol": 3,
+          "anchorRow": 7
+      },
+      {
+          "instanceId": 2007,
+          "sceneId": 2,
+          "templateId": 312,
+          "anchorCol": 13,
+          "anchorRow": 7
+      },
+      {
+          "instanceId": 2008,
+          "sceneId": 2,
+          "templateId": 311,
+          "anchorCol": 15,
+          "anchorRow": 4
+      },
+      {
+          "instanceId": 2009,
+          "sceneId": 2,
+          "templateId": 211,
+          "anchorCol": 15,
+          "anchorRow": 6
+      },
+      {
+          "instanceId": 2010,
+          "sceneId": 2,
+          "templateId": 113,
+          "anchorCol": 9,
+          "anchorRow": 3
+      },
+      {
+          "instanceId": 3001,
+          "sceneId": 3,
+          "templateId": 701,
+          "anchorCol": 37,
+          "anchorRow": 23
+      },
+      {
+          "instanceId": 3002,
+          "sceneId": 3,
+          "templateId": 701,
+          "anchorCol": 45,
+          "anchorRow": 20
+      },
+      {
+          "instanceId": 3003,
+          "sceneId": 3,
+          "templateId": 801,
+          "anchorCol": 40,
+          "anchorRow": 20,
+          "backgroundEmbedded": true
+      },
+      {
+          "instanceId": 3004,
+          "sceneId": 3,
+          "templateId": 901,
+          "anchorCol": 39,
+          "anchorRow": 26
+      },
+      {
+          "instanceId": 3005,
+          "sceneId": 3,
+          "templateId": 901,
+          "anchorCol": 44,
+          "anchorRow": 23
+      },
+      {
+          "instanceId": 3006,
+          "sceneId": 3,
+          "templateId": 110,
+          "anchorCol": 40,
+          "anchorRow": 22
+      },
+      {
+          "instanceId": 3007,
+          "sceneId": 3,
+          "templateId": 211,
+          "anchorCol": 32,
+          "anchorRow": 20
+      },
+      {
+          "instanceId": 3008,
+          "sceneId": 3,
+          "templateId": 311,
+          "anchorCol": 45,
+          "anchorRow": 24
+      },
+      {
+          "instanceId": 3009,
+          "sceneId": 3,
+          "templateId": 902,
+          "anchorCol": 45,
+          "anchorRow": 26
+      },
+      {
+          "instanceId": 3010,
+          "sceneId": 3,
+          "templateId": 111,
+          "anchorCol": 47,
+          "anchorRow": 19
+      },
+      {
+          "instanceId": 3011,
+          "sceneId": 3,
+          "templateId": 113,
+          "anchorCol": 44,
+          "anchorRow": 27
+      },
+      {
+          "instanceId": 3012,
+          "sceneId": 3,
+          "templateId": 1001,
+          "anchorCol": 45,
+          "anchorRow": 21
+      },
+      {
+          "instanceId": 4005,
+          "sceneId": 4,
+          "templateId": 301,
+          "anchorCol": 40,
+          "anchorRow": 49
+      },
+      {
+          "instanceId": 4008,
+          "sceneId": 4,
+          "templateId": 211,
+          "anchorCol": 48,
+          "anchorRow": 40
+      },
+      {
+          "instanceId": 4011,
+          "sceneId": 4,
+          "templateId": 1002,
+          "anchorCol": 62,
+          "anchorRow": 47
+      },
+      {
+          "instanceId": 10006,
+          "sceneId": 4,
+          "templateId": 201,
+          "anchorCol": 64,
+          "anchorRow": 45,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10007,
+          "sceneId": 4,
+          "templateId": 1008,
+          "anchorCol": 62,
+          "anchorRow": 45,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10008,
+          "sceneId": 4,
+          "templateId": 312,
+          "anchorCol": 61,
+          "anchorRow": 45,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10009,
+          "sceneId": 4,
+          "templateId": 201,
+          "anchorCol": 62,
+          "anchorRow": 43,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10010,
+          "sceneId": 4,
+          "templateId": 110,
+          "anchorCol": 52,
+          "anchorRow": 46,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10011,
+          "sceneId": 4,
+          "templateId": 111,
+          "anchorCol": 52,
+          "anchorRow": 44,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10012,
+          "sceneId": 4,
+          "templateId": 601,
+          "anchorCol": 59,
+          "anchorRow": 45,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10013,
+          "sceneId": 4,
+          "templateId": 101,
+          "anchorCol": 45,
+          "anchorRow": 44,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10014,
+          "sceneId": 4,
+          "templateId": 701,
+          "anchorCol": 46,
+          "anchorRow": 53,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10015,
+          "sceneId": 4,
+          "templateId": 501,
+          "anchorCol": 39,
+          "anchorRow": 43,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10016,
+          "sceneId": 4,
+          "templateId": 1004,
+          "anchorCol": 44,
+          "anchorRow": 39,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10017,
+          "sceneId": 4,
+          "templateId": 1007,
+          "anchorCol": 40,
+          "anchorRow": 44,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 5001,
+          "sceneId": 5,
+          "templateId": 801,
+          "anchorCol": 27,
+          "anchorRow": 5
+      },
+      {
+          "instanceId": 5002,
+          "sceneId": 5,
+          "templateId": 401,
+          "anchorCol": 37,
+          "anchorRow": 6
+      },
+      {
+          "instanceId": 5003,
+          "sceneId": 5,
+          "templateId": 101,
+          "anchorCol": 34,
+          "anchorRow": 3
+      },
+      {
+          "instanceId": 5004,
+          "sceneId": 5,
+          "templateId": 201,
+          "anchorCol": 30,
+          "anchorRow": 3
+      },
+      {
+          "instanceId": 5005,
+          "sceneId": 5,
+          "templateId": 301,
+          "anchorCol": 48,
+          "anchorRow": 3
+      },
+      {
+          "instanceId": 5006,
+          "sceneId": 5,
+          "templateId": 110,
+          "anchorCol": 41,
+          "anchorRow": 3
+      },
+      {
+          "instanceId": 5007,
+          "sceneId": 5,
+          "templateId": 902,
+          "anchorCol": 30,
+          "anchorRow": 8
+      },
+      {
+          "instanceId": 5008,
+          "sceneId": 5,
+          "templateId": 311,
+          "anchorCol": 51,
+          "anchorRow": 6
+      },
+      {
+          "instanceId": 5009,
+          "sceneId": 5,
+          "templateId": 113,
+          "anchorCol": 37,
+          "anchorRow": 3
+      },
+      {
+          "instanceId": 5010,
+          "sceneId": 5,
+          "templateId": 1003,
+          "anchorCol": 44,
+          "anchorRow": 6
+      },
+      {
+          "instanceId": 5011,
+          "sceneId": 5,
+          "templateId": 1004,
+          "anchorCol": 44,
+          "anchorRow": 3
+      },
+      {
+          "instanceId": 5012,
+          "sceneId": 5,
+          "templateId": 1006,
+          "anchorCol": 51,
+          "anchorRow": 3
+      },
+      {
+          "instanceId": 10018,
+          "sceneId": 7,
+          "templateId": 201,
+          "anchorCol": 20,
+          "anchorRow": 22,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10019,
+          "sceneId": 7,
+          "templateId": 312,
+          "anchorCol": 19,
+          "anchorRow": 27,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10020,
+          "sceneId": 7,
+          "templateId": 1002,
+          "anchorCol": 23,
+          "anchorRow": 26,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10021,
+          "sceneId": 7,
+          "templateId": 101,
+          "anchorCol": 12,
+          "anchorRow": 26,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10022,
+          "sceneId": 7,
+          "templateId": 110,
+          "anchorCol": 6,
+          "anchorRow": 26,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10023,
+          "sceneId": 7,
+          "templateId": 701,
+          "anchorCol": 4,
+          "anchorRow": 29,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10024,
+          "sceneId": 7,
+          "templateId": 1003,
+          "anchorCol": 11,
+          "anchorRow": 25,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 10025,
+          "sceneId": 7,
+          "templateId": 111,
+          "anchorCol": 16,
+          "anchorRow": 24,
+          "backgroundEmbedded": true,
+          "hotspot": true
+      },
+      {
+          "instanceId": 9001,
+          "sceneId": 9,
+          "templateId": 201,
+          "anchorCol": 63,
+          "anchorRow": 5
+      },
+      {
+          "instanceId": 9002,
+          "sceneId": 9,
+          "templateId": 101,
+          "anchorCol": 65,
+          "anchorRow": 5
+      },
+      {
+          "instanceId": 9003,
+          "sceneId": 9,
+          "templateId": 401,
+          "anchorCol": 67,
+          "anchorRow": 7
+      },
+      {
+          "instanceId": 10001,
+          "sceneId": 10,
+          "templateId": 1005,
+          "anchorCol": 0,
+          "anchorRow": 14
+      }
   ],
   characters: [
-    {
-      id: 'baoyu', name: '贾宝玉', short: '宝玉', shortComment: '富贵闲人，痴情公子', socialRank: 2, gender: '男', homewardness: 38,
-      color: '#c0392b', hair: '#1a1a1a', skin: '#f5d0a9', trait: 'male',
-      sceneId: 4, gridCol: 52, gridRow: 37,
-      attributes: { constitution: 55, sensitivity: 70, charm: 85, intellect: 65 },
-      personality: '性情中人，厌恶仕途经济，怜香惜玉，易感多情。',
-      memoryPalace: '通灵宝玉衔来；初见黛玉「这个妹妹我曾见过的」；怡红院花气袭人。',
-      skills: ['move', 'talk', 'poetry'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 1.1 },
-        energy: { min: 0, max: 100, grow: 1, decay: 0.95 },
-        fun: { min: 0, max: 100, grow: 1, decay: 1.1 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.44 },
+      {
+          "id": "baoyu",
+          "name": "贾宝玉",
+          "short": "宝玉",
+          "shortComment": "富贵闲人，痴情公子",
+          "socialRank": 2,
+          "gender": "男",
+          "homewardness": 38,
+          "color": "#c0392b",
+          "hair": "#1a1a1a",
+          "skin": "#f5d0a9",
+          "trait": "male",
+          "sceneId": 4,
+          "gridCol": 53,
+          "gridRow": 48,
+          "attributes": {
+              "constitution": 55,
+              "sensitivity": 70,
+              "charm": 85,
+              "intellect": 65
+          },
+          "personality": "性情中人，厌恶仕途经济，怜香惜玉，易感多情。",
+          "memoryPalace": "通灵宝玉衔来；初见黛玉「这个妹妹我曾见过的」；怡红院花气袭人。",
+          "skills": [
+              "move",
+              "talk",
+              "poetry"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 1.1
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.95
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 1.1
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.44
+              }
+          },
+          "needs": {
+              "hunger": 68,
+              "energy": 60,
+              "fun": 55,
+              "hygiene": 70
+          }
       },
-      needs: { hunger: 68, energy: 60, fun: 55, hygiene: 70 },
-    },
-    {
-      id: 'daiyu', name: '林黛玉', short: '黛玉', shortComment: '才情绝世，多愁善感', socialRank: 2, gender: '女', homewardness: 78,
-      color: '#7dcea0', hair: '#2c2c2c', skin: '#fdebd0', trait: 'daiyu',
-      sceneId: 1, gridCol: 15, gridRow: 39,
-      attributes: { constitution: 35, sensitivity: 95, charm: 90, intellect: 88 },
-      personality: '孤高敏感，才思敏捷，多愁善感，心较比干多一窍。',
-      memoryPalace: '葬花吟；与宝玉共读西厢；「质本洁来还洁去」。',
-      skills: ['move', 'talk', 'poetry'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 90, grow: 1, decay: 1.56 },
-        energy: { min: 0, max: 85, grow: 1, decay: 1.56 },
-        fun: { min: 0, max: 100, grow: 1.1, decay: 2.1 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.54 },
+      {
+          "id": "daiyu",
+          "name": "林黛玉",
+          "short": "黛玉",
+          "shortComment": "才情绝世，多愁善感",
+          "socialRank": 2,
+          "gender": "女",
+          "homewardness": 78,
+          "color": "#7dcea0",
+          "hair": "#2c2c2c",
+          "skin": "#fdebd0",
+          "trait": "daiyu",
+          "sceneId": 1,
+          "gridCol": 13,
+          "gridRow": 51,
+          "attributes": {
+              "constitution": 35,
+              "sensitivity": 95,
+              "charm": 90,
+              "intellect": 88
+          },
+          "personality": "孤高敏感，才思敏捷，多愁善感，心较比干多一窍。",
+          "memoryPalace": "葬花吟；与宝玉共读西厢；「质本洁来还洁去」。",
+          "skills": [
+              "move",
+              "talk",
+              "poetry"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 90,
+                  "grow": 1,
+                  "decay": 1.56
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 85,
+                  "grow": 1,
+                  "decay": 1.56
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1.1,
+                  "decay": 2.1
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.54
+              }
+          },
+          "needs": {
+              "hunger": 62,
+              "energy": 50,
+              "fun": 72,
+              "hygiene": 78
+          }
       },
-      needs: { hunger: 62, energy: 50, fun: 72, hygiene: 78 },
-    },
-    {
-      id: 'baochai', name: '薛宝钗', short: '宝钗', shortComment: '端庄贤淑，世事洞明', socialRank: 2, gender: '女', homewardness: 68,
-      color: '#d4ac0d', hair: '#1a1a1a', skin: '#f5dcc8', trait: 'female',
-      sceneId: 2, gridCol: 9, gridRow: 4,
-      attributes: { constitution: 75, sensitivity: 45, charm: 88, intellect: 82 },
-      personality: '端庄稳重，随分从时，罕言寡语，藏愚守拙。',
-      memoryPalace: '冷香丸；任是无情也动人；金玉良缘之说。',
-      skills: ['move', 'talk', 'serve'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.72 },
-        energy: { min: 0, max: 100, grow: 1, decay: 0.525 },
-        fun: { min: 0, max: 100, grow: 1, decay: 0.6375 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.3 },
+      {
+          "id": "baochai",
+          "name": "薛宝钗",
+          "short": "宝钗",
+          "shortComment": "端庄贤淑，世事洞明",
+          "socialRank": 2,
+          "gender": "女",
+          "homewardness": 68,
+          "color": "#d4ac0d",
+          "hair": "#1a1a1a",
+          "skin": "#f5dcc8",
+          "trait": "female",
+          "sceneId": 2,
+          "gridCol": 10,
+          "gridRow": 6,
+          "attributes": {
+              "constitution": 75,
+              "sensitivity": 45,
+              "charm": 88,
+              "intellect": 82
+          },
+          "personality": "端庄稳重，随分从时，罕言寡语，藏愚守拙。",
+          "memoryPalace": "冷香丸；任是无情也动人；金玉良缘之说。",
+          "skills": [
+              "move",
+              "talk",
+              "serve"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.72
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.525
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.6375
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.3
+              }
+          },
+          "needs": {
+              "hunger": 75,
+              "energy": 70,
+              "fun": 58,
+              "hygiene": 82
+          }
       },
-      needs: { hunger: 75, energy: 70, fun: 58, hygiene: 82 },
-    },
-    {
-      id: 'tanchun', name: '贾探春', short: '探春', shortComment: '才志高远，爽利能干', socialRank: 3, gender: '女', homewardness: 58,
-      color: '#e67e22', hair: '#1a1a1a', skin: '#f0d5b0', trait: 'female',
-      sceneId: 7, gridCol: 8, gridRow: 16,
-      attributes: { constitution: 70, sensitivity: 50, charm: 75, intellect: 90 },
-      personality: '才志高远，精明能干，爽利果断。',
-      memoryPalace: '理家兴利除弊；题诗「直使人间别有无」；远嫁和番。',
-      skills: ['move', 'talk', 'poetry'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.9 },
-        energy: { min: 0, max: 100, grow: 1, decay: 0.765 },
-        fun: { min: 0, max: 100, grow: 1, decay: 0.72 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.385 },
+      {
+          "id": "tanchun",
+          "name": "贾探春",
+          "short": "探春",
+          "shortComment": "才志高远，爽利能干",
+          "socialRank": 3,
+          "gender": "女",
+          "homewardness": 58,
+          "color": "#e67e22",
+          "hair": "#1a1a1a",
+          "skin": "#f0d5b0",
+          "trait": "female",
+          "sceneId": 7,
+          "gridCol": 12,
+          "gridRow": 23,
+          "attributes": {
+              "constitution": 70,
+              "sensitivity": 50,
+              "charm": 75,
+              "intellect": 90
+          },
+          "personality": "才志高远，精明能干，爽利果断。",
+          "memoryPalace": "理家兴利除弊；题诗「直使人间别有无」；远嫁和番。",
+          "skills": [
+              "move",
+              "talk",
+              "poetry"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.9
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.765
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.72
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.385
+              }
+          },
+          "needs": {
+              "hunger": 70,
+              "energy": 65,
+              "fun": 60,
+              "hygiene": 75
+          }
       },
-      needs: { hunger: 70, energy: 65, fun: 60, hygiene: 75 },
-    },
-    {
-      id: 'xiren', name: '花袭人', short: '袭人', shortComment: '温柔妥帖，忠心护主', socialRank: 4, gender: '女', homewardness: 76,
-      color: '#bb8fce', hair: '#2c2c2c', skin: '#f5d0a9', trait: 'female',
-      sceneId: 4, gridCol: 55, gridRow: 38,
-      attributes: { constitution: 68, sensitivity: 55, charm: 72, intellect: 60 },
-      personality: '温柔和顺，尽职守分，先存天理后问人欲。',
-      memoryPalace: '服侍宝玉起居；劝学仕途；蒋玉菡姻缘。',
-      skills: ['move', 'talk', 'serve'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.9 },
-        energy: { min: 0, max: 100, grow: 1, decay: 0.68 },
-        fun: { min: 0, max: 95, grow: 1, decay: 0.8075 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.325 },
+      {
+          "id": "xiren",
+          "name": "花袭人",
+          "short": "袭人",
+          "shortComment": "温柔妥帖，忠心护主",
+          "socialRank": 4,
+          "gender": "女",
+          "homewardness": 76,
+          "color": "#bb8fce",
+          "hair": "#2c2c2c",
+          "skin": "#f5d0a9",
+          "trait": "female",
+          "sceneId": 4,
+          "gridCol": 56,
+          "gridRow": 49,
+          "attributes": {
+              "constitution": 68,
+              "sensitivity": 55,
+              "charm": 72,
+              "intellect": 60
+          },
+          "personality": "温柔和顺，尽职守分，先存天理后问人欲。",
+          "memoryPalace": "服侍宝玉起居；劝学仕途；蒋玉菡姻缘。",
+          "skills": [
+              "move",
+              "talk",
+              "serve"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.9
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.68
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 95,
+                  "grow": 1,
+                  "decay": 0.8075
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.325
+              }
+          },
+          "needs": {
+              "hunger": 72,
+              "energy": 68,
+              "fun": 50,
+              "hygiene": 80
+          }
       },
-      needs: { hunger: 72, energy: 68, fun: 50, hygiene: 80 },
-    },
-    {
-      id: 'qingwen', name: '晴雯', short: '晴雯', shortComment: '心比天高，风流灵巧', socialRank: 5, gender: '女', homewardness: 42,
-      color: '#e74c3c', hair: '#1a1a1a', skin: '#f5dcc8', trait: 'qingwen',
-      sceneId: 4, gridCol: 57, gridRow: 37,
-      attributes: { constitution: 58, sensitivity: 80, charm: 78, intellect: 55 },
-      personality: '心比天高，身为下贱，风流灵巧，敢怒敢言。',
-      memoryPalace: '撕扇；补裘；「晴为黛影」之说。',
-      skills: ['move', 'talk'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 1.05 },
-        energy: { min: 0, max: 95, grow: 1, decay: 1.05 },
-        fun: { min: 0, max: 100, grow: 1, decay: 1.21 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.4125 },
+      {
+          "id": "qingwen",
+          "name": "晴雯",
+          "short": "晴雯",
+          "shortComment": "心比天高，风流灵巧",
+          "socialRank": 5,
+          "gender": "女",
+          "homewardness": 42,
+          "color": "#e74c3c",
+          "hair": "#1a1a1a",
+          "skin": "#f5dcc8",
+          "trait": "qingwen",
+          "sceneId": 4,
+          "gridCol": 58,
+          "gridRow": 48,
+          "attributes": {
+              "constitution": 58,
+              "sensitivity": 80,
+              "charm": 78,
+              "intellect": 55
+          },
+          "personality": "心比天高，身为下贱，风流灵巧，敢怒敢言。",
+          "memoryPalace": "撕扇；补裘；「晴为黛影」之说。",
+          "skills": [
+              "move",
+              "talk"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 1.05
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 95,
+                  "grow": 1,
+                  "decay": 1.05
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 1.21
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.4125
+              }
+          },
+          "needs": {
+              "hunger": 65,
+              "energy": 58,
+              "fun": 65,
+              "hygiene": 72
+          }
       },
-      needs: { hunger: 65, energy: 58, fun: 65, hygiene: 72 },
-    },
-    {
-      id: 'sheyue', name: '麝月', short: '麝月', shortComment: '稳妥周全，默默守护', socialRank: 5, gender: '女', homewardness: 72,
-      color: '#85c1e9', hair: '#2c2c2c', skin: '#f5d0a9', trait: 'female',
-      sceneId: 4, gridCol: 53, gridRow: 40,
-      attributes: { constitution: 72, sensitivity: 40, charm: 68, intellect: 58 },
-      personality: '老实稳重，话不多，做事周全，是怡红院里的定盘星。',
-      memoryPalace: '常伴宝玉左右；与袭人分担家务；晴雯病中照拂。',
-      skills: ['move', 'talk', 'serve'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.8075 },
-        energy: { min: 0, max: 100, grow: 1, decay: 0.7216 },
-        fun: { min: 0, max: 90, grow: 1, decay: 0.72 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.338 },
+      {
+          "id": "sheyue",
+          "name": "麝月",
+          "short": "麝月",
+          "shortComment": "稳妥周全，默默守护",
+          "socialRank": 5,
+          "gender": "女",
+          "homewardness": 72,
+          "color": "#85c1e9",
+          "hair": "#2c2c2c",
+          "skin": "#f5d0a9",
+          "trait": "female",
+          "sceneId": 4,
+          "gridCol": 54,
+          "gridRow": 51,
+          "attributes": {
+              "constitution": 72,
+              "sensitivity": 40,
+              "charm": 68,
+              "intellect": 58
+          },
+          "personality": "老实稳重，话不多，做事周全，是怡红院里的定盘星。",
+          "memoryPalace": "常伴宝玉左右；与袭人分担家务；晴雯病中照拂。",
+          "skills": [
+              "move",
+              "talk",
+              "serve"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.8075
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.7216
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 90,
+                  "grow": 1,
+                  "decay": 0.72
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.338
+              }
+          },
+          "needs": {
+              "hunger": 70,
+              "energy": 66,
+              "fun": 48,
+              "hygiene": 78
+          }
       },
-      needs: { hunger: 70, energy: 66, fun: 48, hygiene: 78 },
-    },
-    {
-      id: 'zijuan', name: '紫鹃', short: '紫鹃', shortComment: '聪慧忠诚，忧主如己', socialRank: 4, gender: '女', homewardness: 80,
-      color: '#9b59b6', hair: '#2c2c2c', skin: '#f5dcc8', trait: 'female',
-      sceneId: 1, gridCol: 17, gridRow: 39,
-      attributes: { constitution: 62, sensitivity: 75, charm: 70, intellect: 72 },
-      personality: '慧而深虑，对黛玉情同姐妹，常为主子前途忧心。',
-      memoryPalace: '劝黛玉不可错付；试宝玉之心；潇湘馆夜雨。',
-      skills: ['move', 'talk', 'serve'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.9 },
-        energy: { min: 0, max: 100, grow: 1, decay: 0.792 },
-        fun: { min: 0, max: 95, grow: 1, decay: 0.9 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.325 },
+      {
+          "id": "zijuan",
+          "name": "紫鹃",
+          "short": "紫鹃",
+          "shortComment": "聪慧忠诚，忧主如己",
+          "socialRank": 4,
+          "gender": "女",
+          "homewardness": 80,
+          "color": "#9b59b6",
+          "hair": "#2c2c2c",
+          "skin": "#f5dcc8",
+          "trait": "female",
+          "sceneId": 1,
+          "gridCol": 15,
+          "gridRow": 51,
+          "attributes": {
+              "constitution": 62,
+              "sensitivity": 75,
+              "charm": 70,
+              "intellect": 72
+          },
+          "personality": "慧而深虑，对黛玉情同姐妹，常为主子前途忧心。",
+          "memoryPalace": "劝黛玉不可错付；试宝玉之心；潇湘馆夜雨。",
+          "skills": [
+              "move",
+              "talk",
+              "serve"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.9
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.792
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 95,
+                  "grow": 1,
+                  "decay": 0.9
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.325
+              }
+          },
+          "needs": {
+              "hunger": 68,
+              "energy": 62,
+              "fun": 52,
+              "hygiene": 76
+          }
       },
-      needs: { hunger: 68, energy: 62, fun: 52, hygiene: 76 },
-    },
-    {
-      id: 'xueyan', name: '雪雁', short: '雪雁', shortComment: '年幼怯懦，追随黛玉', socialRank: 5, gender: '女', homewardness: 82,
-      color: '#aed6f1', hair: '#2c2c2c', skin: '#fdebd0', trait: 'female',
-      sceneId: 1, gridCol: 19, gridRow: 41,
-      attributes: { constitution: 55, sensitivity: 65, charm: 58, intellect: 45 },
-      personality: '随黛玉自扬州来，年纪尚小，遇事胆怯，却一片忠心。',
-      memoryPalace: '初到贾府；与紫鹃同为黛玉贴身；葬花时递花锄。',
-      skills: ['move', 'talk', 'serve'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.9975 },
-        energy: { min: 0, max: 95, grow: 1, decay: 0.855 },
-        fun: { min: 0, max: 90, grow: 1, decay: 1.05 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.385 },
+      {
+          "id": "xueyan",
+          "name": "雪雁",
+          "short": "雪雁",
+          "shortComment": "年幼怯懦，追随黛玉",
+          "socialRank": 5,
+          "gender": "女",
+          "homewardness": 82,
+          "color": "#aed6f1",
+          "hair": "#2c2c2c",
+          "skin": "#fdebd0",
+          "trait": "female",
+          "sceneId": 1,
+          "gridCol": 17,
+          "gridRow": 53,
+          "attributes": {
+              "constitution": 55,
+              "sensitivity": 65,
+              "charm": 58,
+              "intellect": 45
+          },
+          "personality": "随黛玉自扬州来，年纪尚小，遇事胆怯，却一片忠心。",
+          "memoryPalace": "初到贾府；与紫鹃同为黛玉贴身；葬花时递花锄。",
+          "skills": [
+              "move",
+              "talk",
+              "serve"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.9975
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 95,
+                  "grow": 1,
+                  "decay": 0.855
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 90,
+                  "grow": 1,
+                  "decay": 1.05
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.385
+              }
+          },
+          "needs": {
+              "hunger": 66,
+              "energy": 60,
+              "fun": 55,
+              "hygiene": 74
+          }
       },
-      needs: { hunger: 66, energy: 60, fun: 55, hygiene: 74 },
-    },
-    {
-      id: 'yinger', name: '莺儿', short: '莺儿', shortComment: '心灵手巧，爱说体己话', socialRank: 5, gender: '女', homewardness: 74,
-      color: '#f5b041', hair: '#1a1a1a', skin: '#f5dcc8', trait: 'female',
-      sceneId: 2, gridCol: 10, gridRow: 4,
-      attributes: { constitution: 65, sensitivity: 50, charm: 74, intellect: 60 },
-      personality: '薛宝钗贴身丫鬟，巧手善织，言语爽利，与宝钗情同姊妹。',
-      memoryPalace: '为宝玉织络子；冷香丸之事；蘅芜苑清谈。',
-      skills: ['move', 'talk', 'serve'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.8075 },
-        energy: { min: 0, max: 100, grow: 1, decay: 0.68 },
-        fun: { min: 0, max: 95, grow: 1, decay: 0.765 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.288 },
+      {
+          "id": "yinger",
+          "name": "莺儿",
+          "short": "莺儿",
+          "shortComment": "心灵手巧，爱说体己话",
+          "socialRank": 5,
+          "gender": "女",
+          "homewardness": 74,
+          "color": "#f5b041",
+          "hair": "#1a1a1a",
+          "skin": "#f5dcc8",
+          "trait": "female",
+          "sceneId": 2,
+          "gridCol": 12,
+          "gridRow": 6,
+          "attributes": {
+              "constitution": 65,
+              "sensitivity": 50,
+              "charm": 74,
+              "intellect": 60
+          },
+          "personality": "薛宝钗贴身丫鬟，巧手善织，言语爽利，与宝钗情同姊妹。",
+          "memoryPalace": "为宝玉织络子；冷香丸之事；蘅芜苑清谈。",
+          "skills": [
+              "move",
+              "talk",
+              "serve"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.8075
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.68
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 95,
+                  "grow": 1,
+                  "decay": 0.765
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.288
+              }
+          },
+          "needs": {
+              "hunger": 71,
+              "energy": 67,
+              "fun": 54,
+              "hygiene": 80
+          }
       },
-      needs: { hunger: 71, energy: 67, fun: 54, hygiene: 80 },
-    },
-    {
-      id: 'xiangyun', name: '史湘云', short: '湘云', shortComment: '英豪阔达，醉卧芍药裀', socialRank: 2, gender: '女', homewardness: 46,
-      color: '#c77d9a', hair: '#1a1a1a', skin: '#f5dcc8', trait: 'female',
-      sceneId: 5, gridCol: 27, gridRow: 6,
-      attributes: { constitution: 76, sensitivity: 48, charm: 82, intellect: 74 },
-      personality: '襟怀坦荡，娇憨爽朗，爱说爱笑，不拘小节。',
-      memoryPalace: '醉卧芍药裀；海棠诗社联句；咬舌把二哥哥唤作爱哥哥。',
-      skills: ['move', 'talk', 'poetry'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.9 },
-        energy: { min: 0, max: 100, grow: 1, decay: 0.7216 },
-        fun: { min: 0, max: 100, grow: 1.1, decay: 0.6232 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.338 },
+      {
+          "id": "xiangyun",
+          "name": "史湘云",
+          "short": "湘云",
+          "shortComment": "英豪阔达，醉卧芍药裀",
+          "socialRank": 2,
+          "gender": "女",
+          "homewardness": 46,
+          "color": "#c77d9a",
+          "hair": "#1a1a1a",
+          "skin": "#f5dcc8",
+          "trait": "female",
+          "sceneId": 5,
+          "gridCol": 39,
+          "gridRow": 10,
+          "attributes": {
+              "constitution": 76,
+              "sensitivity": 48,
+              "charm": 82,
+              "intellect": 74
+          },
+          "personality": "襟怀坦荡，娇憨爽朗，爱说爱笑，不拘小节。",
+          "memoryPalace": "醉卧芍药裀；海棠诗社联句；咬舌把二哥哥唤作爱哥哥。",
+          "skills": [
+              "move",
+              "talk",
+              "poetry"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.9
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.7216
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1.1,
+                  "decay": 0.6232
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.338
+              }
+          },
+          "needs": {
+              "hunger": 74,
+              "energy": 72,
+              "fun": 76,
+              "hygiene": 73
+          }
       },
-      needs: { hunger: 74, energy: 72, fun: 76, hygiene: 73 },
-    },
-    {
-      id: 'jiazheng', name: '贾政', short: '政老爷', shortComment: '肃正严谨，望子成龙', socialRank: 1, gender: '男', homewardness: 62,
-      color: '#566573', hair: '#333', skin: '#e8d5b7', trait: 'male',
-      sceneId: 5, gridCol: 28, gridRow: 4,
-      attributes: { constitution: 70, sensitivity: 35, charm: 55, intellect: 78 },
-      personality: '端方严肃，礼法为先，望宝玉走仕途，常斥之。',
-      memoryPalace: '打宝玉；题对额；与清客论学。',
-      skills: ['move', 'talk'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.6375 },
-        energy: { min: 0, max: 100, grow: 1, decay: 0.56 },
-        fun: { min: 0, max: 85, grow: 0.8, decay: 0.455 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.2475 },
+      {
+          "id": "jiazheng",
+          "name": "贾政",
+          "short": "政老爷",
+          "shortComment": "肃正严谨，望子成龙",
+          "socialRank": 1,
+          "gender": "男",
+          "homewardness": 62,
+          "color": "#566573",
+          "hair": "#333",
+          "skin": "#e8d5b7",
+          "trait": "male",
+          "sceneId": 5,
+          "gridCol": 41,
+          "gridRow": 6,
+          "attributes": {
+              "constitution": 70,
+              "sensitivity": 35,
+              "charm": 55,
+              "intellect": 78
+          },
+          "personality": "端方严肃，礼法为先，望宝玉走仕途，常斥之。",
+          "memoryPalace": "打宝玉；题对额；与清客论学。",
+          "skills": [
+              "move",
+              "talk"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.6375
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.56
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 85,
+                  "grow": 0.8,
+                  "decay": 0.455
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.2475
+              }
+          },
+          "needs": {
+              "hunger": 78,
+              "energy": 72,
+              "fun": 45,
+              "hygiene": 85
+          }
       },
-      needs: { hunger: 78, energy: 72, fun: 45, hygiene: 85 },
-    },
-    {
-      id: 'wangfuren', name: '王夫人', short: '王夫人', shortComment: '端庄持家，偏心护短', socialRank: 1, gender: '女', homewardness: 66,
-      color: '#7f8c8d', hair: '#333', skin: '#f0dcc8', trait: 'female',
-      sceneId: 5, gridCol: 30, gridRow: 4,
-      attributes: { constitution: 68, sensitivity: 42, charm: 62, intellect: 58 },
-      personality: '吃斋念佛，持家谨严，护宝玉过甚，对庶出略疏。',
-      memoryPalace: '查赌撵人；金钏儿之事；与贾母、凤姐周旋。',
-      skills: ['move', 'talk'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.6864 },
-        energy: { min: 0, max: 100, grow: 1, decay: 0.5904 },
-        fun: { min: 0, max: 90, grow: 0.85, decay: 0.525 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.2784 },
+      {
+          "id": "wangfuren",
+          "name": "王夫人",
+          "short": "王夫人",
+          "shortComment": "端庄持家，偏心护短",
+          "socialRank": 1,
+          "gender": "女",
+          "homewardness": 66,
+          "color": "#7f8c8d",
+          "hair": "#333",
+          "skin": "#f0dcc8",
+          "trait": "female",
+          "sceneId": 5,
+          "gridCol": 44,
+          "gridRow": 6,
+          "attributes": {
+              "constitution": 68,
+              "sensitivity": 42,
+              "charm": 62,
+              "intellect": 58
+          },
+          "personality": "吃斋念佛，持家谨严，护宝玉过甚，对庶出略疏。",
+          "memoryPalace": "查赌撵人；金钏儿之事；与贾母、凤姐周旋。",
+          "skills": [
+              "move",
+              "talk"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.6864
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.5904
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 90,
+                  "grow": 0.85,
+                  "decay": 0.525
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.2784
+              }
+          },
+          "needs": {
+              "hunger": 76,
+              "energy": 70,
+              "fun": 48,
+              "hygiene": 83
+          }
       },
-      needs: { hunger: 76, energy: 70, fun: 48, hygiene: 83 },
-    },
-    {
-      id: 'jiamu', name: '贾母', short: '贾母', shortComment: '慈爱自己，贾府至尊', socialRank: 0, gender: '女', homewardness: 52,
-      color: '#c0392b', hair: '#888', skin: '#f5e6c8', trait: 'female',
-      sceneId: 5, gridCol: 26, gridRow: 4,
-      attributes: { constitution: 60, sensitivity: 55, charm: 80, intellect: 70 },
-      personality: '享天伦之乐，疼宝玉黛玉，家中大事仍一言九鼎。',
-      memoryPalace: '赏灯节；置办螃蟹宴；史家千金嫁贾家。',
-      skills: ['move', 'talk'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.72 },
-        energy: { min: 0, max: 90, grow: 0.9, decay: 0.8075 },
-        fun: { min: 0, max: 100, grow: 1.1, decay: 0.6 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.3 },
+      {
+          "id": "jiamu",
+          "name": "贾母",
+          "short": "贾母",
+          "shortComment": "慈爱自己，贾府至尊",
+          "socialRank": 0,
+          "gender": "女",
+          "homewardness": 52,
+          "color": "#c0392b",
+          "hair": "#888",
+          "skin": "#f5e6c8",
+          "trait": "female",
+          "sceneId": 5,
+          "gridCol": 37,
+          "gridRow": 6,
+          "attributes": {
+              "constitution": 60,
+              "sensitivity": 55,
+              "charm": 80,
+              "intellect": 70
+          },
+          "personality": "享天伦之乐，疼宝玉黛玉，家中大事仍一言九鼎。",
+          "memoryPalace": "赏灯节；置办螃蟹宴；史家千金嫁贾家。",
+          "skills": [
+              "move",
+              "talk"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.72
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 90,
+                  "grow": 0.9,
+                  "decay": 0.8075
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1.1,
+                  "decay": 0.6
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.3
+              }
+          },
+          "needs": {
+              "hunger": 80,
+              "energy": 58,
+              "fun": 68,
+              "hygiene": 80
+          }
       },
-      needs: { hunger: 80, energy: 58, fun: 68, hygiene: 80 },
-    },
-    {
-      id: 'jiashe', name: '贾赦', short: '大老爷', shortComment: '贪欢好色，刻薄寡恩', socialRank: 1, gender: '男', homewardness: 32,
-      color: '#5d4037', hair: '#333', skin: '#e0c8a8', trait: 'male',
-      sceneId: 5, gridCol: 32, gridRow: 4,
-      attributes: { constitution: 65, sensitivity: 30, charm: 45, intellect: 50 },
-      personality: '好色贪逸，与政弟不睦，对儿女亦薄情。',
-      memoryPalace: '讨鸳鸯；与邢夫人；居大观园外。',
-      skills: ['move', 'talk'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.782 },
-        energy: { min: 0, max: 95, grow: 1, decay: 0.7216 },
-        fun: { min: 0, max: 100, grow: 1.1, decay: 0.855 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.3575 },
+      {
+          "id": "jiashe",
+          "name": "贾赦",
+          "short": "大老爷",
+          "shortComment": "贪欢好色，刻薄寡恩",
+          "socialRank": 1,
+          "gender": "男",
+          "homewardness": 32,
+          "color": "#5d4037",
+          "hair": "#333",
+          "skin": "#e0c8a8",
+          "trait": "male",
+          "sceneId": 5,
+          "gridCol": 48,
+          "gridRow": 6,
+          "attributes": {
+              "constitution": 65,
+              "sensitivity": 30,
+              "charm": 45,
+              "intellect": 50
+          },
+          "personality": "好色贪逸，与政弟不睦，对儿女亦薄情。",
+          "memoryPalace": "讨鸳鸯；与邢夫人；居大观园外。",
+          "skills": [
+              "move",
+              "talk"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.782
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 95,
+                  "grow": 1,
+                  "decay": 0.7216
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1.1,
+                  "decay": 0.855
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.3575
+              }
+          },
+          "needs": {
+              "hunger": 74,
+              "energy": 64,
+              "fun": 62,
+              "hygiene": 70
+          }
       },
-      needs: { hunger: 74, energy: 64, fun: 62, hygiene: 70 },
-    },
-    {
-      id: 'xifeng', name: '王熙凤', short: '凤姐', shortComment: '明察秋毫，杀伐决断', socialRank: 2, gender: '女', homewardness: 26,
-      color: '#e74c3c', hair: '#1a1a1a', skin: '#f5dcc8', trait: 'female',
-      sceneId: 5, gridCol: 24, gridRow: 5,
-      attributes: { constitution: 72, sensitivity: 48, charm: 78, intellect: 82 },
-      personality: '泼辣机巧，善理家计，面上热情内里算盘精。',
-      memoryPalace: '协理宁国府；弄权铁槛寺；抄检大观园。',
-      skills: ['move', 'talk', 'manage'],
-      skillLevels: { manage: 2, trade: 1 },
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.765 },
-        energy: { min: 0, max: 100, grow: 1, decay: 0.7216 },
-        fun: { min: 0, max: 95, grow: 1, decay: 0.8096 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.31 },
+      {
+          "id": "xifeng",
+          "name": "王熙凤",
+          "short": "凤姐",
+          "shortComment": "明察秋毫，杀伐决断",
+          "socialRank": 2,
+          "gender": "女",
+          "homewardness": 26,
+          "color": "#e74c3c",
+          "hair": "#1a1a1a",
+          "skin": "#f5dcc8",
+          "trait": "female",
+          "sceneId": 5,
+          "gridCol": 34,
+          "gridRow": 8,
+          "attributes": {
+              "constitution": 72,
+              "sensitivity": 48,
+              "charm": 78,
+              "intellect": 82
+          },
+          "personality": "泼辣机巧，善理家计，面上热情内里算盘精。",
+          "memoryPalace": "协理宁国府；弄权铁槛寺；抄检大观园。",
+          "skills": [
+              "move",
+              "talk",
+              "manage"
+          ],
+          "skillLevels": {
+              "manage": 2,
+              "trade": 1
+          },
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.765
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.7216
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 95,
+                  "grow": 1,
+                  "decay": 0.8096
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.31
+              }
+          },
+          "needs": {
+              "hunger": 75,
+              "energy": 68,
+              "fun": 55,
+              "hygiene": 82
+          }
       },
-      needs: { hunger: 75, energy: 68, fun: 55, hygiene: 82 },
-    },
-    {
-      id: 'jialian', name: '贾琏', short: '琏二爷', shortComment: '好色贪逸，惧内畏母', socialRank: 2, gender: '男', homewardness: 36,
-      color: '#7d6608', hair: '#333', skin: '#e8d0b0', trait: 'male',
-      sceneId: 5, gridCol: 25, gridRow: 5,
-      attributes: { constitution: 68, sensitivity: 35, charm: 58, intellect: 52 },
-      personality: '风流成性，惧内，常在外流连。',
-      skills: ['move', 'talk'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.855 },
-        energy: { min: 0, max: 95, grow: 1, decay: 0.765 },
-        fun: { min: 0, max: 100, grow: 1.1, decay: 0.95 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.42 },
+      {
+          "id": "jialian",
+          "name": "贾琏",
+          "short": "琏二爷",
+          "shortComment": "好色贪逸，惧内畏母",
+          "socialRank": 2,
+          "gender": "男",
+          "homewardness": 36,
+          "color": "#7d6608",
+          "hair": "#333",
+          "skin": "#e8d0b0",
+          "trait": "male",
+          "sceneId": 5,
+          "gridCol": 35,
+          "gridRow": 8,
+          "attributes": {
+              "constitution": 68,
+              "sensitivity": 35,
+              "charm": 58,
+              "intellect": 52
+          },
+          "personality": "风流成性，惧内，常在外流连。",
+          "skills": [
+              "move",
+              "talk"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.855
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 95,
+                  "grow": 1,
+                  "decay": 0.765
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1.1,
+                  "decay": 0.95
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.42
+              }
+          },
+          "needs": {
+              "hunger": 72,
+              "energy": 65,
+              "fun": 58,
+              "hygiene": 75
+          }
       },
-      needs: { hunger: 72, energy: 65, fun: 58, hygiene: 75 },
-    },
-    {
-      id: 'jiazhen', name: '贾珍', short: '珍大爷', shortComment: '宁国府族长，骄奢放纵', socialRank: 1, gender: '男', homewardness: 40,
-      color: '#6c3483', hair: '#333', skin: '#e0c8a8', trait: 'male',
-      sceneId: 5, gridCol: 32, gridRow: 5,
-      attributes: { constitution: 70, sensitivity: 30, charm: 50, intellect: 48 },
-      personality: '宁府族长，骄奢，有事便来求凤姐。',
-      skills: ['move', 'talk'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.782 },
-        energy: { min: 0, max: 95, grow: 1, decay: 0.7216 },
-        fun: { min: 0, max: 100, grow: 1.1, decay: 0.855 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.3575 },
+      {
+          "id": "jiazhen",
+          "name": "贾珍",
+          "short": "珍大爷",
+          "shortComment": "宁国府族长，骄奢放纵",
+          "socialRank": 1,
+          "gender": "男",
+          "homewardness": 40,
+          "color": "#6c3483",
+          "hair": "#333",
+          "skin": "#e0c8a8",
+          "trait": "male",
+          "sceneId": 5,
+          "gridCol": 48,
+          "gridRow": 8,
+          "attributes": {
+              "constitution": 70,
+              "sensitivity": 30,
+              "charm": 50,
+              "intellect": 48
+          },
+          "personality": "宁府族长，骄奢，有事便来求凤姐。",
+          "skills": [
+              "move",
+              "talk"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.782
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 95,
+                  "grow": 1,
+                  "decay": 0.7216
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1.1,
+                  "decay": 0.855
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.3575
+              }
+          },
+          "needs": {
+              "hunger": 70,
+              "energy": 60,
+              "fun": 65,
+              "hygiene": 72
+          }
       },
-      needs: { hunger: 70, energy: 60, fun: 65, hygiene: 72 },
-    },
-    {
-      id: 'laiwang', name: '来旺', short: '来旺', shortComment: '凤姐心腹，在外跑腿', socialRank: 4, gender: '男', homewardness: 48,
-      color: '#566573', hair: '#333', skin: '#d4b896', trait: 'male',
-      sceneId: 3, gridCol: 22, gridRow: 20,
-      attributes: { constitution: 75, sensitivity: 40, charm: 45, intellect: 55 },
-      personality: '凤姐心腹，善办差事放贷。',
-      skills: ['move', 'talk'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.9 },
-        energy: { min: 0, max: 100, grow: 1, decay: 0.68 },
-        fun: { min: 0, max: 95, grow: 1, decay: 0.8075 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.325 },
+      {
+          "id": "laiwang",
+          "name": "来旺",
+          "short": "来旺",
+          "shortComment": "凤姐心腹，在外跑腿",
+          "socialRank": 4,
+          "gender": "男",
+          "homewardness": 48,
+          "color": "#566573",
+          "hair": "#333",
+          "skin": "#d4b896",
+          "trait": "male",
+          "sceneId": 3,
+          "gridCol": 35,
+          "gridRow": 27,
+          "attributes": {
+              "constitution": 75,
+              "sensitivity": 40,
+              "charm": 45,
+              "intellect": 55
+          },
+          "personality": "凤姐心腹，善办差事放贷。",
+          "skills": [
+              "move",
+              "talk"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.9
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.68
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 95,
+                  "grow": 1,
+                  "decay": 0.8075
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.325
+              }
+          },
+          "needs": {
+              "hunger": 70,
+              "energy": 70,
+              "fun": 50,
+              "hygiene": 68
+          }
       },
-      needs: { hunger: 70, energy: 70, fun: 50, hygiene: 68 },
-    },
-    {
-      id: 'liulaolao', name: '刘姥姥', short: '刘姥姥', shortComment: '穷亲远戚，知恩图报', socialRank: 6, gender: '女', homewardness: 55,
-      color: '#8b6914', hair: '#666', skin: '#c9a87c', trait: 'female',
-      sceneId: 3, gridCol: 20, gridRow: 16,
-      attributes: { constitution: 62, sensitivity: 60, charm: 55, intellect: 50 },
-      personality: '村野老妪，世故而厚道。',
-      skills: ['move', 'talk'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 1.05 },
-        energy: { min: 0, max: 90, grow: 0.95, decay: 0.95 },
-        fun: { min: 0, max: 100, grow: 1, decay: 0.765 },
-        hygiene: { min: 0, max: 95, grow: 1, decay: 0.4875 },
+      {
+          "id": "liulaolao",
+          "name": "刘姥姥",
+          "short": "刘姥姥",
+          "shortComment": "穷亲远戚，知恩图报",
+          "socialRank": 6,
+          "gender": "女",
+          "homewardness": 55,
+          "color": "#8b6914",
+          "hair": "#666",
+          "skin": "#c9a87c",
+          "trait": "female",
+          "sceneId": 3,
+          "gridCol": 33,
+          "gridRow": 23,
+          "attributes": {
+              "constitution": 62,
+              "sensitivity": 60,
+              "charm": 55,
+              "intellect": 50
+          },
+          "personality": "村野老妪，世故而厚道。",
+          "skills": [
+              "move",
+              "talk"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 1.05
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 90,
+                  "grow": 0.95,
+                  "decay": 0.95
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.765
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 95,
+                  "grow": 1,
+                  "decay": 0.4875
+              }
+          },
+          "needs": {
+              "hunger": 65,
+              "energy": 60,
+              "fun": 45,
+              "hygiene": 55
+          }
       },
-      needs: { hunger: 65, energy: 60, fun: 45, hygiene: 55 },
-    },
-    {
-      id: 'jiarong', name: '贾蓉', short: '蓉哥儿', shortComment: '宁府晚辈，凤姐族亲', socialRank: 3, gender: '男', homewardness: 44,
-      color: '#5d6d7e', hair: '#333', skin: '#e8d5b7', trait: 'male',
-      sceneId: 3, gridCol: 24, gridRow: 20,
-      attributes: { constitution: 66, sensitivity: 38, charm: 52, intellect: 48 },
-      personality: '宁府晚辈，与凤姐往来密切。',
-      skills: ['move', 'talk'],
-      baseNeedCoeffs: {
-        hunger: { min: 0, max: 100, grow: 1, decay: 0.855 },
-        energy: { min: 0, max: 100, grow: 1, decay: 0.765 },
-        fun: { min: 0, max: 100, grow: 1, decay: 0.855 },
-        hygiene: { min: 0, max: 100, grow: 1, decay: 0.3575 },
-      },
-      needs: { hunger: 72, energy: 68, fun: 55, hygiene: 70 },
-    },
+      {
+          "id": "jiarong",
+          "name": "贾蓉",
+          "short": "蓉哥儿",
+          "shortComment": "宁府晚辈，凤姐族亲",
+          "socialRank": 3,
+          "gender": "男",
+          "homewardness": 44,
+          "color": "#5d6d7e",
+          "hair": "#333",
+          "skin": "#e8d5b7",
+          "trait": "male",
+          "sceneId": 3,
+          "gridCol": 37,
+          "gridRow": 27,
+          "attributes": {
+              "constitution": 66,
+              "sensitivity": 38,
+              "charm": 52,
+              "intellect": 48
+          },
+          "personality": "宁府晚辈，与凤姐往来密切。",
+          "skills": [
+              "move",
+              "talk"
+          ],
+          "baseNeedCoeffs": {
+              "hunger": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.855
+              },
+              "energy": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.765
+              },
+              "fun": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.855
+              },
+              "hygiene": {
+                  "min": 0,
+                  "max": 100,
+                  "grow": 1,
+                  "decay": 0.3575
+              }
+          },
+          "needs": {
+              "hunger": 72,
+              "energy": 68,
+              "fun": 55,
+              "hygiene": 70
+          }
+      }
   ],
   dialogues: {
     'baoyu|daiyu': {

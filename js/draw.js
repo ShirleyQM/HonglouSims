@@ -2,28 +2,49 @@
 function toScreenX(x) { return x - camX; }
 function toScreenY(y) { return y - camY; }
 
+const ROOM_BG_CACHE = new Map();
+let MINIMAP_BASE_CACHE = null;
+let MINIMAP_BASE_KEY = '';
+let PAPER_TEXTURE_CACHE = null;
+let PAPER_TEXTURE_KEY = '';
+
 function drawMinimap() {
   const mini = document.getElementById('minimap');
   if (!mini || !CONFIG) return;
   const mctx = mini.getContext('2d');
   const worldW = Math.max(1, WORLD_COLS * CELL), worldH = Math.max(1, WORLD_ROWS * CELL);
   const sx = mini.width / worldW, sy = mini.height / worldH;
-  mctx.clearRect(0, 0, mini.width, mini.height);
-  mctx.fillStyle = '#aebfa4';
-  mctx.fillRect(0, 0, mini.width, mini.height);
-  for (const sc of CONFIG.scenes) {
-    const x = sc.originCol * CELL * sx, y = sc.originRow * CELL * sy;
-    const w = sc.cols * CELL * sx, h = sc.rows * CELL * sy;
-    const bg = AssetSystem?.roomBackgroundForScene?.(sc.id);
-    if (bg) mctx.drawImage(bg, x, y, w, h);
-    else {
-      mctx.fillStyle = sc.ground === 'grass' ? '#718c62' : sc.ground === 'corridor' ? '#a8947d' : '#cbbb91';
-      mctx.fillRect(x, y, w, h);
+  const roomsKey = typeof AssetSystem !== 'undefined'
+    ? Object.keys(AssetSystem.manifest?.roomBackgrounds || {}).join(',')
+    : '';
+  const baseKey = `${mini.width}x${mini.height}:${WORLD_COLS}x${WORLD_ROWS}:${roomsKey}`;
+  if (!MINIMAP_BASE_CACHE || MINIMAP_BASE_KEY !== baseKey) {
+    MINIMAP_BASE_KEY = baseKey;
+    MINIMAP_BASE_CACHE = document.createElement('canvas');
+    MINIMAP_BASE_CACHE.width = mini.width;
+    MINIMAP_BASE_CACHE.height = mini.height;
+    const bctx = MINIMAP_BASE_CACHE.getContext('2d');
+    bctx.fillStyle = '#aebfa4';
+    bctx.fillRect(0, 0, mini.width, mini.height);
+    for (const sc of CONFIG.scenes) {
+      const x = sc.originCol * CELL * sx, y = sc.originRow * CELL * sy;
+      const w = sc.cols * CELL * sx, h = sc.rows * CELL * sy;
+      const bg = AssetSystem?.roomBackgroundForScene?.(sc.id);
+      if (bg) bctx.drawImage(bg, x, y, w, h);
+      else {
+        bctx.fillStyle = sc.isTransition ? '#a8947d'
+          : sc.ground?.startsWith?.('grass') ? '#718c62'
+          : sc.ground === 'wood' ? '#80583a'
+          : '#cbbb91';
+        bctx.fillRect(x, y, w, h);
+      }
+      bctx.strokeStyle = 'rgba(68,55,43,.65)';
+      bctx.lineWidth = 1;
+      bctx.strokeRect(x, y, w, h);
     }
-    mctx.strokeStyle = 'rgba(68,55,43,.65)';
-    mctx.lineWidth = 1;
-    mctx.strokeRect(x, y, w, h);
   }
+  mctx.clearRect(0, 0, mini.width, mini.height);
+  mctx.drawImage(MINIMAP_BASE_CACHE, 0, 0);
   CHARS.forEach((c, i) => {
     mctx.beginPath();
     mctx.arc(c.x * sx, c.y * sy, i === selectedIdx ? 4 : 2, 0, Math.PI * 2);
@@ -44,32 +65,189 @@ function drawMinimap() {
 }
 
 function drawWorld() {
-  ctx.fillStyle = '#deded8';
-  ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+  drawPaperWorldBackground();
   for (const sc of CONFIG.scenes) {
     const x0 = sc.originCol * CELL, y0 = sc.originRow * CELL;
     const sx = toScreenX(x0), sy = toScreenY(y0), sw = sc.cols * CELL, sh = sc.rows * CELL;
     if (sx + sw < 0 || sy + sh < 0 || sx > VIEW_W || sy > VIEW_H) continue;
-    if (drawRoomBackground(sc, sx, sy, sw, sh)) continue;
-    for (let r = 0; r < sc.rows; r++)
-      for (let c = 0; c < sc.cols; c++) {
-        const gc = sc.originCol + c, gr = sc.originRow + r;
-        const cell = WORLD[gc]?.[gr];
-        if (!cell) continue;
-        const px = toScreenX(gc * CELL), py = toScreenY(gr * CELL);
-        if (px + CELL < 0 || py + CELL < 0 || px > VIEW_W || py > VIEW_H) continue;
-        const gt = cell.ground;
-        const tile = typeof AssetSystem !== 'undefined' ? AssetSystem.getGroundTile(gt, sc) : null;
-        if (tile) {
-          ctx.drawImage(tile, px, py);
-          if ((gc + gr) % 2) { ctx.fillStyle = 'rgba(0,0,0,.06)'; ctx.fillRect(px, py, CELL, CELL); }
-        } else {
-          if (gt === 'corridor') ctx.fillStyle = '#a89888';
-          else ctx.fillStyle = '#eadfba';
-          ctx.fillRect(px, py, CELL, CELL);
+    const hasRoomBg = drawRoomBackground(sc, sx, sy, sw, sh);
+    if (!hasRoomBg) {
+      for (let r = 0; r < sc.rows; r++)
+        for (let c = 0; c < sc.cols; c++) {
+          const gc = sc.originCol + c, gr = sc.originRow + r;
+          const cell = WORLD[gc]?.[gr];
+          if (!cell) continue;
+          const px = toScreenX(gc * CELL), py = toScreenY(gr * CELL);
+          if (px + CELL < 0 || py + CELL < 0 || px > VIEW_W || py > VIEW_H) continue;
+          const gt = cell.ground;
+          const tile = typeof AssetSystem !== 'undefined' ? AssetSystem.getGroundTile(gt, sc) : null;
+          if (tile) {
+            ctx.drawImage(tile, px, py);
+            if ((gc + gr) % 2) { ctx.fillStyle = 'rgba(0,0,0,.06)'; ctx.fillRect(px, py, CELL, CELL); }
+          } else {
+            if (gt === 'corridor') ctx.fillStyle = '#a89888';
+            else ctx.fillStyle = '#eadfba';
+            ctx.fillRect(px, py, CELL, CELL);
+          }
         }
-      }
+    }
+    drawSceneInkFade(sx, sy, sw, sh);
   }
+}
+
+function drawPaperWorldBackground() {
+  const key = `${VIEW_W}x${VIEW_H}`;
+  if (!PAPER_TEXTURE_CACHE || PAPER_TEXTURE_KEY !== key) {
+    PAPER_TEXTURE_KEY = key;
+    PAPER_TEXTURE_CACHE = document.createElement('canvas');
+    PAPER_TEXTURE_CACHE.width = VIEW_W;
+    PAPER_TEXTURE_CACHE.height = VIEW_H;
+    const pctx = PAPER_TEXTURE_CACHE.getContext('2d');
+    const base = pctx.createLinearGradient(0, 0, VIEW_W, VIEW_H);
+    base.addColorStop(0, '#f3ead0');
+    base.addColorStop(0.45, '#e5d4aa');
+    base.addColorStop(1, '#f7f0dd');
+    pctx.fillStyle = base;
+    pctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    drawPaperInkWash(pctx);
+    const flecks = Math.max(260, Math.floor((VIEW_W * VIEW_H) / 1500));
+    for (let i = 0; i < flecks; i++) {
+      const x = Math.random() * VIEW_W;
+      const y = Math.random() * VIEW_H;
+      const a = 0.025 + Math.random() * 0.07;
+      const r = Math.random() < 0.82 ? 1 : 1.8;
+      pctx.fillStyle = Math.random() < 0.62
+        ? `rgba(109,82,48,${a})`
+        : `rgba(255,252,238,${a + 0.02})`;
+      pctx.fillRect(x, y, r, r);
+    }
+    for (let i = 0; i < 24; i++) {
+      const y = Math.random() * VIEW_H;
+      const grad = pctx.createLinearGradient(0, y, VIEW_W, y + 18);
+      grad.addColorStop(0, 'rgba(120,88,52,0)');
+      grad.addColorStop(0.5, 'rgba(120,88,52,0.015)');
+      grad.addColorStop(1, 'rgba(120,88,52,0)');
+      pctx.fillStyle = grad;
+      pctx.fillRect(0, y, VIEW_W, 18);
+    }
+    drawPaperBorderVignette(pctx);
+  }
+  ctx.drawImage(PAPER_TEXTURE_CACHE, 0, 0);
+}
+
+function drawPaperInkWash(pctx) {
+  const patches = [
+    { x: 0.08, y: 0.22, r: 0.34, color: '92,106,78', a: 0.16 },
+    { x: 0.23, y: 0.82, r: 0.30, color: '96,83,58', a: 0.12 },
+    { x: 0.72, y: 0.12, r: 0.28, color: '85,104,86', a: 0.12 },
+    { x: 0.86, y: 0.74, r: 0.24, color: '86,76,58', a: 0.09 },
+  ];
+  for (const p of patches) {
+    const cx = p.x * VIEW_W, cy = p.y * VIEW_H;
+    const radius = p.r * Math.max(VIEW_W, VIEW_H);
+    const g = pctx.createRadialGradient(cx, cy, radius * 0.08, cx, cy, radius);
+    g.addColorStop(0, `rgba(${p.color},${p.a})`);
+    g.addColorStop(0.46, `rgba(${p.color},${p.a * 0.42})`);
+    g.addColorStop(1, `rgba(${p.color},0)`);
+    pctx.fillStyle = g;
+    pctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
+  }
+  drawPaperCloudBand(pctx, VIEW_W * 0.02, VIEW_H * 0.52, VIEW_W * 0.32, 0.72);
+  drawPaperCloudBand(pctx, VIEW_W * 0.58, VIEW_H * 0.22, VIEW_W * 0.34, 0.44);
+  drawPaperMountainStroke(pctx, VIEW_W * 0.02, VIEW_H * 0.60, VIEW_W * 0.40, 0.72);
+  drawPaperMountainStroke(pctx, VIEW_W * 0.55, VIEW_H * 0.34, VIEW_W * 0.42, 0.52);
+  drawPaperBambooShadow(pctx, VIEW_W * 0.03, VIEW_H * 0.16, 1, 1.25);
+  drawPaperBambooShadow(pctx, VIEW_W * 0.95, VIEW_H * 0.18, -1, 0.9);
+}
+
+function drawPaperMountainStroke(pctx, x, y, w, alpha) {
+  pctx.save();
+  pctx.strokeStyle = `rgba(82,76,58,${0.055 * alpha})`;
+  pctx.lineWidth = 2;
+  pctx.beginPath();
+  pctx.moveTo(x, y);
+  const steps = 7;
+  for (let i = 1; i <= steps; i++) {
+    const px = x + (w * i) / steps;
+    const py = y - Math.sin(i * 1.3) * 26 * alpha - (i % 2 ? 12 : -3) * alpha;
+    pctx.lineTo(px, py);
+  }
+  pctx.stroke();
+  pctx.strokeStyle = `rgba(82,76,58,${0.028 * alpha})`;
+  pctx.lineWidth = 8;
+  pctx.stroke();
+  pctx.restore();
+}
+
+function drawPaperCloudBand(pctx, x, y, w, alpha) {
+  pctx.save();
+  pctx.lineCap = 'round';
+  pctx.lineJoin = 'round';
+  for (let i = 0; i < 3; i++) {
+    pctx.strokeStyle = `rgba(92,82,63,${0.045 * alpha / (i + 1)})`;
+    pctx.lineWidth = 14 - i * 3;
+    pctx.beginPath();
+    pctx.moveTo(x, y + i * 10);
+    pctx.bezierCurveTo(x + w * 0.14, y - 18 - i * 4, x + w * 0.28, y + 18, x + w * 0.42, y);
+    pctx.bezierCurveTo(x + w * 0.58, y - 24, x + w * 0.72, y + 12, x + w, y - 5 + i * 6);
+    pctx.stroke();
+  }
+  pctx.restore();
+}
+
+function drawPaperBambooShadow(pctx, x, y, dir, opacity = 1) {
+  pctx.save();
+  pctx.strokeStyle = `rgba(57,78,50,${0.07 * opacity})`;
+  pctx.fillStyle = `rgba(57,78,50,${0.052 * opacity})`;
+  pctx.lineWidth = 2;
+  for (let i = 0; i < 5; i++) {
+    const bx = x + dir * i * 9;
+    pctx.beginPath();
+    pctx.moveTo(bx, y + 160);
+    pctx.quadraticCurveTo(bx + dir * 22, y + 70, bx + dir * 10, y);
+    pctx.stroke();
+    for (let j = 0; j < 5; j++) {
+      const ly = y + 28 + j * 24 + i * 4;
+      pctx.beginPath();
+      pctx.ellipse(bx + dir * (16 + j * 3), ly, 4, 17, dir * 0.95, 0, Math.PI * 2);
+      pctx.fill();
+    }
+  }
+  pctx.restore();
+}
+
+function drawPaperBorderVignette(pctx) {
+  const g = pctx.createRadialGradient(VIEW_W * 0.5, VIEW_H * 0.48, Math.min(VIEW_W, VIEW_H) * 0.22, VIEW_W * 0.5, VIEW_H * 0.5, Math.max(VIEW_W, VIEW_H) * 0.78);
+  g.addColorStop(0, 'rgba(255,255,245,0)');
+  g.addColorStop(0.72, 'rgba(100,72,44,0.035)');
+  g.addColorStop(1, 'rgba(76,50,33,0.16)');
+  pctx.fillStyle = g;
+  pctx.fillRect(0, 0, VIEW_W, VIEW_H);
+}
+
+function drawSceneInkFade(sx, sy, sw, sh) {
+  const fade = Math.max(18, Math.min(46, CELL * 1.25));
+  ctx.save();
+  ctx.globalCompositeOperation = 'source-over';
+  const sides = [
+    [sx, sy, fade, sh, sx, sy, sx + fade, sy, 'left'],
+    [sx + sw - fade, sy, fade, sh, sx + sw, sy, sx + sw - fade, sy, 'right'],
+    [sx, sy, sw, fade, sx, sy, sx, sy + fade, 'top'],
+    [sx, sy + sh - fade, sw, fade, sx, sy + sh, sx, sy + sh - fade, 'bottom'],
+  ];
+  for (const [x, y, w, h, x1, y1, x2, y2, side] of sides) {
+    const g = ctx.createLinearGradient(x1, y1, x2, y2);
+    g.addColorStop(0, 'rgba(64,54,42,.26)');
+    g.addColorStop(0.58, 'rgba(83,72,56,.09)');
+    g.addColorStop(1, 'rgba(83,72,56,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x, y, w, h);
+    if (side === 'top' || side === 'bottom') {
+      ctx.fillStyle = side === 'top' ? 'rgba(255,250,232,.055)' : 'rgba(56,46,36,.035)';
+      ctx.fillRect(x, y, w, Math.max(1, h * 0.18));
+    }
+  }
+  ctx.restore();
 }
 
 function drawScenePlaques() {
@@ -105,30 +283,61 @@ function drawRoomBackground(sc, sx, sy, sw, sh) {
   const img = AssetSystem.roomBackgroundForScene?.(sc.id);
   if (!img) return false;
   const def = AssetSystem.roomBackgroundDef?.(sc.id) || {};
+  const cw = Math.max(1, Math.round(sw));
+  const ch = Math.max(1, Math.round(sh));
+  const fit = def.fit || 'contain';
+  const key = `${sc.id}:${img.src}:${img.naturalWidth || img.width}x${img.naturalHeight || img.height}:${cw}x${ch}:${fit}:${def.dim || 0}`;
+  let cached = ROOM_BG_CACHE.get(key);
+  if (!cached) {
+    cached = document.createElement('canvas');
+    cached.width = cw;
+    cached.height = ch;
+    const cctx = cached.getContext('2d');
+    cctx.imageSmoothingEnabled = true;
+    cctx.imageSmoothingQuality = 'high';
+    drawRoomBackgroundTileFill(cctx, sc, cw, ch, def);
+    const scale = fit === 'cover'
+      ? Math.max(cw / img.width, ch / img.height)
+      : Math.min(cw / img.width, ch / img.height);
+    const dw = img.width * scale;
+    const dh = img.height * scale;
+    const dx = (cw - dw) / 2;
+    const dy = (ch - dh) / 2;
+    cctx.drawImage(img, dx, dy, dw, dh);
+    if (def.dim) {
+      cctx.fillStyle = `rgba(0,0,0,${def.dim})`;
+      cctx.fillRect(0, 0, cw, ch);
+    }
+    cctx.strokeStyle = 'rgba(212,184,150,.55)';
+    cctx.lineWidth = 2;
+    cctx.strokeRect(1, 1, cw - 2, ch - 2);
+    ROOM_BG_CACHE.set(key, cached);
+  }
   ctx.save();
   ctx.beginPath();
   ctx.rect(sx, sy, sw, sh);
   ctx.clip();
-  ctx.fillStyle = '#0c0b0a';
-  ctx.fillRect(sx, sy, sw, sh);
-  const fit = def.fit || 'contain';
-  const scale = fit === 'cover'
-    ? Math.max(sw / img.width, sh / img.height)
-    : Math.min(sw / img.width, sh / img.height);
-  const dw = img.width * scale;
-  const dh = img.height * scale;
-  const dx = sx + (sw - dw) / 2;
-  const dy = sy + (sh - dh) / 2;
-  ctx.drawImage(img, dx, dy, dw, dh);
-  if (def.dim) {
-    ctx.fillStyle = `rgba(0,0,0,${def.dim})`;
-    ctx.fillRect(sx, sy, sw, sh);
-  }
-  ctx.strokeStyle = 'rgba(212,184,150,.55)';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(sx + 1, sy + 1, sw - 2, sh - 2);
+  ctx.drawImage(cached, sx, sy, sw, sh);
   ctx.restore();
   return true;
+}
+
+function drawRoomBackgroundTileFill(targetCtx, sc, cw, ch, def = {}) {
+  targetCtx.fillStyle = def.fill || sc.bgAlt || sc.bg || '#eadfba';
+  targetCtx.fillRect(0, 0, cw, ch);
+  const tile = typeof AssetSystem !== 'undefined' ? AssetSystem.getGroundTile?.(sc.ground, sc) : null;
+  if (!tile) return;
+  for (let y = 0; y < ch; y += CELL) {
+    for (let x = 0; x < cw; x += CELL) {
+      targetCtx.drawImage(tile, x, y);
+      const gc = sc.originCol + Math.floor(x / CELL);
+      const gr = sc.originRow + Math.floor(y / CELL);
+      if ((gc + gr) % 2) {
+        targetCtx.fillStyle = 'rgba(0,0,0,.045)';
+        targetCtx.fillRect(x, y, CELL, CELL);
+      }
+    }
+  }
 }
 
 function drawFurnitureInstances() {
@@ -139,6 +348,10 @@ function drawFurnitureInstances() {
     const w = tpl.gridW * CELL, h = tpl.gridH * CELL;
     if (x + w < 0 || y + h < 0 || x > VIEW_W || y > VIEW_H) continue;
     const roomMode = !!(typeof AssetSystem !== 'undefined' && AssetSystem.roomBackgroundForScene?.(inst.sceneId));
+    if (inst.backgroundEmbedded) {
+      drawFurnitureHotspot(inst, tpl, x, y, w, h);
+      continue;
+    }
     const spriteImg = (typeof AssetSystem !== 'undefined' && AssetSystem.furnitureImageForTemplate)
       ? AssetSystem.furnitureImageForTemplate(inst.templateId) : null;
     if (spriteImg) {
@@ -228,39 +441,52 @@ function drawFurnitureSprite(inst, tpl, x, y, w, h, img, def, roomMode) {
 }
 
 function drawFurnitureHotspot(inst, tpl, x, y, w, h) {
+  const fineRect = furnitureFineWorldRect(inst);
+  if (fineRect) {
+    x = toScreenX(fineRect.x);
+    y = toScreenY(fineRect.y);
+    w = fineRect.w;
+    h = fineRect.h;
+  }
   const rt = FURN_RT[inst.instanceId];
   const occupied = rt?.users?.length > 0;
   const hover = hoverInst === inst.instanceId;
-  const cx = x + w / 2;
-  const cy = y + h / 2;
+  const lineY = y + h - 2;
+  const t = (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
+  const pulse = hover ? 1 : 0.72 + Math.sin(t * 3.2) * 0.12;
   ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,.55)';
-  ctx.shadowBlur = hover ? 8 : 4;
-  ctx.fillStyle = hover ? '#f4d27a' : occupied ? '#d98f8a' : '#f6e7b8';
-  ctx.strokeStyle = hover ? '#5c4033' : '#8b7768';
-  ctx.lineWidth = hover ? 2 : 1.5;
+  ctx.shadowColor = hover
+    ? 'rgba(255, 228, 150, 0.98)'
+    : occupied ? 'rgba(232, 150, 130, 0.75)' : 'rgba(255, 210, 120, 0.72)';
+  ctx.shadowBlur = hover ? 16 : 10 * pulse;
+  ctx.strokeStyle = hover ? '#fff0c0' : occupied ? '#e8a090' : `rgba(255, 224, 150, ${0.55 + pulse * 0.35})`;
+  ctx.lineWidth = hover ? 3 : 2;
+  ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.arc(cx, cy, hover ? 8 : 6, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.moveTo(x + w * 0.06, lineY);
+  ctx.lineTo(x + w * 0.94, lineY);
   ctx.stroke();
   ctx.shadowBlur = 0;
-  ctx.fillStyle = '#3d3028';
-  ctx.font = '12px serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(tpl.icon || '•', cx, cy + 0.5);
+  const glow = ctx.createLinearGradient(x, lineY - 8, x, lineY + 4);
+  glow.addColorStop(0, 'rgba(255, 240, 190, 0)');
+  glow.addColorStop(1, hover ? 'rgba(255, 220, 130, 0.28)' : 'rgba(255, 210, 120, 0.16)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(x + w * 0.06, lineY - 8, w * 0.88, 10);
   if (hover) {
     ctx.font = '11px "Microsoft YaHei", "PingFang SC", sans-serif';
+    ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
-    const label = tpl.name;
+    const label = tpl.name || '';
     const tw = ctx.measureText(label).width + 12;
-    ctx.fillStyle = 'rgba(250,248,244,.92)';
-    ctx.strokeStyle = 'rgba(92,64,51,.75)';
+    const lx = Math.max(2, Math.min(VIEW_W - tw - 2, x + w / 2 - tw / 2));
+    const ly = Math.min(VIEW_H - 22, Math.max(2, y - 6));
+    ctx.fillStyle = 'rgba(250,248,244,.94)';
+    ctx.strokeStyle = 'rgba(92,64,51,.72)';
     ctx.lineWidth = 1;
-    ctx.fillRect(cx - tw / 2, cy + 12, tw, 18);
-    ctx.strokeRect(cx - tw / 2, cy + 12, tw, 18);
+    ctx.fillRect(lx, ly - 14, tw, 18);
+    ctx.strokeRect(lx, ly - 14, tw, 18);
     ctx.fillStyle = '#3d3028';
-    ctx.fillText(label, cx, cy + 25);
+    ctx.fillText(label, lx + tw / 2, ly);
   }
   ctx.restore();
 }

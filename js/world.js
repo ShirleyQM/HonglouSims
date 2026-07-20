@@ -94,6 +94,16 @@ function buildWorldGrid() {
     const sc = getScene(inst.sceneId);
     const keepOpenEdge = !!sc && (!!sc.openEdges || sc.id === 3);
     INST_MAP[inst.instanceId] = inst;
+    if (isEmbeddedFurnitureInst(inst) || inst.hotspot) {
+      const entry = furnitureFineEntryGrid(inst);
+      const cell = WORLD[entry.col]?.[entry.row];
+      if (cell) {
+        cell.walkable = true;
+        cell.entryFor = inst.instanceId;
+        cell.furnitureId = 0;
+      }
+      continue;
+    }
     for (let dx = 0; dx < tpl.gridW; dx++)
       for (let dy = 0; dy < tpl.gridH; dy++) {
         const c = inst.anchorCol + dx, r = inst.anchorRow + dy;
@@ -338,6 +348,15 @@ function syncFurnitureEntryCells() {
   for (const inst of CONFIG.furnitureInstances) {
     const tpl = getTemplate(inst.templateId);
     if (!tpl) continue;
+    if (isEmbeddedFurnitureInst(inst) || inst.hotspot) {
+      const entry = furnitureFineEntryGrid(inst);
+      if (WORLD[entry.col]?.[entry.row]) {
+        WORLD[entry.col][entry.row].walkable = true;
+        WORLD[entry.col][entry.row].entryFor = inst.instanceId;
+        WORLD[entry.col][entry.row].furnitureId = 0;
+      }
+      continue;
+    }
     const off = inst._entryOverride || tpl.entryOffset;
     const ec = inst.anchorCol + off[0], er = inst.anchorRow + off[1];
     const defEc = inst.anchorCol + tpl.entryOffset[0], defEr = inst.anchorRow + tpl.entryOffset[1];

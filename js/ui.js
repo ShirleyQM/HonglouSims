@@ -385,7 +385,7 @@ function buildColFamily() {
   el.innerHTML = `
     <div class="fam-row-header">
       <span class="fam-title">${fam.crestIcon || ''} ${escapeHtml(fam.name)}</span>
-      <button type="button" id="btn-family-switch-sm" title="快捷键 F">切换家庭</button>
+      <button type="button" id="btn-family-switch-sm" title="快捷键 F">管理家庭</button>
     </div>
     <div class="member-avatars">${avatars || '<span class="col-empty">无成员</span>'}</div>
     <div class="fam-meta-line">${escapeHtml(fam.tag || '')} · ${memberIds.length}口 · 公库 ${fund}两</div>`;
@@ -927,7 +927,7 @@ function buildHelpPanel() {
   return `<h3>帮助</h3>
     <div style="font-size:11px;color:var(--jn-text-muted);line-height:1.6">
       <p><b>操作</b>：点击地面/家具行走或使用；点击其他人物打开互动菜单（含「传令」）；头像上的「令」表示今日当值传令快捷入口，点击会打开传令并预选此人；底栏「传令」可点名或群体下发；Shift+点击可插队行动。</p>
-      <p><b>快捷键</b>：F 切换家庭；1–9 选择家庭成员；J 任务；P 人物；Q 起居；R 关系；K 技能；M 日志；Y 秩序；B 背包；S 设置；H 帮助。</p>
+      <p><b>快捷键</b>：F 管理家庭；1–9 选择家庭成员；J 任务；P 人物；Q 起居；R 关系；K 技能；M 日志；Y 秩序；B 背包；S 设置；H 帮助。</p>
       <p><b>界面</b>：顶栏为地点、时令和全局入口；左侧任务 J 可收起；行动队列竖向排列；底部为当前人物 HUD、快捷入口和家庭成员头像。</p>
       <p>若地图空荡，请在设置→导入导出→恢复默认配置并应用重载。</p>
     </div>
@@ -1013,6 +1013,93 @@ function profileNeedDefsInDisplayOrder() {
   });
 }
 
+const PROFILE_NEED_PYRAMID = [
+  { tier: 'top', keys: ['mood'] },
+  { tier: 'mid', keys: ['social', 'fun'] },
+  { tier: 'base', keys: ['hunger', 'energy', 'hygiene'] },
+];
+
+function profileNeedChipHtml(c, def, color) {
+  const key = def.key || def.id;
+  const value = c.needs?.[key];
+  return `<span class="profile-need-chip">
+    <i style="background:${escapeHtml(color)}"></i>
+    <b>${escapeHtml(def.label || def.name || key)}</b>
+    <em>${escapeHtml(value == null ? '—' : Math.round(value))}</em>
+  </span>`;
+}
+
+function profileNeedKeyToTier(needKey) {
+  if (needKey === 'mood') return 'top';
+  if (needKey === 'social' || needKey === 'fun') return 'mid';
+  if (needKey === 'hunger' || needKey === 'energy' || needKey === 'hygiene') return 'base';
+  return 'other';
+}
+
+function profileStatePyramidTier(stateId) {
+  const sd = CONFIG.stateDefs?.[stateId];
+  if (!sd) return 'other';
+  if (sd.needBand?.need) return profileNeedKeyToTier(sd.needBand.need);
+  if (sd.trigger?.needKey) return profileNeedKeyToTier(sd.trigger.needKey);
+  if (sd.trigger?.need) return profileNeedKeyToTier(sd.trigger.need);
+  if (sd.category === 'needCombo') {
+    if (stateId === 'needsAtEase') return 'top';
+    if (stateId === 'needsContented') return 'mid';
+    return 'base';
+  }
+  const needKeys = Object.keys(sd.needMods || {});
+  if (needKeys.length) {
+    const rank = { top: 3, mid: 2, base: 1, other: 0 };
+    return needKeys
+      .map(profileNeedKeyToTier)
+      .sort((a, b) => rank[b] - rank[a])[0];
+  }
+  return 'other';
+}
+
+function profileStateTagHtml(s) {
+  const sd = CONFIG.stateDefs[s.id];
+  const cls = getStateTagClass(s.id);
+  const remain = s.remaining === -1 ? '常驻' : s.remaining > 0 ? `${Math.round(s.remaining)}分` : '';
+  return `<span class="tag state ${cls}" title="${escapeHtml(sd?.desc || '')}">${escapeHtml(sd?.name || s.id)}${remain ? ` · ${escapeHtml(remain)}` : ''}</span>`;
+}
+
+function profileStatesByPyramidTier(c) {
+  const grouped = { top: [], mid: [], base: [], other: [] };
+  (c.activeStates || []).forEach(s => {
+    grouped[profileStatePyramidTier(s.id)].push(s);
+  });
+  return grouped;
+}
+
+function buildProfileNeedStatusGrid(c) {
+  const needPalette = ['#b99a58', '#cb7f82', '#67b8b2', '#d486a7', '#8f74b3', '#80a96e'];
+  const defs = profileNeedDefsInDisplayOrder();
+  const byKey = Object.fromEntries(defs.map((def, i) => [def.key || def.id, { def, i }]));
+  const statesByTier = profileStatesByPyramidTier(c);
+  const rows = PROFILE_NEED_PYRAMID.map(({ tier, keys }) => {
+    const chips = keys.map(key => {
+      const row = byKey[key];
+      if (!row) return '';
+      const color = row.def.color || needPalette[row.i % needPalette.length];
+      return profileNeedChipHtml(c, row.def, color);
+    }).join('');
+    const tags = statesByTier[tier].map(profileStateTagHtml).join('');
+    return `<div class="profile-need-status-row ${tier}">
+      <div class="profile-need-pyramid-tier ${tier}">${chips}</div>
+      <div class="profile-status-tier">${tags || '<span class="profile-status-empty">—</span>'}</div>
+    </div>`;
+  }).join('');
+  const otherTags = statesByTier.other.map(profileStateTagHtml).join('');
+  const otherRow = otherTags
+    ? `<div class="profile-need-status-row other">
+        <div class="profile-need-pyramid-tier other"></div>
+        <div class="profile-status-tier">${otherTags}</div>
+      </div>`
+    : '';
+  return `<div class="profile-need-status-grid" aria-label="基础需求层次与状态">${rows}${otherRow}</div>`;
+}
+
 function profileReputationSummary(c, repExplain) {
   const get = id => Math.round(repExplain?.domains?.find(row => row.id === id)?.value ?? c?.reputationDomains?.[id] ?? 0);
   const face = get('family');
@@ -1046,9 +1133,23 @@ function profileDreamInfo(c) {
   };
 }
 
-function buildProfileOverviewBlock(c, repExplain) {
-  const portrait = profilePortraitUrl(c);
+function buildProfilePortraitRail(c) {
   const fullBody = profileFullBodyPortraitUrl(c);
+  const portrait = profilePortraitUrl(c);
+  const src = fullBody || portrait;
+  return `<aside class="profile-portrait-rail">
+    <button type="button" class="profile-portrait-rail-art${src ? ' clickable' : ''}" ${src ? `data-profile-full-body="${escapeHtml(c.id)}" title="查看完整立绘"` : ''}>
+      ${src ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(c.name || '')}全身立绘" loading="lazy" decoding="async">` : `<div class="profile-cover-fallback" style="background:${escapeHtml(c.color || '#c8d8c0')}">${escapeHtml(c.short || c.name?.slice(0, 1) || '人')}</div>`}
+    </button>
+    <div class="profile-portrait-rail-summary">
+      <span>人物档案</span>
+      <b>${escapeHtml(c.name || '未名')}</b>
+      <p>${escapeHtml(c.shortComment || c.personality || '身份、职业、需求与声望会在这里汇总展示。')}</p>
+    </div>
+  </aside>`;
+}
+
+function buildProfileOverviewBlock(c, repExplain) {
   const baseRank = c._baseSocialRank ?? getCharDef(c.id)?.socialRank ?? c.socialRank ?? 2;
   const effectiveRank = IdentityProtocolSystem?.getCharRank?.(c.id) ?? baseRank;
   const rankLabel = IdentityProtocolSystem?.rankLabel?.(effectiveRank) || `等级${effectiveRank}`;
@@ -1076,10 +1177,6 @@ function buildProfileOverviewBlock(c, repExplain) {
   ].filter(Boolean).map(t => `<span>${escapeHtml(t)}</span>`).join('');
   return `<section class="profile-cover">
     <button type="button" class="profile-edit-btn" id="profile-edit-character">编辑</button>
-    <button type="button" class="profile-cover-art${fullBody ? ' clickable' : ''}" ${fullBody ? `data-profile-full-body="${escapeHtml(c.id)}" title="查看全身图"` : ''}>
-      ${portrait ? `<img src="${escapeHtml(portrait)}" alt="${escapeHtml(c.name || '')}" loading="lazy" decoding="async">` : `<div class="profile-cover-fallback" style="background:${escapeHtml(c.color || '#c8d8c0')}">${escapeHtml(c.short || c.name?.slice(0, 1) || '人')}</div>`}
-      ${fullBody ? '<span class="profile-cover-art-hint">全身</span>' : ''}
-    </button>
     <div class="profile-cover-main">
       <div class="profile-cover-kicker">人物档案</div>
       <div class="profile-cover-name">${escapeHtml(c.name || '未名')}</div>
@@ -1154,28 +1251,7 @@ function buildProfileIdentityBlock(c, repExplain) {
 }
 
 function buildProfileStatusBlock(c) {
-  const needPalette = ['#b99a58', '#cb7f82', '#67b8b2', '#d486a7', '#8f74b3', '#80a96e'];
-  const needs = profileNeedDefsInDisplayOrder().map((def, i) => {
-    const key = def.key || def.id;
-    const value = c.needs?.[key];
-    const color = def.color || needPalette[i % needPalette.length];
-    return `<span class="profile-need-chip">
-      <i style="background:${escapeHtml(color)}"></i>
-      <b>${escapeHtml(def.label || def.name || key)}</b>
-      <em>${escapeHtml(value == null ? '—' : Math.round(value))}</em>
-    </span>`;
-  }).join('');
-  const states = (c.activeStates || []).map(s => {
-    const sd = CONFIG.stateDefs[s.id];
-    const cls = getStateTagClass(s.id);
-    const remain = s.remaining === -1 ? '常驻' : s.remaining > 0 ? `${Math.round(s.remaining)}分` : '';
-    return `<span class="tag state ${cls}" title="${escapeHtml(sd?.desc || '')}">${escapeHtml(sd?.name || s.id)}${remain ? ` · ${escapeHtml(remain)}` : ''}</span>`;
-  }).join('');
   const healthValue = HealthSystem?.getHealth?.(c.id);
-  const illnessLevel = HealthSystem?.getIllnessLevel?.(c.id);
-  const healthLine = healthValue != null
-    ? `健康 ${Math.round(healthValue)}${illnessLevel && illnessLevel !== 'none' ? ' · ' + illnessLevel : ''}`
-    : '健康系统未记录异常';
   const personal = Math.round(MoneySystem?.getBalance?.(c) ?? 0);
   const healthPct = Math.max(0, Math.min(100, Number(healthValue ?? 100)));
   const moneyPct = Math.max(0, Math.min(100, personal));
@@ -1194,37 +1270,8 @@ function buildProfileStatusBlock(c) {
     </div>
     <div class="profile-need-ribbon">
       <div class="profile-need-head"><span>当前状态</span></div>
-      <div class="profile-need-line">${needs}</div>
-      <div class="profile-status-strip">${states || '<span>无状态</span>'}</div>
+      ${buildProfileNeedStatusGrid(c)}
     </div>
-  </section>`;
-}
-
-function buildProfileBasicsBlock(c, repExplain) {
-  const family = FamilySystem?.findFamilyOfChar?.(c.id);
-  const role = family ? FamilySystem.getCharRole(c.id, family.id) : '';
-  const baseRank = c._baseSocialRank ?? getCharDef(c.id)?.socialRank ?? c.socialRank ?? 2;
-  const effectiveRank = IdentityProtocolSystem?.getCharRank?.(c.id) ?? baseRank;
-  const rankLabel = IdentityProtocolSystem?.rankLabel?.(effectiveRank) || `等级${effectiveRank}`;
-  const path = c.lifePath ? LifePathSystem?.getPath?.(c.lifePath) : null;
-  const stage = c.currentStage ? LifePathSystem?.getStage?.(c.currentStage) : null;
-  const personal = Math.round(MoneySystem?.getBalance?.(c) ?? 0);
-  const basics = [
-    profileMetricCard('性别', c.gender || '未设', '人物基础信息'),
-    profileMetricCard('年龄', c.age == null ? '未设' : `${c.age}岁`, '人物基础信息'),
-    profileMetricCard('家庭', family?.name || '未入家庭', '归属'),
-    profileMetricCard('家庭身份', role || '未配置', '家中位置'),
-    profileMetricCard('血缘', '暂未开放', '亲缘系统后续接入'),
-  ].join('');
-  const rows = [
-    profileMetricCard('身份', rankLabel, effectiveRank !== baseRank ? `原位阶：${IdentityProtocolSystem?.rankLabel?.(baseRank) || baseRank}` : '当前礼法位置'),
-    profileMetricCard('职业', stage?.title || path?.name || '暂无', path?.name ? `路径：${path.name}` : '未进入职业路径'),
-    profileMetricCard('私库', `${personal} 两`, '人物当前银两'),
-  ].join('');
-  return `<section class="profile-section">
-    <h4>基础信息</h4>
-    <div class="profile-basic-grid">${basics}</div>
-    <div class="profile-metrics profile-current-row">${rows}</div>
   </section>`;
 }
 
@@ -1627,19 +1674,22 @@ function buildCharacterProfilePanel() {
   LifePathSystem?.initChar?.(c);
   ReputationDomainSystem?.initChar?.(c);
   const repExplain = ReputationDomainSystem?.explain?.(c.id);
-  return `<div class="profile-panel profile-compact-panel">
-    <section class="profile-compact-top">
-      <div class="profile-compact-main">
-        ${buildProfileOverviewBlock(c, repExplain)}
-        ${buildProfileStatusBlock(c)}
+  return `<div class="profile-panel profile-compact-panel profile-dossier-layout">
+    ${buildProfilePortraitRail(c)}
+    <main class="profile-dossier-content">
+      <section class="profile-compact-top">
+        <div class="profile-compact-main">
+          ${buildProfileOverviewBlock(c, repExplain)}
+          ${buildProfileStatusBlock(c)}
+        </div>
+        ${buildProfileFutureBlock(c)}
+      </section>
+      <div class="profile-compact-bottom">
+        ${buildProfileSkillsBlock(c)}
+        ${buildProfileReputationBlock(c, repExplain)}
       </div>
-      ${buildProfileFutureBlock(c)}
-    </section>
-    <div class="profile-compact-bottom">
-      ${buildProfileSkillsBlock(c)}
-      ${buildProfileReputationBlock(c, repExplain)}
-    </div>
-    ${panelFooterActionsHtml()}
+      ${panelFooterActionsHtml()}
+    </main>
   </div>`;
 }
 
@@ -2528,7 +2578,7 @@ function buildRoutinePanel() {
 
 function openPanel(html) {
   const panel = document.getElementById('panel-content');
-  panel.classList.remove('routine-panel-box', 'order-book-panel-box', 'jiafu-order-panel-box');
+  panel.classList.remove('routine-panel-box', 'order-book-panel-box', 'jiafu-order-panel-box', 'family-panel-box');
   panel.innerHTML = html;
   document.getElementById('panel-overlay').classList.add('open');
 }
@@ -3285,6 +3335,8 @@ function hitChar(mx, my) {
 
 function hitFurnInst(mx, my) {
   const wx = mx + camX, wy = my + camY;
+  const embedded = hitEmbeddedFurnitureInst(wx, wy);
+  if (embedded) return embedded;
   const g = pixelToGrid(wx, wy);
   const cell = WORLD[g.col]?.[g.row];
   if (cell?.entryFor) return cell.entryFor;
@@ -3307,6 +3359,19 @@ function handleMapClick(mx, my, shiftKey, clientX = 0, clientY = 0) {
     });
     openFurnitureActionPanel(c, inst, shiftKey, clientX, clientY);
     return;
+  }
+
+  const embeddedId = hitEmbeddedFurnitureInst(wpx, wpy);
+  if (embeddedId) {
+    const inst = getInstance(embeddedId);
+    if (inst) {
+      EventBus.emit('map:click', {
+        charId: c.id, targetType: 'furniture', instanceId: inst.instanceId,
+        templateId: inst.templateId, gridCol: g.col, gridRow: g.row,
+      });
+      openFurnitureActionPanel(c, inst, shiftKey, clientX, clientY);
+      return;
+    }
   }
 
   const inst = getInstAt(g.col, g.row);
@@ -3426,6 +3491,11 @@ const IM_CYCLE_ARC_ANGLE_END = 58;
 let imMenuCurrentIndex = 1;
 let imMenuSubIndex = 0;
 let imMenuIsScrolling = false;
+const IM_FURN_VISIBLE_SLOTS = 6;
+const IM_FURN_CENTER_SLOT = 2;
+const IM_FURN_CONTAINER = { width: 260, height: 292 };
+const IM_FURN_SLOT_X = 130;
+const IM_FURN_SLOT_GAP = 44;
 
 const IM_CYCLE_SLOTS = Array.from({ length: IM_CYCLE_VISIBLE_SLOTS }, (_, i) => {
   const t = i / (IM_CYCLE_VISIBLE_SLOTS - 1);
@@ -3763,6 +3833,23 @@ function handleImCycleWheel(e) {
 function setFurnitureMenuHint(text) {
   const hint = document.getElementById('im-hint');
   if (hint) hint.textContent = text || imFurnitureDefaultHint || '选择动作';
+  const footer = document.querySelector('#interaction-menu .im-furniture-overall-hint');
+  if (footer) {
+    const msg = text || imFurnitureDefaultHint || '';
+    footer.textContent = msg;
+    footer.title = msg;
+  }
+}
+
+function furnitureBlockHint(rows) {
+  const reasons = rows
+    .filter(row => !row.ok && typeof row.chk === 'string' && row.chk.trim())
+    .map(row => row.chk.trim());
+  if (!reasons.length) return '';
+  const counts = new Map();
+  reasons.forEach(reason => counts.set(reason, (counts.get(reason) || 0) + 1));
+  return [...counts.entries()]
+    .sort((a, b) => (b[1] - a[1]) || (b[0].length - a[0].length))[0]?.[0] || '';
 }
 
 function renderFurnitureActions(inst) {
@@ -3773,42 +3860,86 @@ function renderFurnitureActions(inst) {
   const sectors = document.getElementById('im-sectors');
   imMenuMode = 'furniture';
   imFurnitureInstanceId = inst.instanceId;
-  imFurnitureDefaultHint = '悬停看详情';
+  imFurnitureDefaultHint = '';
   menu.classList.add('im-options', 'im-furniture');
   menu.classList.remove('im-quest');
-  document.getElementById('im-target').textContent = `${tpl.icon || ''}${tpl.name}`;
-  setFurnitureMenuHint(imFurnitureDefaultHint);
+  document.getElementById('im-target').textContent = tpl.name || '家具';
+  setFurnitureMenuHint('');
 
   const n = actions.length;
-  const { ringSize, radius, span, start } = imOptionsLayout(n, -90);
-  setImRingSize(ringSize);
-  sectors.innerHTML = actions.map((action, i) => {
+  setImMenuSize(IM_FURN_CONTAINER.width, IM_FURN_CONTAINER.height);
+  imMenuCurrentIndex = imWrapIndex(imMenuCurrentIndex, Math.max(1, n));
+  const visibleCount = Math.min(IM_FURN_VISIBLE_SLOTS, n);
+  if (!n) {
+    const px = IM_FURN_SLOT_X;
+    const py = IM_FURN_CONTAINER.height / 2;
+    imFurnitureDefaultHint = '暂无可用动作';
+    sectors.innerHTML = `<button type="button" class="im-sector im-opt-sector disabled"
+      onpointerdown="handleInteractionMenuSectorClick(event)"
+      style="--px:${px}px;--py:${py}px;left:${px}px;top:${py}px;transform:translate(-50%, -50%)" title="当前没有可用动作">
+      <span class="im-sector-inner">
+        <span class="im-sector-label">暂无动作</span>
+        <span class="im-reason">不可用</span>
+      </span>
+    </button>
+    <div class="im-furniture-overall-hint" title="暂无可用动作">暂无可用动作</div>`;
+    requestAnimationFrame(() => positionInteractionMenu());
+    return;
+  }
+
+  const rows = actions.map(action => {
     const chk = canUseFurniture(c, inst, action);
-    const ok = chk === true || chk === '已满';
-    const angle = n === 1 ? -90 : start + (span / Math.max(1, n - 1)) * i;
-    const { px, py } = imSectorCenter(angle, radius, ringSize);
-    const detail = furnitureActionDetail(tpl, action, chk);
-    const cls = ok ? '' : ' disabled';
+    return {
+      action,
+      chk,
+      ok: chk === true || chk === '已满',
+      detail: furnitureActionDetail(tpl, action, true),
+    };
+  });
+  imFurnitureDefaultHint = furnitureBlockHint(rows);
+
+  sectors.innerHTML = Array.from({ length: visibleCount }, (_, slotIdx) => {
+    const actionIndex = n > IM_FURN_VISIBLE_SLOTS
+      ? imWrapIndex(imMenuCurrentIndex + slotIdx - IM_FURN_CENTER_SLOT, n)
+      : slotIdx;
+    const { action, chk, ok, detail } = rows[actionIndex];
+    const px = IM_FURN_SLOT_X;
+    const startY = (IM_FURN_CONTAINER.height - (visibleCount - 1) * IM_FURN_SLOT_GAP) / 2;
+    const py = startY + slotIdx * IM_FURN_SLOT_GAP;
+    const active = actionIndex === imMenuCurrentIndex;
+    const slotDistance = Math.abs(slotIdx - Math.min(IM_FURN_CENTER_SLOT, visibleCount - 1));
+    const opacity = n > IM_FURN_VISIBLE_SLOTS ? Math.max(0.68, 1 - slotDistance * 0.08) : 1;
+    const cls = `${active ? ' active' : ''}${ok ? '' : ' disabled'}`;
     return `<button type="button" class="im-sector im-opt-sector furn-im-sector${cls}"
       onpointerdown="handleInteractionMenuSectorClick(event)"
-      onclick="handleInteractionMenuSectorClick(event)"
-      onpointerenter="setFurnitureMenuHint(this.dataset.detail)"
-      onpointerleave="setFurnitureMenuHint('')"
-      onmouseover="setFurnitureMenuHint(this.dataset.detail)"
-      onmouseout="setFurnitureMenuHint('')"
       data-furn="${inst.instanceId}"
       data-furn-action="${escapeAttr(action.id || 'default_use')}"
       data-detail="${escapeAttr(detail)}"
-      style="--px:${px}px;--py:${py}px;left:${px}px;top:${py}px;transform:translate(-50%, -50%)"
-      title="${escapeAttr(detail)}">
+      data-action-index="${actionIndex}"
+      style="--px:${px}px;--py:${py}px;--slot-opacity:${opacity.toFixed(2)};left:${px}px;top:${py}px;transform:translate(-50%, -50%)">
       <span class="im-sector-inner">
         <span class="im-sector-label">${escapeHtml(action.name || '使用')}</span>
         ${ok ? '' : `<span class="im-reason">${escapeHtml(chk)}</span>`}
       </span>
     </button>`;
-  }).join('');
+  }).join('') + `<div class="im-furniture-overall-hint" title="${escapeAttr(imFurnitureDefaultHint)}">${escapeHtml(imFurnitureDefaultHint)}</div>`;
 
   requestAnimationFrame(() => positionInteractionMenu());
+}
+
+function handleFurnitureMenuWheel(e) {
+  if (imMenuMode !== 'furniture' || !imFurnitureInstanceId) return;
+  const inst = getInstance(imFurnitureInstanceId);
+  const tpl = inst && getTemplate(inst.templateId);
+  const actions = getFurnitureActions(tpl);
+  if (actions.length <= IM_FURN_VISIBLE_SLOTS) return;
+  e.preventDefault();
+  if (imMenuIsScrolling) return;
+  imMenuIsScrolling = true;
+  const dir = e.deltaY > 0 ? 1 : -1;
+  imMenuCurrentIndex = imWrapIndex(imMenuCurrentIndex + dir, actions.length);
+  renderFurnitureActions(inst);
+  setTimeout(() => { imMenuIsScrolling = false; }, 150);
 }
 
 function renderImQuestOptions() {
@@ -3884,7 +4015,14 @@ function handleInteractionMenuSectorClick(e) {
       || btn.querySelector('.im-quest-hint')?.textContent?.trim()
       || btn.title
       || '当前不可用';
-    showActionBlocked(CHARS[selectedIdx], reason, 'interaction');
+    const kind = btn.dataset.furnAction ? 'furniture' : btn.dataset.qid ? 'quest' : 'interaction';
+    if (kind === 'furniture') {
+      setFurnitureMenuHint(reason);
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    showActionBlocked(CHARS[selectedIdx], reason, kind);
     e.preventDefault();
     e.stopPropagation();
     return;
@@ -3966,8 +4104,9 @@ function openFurnitureActionMenu(c, inst, clientX, clientY, shiftKey) {
   imMenuGroups = [];
   imMenuCatAngles = {};
   imFurnitureInstanceId = inst.instanceId;
+  imMenuCurrentIndex = 0;
   const menu = document.getElementById('interaction-menu');
-  menu.onwheel = null;
+  menu.onwheel = handleFurnitureMenuWheel;
   menu.classList.add('open');
   renderFurnitureActions(inst);
   requestAnimationFrame(() => positionInteractionMenu());
@@ -4023,6 +4162,7 @@ function closeInteractionMenu() {
   imMenuMode = 'interaction';
   imMenuGroups = [];
   imMenuCatAngles = {};
+  imMenuCurrentIndex = 0;
   imMenuSubIndex = 0;
   imMenuIsScrolling = false;
   imFurnitureInstanceId = 0;
@@ -4064,6 +4204,7 @@ canvas.addEventListener('click', e => {
   const ci = hitChar(mx, my);
   if (ci >= 0) {
     if (ci !== selectedIdx) openInteractionMenu(ci, e.clientX, e.clientY, e.shiftKey);
+    else closeInteractionMenu();
     return;
   }
   closeInteractionMenu();

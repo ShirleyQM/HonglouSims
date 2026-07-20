@@ -76,7 +76,11 @@
     <section>
       <h1 id="sceneTitle">场景地图标注</h1>
       <div class="row">
+        <label>场景 <select id="sceneSelect"></select></label>
+      </div>
+      <div class="row">
         <button id="tool-select" class="active" data-tool="select">拖家具</button>
+        <button id="tool-hotRect" data-tool="hotRect">框选热区</button>
         <button id="tool-paint" data-tool="paint">刷遮罩</button>
         <button id="tool-erase" data-tool="erase">橡皮</button>
         <button id="tool-occ-rect" data-tool="occRect">遮挡矩形</button>
@@ -102,11 +106,24 @@
         </label>
       </div>
       <div class="muted" id="cursorInfo"></div>
+      <div class="muted" id="bgStatus">背景加载中…</div>
     </section>
 
     <section>
-      <h2>家具</h2>
+      <h2>家具 / 热区</h2>
+      <div class="row">
+        <label>绑定家具
+          <select id="hotspotTemplate"></select>
+        </label>
+      </div>
       <div id="furnitureList"></div>
+      <div class="row" style="margin-top:8px">
+        <label><input id="backgroundEmbedded" type="checkbox">背景已绘制，仅保留交互热区</label>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button id="deleteFurniture">删除选中</button>
+      </div>
+      <div class="muted" style="margin-top:6px">用「框选热区」在背景图上拖拽矩形，自动绑定上方所选家具模板。导出后复制到 config。</div>
       <div class="row" style="margin-top:8px">
         <button id="nudgeUp">↑</button>
         <button id="nudgeLeft">←</button>
@@ -140,6 +157,7 @@
   </aside>
 
   <script src="../js/config.js"></script>
+  <script src="../js/furniture-fine.js"></script>
   <script>
     const params = new URLSearchParams(location.search);
     const requestedSceneId = Number(params.get('scene') || 4);
@@ -149,7 +167,16 @@
     const scene = structuredClone(DEFAULT_CONFIG.scenes.find(s => s.id === sceneId));
     const templates = DEFAULT_CONFIG.furnitureTemplates;
     const furniture = structuredClone(DEFAULT_CONFIG.furnitureInstances.filter(f => f.sceneId === sceneId));
-    let manifest = null;
+    const sceneBackgroundSources = {
+      1: 'assets/rooms/潇湘馆-v1.png',
+      2: 'assets/rooms/蘅芜苑-open-top-v1.png',
+      3: 'assets/rooms/沁芳庭-open-top-editor.jpg',
+      4: 'assets/rooms/怡红院-open-top-v1.png',
+      5: 'assets/rooms/荣禧堂-open-top-v1.png',
+      7: 'assets/rooms/秋爽斋-open-top-v1.png',
+      9: 'assets/rooms/暖香坞-v1.png',
+      14: 'assets/rooms/潇怡竹林-v1.png',
+    };
     let bg = new Image();
     let tool = 'select';
     let brush = 'D';
@@ -161,6 +188,7 @@
     let dragOffset = { c: 0, r: 0 };
     let furnitureDrag = null;
     let occDrag = null;
+    let hotDrag = null;
     let occDraft = null;
     const furnitureFine = new Map();
     const colors = {
@@ -205,6 +233,7 @@
 
     const storageKey = `dayuan-map-editor:scene:${sceneId}:occlusionPolygons`;
     const furnitureStorageKey = `dayuan-map-editor:scene:${sceneId}:furnitureFinePlacements`;
+    const furnitureInstancesStorageKey = `dayuan-map-editor:scene:${sceneId}:furnitureInstances`;
     let occlusionPolygons = normalizeOcclusionPolygons(scene.occlusionPolygons || scene.occlusion);
 
     function applyFurnitureFineItems(items) {
@@ -212,6 +241,9 @@
       const dims = fineDims();
       for (const item of items) {
         if (!furniture.some(inst => inst.instanceId === item.instanceId)) continue;
+        const inst = furniture.find(f => f.instanceId === item.instanceId);
+        if (inst && typeof item.backgroundEmbedded === 'boolean') inst.backgroundEmbedded = item.backgroundEmbedded;
+        if (inst && item.backgroundEmbedded) inst.hotspot = true;
         const sourceScale = Number(item.fineScale) || gridScale;
         const ratio = gridScale / sourceScale;
         const tpl = templates[item.templateId] || templates[furniture.find(inst => inst.instanceId === item.instanceId)?.templateId] || {};
@@ -255,8 +287,121 @@
     function persistFurnitureFine() {
       localStorage.setItem(furnitureStorageKey, JSON.stringify(furniture.map(inst => {
         const loc = localInst(inst);
-        return { instanceId: inst.instanceId, fineScale: gridScale, fineCol: loc.c, fineRow: loc.r, fineW: loc.w, fineH: loc.h };
+        return { instanceId: inst.instanceId, fineScale: gridScale, fineCol: loc.c, fineRow: loc.r, fineW: loc.w, fineH: loc.h, backgroundEmbedded: !!inst.backgroundEmbedded };
       })));
+      persistFurnitureInstances();
+    }
+
+    function configFurnitureIds() {
+      return new Set(DEFAULT_CONFIG.furnitureInstances.filter(row => row.sceneId === sceneId).map(row => row.instanceId));
+    }
+
+    function loadStoredFurnitureInstances() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(furnitureInstancesStorageKey) || 'null');
+        if (!Array.isArray(stored)) return;
+        for (const row of stored) {
+          if (!row?.instanceId || furniture.some(inst => inst.instanceId === row.instanceId)) continue;
+          furniture.push(structuredClone(row));
+        }
+      } catch (err) {
+        console.warn('读取热区家具草稿失败', err);
+      }
+    }
+
+    function persistFurnitureInstances() {
+      const baseIds = configFurnitureIds();
+      const extras = furniture.filter(inst => !baseIds.has(inst.instanceId)).map(inst => ({
+        instanceId: inst.instanceId,
+        sceneId: inst.sceneId,
+        templateId: inst.templateId,
+        anchorCol: inst.anchorCol,
+        anchorRow: inst.anchorRow,
+        backgroundEmbedded: !!inst.backgroundEmbedded,
+        hotspot: !!inst.hotspot,
+      }));
+      localStorage.setItem(furnitureInstancesStorageKey, JSON.stringify(extras));
+    }
+
+    function nextInstanceId() {
+      const ids = [...DEFAULT_CONFIG.furnitureInstances, ...furniture].map(row => Number(row.instanceId) || 0);
+      return Math.max(1000, ...ids) + 1;
+    }
+
+    function fineRectFromPoints(start, end) {
+      const s = fineCellSize();
+      const dims = fineDims();
+      const toFine = pt => ({
+        c: Math.max(0, Math.min(dims.cols - 1, Math.floor(pt.x / s.w))),
+        r: Math.max(0, Math.min(dims.rows - 1, Math.floor(pt.y / s.h))),
+      });
+      const a = toFine(start);
+      const b = toFine(end);
+      const c1 = Math.min(a.c, b.c);
+      const c2 = Math.max(a.c, b.c);
+      const r1 = Math.min(a.r, b.r);
+      const r2 = Math.max(a.r, b.r);
+      if (c2 <= c1 && r2 <= r1) return null;
+      return {
+        c: c1,
+        r: r1,
+        w: Math.max(1, c2 - c1 + 1),
+        h: Math.max(1, r2 - r1 + 1),
+      };
+    }
+
+    function createHotspotInstance(rect, templateId) {
+      const tplId = Number(templateId);
+      const tpl = templates[tplId];
+      if (!tpl) return null;
+      const inst = {
+        instanceId: nextInstanceId(),
+        sceneId,
+        templateId: tplId,
+        anchorCol: scene.originCol,
+        anchorRow: scene.originRow,
+        backgroundEmbedded: true,
+        hotspot: true,
+      };
+      furniture.push(inst);
+      furnitureFine.set(inst.instanceId, { c: rect.c, r: rect.r, w: rect.w, h: rect.h });
+      syncInstFromFine(inst);
+      selectedId = inst.instanceId;
+      renderFurnitureList();
+      syncFurnitureControls();
+      persistFurnitureFine();
+      render();
+      updateOutput('furniture');
+      return inst;
+    }
+
+    function deleteSelectedFurniture() {
+      const inst = selectedInst();
+      if (!inst) return;
+      const tpl = templates[inst.templateId] || {};
+      const label = tpl.name || inst.templateId;
+      if (!confirm(`删除家具/热区 #${inst.instanceId} · ${label}？`)) return;
+      const idx = furniture.findIndex(row => row.instanceId === inst.instanceId);
+      if (idx >= 0) furniture.splice(idx, 1);
+      furnitureFine.delete(inst.instanceId);
+      selectedId = furniture[0]?.instanceId || 0;
+      renderFurnitureList();
+      syncFurnitureControls();
+      persistFurnitureFine();
+      render();
+      updateOutput('furniture');
+    }
+
+    function renderHotspotTemplates() {
+      const select = document.getElementById('hotspotTemplate');
+      const entries = Object.entries(templates).sort((a, b) => String(a[1]?.name || a[0]).localeCompare(String(b[1]?.name || b[0]), 'zh-CN'));
+      select.innerHTML = entries.map(([id, tpl]) =>
+        `<option value="${id}">${escapeHtml(String(id))} · ${escapeHtml(tpl.name || tpl.icon || '家具')}</option>`
+      ).join('');
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
     }
 
     function normalizeMask() {
@@ -519,11 +664,25 @@
         const w = loc.w * s.w;
         const h = loc.h * s.h;
         const active = inst.instanceId === selectedId;
-        ctx.fillStyle = active ? 'rgba(245, 205, 93, .58)' : 'rgba(80, 45, 35, .42)';
-        ctx.strokeStyle = active ? '#ffd55d' : '#4b3028';
+        ctx.fillStyle = inst.backgroundEmbedded
+          ? (active ? 'rgba(62, 190, 224, .42)' : 'rgba(62, 190, 224, .22)')
+          : (active ? 'rgba(245, 205, 93, .58)' : 'rgba(80, 45, 35, .42)');
+        ctx.strokeStyle = inst.backgroundEmbedded ? (active ? '#73e3ff' : '#328ca5') : (active ? '#ffd55d' : '#4b3028');
         ctx.lineWidth = active ? 3 : 2;
         ctx.fillRect(x, y, w, h);
         ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+        if (inst.backgroundEmbedded || inst.hotspot) {
+          ctx.save();
+          ctx.strokeStyle = active ? '#fff0c0' : 'rgba(255, 224, 150, 0.85)';
+          ctx.shadowColor = 'rgba(255, 220, 130, 0.75)';
+          ctx.shadowBlur = active ? 10 : 6;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(x + w * 0.08, y + h - 2);
+          ctx.lineTo(x + w * 0.92, y + h - 2);
+          ctx.stroke();
+          ctx.restore();
+        }
         if (active) {
           ctx.fillStyle = '#ffd55d';
           const handle = Math.max(8, Math.min(18, Math.min(s.w, s.h) * 1.2));
@@ -533,7 +692,7 @@
         }
         ctx.fillStyle = '#fff8dc';
         ctx.font = '12px sans-serif';
-        ctx.fillText(loc.tpl.name || inst.templateId, x + w / 2, y + h / 2);
+        ctx.fillText(`${inst.backgroundEmbedded ? '热区·' : ''}${loc.tpl.name || inst.templateId}`, x + w / 2, y + h / 2);
         if (document.getElementById('showEntries').checked) {
           const off = loc.tpl.entryOffset || [0, 0];
           const ec = loc.c + off[0] * gridScale;
@@ -591,6 +750,32 @@
       if (document.getElementById('showGrid').checked) drawGrid();
       if (document.getElementById('showFurniture').checked) drawFurniture();
       if (document.getElementById('showOcclusion').checked) drawOcclusions();
+      if (hotDrag?.type === 'rect') drawHotDraft(hotDrag.start, hotDrag.current || hotDrag.start);
+    }
+
+    function drawHotDraft(start, end) {
+      const rect = fineRectFromPoints(start, end);
+      if (!rect) return;
+      const s = fineCellSize();
+      const x = rect.c * s.w;
+      const y = rect.r * s.h;
+      const w = rect.w * s.w;
+      const h = rect.h * s.h;
+      ctx.save();
+      ctx.fillStyle = 'rgba(62, 190, 224, .24)';
+      ctx.strokeStyle = '#73e3ff';
+      ctx.lineWidth = 2;
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+      ctx.strokeStyle = 'rgba(255, 228, 150, .95)';
+      ctx.shadowColor = 'rgba(255, 220, 130, .85)';
+      ctx.shadowBlur = 8;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x + w * 0.08, y + h - 2);
+      ctx.lineTo(x + w * 0.92, y + h - 2);
+      ctx.stroke();
+      ctx.restore();
     }
 
     function renderBrushes() {
@@ -614,10 +799,25 @@
         const loc = localInst(inst);
         const row = document.createElement('div');
         row.className = 'furn-row' + (inst.instanceId === selectedId ? ' active' : '');
-        row.innerHTML = `<span>${inst.instanceId}</span><span>${tpl.name || inst.templateId}</span><span>${loc.c},${loc.r} ${loc.w}×${loc.h}</span>`;
-        row.onclick = () => { selectedId = inst.instanceId; renderFurnitureList(); render(); updateOutput('furniture'); };
+        row.innerHTML = `<span>${inst.instanceId}</span><span>${inst.backgroundEmbedded ? '热区·' : ''}${tpl.name || inst.templateId}</span><span>${loc.c},${loc.r} ${loc.w}×${loc.h}</span>`;
+        row.onclick = () => { selectedId = inst.instanceId; renderFurnitureList(); syncFurnitureControls(); render(); updateOutput('furniture'); };
         list.appendChild(row);
       }
+    }
+
+    function syncFurnitureControls() {
+      const inst = selectedInst();
+      const checkbox = document.getElementById('backgroundEmbedded');
+      checkbox.disabled = !inst;
+      checkbox.checked = !!inst?.backgroundEmbedded;
+    }
+
+    function renderSceneSelect() {
+      const select = document.getElementById('sceneSelect');
+      select.innerHTML = DEFAULT_CONFIG.scenes
+        .filter(sc => !sc.isTransition)
+        .map(sc => `<option value="${sc.id}"${sc.id === sceneId ? ' selected' : ''}>${sc.id} · ${sc.name}</option>`)
+        .join('');
     }
 
     function renderOcclusionList() {
@@ -659,7 +859,7 @@
     function furnitureCode() {
       for (const inst of furniture) syncInstFromFine(inst);
       return furniture.map(inst =>
-        `    { instanceId: ${inst.instanceId}, sceneId: ${inst.sceneId}, templateId: ${inst.templateId}, anchorCol: ${inst.anchorCol}, anchorRow: ${inst.anchorRow} },`
+        `    { instanceId: ${inst.instanceId}, sceneId: ${inst.sceneId}, templateId: ${inst.templateId}, anchorCol: ${inst.anchorCol}, anchorRow: ${inst.anchorRow}${inst.backgroundEmbedded ? ', backgroundEmbedded: true' : ''}${inst.hotspot ? ', hotspot: true' : ''} },`
       ).join('\n');
     }
 
@@ -672,7 +872,7 @@
         const y = loc.r / dims.rows;
         const w = loc.w / dims.cols;
         const h = loc.h / dims.rows;
-        return `    { instanceId: ${inst.instanceId}, sceneId: ${inst.sceneId}, templateId: ${inst.templateId}, name: ${JSON.stringify(tpl.name || String(inst.templateId))}, fineScale: ${gridScale}, fineCol: ${loc.c}, fineRow: ${loc.r}, fineW: ${loc.w}, fineH: ${loc.h}, x: ${x.toFixed(4)}, y: ${y.toFixed(4)}, w: ${w.toFixed(4)}, h: ${h.toFixed(4)} },`;
+        return `    { instanceId: ${inst.instanceId}, sceneId: ${inst.sceneId}, templateId: ${inst.templateId}, name: ${JSON.stringify(tpl.name || String(inst.templateId))}, fineScale: ${gridScale}, fineCol: ${loc.c}, fineRow: ${loc.r}, fineW: ${loc.w}, fineH: ${loc.h}, x: ${x.toFixed(4)}, y: ${y.toFixed(4)}, w: ${w.toFixed(4)}, h: ${h.toFixed(4)}${inst.backgroundEmbedded ? ', backgroundEmbedded: true' : ''} },`;
       }).join('\n') + '\n  ]';
     }
 
@@ -699,22 +899,34 @@
       await navigator.clipboard.writeText(document.getElementById('output').value);
     }
 
-    async function init() {
+    function init() {
       document.title = `HonglouSims · ${scene.name}地图标注`;
       document.getElementById('sceneTitle').textContent = `${scene.name}地图标注`;
       normalizeMask();
       loadConfigFurnitureFine();
+      loadStoredFurnitureInstances();
       loadStoredFurnitureFine();
       loadStoredOcclusions();
       document.getElementById('gridScale').value = String(gridScale);
       for (const inst of furniture) fineStateFor(inst);
       renderBrushes();
+      renderHotspotTemplates();
+      renderSceneSelect();
       renderFurnitureList();
+      syncFurnitureControls();
       renderOcclusionList();
       updateOutput('all');
-      manifest = await fetch('../assets/manifest.json', { cache: 'no-cache' }).then(r => r.json());
-      const src = manifest.roomBackgrounds?.[String(sceneId)]?.src || manifest.roomBackgrounds?.['4']?.src || 'assets/rooms/怡红院-v1.png';
-      bg.onload = render;
+      const status = document.getElementById('bgStatus');
+      const src = sceneBackgroundSources[sceneId] || sceneBackgroundSources[4];
+      bg.onload = () => {
+        status.textContent = `背景已加载 · ${bg.naturalWidth}×${bg.naturalHeight}`;
+        render();
+      };
+      bg.onerror = () => {
+        status.textContent = `背景加载失败：../${src}`;
+        status.style.color = '#a7352c';
+        render();
+      };
       bg.src = '../' + src;
       render();
     }
@@ -769,6 +981,22 @@
     document.getElementById('copyFurniture').onclick = () => copyOutput('furniture');
     document.getElementById('copyOcclusion').onclick = () => copyOutput('occlusion');
     document.getElementById('copyAll').onclick = () => copyOutput('all');
+    document.getElementById('sceneSelect').onchange = evt => {
+      const next = new URL(location.href);
+      next.searchParams.set('scene', evt.target.value);
+      location.href = next.toString();
+    };
+    document.getElementById('backgroundEmbedded').onchange = evt => {
+      const inst = selectedInst();
+      if (!inst) return;
+      inst.backgroundEmbedded = evt.target.checked;
+      if (inst.backgroundEmbedded) inst.hotspot = true;
+      persistFurnitureFine();
+      renderFurnitureList();
+      render();
+      updateOutput('furniture');
+    };
+    document.getElementById('deleteFurniture').onclick = deleteSelectedFurniture;
     document.getElementById('nudgeUp').onclick = () => moveSelected(0, -1);
     document.getElementById('nudgeDown').onclick = () => moveSelected(0, 1);
     document.getElementById('nudgeLeft').onclick = () => moveSelected(-1, 0);
@@ -799,6 +1027,12 @@
         render();
         return;
       }
+      if (tool === 'hotRect') {
+        hotDrag = { type: 'rect', start: point, current: point };
+        dragging = true;
+        render();
+        return;
+      }
       if (tool === 'occPoly') {
         if (!occDraft) occDraft = { type: 'poly', points: [] };
         occDraft.points.push([point.nx, point.ny]);
@@ -812,6 +1046,7 @@
         updateOutput('occlusion');
         return;
       }
+      if (tool !== 'select') return;
       const handle = furnitureHandleAt(fine.c, fine.r);
       if (handle) {
         furnitureDrag = { type: 'resize', handle, startFine: fine, startState: { ...fineStateFor(selectedInst()) } };
@@ -842,10 +1077,16 @@
         render();
         return;
       }
+      if (tool === 'hotRect' && hotDrag?.type === 'rect') {
+        hotDrag.current = point;
+        render();
+        return;
+      }
       if (tool === 'paint' || tool === 'erase') {
         setMask(cell.c, cell.r, tool === 'erase' ? '#' : brush);
         return;
       }
+      if (tool !== 'select') return;
       const inst = selectedInst();
       if (!inst) return;
       if (furnitureDrag?.type === 'resize') {
@@ -887,6 +1128,15 @@
           updateOutput('occlusion');
         }
         occDrag = null;
+        render();
+      }
+      if (dragging && tool === 'hotRect' && hotDrag?.type === 'rect') {
+        const rect = fineRectFromPoints(hotDrag.start, hotDrag.current || hotDrag.start);
+        if (rect) {
+          const templateId = document.getElementById('hotspotTemplate').value;
+          createHotspotInstance(rect, templateId);
+        }
+        hotDrag = null;
         render();
       }
       furnitureDrag = null;

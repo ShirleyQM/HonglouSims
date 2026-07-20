@@ -41,6 +41,21 @@
     },
     "baoyu": {
       "src": "assets/全身立绘/processed/baoyu_avatar.webp"
+    },
+    "xiangyun": {
+      "src": "assets/全身立绘/processed/xiangyun_avatar.webp"
+    },
+    "baochai": {
+      "src": "assets/全身立绘/processed/baochai_avatar.webp"
+    },
+    "tanchun": {
+      "src": "assets/全身立绘/processed/tanchun_avatar.webp"
+    },
+    "yinger": {
+      "src": "assets/全身立绘/processed/yinger_avatar.webp"
+    },
+    "yuanchun": {
+      "src": "assets/全身立绘/processed/yuanchun_avatar.webp"
     }
   },
   "animations": {
@@ -173,34 +188,28 @@
         "src": "assets/tiles/ground_grass_05.png"
       },
       "stone": {
-        "base": "#2f3a2f",
-        "style": "flagstone",
-        "src": "assets/tiles/ground_stone_02.png"
+        "base": "#d8c38e",
+        "style": "flagstone"
       },
       "stone_irregular": {
-        "base": "#465046",
-        "style": "flagstone",
-        "src": "assets/tiles/ground_stone_01.png"
+        "base": "#d6c08a",
+        "style": "flagstone"
       },
       "stone_herringbone": {
-        "base": "#3f473f",
-        "style": "flagstone",
-        "src": "assets/tiles/ground_stone_03.png"
+        "base": "#d9c58f",
+        "style": "flagstone"
       },
       "stone_pebble": {
-        "base": "#4a4a3e",
-        "style": "flagstone",
-        "src": "assets/tiles/ground_stone_04.png"
+        "base": "#d0b57b",
+        "style": "flagstone"
       },
       "stone_muddy": {
-        "base": "#5a4732",
-        "style": "flagstone",
-        "src": "assets/tiles/ground_stone_05.png"
+        "base": "#c5a66f",
+        "style": "flagstone"
       },
       "corridor": {
-        "base": "#4a4038",
-        "style": "plank_h",
-        "src": "assets/tiles/ground_stone_03.png"
+        "base": "#d9c58f",
+        "style": "flagstone"
       },
       "wood": {
         "base": "#4a3028",
@@ -341,12 +350,16 @@
       "fullBodyHud": "assets/全身立绘/processed/daiyu_fullbody_hud.webp"
     },
     "baochai": {
-      "portrait": "assets/lihui/processed/baochai_portrait.webp",
-      "hud": "assets/lihui/processed/baochai_hud.webp"
+      "portrait": "assets/全身立绘/processed/baochai_portrait.webp",
+      "hud": "assets/全身立绘/processed/baochai_hud.webp",
+      "fullBody": "assets/全身立绘/processed/baochai_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/baochai_fullbody_hud.webp"
     },
     "tanchun": {
-      "portrait": "assets/lihui/processed/tanchun_portrait.webp",
-      "hud": "assets/lihui/processed/tanchun_hud.webp"
+      "portrait": "assets/全身立绘/processed/tanchun_portrait.webp",
+      "hud": "assets/全身立绘/processed/tanchun_hud.webp",
+      "fullBody": "assets/全身立绘/processed/tanchun_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/tanchun_fullbody_hud.webp"
     },
     "xifeng": {
       "portrait": "assets/lihui/processed/xifeng_portrait.webp",
@@ -365,12 +378,16 @@
       "fullBodyHud": "assets/全身立绘/processed/xueyan_fullbody_hud.webp"
     },
     "yinger": {
-      "portrait": "assets/lihui/processed/yinger_portrait.webp",
-      "hud": "assets/lihui/processed/yinger_hud.webp"
+      "portrait": "assets/全身立绘/processed/yinger_portrait.webp",
+      "hud": "assets/全身立绘/processed/yinger_hud.webp",
+      "fullBody": "assets/全身立绘/processed/yinger_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/yinger_fullbody_hud.webp"
     },
     "xiangyun": {
-      "portrait": "assets/lihui/processed/xiangyun_portrait.webp",
-      "hud": "assets/lihui/processed/xiangyun_hud.webp"
+      "portrait": "assets/全身立绘/processed/xiangyun_portrait.webp",
+      "hud": "assets/全身立绘/processed/xiangyun_hud.webp",
+      "fullBody": "assets/全身立绘/processed/xiangyun_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/xiangyun_fullbody_hud.webp"
     },
     "xiren": {
       "portrait": "assets/全身立绘/processed/xiren_portrait.webp",
@@ -401,8 +418,10 @@
       "fullBodyHud": "assets/全身立绘/processed/yingchun_fullbody_hud.webp"
     },
     "yuanchun": {
-      "portrait": "assets/lihui/processed/yuanchun_portrait.webp",
-      "hud": "assets/lihui/processed/yuanchun_hud.webp"
+      "portrait": "assets/全身立绘/processed/yuanchun_portrait.webp",
+      "hud": "assets/全身立绘/processed/yuanchun_hud.webp",
+      "fullBody": "assets/全身立绘/processed/yuanchun_fullbody.webp",
+      "fullBodyHud": "assets/全身立绘/processed/yuanchun_fullbody_hud.webp"
     },
     "qinkeqing": {
       "portrait": "assets/lihui/processed/qinkeqing_portrait.webp",
@@ -423,12 +442,12 @@
     },
     "2": {
       "src": "assets/rooms/蘅芜苑-open-top-v1.png",
-      "fit": "cover",
+      "fit": "contain",
       "dim": 0.02
     },
     "3": {
       "src": "assets/rooms/沁芳庭-open-top-v1.png",
-      "fit": "cover",
+      "fit": "contain",
       "dim": 0.02
     },
     "4": {
@@ -438,37 +457,17 @@
     },
     "5": {
       "src": "assets/rooms/荣禧堂-open-top-v1.png",
-      "fit": "cover",
+      "fit": "contain",
       "dim": 0.02
     },
     "7": {
-      "src": "assets/rooms/秋爽斋-open-top-v1.png",
-      "fit": "cover",
+      "src": "assets/rooms/秋爽斋-open-top-v1-crop.png",
+      "fit": "contain",
       "dim": 0.02
     },
     "9": {
       "src": "assets/rooms/暖香坞-v1.png",
-      "fit": "cover",
-      "dim": 0
-    },
-    "10": {
-      "src": "assets/rooms/大观园游廊-横向-v1.png",
-      "fit": "cover",
-      "dim": 0
-    },
-    "11": {
-      "src": "assets/rooms/大观园游廊-横向-v1.png",
-      "fit": "cover",
-      "dim": 0
-    },
-    "12": {
-      "src": "assets/rooms/大观园游廊-纵向-v1.png",
-      "fit": "cover",
-      "dim": 0
-    },
-    "13": {
-      "src": "assets/rooms/大观园游廊-纵向-v1.png",
-      "fit": "cover",
+      "fit": "contain",
       "dim": 0
     },
     "14": {
