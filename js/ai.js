@@ -1639,13 +1639,15 @@ function calcScheduleFactor(c, raw, tags) {
   };
 }
 
-function calcMemoryFactor(c, tags) {
+function calcMemoryFactor(c, tags, candidate = {}) {
+  const input = TraitBehaviorSystem.buildSocialDecisionInput(c, candidate.targetCharId, { tags, sceneId: c.sceneId });
+  candidate.socialDecisionInput = input;
   let f = 1;
-  for (const mem of c.memories.slice(-5)) {
+  for (const mem of input.recentMemories) {
     f = applyTagMods(f, tags, MEMORY_TAG_MODS[mem.tag]);
     if (mem.tag === '创伤') f = applyTagMods(f, tags, { cut: { [tags[0]]: 0.1 } });
   }
-  return f;
+  return f * (candidate.targetCharId ? TraitBehaviorSystem.socialMemoryFactor(input) : 1);
 }
 
 function crowdFactor(c, cand) {
@@ -2165,7 +2167,7 @@ function finalizeCandidate(c, raw, fastOnly) {
   const routine = calcRoutineFactor(c, raw, tags);
   raw.routineFactor = routine.factor;
   raw.routineAnchor = routine.anchor;
-  raw.memoryFactor = calcMemoryFactor(c, tags);
+  raw.memoryFactor = calcMemoryFactor(c, tags, raw);
   raw.distanceFactor = distanceFactor;
   raw.specialtyFactor = CharSpecialtySystem.calcFactor(c, raw, tags);
   raw.dramaFactor = (typeof AiDrama !== 'undefined') ? AiDrama.dramaFactor(c, raw) : 1;

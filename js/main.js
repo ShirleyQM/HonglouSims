@@ -101,6 +101,7 @@ initAISystem();
 FurnitureReactionSystem?.init?.();
 BehaviorTelemetry?.init?.();
 if (loadGameFromStorage()) log('已读取存档，继续游玩。');
+TraitBehaviorSystem.syncMemories();
 else {
   log('新游戏：F切换家庭，点击人物选互动。若地图空荡，后台「导入导出」→ 恢复默认配置 → 应用并重载。');
   const headIdx = CHARS.findIndex(c => c.id === FamilySystem.getFirstMemberCharId());

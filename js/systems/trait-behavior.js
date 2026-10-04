@@ -77,10 +77,85 @@ const TraitBehaviorSystem = (() => {
     return shown;
   }
 
+  // MemoryEvent V1: retain legacy fields for save files and the memory panel.
+  let memorySequence = 0;
+  function memoryId(c) {
+    let id;
+    do { id = `memory:${c.id}:${now()}:${++memorySequence}`; }
+    while (CHARS.some(ch => (ch.memories || []).some(m => m.id === id)));
+    return id;
+  }
+
+  function linkMemory(c, row) {
+    if (!row.with || row.with === c.id || typeof relations === 'undefined') return;
+    const key = relKey(c.id, row.with);
+    // A memory may precede the first numerical relationship change.
+    relations[key] ||= { affection: 0, trust: 0, friendship: 0,
+      submission: {}, initType: '陌生人', note: '', lastInteract: 0,
+      memoryIds: [], thresholdEvents: [] };
+    const r = relations[key];
+    r.memoryIds ||= [];
+    if (!r.memoryIds.includes(row.id)) r.memoryIds.push(row.id);
+  }
+
+  function syncMemories() {
+    for (const c of CHARS) {
+      c.memories = (c.memories || []).map(row => normalizeMemory(c, row));
+      c.memories.forEach(row => linkMemory(c, row));
+    }
+    if (typeof relations !== 'undefined') {
+      const live = new Set(CHARS.flatMap(c => c.memories.map(m => m.id)));
+      Object.values(relations).forEach(r => { r.memoryIds = [...new Set(r.memoryIds || [])].filter(id => live.has(id)); });
+    }
+  }
+
+  function retrieveMemories(c, query = {}) {
+    if (typeof c === 'string') c = getChar(c);
+    if (!c) return [];
+    c.memories = (c.memories || []).map(row => normalizeMemory(c, row));
+    const tags = query.tags || [];
+    return c.memories.filter(m => m.strength > 0.12 || m.permanent).map(m => {
+      const age = Math.max(0, now() - (m.lastReinforcedAt ?? m.createdAt)) / 1440;
+      const target = query.otherId && m.with === query.otherId ? 3 : 0;
+      const scene = query.sceneId != null && m.sceneId === query.sceneId ? 1.5 : 0;
+      const overlap = tags.filter(t => m.tags.includes(t)).length;
+      const emotion = query.emotion && m.emotion === query.emotion ? 1 : 0;
+      return { ...m, retrievalScore: target + scene + overlap + emotion
+        + 1 / (1 + age) + Math.min(3, m.strength) + Math.min(1, Math.abs(m.valence)) };
+    }).sort((a, b) => b.retrievalScore - a.retrievalScore || b.createdAt - a.createdAt || a.id.localeCompare(b.id))
+      .slice(0, query.limit ?? 5);
+  }
+
+  function buildSocialDecisionInput(c, otherId, context = {}) {
+    return { charId: c.id, targetCharId: otherId, ...context,
+      recentMemories: retrieveMemories(c, { ...context, otherId, sceneId: context.sceneId ?? c.sceneId }) };
+  }
+
+  function socialMemoryFactor(input) {
+    const related = input.recentMemories.filter(m => m.with === input.targetCharId);
+    const conflict = (input.tags || []).some(t => ['zhengchi', 'conflict'].includes(t));
+    const impact = related.reduce((sum, m) => sum + m.valence * Math.min(2, m.strength) / 5, 0);
+    return Math.max(0.4, Math.min(1.6, 1 + (conflict ? -impact : impact)));
+  }
+
+  function reinforceMemory(c, id, amount = 0.25) {
+    const m = (c?.memories || []).find(row => row.id === id);
+    if (!m) return null;
+    m.strength = Math.min(3, m.strength + Math.max(0, amount));
+    m.lastReinforcedAt = now();
+    EventBus.emit('memory:reinforced', { charId: c.id, memoryId: id, strength: m.strength });
+    return m;
+  }
+
   function normalizeMemory(c, row) {
     const createdAt = row.createdAt ?? row.timestamp ?? ((row.day || gameDay || 1) * 1440 + (row.hour || 0) * 60);
     return {
       ...row,
+      id: row.id || memoryId(c),
+      version: 1, charId: c.id,
+      sceneId: row.sceneId ?? c.sceneId,
+      tags: [...new Set([...(row.tags || []), row.tag].filter(Boolean))],
+      emotion: row.emotion || '', valence: row.valence ?? 0,
       createdAt,
       strength: row.strength ?? 1,
       decayPerDay: row.decayPerDay ?? 0.12,
@@ -90,6 +165,15 @@ const TraitBehaviorSystem = (() => {
 
   function addMemory(c, data, context = {}) {
     if (!c || (!data.text && !data.tag)) return { changed: 0 };
+    c.memories = (c.memories || []).map(row => normalizeMemory(c, row));
+    const existing = c.memories.find(m => m.source === data.source && m.with === (data.with || '')
+      && ((data.eventId && m.eventId === data.eventId)
+        || (!data.eventId && m.text === data.text && now() - m.createdAt < 180)));
+    if (existing) {
+      if (data.eventId) return { charId: c.id, memory: existing, changed: 0 };
+      const memory = reinforceMemory(c, existing.id);
+      return { charId: c.id, memory, changed: 1, reinforced: true };
+    }
     const baseChance = context.force ? 1 : (context.baseChance ?? 0.85);
     const chance = Math.min(1, baseChance * TraitEffectSystem.memoryChanceMultiplier(c));
     if (!context.force && Math.random() > chance) return { charId: c.id, changed: 0 };
@@ -103,15 +187,17 @@ const TraitBehaviorSystem = (() => {
     c.memories ||= [];
     c.memories.push(row);
     if (c.memories.length > 80) c.memories.splice(0, c.memories.length - 80);
+    syncMemories();
     bump(c.id, 'memoriesCreated');
     EventBus.emit('memory:add', {
       charId: c.id, text: row.text || row.tag, tag: row.tag || '', with: row.with || '',
-      strength: row.strength,
+      strength: row.strength, memoryId: row.id, memory: row,
     });
     return { charId: c.id, memory: row, changed: 1 };
   }
 
   function decayMemories() {
+    syncMemories();
     for (const c of CHARS) {
       c.memories = (c.memories || []).map(row => normalizeMemory(c, row)).filter(row => {
         if (row.permanent) return true;
@@ -122,6 +208,7 @@ const TraitBehaviorSystem = (() => {
         return false;
       });
     }
+    syncMemories();
   }
 
   function trySpending(evt) {
@@ -250,6 +337,37 @@ const TraitBehaviorSystem = (() => {
     }));
   }
 
+  function bindMemoryEvents() {
+    unsubs.push(EventBus.on('save:loaded', syncMemories));
+    function write(charId, otherId, text, tag, valence, source, evt) {
+      addMemory(getChar(charId), { text, tag, tags: [tag, source.split(':')[0]],
+        with: otherId || '', valence, source, eventId: evt.instanceId || evt.eventId,
+        sceneId: evt.originSceneId ?? getChar(charId)?.sceneId }, { baseChance: 0.9 });
+    }
+    unsubs.push(EventBus.on('interaction:complete', evt => {
+      const valence = evt.category === 'zhengchi' ? -1 : 0.5;
+      for (const [a, b] of [[evt.initiatorId, evt.targetId], [evt.targetId, evt.initiatorId]])
+        write(a, b, `与${getChar(b)?.short || b}完成${evt.interactionName || '互动'}`, evt.category || 'social', valence, 'interaction:complete', evt);
+    }));
+    unsubs.push(EventBus.on('relation:axis_change', evt => {
+      if (Math.abs(evt.new - evt.old) < 5) return;
+      for (const [a, b] of [[evt.idA, evt.idB], [evt.idB, evt.idA]])
+        write(a, b, evt.reason || `与${getChar(b)?.short || b}的${evt.axis}发生变化`, 'relation', Math.sign(evt.new - evt.old), 'relation:axis_change', evt);
+    }));
+    for (const status of ['accepted', 'declined', 'completed', 'failed']) {
+      unsubs.push(EventBus.on(`quest:${status}`, evt => {
+        const title = QuestSystem?.tpl?.(evt.templateId)?.name || '差事';
+        write(evt.assigneeId, evt.issuerId, `${title}：${status}`, 'quest', ['failed', 'declined'].includes(status) ? -0.7 : 0.6, `quest:${status}`, evt);
+      }));
+    }
+    unsubs.push(EventBus.on('state:add', evt => {
+      const valence = Math.sign(evt.stateDef?.moodDelta || 0)
+        || (['angry', 'melancholy', 'offended', 'ganshang'].includes(evt.stateId) ? -0.7
+          : ['elated', 'happy'].includes(evt.stateId) ? 0.7 : 0);
+      write(evt.charId, '', `感到${evt.stateName || evt.stateId}`, evt.stateId, valence, 'state:add', evt);
+    }));
+  }
+
   function resetStats(c) {
     if (c) delete c.traitStats;
     return stats(c);
@@ -266,8 +384,10 @@ const TraitBehaviorSystem = (() => {
     unsubs.push(EventBus.on('time:day', decayMemories));
     unsubs.push(EventBus.on('time:hour', trySpending));
     bindStats();
+    bindMemoryEvents();
+    syncMemories();
   }
 
-  return { init, addMemory, decayMemories, getStats: stats, resetStats, showTraitBubble };
+  return { init, addMemory, normalizeMemory, syncMemories, retrieveMemories, reinforceMemory, buildSocialDecisionInput, socialMemoryFactor, decayMemories, getStats: stats, resetStats, showTraitBubble };
 })();
 window.TraitBehaviorSystem = TraitBehaviorSystem;

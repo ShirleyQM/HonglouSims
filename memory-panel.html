@@ -824,14 +824,14 @@
         tags: ['记忆宫殿', i === 0 ? '核心' : '旧事'],
       }));
       const runtime = (state.runtimeMemories[c.id] || []).slice(-8).map((m, i) => ({
-        id: `${c.id}:runtime:${i}`,
+        id: m.id || `${c.id}:runtime:${i}`,
         kind: 'memory',
         label: '运行记忆',
         polarity: m.valence > 0 ? 'positive' : m.valence < 0 ? 'negative' : 'neutral',
         title: m.text || m.tag || m.type || '一段旧事',
         body: m.text || m.tag || JSON.stringify(m),
         source: m.source || 'localStorage 存档',
-        strength: Math.round((m.strength || 1) * 55),
+        strength: Math.round((m.strength ?? 1) * 55),
         tags: [m.tag || '记忆', m.with ? `关联 ${m.with}` : ''],
       }));
       return [...palace, ...runtime];

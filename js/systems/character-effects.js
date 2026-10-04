@@ -47,6 +47,7 @@ const CharacterEffectSystem = (() => {
     if (!c || !effect.text) return { changed: 0 };
     if (typeof TraitBehaviorSystem !== 'undefined') {
       return TraitBehaviorSystem.addMemory(c, {
+        ...effect,
         text: effect.text,
         tag: effect.tag || '',
         with: effect.with || context.otherId || '',
