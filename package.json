@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node serve.mjs",
     "start:local": "BIND_LOCAL=1 node serve.mjs",
+    "test:memory": "node scripts/probe-agent-memory.mjs",
     "test:config": "node tests/config/validate-config.mjs",
     "test:smoke": "node tests/smoke/smoke-ui.mjs",
     "test:admin": "node tests/smoke/smoke-admin.mjs",

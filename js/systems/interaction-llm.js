@@ -255,19 +255,8 @@ ${sceneNote}
   }
 
   function formatMemories(c, otherId) {
-    const all = c.memories || [];
-    if (!all.length) return '无';
-    const withOther = all.filter(m => m.with === otherId);
-    const pool = [...withOther.slice(-4), ...all.filter(m => m.with !== otherId).slice(-3)];
-    const seen = new Set();
-    const picked = [];
-    for (let i = pool.length - 1; i >= 0 && picked.length < 5; i--) {
-      const m = pool[i];
-      const key = m.text + (m.with || '');
-      if (seen.has(key)) continue;
-      seen.add(key);
-      picked.unshift(m);
-    }
+    const picked = TraitBehaviorSystem.retrieveMemories(c, { otherId, sceneId: c.sceneId, limit: 5 });
+    if (!picked.length) return '无';
     return picked.map(m => {
       const who = m.with ? (getChar(m.with)?.short || '') : '';
       const tag = m.tag ? `·${m.tag}` : '';
